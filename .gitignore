@@ -1,0 +1,5 @@
+*~
+*.o
+tmp*
+a.out
+cc_sakura
