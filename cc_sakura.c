@@ -39,6 +39,10 @@ struct Node{
 Token *token;
 char *user_input;
 
+Node *expr();
+Node *mul();
+Node *primary();
+
 void error(char *loc,char *fmt, ...){
 	va_list ap;
 	va_start(ap,fmt);
@@ -53,6 +57,7 @@ void error(char *loc,char *fmt, ...){
 }
 
 bool consume(char op){
+	// judge whether op is a symbol and return judge result
 	if(token->kind != TK_RESERVED || token->str[0] != op)
 		return false;
 	token=token->next;
@@ -60,12 +65,14 @@ bool consume(char op){
 }
 
 void expect(char op){
+	// judge whether op is a symbol and move the pointer to the next
 	if(token->kind!=TK_RESERVED || token->str[0]!=op)
 		error(token->str,"does not charctor.");
 	token=token->next;
 }
 
 int expect_number(){
+	// judge whether token is a number and move the pointer to the next and return value
 	if(token->kind!=TK_NUM)
 		error(token->str,"not a number");
 	int val=token->val;
@@ -74,7 +81,7 @@ int expect_number(){
 }
 
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
-	//create new node
+	//create new node(symbol)
 	Node *node=calloc(1,sizeof(Node));
 	node->kind=kind;
 	node->lhs=lhs;
@@ -83,26 +90,33 @@ Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
 }
 
 Node *new_node_num(int val){
+	//create new node(number)
 	Node *node=calloc(1,sizeof(Node));
-	node->kind=kind;
+	node->kind=ND_NUM;
 	node->val=val;
 	return node;
 }
 
 Node *primary(){
 	if(consume('(')){
+		//jmp expr
 		Node *node=expr();
+		//check end of caret
 		expect(')');
 		return node;
 	}
+	//return new num node
 	return new_node_num(expect_number());
 }
 
 Node *mul(){
+	//jmp primary()
 	Node *node=primary();
 
 	for(;;){
+		// is * and move the pointer next
 		if(consume('*')){
+			//create new node and jmp primary
 			node=new_node(ND_MUL,node,primary());
 		}else if(consume('/')){
 			node=new_node(ND_DIV,node,primary());
@@ -113,6 +127,7 @@ Node *mul(){
 }
 
 Node *expr(){
+	//jmp mul()
 	Node *node=mul();
 
 	for(;;){
@@ -137,6 +152,8 @@ Token *new_token(TokenKind kind,Token *cur,char *str){
 Token *tokenize(char *p){
 	Token head;
 	head.next=NULL;
+
+	//set head pointer to cur
 	Token *cur=&head;
 
 	while(*p){
@@ -146,12 +163,15 @@ Token *tokenize(char *p){
 		}
 
 		if(*p=='+' || *p=='-'){
+			//add symbol token
 			cur=new_token(TK_RESERVED,cur,p++);
 			continue;
 		}
 
 		if(isdigit(*p)){
+			//add number token
 			cur=new_token(TK_NUM,cur,p);
+			//set number
 			cur->val=strtol(p,&p,10);
 			continue;
 		}
@@ -159,6 +179,7 @@ Token *tokenize(char *p){
 		error(token->str,"cat not tokenize.");
 	}
 
+	//add EOF token
 	new_token(TK_EOF,cur,p);
 	return head.next;
 }
@@ -180,14 +201,18 @@ int main(int argc,char **argv){
 	printf(".global main\n");
 	printf("main:\n");
 
+	//is_number?
 	printf("	mov rax,%ld\n",expect_number());
 
 	while(!at_eof()){
+		//Is the data + ?
 		if(consume('+')){
+			//Is the next data a number?
 			printf("	add rax,%ld\n",expect_number());
 			continue;
 		}
 
+		//Is the data -
 		expect('-');
 		printf("	sub rax,%ld\n",expect_number());
 	}
