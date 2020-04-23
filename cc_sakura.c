@@ -11,13 +11,29 @@ typedef enum{
 	TK_EOF,
 }TokenKind;
 
+typedef enum{
+	ND_ADD,
+	ND_SUB,
+	ND_MUL,
+	ND_DIV,
+	ND_NUM,
+}NodeKind;
+
 typedef struct Token Token;
+typedef struct Node Node;
 
 struct Token{
 	TokenKind kind;
 	Token *next;
 	int val;
 	char *str;
+};
+
+struct Node{
+	NodeKind kind;
+	Node *lhs;
+	Node *rhs;
+	int val;
 };
 
 Token *token;
@@ -55,6 +71,59 @@ int expect_number(){
 	int val=token->val;
 	token=token->next;
 	return val;
+}
+
+Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
+	//create new node
+	Node *node=calloc(1,sizeof(Node));
+	node->kind=kind;
+	node->lhs=lhs;
+	node->rhs=rhs;
+	return node;
+}
+
+Node *new_node_num(int val){
+	Node *node=calloc(1,sizeof(Node));
+	node->kind=kind;
+	node->val=val;
+	return node;
+}
+
+Node *primary(){
+	if(consume('(')){
+		Node *node=expr();
+		expect(')');
+		return node;
+	}
+	return new_node_num(expect_number());
+}
+
+Node *mul(){
+	Node *node=primary();
+
+	for(;;){
+		if(consume('*')){
+			node=new_node(ND_MUL,node,primary());
+		}else if(consume('/')){
+			node=new_node(ND_DIV,node,primary());
+		}else{
+			return node;
+		}
+	}
+}
+
+Node *expr(){
+	Node *node=mul();
+
+	for(;;){
+		if(consume('+')){
+			node=new_node(ND_ADD,node,mul());
+		}else if(consume('-')){
+			node=new_node(ND_SUB,node,mul());
+		}else{
+			return node;
+		}
+	}
 }
 
 Token *new_token(TokenKind kind,Token *cur,char *str){
