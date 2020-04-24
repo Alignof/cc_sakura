@@ -16,19 +16,28 @@ typedef enum{
 	ND_SUB,
 	ND_MUL,
 	ND_DIV,
+	ND_GT,
+	ND_GE,
+	ND_LT,
+	ND_LE,
+	ND_EQ,
+	ND_NE,
 	ND_NUM,
 }NodeKind;
 
 typedef struct Token Token;
 typedef struct Node Node;
 
+//code token
 struct Token{
 	TokenKind kind;
 	Token *next;
 	int val;
 	char *str;
+	int len;
 };
 
+//tree object
 struct Node{
 	NodeKind kind;
 	Node *lhs;
@@ -40,7 +49,10 @@ Token *token;
 char *user_input;
 
 Node *expr();
+Node *relationalj();
+Node *add();
 Node *mul();
+Node *unary();
 Node *primary();
 
 void error(char *loc,char *fmt, ...){
@@ -56,17 +68,21 @@ void error(char *loc,char *fmt, ...){
 	exit(1);
 }
 
-bool consume(char op){
+bool consume(char *op){
 	// judge whether op is a symbol and return judge result
-	if(token->kind != TK_RESERVED || token->str[0] != op)
+	if(token->kind != TK_RESERVED ||
+		strlen(op)!=token->len||
+		memcmp(token->str,op,token->len))
 		return false;
 	token=token->next;
 	return true;
 }
 
-void expect(char op){
+void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
-	if(token->kind!=TK_RESERVED || token->str[0]!=op)
+	if(token->kind != TK_RESERVED ||
+		strlen(op)!=token->len||
+		memcmp(token->str,op,token->len))
 		error(token->str,"does not charctor.");
 	token=token->next;
 }
@@ -98,11 +114,11 @@ Node *new_node_num(int val){
 }
 
 Node *primary(){
-	if(consume('(')){
+	if(consume("(")){
 		//jmp expr
 		Node *node=expr();
 		//check end of caret
-		expect(')');
+		expect(")");
 		return node;
 	}
 	//return new num node
@@ -110,10 +126,10 @@ Node *primary(){
 }
 
 Node *unary(){
-	if(consume('+'))
+	if(consume("+"))
 		//ignore +
 		return primary();
-	if(consume('-'))
+	if(consume("-"))
 		//convert 0-n
 		return new_node(ND_SUB,new_node_num(0),primary());
 
@@ -126,10 +142,10 @@ Node *mul(){
 
 	for(;;){
 		// is * and move the pointer next
-		if(consume('*')){
+		if(consume("*")){
 			//create new node and jmp unary
 			node=new_node(ND_MUL,node,unary());
-		}else if(consume('/')){
+		}else if(consume("/")){
 			node=new_node(ND_DIV,node,unary());
 		}else{
 			return node;
@@ -137,15 +153,48 @@ Node *mul(){
 	}
 }
 
-Node *expr(){
+Node *add(){
 	//jmp mul()
 	Node *node=mul();
 
 	for(;;){
-		if(consume('+')){
+		if(consume("+")){
 			node=new_node(ND_ADD,node,mul());
-		}else if(consume('-')){
+		}else if(consume("-")){
 			node=new_node(ND_SUB,node,mul());
+		}else{
+			return node;
+		}
+	}
+}
+
+Node *relational(){
+	Node *node=add();
+
+	for(;;){
+		if(consume(">=")){
+			node=new_node(ND_GE,node,add());
+		}else if(consume("<=")){
+			node=new_node(ND_LE,node,add());
+		}else if(consume(">")){
+			node=new_node(ND_GT,node,add());
+		}else if(consume("<")){
+			node=new_node(ND_LT,node,add());
+		}else{
+			return node;
+		}
+		
+	}
+}
+
+Node *expr(){
+	Node *node=relational();
+
+	for(;;){
+		if(consume("==")){
+			node=new_node(ND_EQ,node,relational());
+		}else if(consume("!=")){
+			node=new_node(ND_NE,node,relational());
 		}else{
 			return node;
 		}
@@ -156,17 +205,29 @@ Token *new_token(TokenKind kind,Token *cur,char *str){
 	Token *new=calloc(1,sizeof(Token));
 	new->kind=kind;
 	new->str=str;
+	new->len=1;
 	cur->next=new;
 	return new;
 }
 
-bool istoken(char str){
+bool istoken(char *str, bool *flag){
 	int i;
-	char *tokens="+-*/()";
-	int size=sizeof(tokens)/sizeof(char);
+	char *single_tokens="+-*/()<>";
+	char *multi_tokens="<=>!";
+	int size;
 	
+	size=sizeof(multi_tokens)/sizeof(char);
 	for(i=0;i<size;i++){
-		if(str==tokens[i]){
+		if(*str==multi_tokens[i] && *(str+1)=='='){
+			*flag=false;
+			return true;
+		}
+	}
+	
+	size=sizeof(single_tokens)/sizeof(char);
+	for(i=0;i<size;i++){
+		if(*str==single_tokens[i]){
+			*flag=true;
 			return true;
 		}
 	}
@@ -175,6 +236,7 @@ bool istoken(char str){
 }
 
 Token *tokenize(char *p){
+	bool is_single_token;
 	Token head;
 	head.next=NULL;
 
@@ -187,9 +249,16 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		if(istoken(*p)){
-			//add symbol token
-			cur=new_token(TK_RESERVED,cur,p++);
+		//single token or multi token or isn't token
+		if(istoken(p,&is_single_token)){
+			if(is_single_token){
+				cur=new_token(TK_RESERVED,cur,p);
+				p++;
+			}else{
+				cur=new_token(TK_RESERVED,cur,p);
+				p+=2;
+				cur->len=2;
+			}
 			continue;
 		}
 
@@ -241,10 +310,39 @@ void gen(Node *node){
 			printf("	cqo\n");
 			printf("	idiv rax,rdi\n");
 			break;
+		case ND_GT:
+			printf("	cmp rdi,rax\n");
+			printf("	setl al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_GE:
+			printf("	cmp rdi,rax\n");
+			printf("	setge al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_LT:
+			printf("	cmp rax,rdi\n");
+			printf("	setl al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_LE:
+			printf("	cmp rax,rdi\n");
+			printf("	setle al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_EQ:
+			printf("	cmp rax,rdi\n");
+			printf("	sete al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_NE:
+			printf("	cmp rax,rdi\n");
+			printf("	setne al\n");
+			printf("	movzb rax,al\n");
+			break;
 	}
 
 	printf("	push rax\n");
-
 }
 
 int main(int argc,char **argv){
