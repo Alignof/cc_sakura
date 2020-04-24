@@ -3,3 +3,6 @@
 tmp*
 a.out
 cc_sakura
+
+.gdb_history
+peda-session-cc_sakura.txt
