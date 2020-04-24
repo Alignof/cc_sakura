@@ -205,6 +205,7 @@ Node *expr(){
 Token *new_token(TokenKind kind,Token *cur,char *str){
 	Token *new=calloc(1,sizeof(Token));
 	new->kind=kind;
+	//Remaining characters
 	new->str=str;
 	new->len=1;
 	cur->next=new;
@@ -252,7 +253,7 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		//single token or multi token or isn't token
+		//judge single token or multi token or isn't token
 		if(istoken(p,&is_single_token)){
 			if(is_single_token){
 				cur=new_token(TK_RESERVED,cur,p);
