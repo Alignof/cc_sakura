@@ -1,6 +1,12 @@
 CFLAGS=-std=c11 -g -O0 -static
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
 
-cc_sakura: cc_sakura.c
+
+cc_sakura: $(OBJS)
+	$(CC) -o cc_sakura $(OBJS) $(LDFLAGS)
+
+$(OBJS): cc_sakura.h
 
 test: cc_sakura
 	./test.sh
