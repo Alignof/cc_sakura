@@ -172,6 +172,7 @@ Node *relational(){
 	Node *node=add();
 
 	for(;;){
+		//prefer multi symbol
 		if(consume(">=")){
 			node=new_node(ND_GE,node,add());
 		}else if(consume("<=")){
@@ -216,6 +217,7 @@ bool istoken(char *str, bool *flag){
 	char *multi_tokens="<=>!";
 	int size;
 	
+	//Is multi token? (<=,==,!=,>=)
 	size=sizeof(multi_tokens)/sizeof(char);
 	for(i=0;i<size;i++){
 		if(*str==multi_tokens[i] && *(str+1)=='='){
@@ -224,6 +226,7 @@ bool istoken(char *str, bool *flag){
 		}
 	}
 	
+	//Is single token? (+,-,*,/,<,>)
 	size=sizeof(single_tokens)/sizeof(char);
 	for(i=0;i<size;i++){
 		if(*str==single_tokens[i]){
