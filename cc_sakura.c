@@ -109,17 +109,28 @@ Node *primary(){
 	return new_node_num(expect_number());
 }
 
+Node *unary(){
+	if(consume('+'))
+		//ignore +
+		return primary();
+	if(consume('-'))
+		//convert 0-n
+		return new_node(ND_SUB,new_node_num(0),primary());
+
+	return primary();
+}
+
 Node *mul(){
-	//jmp primary()
-	Node *node=primary();
+	//jmp unary()
+	Node *node=unary();
 
 	for(;;){
 		// is * and move the pointer next
 		if(consume('*')){
-			//create new node and jmp primary
-			node=new_node(ND_MUL,node,primary());
+			//create new node and jmp unary
+			node=new_node(ND_MUL,node,unary());
 		}else if(consume('/')){
-			node=new_node(ND_DIV,node,primary());
+			node=new_node(ND_DIV,node,unary());
 		}else{
 			return node;
 		}
@@ -149,6 +160,20 @@ Token *new_token(TokenKind kind,Token *cur,char *str){
 	return new;
 }
 
+bool istoken(char str){
+	int i;
+	char *tokens="+-*/()";
+	int size=sizeof(tokens)/sizeof(char);
+	
+	for(i=0;i<size;i++){
+		if(str==tokens[i]){
+			return true;
+		}
+	}
+
+	return false;
+}
+
 Token *tokenize(char *p){
 	Token head;
 	head.next=NULL;
@@ -162,7 +187,7 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		if(*p=='+' || *p=='-'){
+		if(istoken(*p)){
 			//add symbol token
 			cur=new_token(TK_RESERVED,cur,p++);
 			continue;
@@ -194,7 +219,9 @@ void gen(Node *node){
 		return;
 	}
 
+	//check left hand side
 	gen(node->lhs);
+	//check right hand side
 	gen(node->rhs);
 
 	printf("	pop rdi\n");
@@ -236,6 +263,7 @@ int main(int argc,char **argv){
 	printf(".global main\n");
 	printf("main:\n");
 
+	//generate assembly
 	gen(node);
 
 	printf("	pop rax\n");

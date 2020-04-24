@@ -1,4 +1,4 @@
-CFLAGS=-std=c11 -g -static
+CFLAGS=-std=c11 -g -O0 -static
 
 cc_sakura: cc_sakura.c
 
