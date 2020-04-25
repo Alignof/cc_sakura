@@ -23,7 +23,7 @@ Token *new_token(TokenKind kind,Token *cur,char *str){
 	return new;
 }
 
-bool istoken(char *str, bool *flag){
+bool issymbol(char *str, bool *flag){
 	int i;
 	char *single_tokens="+-*/()<>";
 	char *multi_tokens="<=>!";
@@ -70,7 +70,7 @@ Token *tokenize(char *p){
 		}
 
 		//judge single token or multi token or isn't token
-		if(istoken(p,&is_single_token)){
+		if(issymbol(p,&is_single_token)){
 			if(is_single_token){
 				cur=new_token(TK_RESERVED,cur,p);
 				p++;

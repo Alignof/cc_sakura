@@ -8,6 +8,7 @@
 
 typedef enum{
 	TK_RESERVED,
+	TK_IDENT,
 	TK_NUM,
 	TK_EOF,
 }TokenKind;
@@ -51,7 +52,7 @@ struct Node{
 Token *token;
 char *user_input;
 void error(char *loc,char *fmt, ...);
-bool istoken(char *str, bool *flag);
+bool issymbol(char *str, bool *flag);
 bool at_eof();
 bool consume(char *op);
 void expect(char *op);
