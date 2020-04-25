@@ -10,7 +10,7 @@ int main(int argc,char **argv){
 	//tokenize
 	token=tokenize(argv[1]);
 	//make syntax tree
-	Node *node=expr();
+	program();
 
 	printf(".intel_syntax noprefix\n");
 	printf(".global main\n");

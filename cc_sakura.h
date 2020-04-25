@@ -14,17 +14,19 @@ typedef enum{
 }TokenKind;
 
 typedef enum{
-	ND_ADD,
-	ND_SUB,
-	ND_MUL,
-	ND_DIV,
-	ND_GT,
-	ND_GE,
-	ND_LT,
-	ND_LE,
-	ND_EQ,
-	ND_NE,
-	ND_NUM,
+	ND_ADD,		// *
+	ND_SUB,		// -
+	ND_MUL,		// *
+	ND_DIV,		// /
+	ND_GT,		// >
+	ND_GE,		// >=
+	ND_LT,		// <
+	ND_LE,		// <=
+	ND_EQ,		// ==
+	ND_NE,		// !=
+	ND_ASSIGN,	// =
+	ND_LVAR,	//local valiable
+	ND_NUM,		//integer
 }NodeKind;
 
 
@@ -46,6 +48,7 @@ struct Node{
 	Node *lhs;
 	Node *rhs;
 	int val;
+	int offset;
 };
 
 //parse.c
@@ -57,18 +60,25 @@ bool at_eof();
 bool consume(char *op);
 void expect(char *op);
 int expect_number();
+
 Token *new_token(TokenKind kind,Token *cur,char *str);
 Token *tokenize(char *p);
 
-//codegan.c
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
+
+void program();
+Node *stmt();
 Node *expr();
+Node *assign();
 Node *relational();
+Node *equelity();
 Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+
+//codegan.c
 void gen(Node *node);
 
 

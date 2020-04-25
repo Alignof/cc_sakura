@@ -82,6 +82,13 @@ Token *tokenize(char *p){
 			continue;
 		}
 
+		//Is valiable?
+		if('a'<=*p && *p<='z'){
+			cur=new_token(TK_IDENT,cur,p++);
+			cur->len=1;
+			continue;
+		}
+
 		if(isdigit(*p)){
 			//add number token
 			cur=new_token(TK_NUM,cur,p);
@@ -108,6 +115,17 @@ bool consume(char *op){
 	return true;
 }
 
+Token *consume_ident(){
+	// judge whether token is a ident and token pointer
+	if(token->kind != TK_IDENT ||
+		!('a' <= token->str && token->str <= 'z'))
+		return false;
+	
+	Token *ret=token;
+	token=token->next;
+	return ret;
+}
+
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if(token->kind != TK_RESERVED ||
@@ -124,5 +142,151 @@ int expect_number(){
 	int val=token->val;
 	token=token->next;
 	return val;
+}
+
+//nodes order
+Node *code[100];
+
+Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
+	//create new node(symbol)
+	Node *node=calloc(1,sizeof(Node));
+	node->kind=kind;
+	node->lhs=lhs;
+	node->rhs=rhs;
+	return node;
+}
+
+Node *new_node_num(int val){
+	//create new node(number)
+	Node *node=calloc(1,sizeof(Node));
+	node->kind=ND_NUM;
+	node->val=val;
+	return node;
+}
+
+Node *primary(){
+	if(consume("(")){
+		//jmp expr
+		Node *node=expr();
+		//check end of caret
+		expect(")");
+		return node;
+	}
+
+	Token *tok=consume_ident();
+	if(tok){
+		Node *node=calloc(1,sizeof(Node));
+		node->kind=ND_LVAR;
+		node->offset=(tok->str[0]-'a'+1)*8;
+		return node;
+	}
+
+	//return new num node
+	return new_node_num(expect_number());
+}
+
+Node *unary(){
+	if(consume("+"))
+		//ignore +
+		return primary();
+	if(consume("-"))
+		//convert 0-n
+		return new_node(ND_SUB,new_node_num(0),primary());
+
+	return primary();
+}
+
+Node *mul(){
+	//jmp unary()
+	Node *node=unary();
+
+	for(;;){
+		// is * and move the pointer next
+		if(consume("*")){
+			//create new node and jmp unary
+			node=new_node(ND_MUL,node,unary());
+		}else if(consume("/")){
+			node=new_node(ND_DIV,node,unary());
+		}else{
+			return node;
+		}
+	}
+}
+
+Node *add(){
+	//jmp mul()
+	Node *node=mul();
+
+	for(;;){
+		if(consume("+")){
+			node=new_node(ND_ADD,node,mul());
+		}else if(consume("-")){
+			node=new_node(ND_SUB,node,mul());
+		}else{
+			return node;
+		}
+	}
+}
+
+Node *relational(){
+	Node *node=add();
+
+	for(;;){
+		//prefer multi symbol
+		if(consume(">=")){
+			node=new_node(ND_GE,node,add());
+		}else if(consume("<=")){
+			node=new_node(ND_LE,node,add());
+		}else if(consume(">")){
+			node=new_node(ND_GT,node,add());
+		}else if(consume("<")){
+			node=new_node(ND_LT,node,add());
+		}else{
+			return node;
+		}
+		
+	}
+}
+
+Node *equelity(){
+	Node *node=relational();
+
+	for(;;){
+		if(consume("==")){
+			node=new_node(ND_EQ,node,relational());
+		}else if(consume("!=")){
+			node=new_node(ND_NE,node,relational());
+		}else{
+			return node;
+		}
+	}
+}
+
+Node *assign(){
+	Node *node=equelity();
+
+	if(consume("=")){
+		node=new_node(ND_ASSIGN,node,assign());
+	}else{
+		return node;
+	}
+}
+
+Node *expr(){
+	Node *node=assign();
+}
+
+Node *stmt(){
+	Node *node=expr();
+	expect(";");
+
+	return node;
+}
+
+void program(){
+	int i=0;
+	while(!at_eof())
+		code[i++]=stmt();
+	code[i]=NULL;
 }
 
