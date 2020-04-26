@@ -53,6 +53,8 @@ struct Node{
 
 //parse.c
 Token *token;
+Node *code[100];
+
 char *user_input;
 void error(char *loc,char *fmt, ...);
 bool issymbol(char *str, bool *flag);

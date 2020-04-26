@@ -25,8 +25,8 @@ Token *new_token(TokenKind kind,Token *cur,char *str){
 
 bool issymbol(char *str, bool *flag){
 	int i;
-	char *single_tokens="+-*/()<>";
-	char *multi_tokens="<=>!";
+	char single_tokens[]="+-*/()<>=;";
+	char multi_tokens[]="<=>!";
 	int size;
 	
 	//Is multi token? (<=,==,!=,>=)
@@ -96,7 +96,6 @@ Token *tokenize(char *p){
 			cur->val=strtol(p,&p,10);
 			continue;
 		}
-
 		error(token->str,"cat not tokenize.");
 	}
 
@@ -118,7 +117,7 @@ bool consume(char *op){
 Token *consume_ident(){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||
-		!('a' <= token->str && token->str <= 'z'))
+		!('a' <= *(token->str) && *(token->str) <= 'z'))
 		return false;
 	
 	Token *ret=token;
@@ -143,9 +142,6 @@ int expect_number(){
 	token=token->next;
 	return val;
 }
-
-//nodes order
-Node *code[100];
 
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
 	//create new node(symbol)
