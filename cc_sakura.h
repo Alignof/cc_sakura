@@ -10,6 +10,10 @@ typedef enum{
 	TK_RESERVED,
 	TK_IDENT,
 	TK_NUM,
+	TK_IF,
+	TK_WHILE,
+	TK_FOR,
+	TK_RETURN,
 	TK_EOF,
 }TokenKind;
 
@@ -27,6 +31,10 @@ typedef enum{
 	ND_ASSIGN,	// =
 	ND_LVAR,	//local valiable
 	ND_NUM,		//integer
+	ND_IF,		//if
+	ND_WHILE,	//while
+	ND_FOR,		//for
+	ND_RETURN,	//return
 }NodeKind;
 
 
@@ -65,16 +73,19 @@ Token *token;
 Node *code[100];
 LVar *locals;
 
+int len_val(char *str);
 char *user_input;
 void error(char *loc,char *fmt, ...);
 bool issymbol(char *str, bool *flag);
 bool at_eof();
 bool consume(char *op);
+bool consume_ret();
 void expect(char *op);
 int expect_number();
 
 Token *new_token(TokenKind kind,Token *cur,char *str);
 Token *tokenize(char *p);
+Token *consume_ident();
 
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
