@@ -151,6 +151,16 @@ bool consume_ret(){
 	return true;
 }
 
+bool consume_reserved_word(char *keyword,TokenKind kind){
+	if(token->kind != kind ||
+		token->len!=strlen(keyword)||
+		memcmp(token->str,keyword,token->len))
+		return false;
+	token=token->next;
+	return true;
+}
+
+
 int len_val(char *str){
 	int counter;
 	for(counter=0;('a' <= *str && *str <= 'z');str++)
@@ -354,23 +364,29 @@ Node *expr(){
 
 Node *stmt(){
 	Node *node;
+	Node *tmp;
 
-	if(consume_ret()){
-		node=calloc(1,sizeof(Node));
-		node->kind=ND_RETURN;
-		node->lhs=expr();
+	if(consume_reserved_word("return",TK_RETURN)){
+		node=new_node(ND_RETURN,node,expr());
 		if(!consume(";"))
 			error(token->str,"not a ';' token.");
 	}
-	/*
-	if(consume_if){
-		expect("(");
-		node=calloc(1,sizeof(Node));
-		node->kind=ND_IF;
-		node->lhs=expr();
-	}
-	*/
-	else{
+	
+	if(consume_reserved_word("if",TK_IF)){
+		node=new_node(ND_IF,node,NULL);
+		if(consume("(")){
+			//jmp expr
+			Node *tmp=expr();
+			//check end of caret
+			expect(")");
+			node->lhs=tmp;
+			node=tmp;
+		}
+
+		if(consume_reserved_word("else",TK_ELSE)){
+			node=new_node(ND_ELSE,node,stmt());
+		}
+	}else{
 		node=expr();
 		if(!consume(";"))
 			error(token->str,"not a ';' token.");

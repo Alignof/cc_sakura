@@ -11,6 +11,7 @@ typedef enum{
 	TK_IDENT,
 	TK_NUM,
 	TK_IF,
+	TK_ELSE,
 	TK_WHILE,
 	TK_FOR,
 	TK_RETURN,
@@ -32,6 +33,7 @@ typedef enum{
 	ND_LVAR,	//local valiable
 	ND_NUM,		//integer
 	ND_IF,		//if
+	ND_ELSE,	//else
 	ND_WHILE,	//while
 	ND_FOR,		//for
 	ND_RETURN,	//return
@@ -80,6 +82,7 @@ bool issymbol(char *str, bool *flag);
 bool at_eof();
 bool consume(char *op);
 bool consume_ret();
+bool consume_reserved_word();
 void expect(char *op);
 int expect_number();
 
