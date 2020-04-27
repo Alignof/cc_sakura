@@ -114,6 +114,13 @@ bool consume(char *op){
 	return true;
 }
 
+int len_val(char *str){
+	int counter;
+	for(counter=0;('a' <= *str && *str <= 'z');str++)
+		counter++;
+	return counter;
+}
+
 Token *consume_ident(){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||
@@ -121,7 +128,13 @@ Token *consume_ident(){
 		return false;
 	
 	Token *ret=token;
-	token=token->next;
+	//check variable length
+	int _len=len_val(token->str);
+	
+	//move next token 
+	for(int i=0;i<_len;i++)
+		token=token->next;
+
 	return ret;
 }
 
@@ -141,6 +154,15 @@ int expect_number(){
 	int val=token->val;
 	token=token->next;
 	return val;
+}
+
+LVar *find_lvar(Token *tok){
+	//while var not equal NULL
+	for (LVar *var=locals;var;var=var->next){
+		if(var->len==tok->len && !memcmp(tok->str,var->name,var->len))
+			return var;
+	}
+	return NULL;
 }
 
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
@@ -173,7 +195,27 @@ Node *primary(){
 	if(tok){
 		Node *node=calloc(1,sizeof(Node));
 		node->kind=ND_LVAR;
-		node->offset=(tok->str[0]-'a'+1)*8;
+
+		LVar *lvar=find_lvar(tok);
+		if(lvar){
+			//variable exist
+			node->offset=lvar->offset;
+		}else{
+			//variable does not exist.
+			lvar=calloc(1,sizeof(LVar));
+			lvar->next=locals;
+			lvar->name=tok->str;
+			lvar->len=tok->len;
+			
+			if(locals){
+				lvar->offset=locals->offset+8;
+			}else{
+				lvar->offset=0;
+			}
+			node->offset=lvar->offset;
+			//locals == head of list
+			locals=lvar;
+		}
 		return node;
 	}
 

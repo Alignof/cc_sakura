@@ -32,6 +32,7 @@ typedef enum{
 
 typedef struct Token Token;
 typedef struct Node Node;
+typedef struct LVar LVar;
 
 //code token
 struct Token{
@@ -51,9 +52,18 @@ struct Node{
 	int offset;
 };
 
+//local variable
+struct LVar{
+	LVar *next;
+	char *name;
+	int len;
+	int offset;
+};
+
 //parse.c
 Token *token;
 Node *code[100];
+LVar *locals;
 
 char *user_input;
 void error(char *loc,char *fmt, ...);

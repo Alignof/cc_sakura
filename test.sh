@@ -38,5 +38,12 @@ assert 0  "12 != 12;"
 
 assert 8  "5+3;6+2;"
 assert 5  "a=3;b=2;a+b;"
+assert 25 "a=3;b=2;c=12;d=17;(d-c)*(a+b);"
+
+assert 5 "abc=3;def=2;abc+def;"
+assert 6 "kinako=3;momone=2;momone*kinako;"
+assert 11 "abc=3;def=2;a=4;abc+def*a;"
+assert 11 "abc=3;def=2;abd=4;abc+def*abd;"
+assert 11 "abc=3;def=2;ab=4;abc+def*ab;"
 
 echo OK

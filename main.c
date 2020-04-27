@@ -2,6 +2,7 @@
 
 int main(int argc,char **argv){
 	int i;
+	locals=NULL;
 
 	if(argc!=2){
 		fprintf(stderr,"Incorrect number of arguments\n");
