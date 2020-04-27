@@ -28,7 +28,7 @@ int main(int argc,char **argv){
 	//generate assembly at first expr
 	for(i=0;code[i];i++){
 		gen(code[i]);
-		printf("	pop rax\n");
+		printf("	pop rax\n\n");
 	}
 
 	//rax=return value

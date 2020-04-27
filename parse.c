@@ -82,6 +82,9 @@ Token *tokenize(char *p){
 			continue;
 		}
 
+		//Is return?
+		if(strcmp)
+
 		//Is valiable?
 		if('a'<=*p && *p<='z'){
 			cur=new_token(TK_IDENT,cur,p++);
