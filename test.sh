@@ -46,5 +46,7 @@ assert 6 "kinako=3;momone=2;momone*kinako;"
 assert 5 "return 2+3;"
 assert 5 "a=13;b=8;return a-b;"
 
+assert 2 "2;if(3<2) 5+3;"
+assert 8 "2;if(3>2) 5+3;"
 
 echo OK
