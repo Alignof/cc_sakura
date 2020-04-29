@@ -379,7 +379,9 @@ Node *stmt(){
 			//check end of caret
 			expect(")");
 			node->lhs=tmp;
-			node=tmp;
+			node->rhs=expr();
+			if(!consume(";"))
+				error(token->str,"not a ';' token.");
 		}
 
 		if(consume_reserved_word("else",TK_ELSE)){

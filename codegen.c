@@ -1,5 +1,7 @@
 #include "cc_sakura.h"
 
+int label_count=0;
+
 void gen_lval(Node *node){
 	if(node->kind != ND_LVAR)
 		error(token->str,"not a variable");
@@ -36,6 +38,16 @@ void gen(Node *node){
 			printf("	pop rax\n");
 			printf("	mov [rax],rdi\n");
 			printf("	push rdi\n");
+			return;
+		case ND_IF:
+			// remove pop instruction
+			gen(node->lhs);
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			printf("	je .Lend%03d\n",label_count);
+			gen(node->rhs);
+			printf(".Lend%03d:\n",label_count);
+			label_count++;
 			return;
 	}
 
