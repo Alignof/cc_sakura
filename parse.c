@@ -368,11 +368,10 @@ Node *stmt(){
 
 	if(consume_reserved_word("return",TK_RETURN)){
 		node=new_node(ND_RETURN,node,expr());
-		if(!consume(";"))
+		if(!consume(";")){
 			error(token->str,"not a ';' token.");
-	}
-	
-	if(consume_reserved_word("if",TK_IF)){
+		}
+	}else if(consume_reserved_word("if",TK_IF)){
 		node=new_node(ND_IF,node,NULL);
 		if(consume("(")){
 			//jmp expr
