@@ -90,7 +90,7 @@ Token *tokenize(char *p){
 		}
 
 		//Is if?
-		if(strncmp(p,"if",2)==0 && !is_alnum(p[6])){
+		if(strncmp(p,"if",2)==0 && !is_alnum(p[2])){
 			cur=new_token(TK_IF,cur,p);
 			cur->len=2;
 			cur->str=p;
@@ -99,7 +99,7 @@ Token *tokenize(char *p){
 		}
 
 		//Is else?
-		if(strncmp(p,"else",4)==0 && !is_alnum(p[6])){
+		if(strncmp(p,"else",4)==0 && !is_alnum(p[4])){
 			cur=new_token(TK_ELSE,cur,p);
 			cur->len=4;
 			cur->str=p;
@@ -107,6 +107,14 @@ Token *tokenize(char *p){
 			continue;
 		}
 
+		//Is while?
+		if(strncmp(p,"while",5)==0 && !is_alnum(p[5])){
+			cur=new_token(TK_WHILE,cur,p);
+			cur->len=5;
+			cur->str=p;
+			p+=5;
+			continue;
+		}
 
 		//Is return?
 		if(strncmp(p,"return",6)==0 && !is_alnum(p[6])){
@@ -398,6 +406,20 @@ Node *stmt(){
 			tmp->lhs=node->rhs;
 			node->rhs=tmp;
 			node->kind=ND_IFELSE;
+		}
+	}else if(consume_reserved_word("while",TK_WHILE)){
+		node=new_node(ND_WHILE,node,NULL);
+		if(consume("(")){
+			//jmp expr
+			Node *tmp=expr();
+			//check end of caret
+			expect(")");
+
+			// (cond)if expr
+			node->lhs=tmp;
+			node->rhs=expr();
+			if(!consume(";"))
+				error(token->str,"not a ';' token.");
 		}
 	}else{
 		node=expr();

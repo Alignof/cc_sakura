@@ -38,6 +38,7 @@ assert 0  "12 != 12;"
 
 assert 8  "5+3;6+2;"
 assert 5  "a=3;b=2;a+b;"
+assert 5  "a=8;a=a-3;a;"
 assert 25 "a=3;b=2;c=12;d=17;(d-c)*(a+b);"
 
 assert 5 "abc=3;def=2;abc+def;"
@@ -57,5 +58,8 @@ assert 5 "if(2>3) 3-2; else 2+3;"
 assert 1 "if(2<3) 3-2; else 2+3;"
 assert 9 "a=2;b=3;if(a>b) b-a/a; else a+b*b-a;"
 assert 2 "a=2;b=3;if(a<b) b-a/a; else a+b*b-a;"
+
+assert 0 "a=10;while(a>0) a=a-1;a;"
+assert 10 "a=10;while(a<0) a=a-1;a;"
 
 echo OK
