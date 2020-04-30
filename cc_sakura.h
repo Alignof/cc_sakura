@@ -106,7 +106,9 @@ Node *unary();
 Node *primary();
 
 //codegan.c
-int label_count;
+int label_begin;
+int label_end;
+int label_else;
 void gen(Node *node);
 void gen_lval(Node *node);
 

@@ -1,6 +1,8 @@
 #include "cc_sakura.h"
 
-int label_count=0;
+int label_begin=0;
+int label_end=0;
+int label_else=0;
 
 void gen_lval(Node *node){
 	if(node->kind != ND_LVAR)
@@ -43,25 +45,27 @@ void gen(Node *node){
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lend%03d\n",label_count);
+			printf("	je .Lend%03d\n",label_end);
 			gen(node->rhs);
-			printf(".Lend%03d:\n",label_count);
-			label_count++;
+			printf(".Lend%03d:\n",label_end);
+			label_end++;
 			return;
 		case ND_IFELSE:
 			// condition
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lelse%03d\n",label_count);
-			// if expr
+			printf("	je .Lelse%03d\n",label_else);
+			// expr in if
 			gen(node->rhs->lhs);
-			printf("	jmp .Lend%03d\n",label_count);
-			printf(".Lelse%03d:\n",label_count);
-			// else expr
+			printf("	jmp .Lend%03d\n",label_end);
+			printf(".Lelse%03d:\n",label_else);
+			// expr in else
 			gen(node->rhs->rhs);
-			printf(".Lend%03d:\n",label_count);
-			label_count++;
+			printf(".Lend%03d:\n",label_end);
+		
+			label_end++;
+			label_else++;
 			return;
 	}
 
