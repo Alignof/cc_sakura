@@ -40,12 +40,26 @@ void gen(Node *node){
 			printf("	push rdi\n");
 			return;
 		case ND_IF:
-			// remove pop instruction
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			printf("	je .Lend%03d\n",label_count);
 			gen(node->rhs);
+			printf(".Lend%03d:\n",label_count);
+			label_count++;
+			return;
+		case ND_IFELSE:
+			// condition
+			gen(node->lhs);
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			printf("	je .Lelse%03d\n",label_count);
+			// if expr
+			gen(node->rhs->lhs);
+			printf("	jmp .Lend%03d\n",label_count);
+			printf(".Lelse%03d:\n",label_count);
+			// else expr
+			gen(node->rhs->rhs);
 			printf(".Lend%03d:\n",label_count);
 			label_count++;
 			return;

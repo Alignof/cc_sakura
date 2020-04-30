@@ -92,18 +92,25 @@ Token *tokenize(char *p){
 		//Is if?
 		if(strncmp(p,"if",2)==0 && !is_alnum(p[6])){
 			cur=new_token(TK_IF,cur,p);
-			cur->kind=TK_IF;
 			cur->len=2;
 			cur->str=p;
 			p+=2;
 			continue;
 		}
 
+		//Is else?
+		if(strncmp(p,"else",4)==0 && !is_alnum(p[6])){
+			cur=new_token(TK_ELSE,cur,p);
+			cur->len=4;
+			cur->str=p;
+			p+=4;
+			continue;
+		}
+
 
 		//Is return?
 		if(strncmp(p,"return",6)==0 && !is_alnum(p[6])){
-			cur=new_token(TK_RESERVED,cur,p);
-			cur->kind=TK_RETURN;
+			cur=new_token(TK_RETURN,cur,p);
 			cur->len=6;
 			cur->str=p;
 			p+=6;
@@ -378,6 +385,8 @@ Node *stmt(){
 			Node *tmp=expr();
 			//check end of caret
 			expect(")");
+
+			// (cond)if expr
 			node->lhs=tmp;
 			node->rhs=expr();
 			if(!consume(";"))
@@ -385,7 +394,10 @@ Node *stmt(){
 		}
 
 		if(consume_reserved_word("else",TK_ELSE)){
-			node=new_node(ND_ELSE,node,stmt());
+			tmp=new_node(ND_ELSE,node,stmt());
+			tmp->lhs=node->rhs;
+			node->rhs=tmp;
+			node->kind=ND_IFELSE;
 		}
 	}else{
 		node=expr();

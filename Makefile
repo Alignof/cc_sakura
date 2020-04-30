@@ -12,6 +12,6 @@ test: cc_sakura
 	./test.sh
 
 clean:
-	rm -f cc_sakura *.o *~ tmp*
+	rm -f cc_sakura *.o *~ tmp* *.txt *.out
 
 .PHONY: test clean

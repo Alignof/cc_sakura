@@ -53,4 +53,9 @@ assert 3 "1+2;if(3<2) 10-3;"
 assert 1 "a=2;b=3;a+b;if(a<b) b-a;"
 assert 5 "a=2;b=3;a+b;if(a>b) b-a;"
 
+assert 5 "if(2>3) 3-2; else 2+3;"
+assert 1 "if(2<3) 3-2; else 2+3;"
+assert 9 "a=2;b=3;if(a>b) b-a/a; else a+b*b-a;"
+assert 2 "a=2;b=3;if(a<b) b-a/a; else a+b*b-a;"
+
 echo OK
