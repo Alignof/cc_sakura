@@ -14,6 +14,7 @@ void gen_lval(Node *node){
 }
 
 void gen(Node *node){
+	Node *tmp;
 	switch(node->kind){
 		case ND_RETURN:
 			gen(node->rhs);
@@ -84,6 +85,13 @@ void gen(Node *node){
 		
 			label_begin++;
 			label_end++;
+			return;
+		case ND_BLOCK:
+			tmp=node->vector;
+			while(tmp->vector){
+				gen(tmp->vector);
+				tmp=tmp->vector;
+			}
 			return;
 	}
 

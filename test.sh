@@ -62,4 +62,7 @@ assert 2 "a=2;b=3;if(a<b) b-a/a; else a+b*b-a;"
 assert 0 "a=10;while(a>0) a=a-1;a;"
 assert 10 "a=10;while(a<0) a=a-1;a;"
 
+assert 2 "a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;"
+assert 13 "a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;"
+
 echo OK

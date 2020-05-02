@@ -50,6 +50,9 @@ bool issymbol(char *str, bool *flag){
 	return false;
 }
 
+bool isblock(char *str){
+	return *str=='{' || *str=='}';
+}
 
 bool at_eof(){
 	return token->kind==TK_EOF;
@@ -115,7 +118,17 @@ Token *tokenize(char *p){
 			p+=5;
 			continue;
 		}
-
+		
+		//Is block? '{' or '}'
+		if(isblock(p)){
+			cur=new_token(TK_BLOCK,cur,p);
+			cur->len=1;
+			cur->val=*p;
+			cur->str=p;
+			p+=1;
+			continue;
+		}
+		
 		//Is return?
 		if(strncmp(p,"return",6)==0 && !is_alnum(p[6])){
 			cur=new_token(TK_RETURN,cur,p);
@@ -149,7 +162,7 @@ Token *tokenize(char *p){
 
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
-	if(token->kind != TK_RESERVED ||
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
 		strlen(op)!=token->len||
 		memcmp(token->str,op,token->len))
 		return false;
@@ -202,7 +215,7 @@ Token *consume_ident(){
 
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
-	if(token->kind != TK_RESERVED ||
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
 		strlen(op)!=token->len||
 		memcmp(token->str,op,token->len))
 		error(token->str,"does not charctor.");
@@ -396,9 +409,12 @@ Node *stmt(){
 
 			// (cond)if expr
 			node->lhs=tmp;
-			node->rhs=expr();
+			node->rhs=stmt();
+
+			/*
 			if(!consume(";"))
 				error(token->str,"not a ';' token.");
+			*/
 		}
 
 		if(consume_reserved_word("else",TK_ELSE)){
@@ -417,10 +433,28 @@ Node *stmt(){
 
 			// (cond)if expr
 			node->lhs=tmp;
-			node->rhs=expr();
+			node->rhs=stmt();
+
+			/*
 			if(!consume(";"))
 				error(token->str,"not a ';' token.");
+			*/
 		}
+	}else if(consume("{")){
+		node=new_node(ND_BLOCK,node,NULL);
+		
+		Node *tmp=calloc(1,sizeof(Node));
+		node->vector=tmp;
+		while(token->kind!=TK_BLOCK){
+			//Is first?
+			if(tmp->vector){
+				tmp=stmt();
+			}else{
+				tmp->vector=stmt();
+				tmp=tmp->vector;
+			}
+		}
+		expect("}");
 	}else{
 		node=expr();
 		if(!consume(";"))

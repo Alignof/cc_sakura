@@ -14,6 +14,7 @@ typedef enum{
 	TK_ELSE,
 	TK_WHILE,
 	TK_FOR,
+	TK_BLOCK,
 	TK_RETURN,
 	TK_EOF,
 }TokenKind;
@@ -37,6 +38,7 @@ typedef enum{
 	ND_IFELSE,	//if-else
 	ND_WHILE,	//while
 	ND_FOR,		//for
+	ND_BLOCK,	//{}
 	ND_RETURN,	//return
 }NodeKind;
 
@@ -59,6 +61,7 @@ struct Node{
 	NodeKind kind;
 	Node *lhs;
 	Node *rhs;
+	Node *vector;
 	int val;
 	int offset;
 };
@@ -80,6 +83,7 @@ int len_val(char *str);
 char *user_input;
 void error(char *loc,char *fmt, ...);
 bool issymbol(char *str, bool *flag);
+bool isblock(char *str);
 bool at_eof();
 bool consume(char *op);
 bool consume_ret();

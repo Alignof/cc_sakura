@@ -29,6 +29,7 @@ int main(int argc,char **argv){
 	for(i=0;code[i];i++){
 		gen(code[i]);
 		//printf("	pop rax\n\n");
+		printf("\n");
 	}
 
 	//rax=return value
