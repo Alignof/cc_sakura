@@ -5,7 +5,7 @@ int label_end=0;
 int label_else=0;
 
 void gen_lval(Node *node){
-	if(node->kind != ND_LVAR)
+	if(node->kind != ND_LVAR && node->kind != ND_CALL_FUNC)
 		error(token->str,"not a variable");
 
 	printf("	mov rax,rbp\n");
@@ -92,6 +92,9 @@ void gen(Node *node){
 				gen(tmp->vector);
 				tmp=tmp->vector;
 			}
+			return;
+		case ND_CALL_FUNC:
+			printf("	call %s\n",node->str);
 			return;
 	}
 

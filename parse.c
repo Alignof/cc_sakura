@@ -205,6 +205,7 @@ Token *consume_ident(){
 	Token *ret=token;
 	//check variable length
 	int _len=len_val(token->str);
+	token->len=_len;
 	
 	//move next token 
 	for(int i=0;i<_len;i++)
@@ -266,10 +267,11 @@ Node *primary(){
 		return node;
 	}
 
+	// Is variable
 	Token *tok=consume_ident();
 	if(tok){
 		Node *node=calloc(1,sizeof(Node));
-		node->kind=ND_LVAR;
+		//node->kind=ND_LVAR;
 
 		LVar *lvar=find_lvar(tok);
 		if(lvar){
@@ -291,6 +293,18 @@ Node *primary(){
 			//locals == head of list
 			locals=lvar;
 		}
+
+		// Is func?
+		if(*(token->str)=='('){
+			node->kind=ND_CALL_FUNC;
+			node->str=(char *)calloc(tok->len,sizeof(char));
+			strncpy(node->str,tok->str,tok->len);
+			expect("(");
+			expect(")");
+		}else{
+			node->kind=ND_LVAR;
+		}
+
 		return node;
 	}
 

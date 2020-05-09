@@ -39,6 +39,7 @@ typedef enum{
 	ND_WHILE,	//while
 	ND_FOR,		//for
 	ND_BLOCK,	//{}
+	ND_CALL_FUNC,	//func();
 	ND_RETURN,	//return
 }NodeKind;
 
@@ -63,6 +64,7 @@ struct Node{
 	Node *rhs;
 	Node *vector;
 	int val;
+	char *str;
 	int offset;
 };
 
