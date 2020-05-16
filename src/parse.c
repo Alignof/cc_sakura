@@ -309,7 +309,7 @@ Node *primary(){
 			if(!(consume(")"))){
 				tmp=node;
 				while(token->kind == TK_NUM || token->kind ==TK_IDENT){
-					tmp->vector=primary();
+					tmp->vector=equelity();
 					tmp=tmp->vector;
 
 					if(!(consume(",")))

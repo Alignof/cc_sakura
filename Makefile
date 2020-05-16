@@ -23,5 +23,6 @@ func_test: cc_sakura
 
 clean:
 	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out
+	rm -f $(OBJECTS) $(TARGET)
 
 .PHONY: test func_test clean

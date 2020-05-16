@@ -1,23 +1,22 @@
 assert() {
-	expected="$1"
-	input="$2"
+	input="$1"
+
+	echo "$input"
 
 	./cc_sakura "$input" > tmp.s
 	gcc -c tmp.s src/func.c
 	gcc -o tmp tmp.o func.o
 	./tmp
 	
-	actual="$?"
-
-	if [ "$actual" = "$expected" ]; then
-		echo "$input => $actual"
-	else
-		echo "$input => $expected expected, but got $actual"
-		exit 1
-	fi
+	echo ""
+#	actual="$?"
+#	echo "$input => $actual"
 }
 
-assert 127 "func();"
-assert 127 "addtest(1,2);"
+assert "func();"
+assert "addtest(1,2);"
+assert "addtest(23,27);"
+assert "a=2;b=3;addtest(a,b);"
+assert "a=2;b=3;addtest(a,a+b);"
 
-echo OK
+echo done.
