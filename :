@@ -25,7 +25,7 @@ Token *new_token(TokenKind kind,Token *cur,char *str){
 
 bool issymbol(char *str, bool *flag){
 	int i;
-	char single_tokens[]="+-*/()<>=,;";
+	char single_tokens[]="+-*/()<>=;";
 	char multi_tokens[]="<=>!";
 	int size;
 	
@@ -152,7 +152,6 @@ Token *tokenize(char *p){
 			cur->val=strtol(p,&p,10);
 			continue;
 		}
-
 		error(token->str,"cat not tokenize.");
 	}
 
@@ -260,8 +259,6 @@ Node *new_node_num(int val){
 }
 
 Node *primary(){
-	Node *tmp;
-
 	if(consume("(")){
 		//jmp expr
 		Node *node=expr();
@@ -299,25 +296,11 @@ Node *primary(){
 
 		// Is func?
 		if(*(token->str)=='('){
-			expect("(");
-
 			node->kind=ND_CALL_FUNC;
 			node->str=(char *)calloc(tok->len,sizeof(char));
 			strncpy(node->str,tok->str,tok->len);
-			
-			// have argument?
-			if(!(consume(")"))){
-				tmp=node;
-				while(token->kind == TK_NUM || token->kind ==TK_IDENT){
-					tmp->vector=primary();
-					tmp=tmp->vector;
-
-					if(!(consume(",")))
-						break;
-				}
-				tmp->vector=NULL;
-				expect(")");
-			}
+			expect("(");
+			expect(")");
 		}else{
 			node->kind=ND_LVAR;
 		}
@@ -441,6 +424,11 @@ Node *stmt(){
 			// (cond)if expr
 			node->lhs=tmp;
 			node->rhs=stmt();
+
+			/*
+			if(!consume(";"))
+				error(token->str,"not a ';' token.");
+			*/
 		}
 
 		if(consume_reserved_word("else",TK_ELSE)){
@@ -460,6 +448,11 @@ Node *stmt(){
 			// (cond)if expr
 			node->lhs=tmp;
 			node->rhs=stmt();
+
+			/*
+			if(!consume(";"))
+				error(token->str,"not a ';' token.");
+			*/
 		}
 	}else if(consume("{")){
 		node=new_node(ND_BLOCK,node,NULL);

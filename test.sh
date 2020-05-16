@@ -65,4 +65,7 @@ assert 10 "a=10;while(a<0) a=a-1;a;"
 assert 2 "a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;"
 assert 13 "a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;"
 
+assert 127 "func();"
+assert 127 "func(a);"
+assert 127 "func(a,b);"
 echo OK

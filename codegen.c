@@ -94,6 +94,13 @@ void gen(Node *node){
 			}
 			return;
 		case ND_CALL_FUNC:
+			tmp=node->vector;
+			while(tmp->vector!=NULL){
+				printf("	push %d\n",tmp->val);
+				tmp=tmp->vector;
+			}
+			printf("	push %d\n",tmp->val);
+
 			printf("	call %s\n",node->str);
 			return;
 	}
