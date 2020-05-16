@@ -13,7 +13,31 @@ void gen_lval(Node *node){
 	printf("	push rax\n");
 }
 
+void gen_arg(int arg,Node *tmp){
+	switch(arg){
+		case 1:
+			printf("	mov rdi,%d\n",tmp->val);
+			break;
+		case 2:
+			printf("	mov rsi,%d\n",tmp->val);
+			break;
+		case 3:
+			printf("	mov rdx,%d\n",tmp->val);
+			break;
+		case 4:
+			printf("	mov rcx,%d\n",tmp->val);
+			break;
+		case 5:
+			printf("	mov r8,%d\n",tmp->val);
+			break;
+		case 6:
+			printf("	mov r9,%d\n",tmp->val);
+			break;
+	}
+}
+
 void gen(Node *node){
+	int arg=1;
 	Node *tmp;
 	switch(node->kind){
 		case ND_RETURN:
@@ -95,11 +119,13 @@ void gen(Node *node){
 			return;
 		case ND_CALL_FUNC:
 			tmp=node->vector;
+
 			while(tmp->vector!=NULL){
-				printf("	push %d\n",tmp->val);
+				gen_arg(arg,tmp);
 				tmp=tmp->vector;
+				arg++;
 			}
-			printf("	push %d\n",tmp->val);
+			gen_arg(arg,tmp);
 
 			printf("	call %s\n",node->str);
 			return;

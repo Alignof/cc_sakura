@@ -1,22 +1,25 @@
-CFLAGS=-std=c11 -g -O0 -static
-SRCS=$(wildcard *.c)
-OBJS=$(SRCS:.c=.o)
+CC	 := gcc
+CFLAGS 	 :=-std=c11 -g -O0 -static
 
+INCLUDE  := -I./include
+TARGET   := ./cc_sakura
+SRCDIR   := ./src
+OBJDIR   := ./src/obj
+SOURCES  := $(wildcard ./src/*.c)
+OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
-cc_sakura: $(OBJS)
-	$(CC) -o cc_sakura $(OBJS) $(LDFLAGS)
+$(TARGET): $(OBJECTS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJS): cc_sakura.h
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	@[ -d $(OBJDIR) ]
+	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
 test: cc_sakura
 	./test.sh
 
 func_test: cc_sakura
-	./cc_sakura "func();" > tmp.s
-	gcc -c tmp.s
-	gcc -c test_func.c
-	gcc -o tmp tmp.o test_func.o
-	./tmp
+	./test_func.sh
 
 clean:
 	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out
