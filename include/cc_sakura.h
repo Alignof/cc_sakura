@@ -47,6 +47,7 @@ typedef enum{
 typedef struct Token Token;
 typedef struct Node Node;
 typedef struct LVar LVar;
+typedef struct Func Func;
 
 //code token
 struct Token{
@@ -68,6 +69,16 @@ struct Node{
 	int offset;
 };
 
+//function
+struct Func{
+	int argc;
+	int lvarc;
+	char *name;
+	Func *next;
+	Node *args;
+	Node *code[100];
+};
+
 //local variable
 struct LVar{
 	LVar *next;
@@ -77,8 +88,9 @@ struct LVar{
 };
 
 //parse.c
+int lvar_count;
 Token *token;
-Node *code[100];
+Func *func_list[100];
 LVar *locals;
 
 int len_val(char *str);
@@ -101,6 +113,7 @@ Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
 
 void program();
+void function(Func *func);
 Node *stmt();
 Node *expr();
 Node *assign();
@@ -116,9 +129,6 @@ int label_begin;
 int label_end;
 int label_else;
 void gen(Node *node);
-void gen_lval(Node *node);
-
-
-
+void gen_lvar(Node *node);
 
 

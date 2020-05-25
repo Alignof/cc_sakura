@@ -220,7 +220,7 @@ void expect(char *op){
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
 		strlen(op)!=token->len||
 		memcmp(token->str,op,token->len))
-		error(token->str,"does not charctor.");
+		error(token->str,"not a charctor.");
 	token=token->next;
 }
 
@@ -290,7 +290,7 @@ Node *primary(){
 			if(locals){
 				lvar->offset=locals->offset+8;
 			}else{
-				lvar->offset=0;
+				lvar->offset=8;
 			}
 			node->offset=lvar->offset;
 			//locals == head of list
@@ -320,6 +320,7 @@ Node *primary(){
 			}
 		}else{
 			node->kind=ND_LVAR;
+			lvar_count++;
 		}
 
 		return node;
@@ -485,10 +486,60 @@ Node *stmt(){
 	return node;
 }
 
+void function(Func *func){
+	int i=0;
+
+	// while end of function block
+	while(!consume("}"))
+		func->code[i++]=stmt();
+
+	func->lvarc=lvar_count;
+	func->code[i]=NULL;
+}
+
 void program(){
 	int i=0;
-	while(!at_eof())
-		code[i++]=stmt();
-	code[i]=NULL;
+	int counter;
+	Node *tmp;
+
+	while(!at_eof()){
+		lvar_count=0;
+		counter=0;
+		func_list[i]=(Func *)malloc(sizeof(Func));
+
+		if(token->kind != TK_IDENT ||!('a' <= *(token->str) && *(token->str) <= 'z'))
+			error(token->str,"not a function.");
+
+		// get string len
+		for(counter=0;('a' <= token->str[counter] && token->str[counter] <= 'z');counter++)
+
+		func_list[i]->name=(char *)calloc(counter,sizeof(char));
+		strncpy(func_list[i]->name,token->str,counter);
+
+		// consume function name
+		while('a' <= *(token->str) && *(token->str) <= 'z')
+			token=token->next;
+
+		// get argument
+		expect("(");
+		if(!(consume(")"))){
+			tmp=func_list[i]->args;
+			while(token->kind == TK_NUM || token->kind ==TK_IDENT){
+				tmp->vector=primary();
+				tmp=tmp->vector;
+
+				if(!(consume(",")))
+					break;
+			}
+			tmp->vector=NULL;
+			expect(")");
+		}
+
+		// get function block
+		consume("{");
+		function(func_list[i++]);
+		consume("}");
+	}
+	func_list[i]=NULL;
 }
 

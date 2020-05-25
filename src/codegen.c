@@ -4,12 +4,12 @@ int label_begin=0;
 int label_end=0;
 int label_else=0;
 
-void gen_lval(Node *node){
+void gen_lvar(Node *node){
 	if(node->kind != ND_LVAR && node->kind != ND_CALL_FUNC)
 		error(token->str,"not a variable");
 
 	printf("	mov rax,rbp\n");
-	printf("	sub rax, %d\n",node->offset);
+	printf("	sub rax,%d\n",node->offset);
 	printf("	push rax\n");
 }
 
@@ -38,14 +38,14 @@ void gen(Node *node){
 			printf("	push %d\n",node->val);
 			return;
 		case ND_LVAR:
-			gen_lval(node);
+			gen_lvar(node);
 			printf("	pop rax\n");
 			printf("	mov rax,[rax]\n");
 			printf("	push rax\n");
 			return;
 		case ND_ASSIGN:
-			// gen_lval(variable) = gen(expr)
-			gen_lval(node->lhs);
+			// gen_lvar(variable) = gen(expr)
+			gen_lvar(node->lhs);
 			gen(node->rhs);
 
 			printf("	pop rdi\n");
