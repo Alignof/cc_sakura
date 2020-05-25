@@ -117,6 +117,7 @@ void gen(Node *node){
 			}
 
 			printf("	call %s\n",node->str);
+			printf("	push rax\n");
 			return;
 	}
 

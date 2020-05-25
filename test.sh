@@ -65,9 +65,9 @@ assert 10 "main(){a=10;while(a<0) a=a-1;a;}"
 assert 2  "main(){a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;}"
 assert 13 "main(){a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;}"
 
-assert 80  "func(){return 0;} main(){func();}"
-#assert 9  "func(){return 9;} main(){b=func();b;}"
-#assert 9  "func(){a=9;return a;} main(){b=func();b;}"
-#assert 3  "func(){a=9;return a;} main(){b=3;c=func();b;}"
+assert 0  "func(){return 0;} main(){func();}"
+assert 9  "func(){return 9;} main(){b=func();b;}"
+assert 9  "func(){a=9;return a;} main(){b=func();b;}"
+assert 3  "func(){a=9;return a;} main(){b=3;c=func();b;}"
 
 echo OK
