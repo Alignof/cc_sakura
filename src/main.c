@@ -3,6 +3,7 @@
 int main(int argc,char **argv){
 	int i,j;
 	Node *tmp;
+	char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
 	if(argc!=2){
 		fprintf(stderr,"Incorrect number of arguments\n");
@@ -61,9 +62,13 @@ int main(int argc,char **argv){
 		printf("	mov rbp,rsp\n");
 		printf("	sub rsp,%d\n",func_list[i]->lvarc*8);
 
-		// set local variable
-		if(func_list[i]->args)
+		if(func_list[i]->args){
+			// push argument stack
+			for(j=func_list[i]->args->val;j>=0;j--) printf("	push %s\n",reg[j]);
+
+			// set local variable
 			gen(func_list[i]->args);
+		}
 
 		for(j=0;func_list[i]->code[j]!=NULL;j++){
 			gen(func_list[i]->code[j]);

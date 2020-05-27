@@ -545,6 +545,7 @@ void program(){
 					break;
 			}
 			args_ptr=NULL;
+			func_list[i]->args->val=counter-1;
 			expect(")");
 		}
 

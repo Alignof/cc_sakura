@@ -24,7 +24,6 @@ void gen_arg(int arg_num,Node *tmp){
 void gen(Node *node){
 	int arg=0;
 	Node *tmp;
-	char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
 	switch(node->kind){
 		case ND_RETURN:
@@ -130,13 +129,15 @@ void gen(Node *node){
 			while(tmp){
 				// generate arg as lvar
 				gen(tmp->vector);
-				gen_lvar(tmp->vector);
-				printf("	push %s\n",reg[tmp->val]);
-				printf("	pop rdi\n");
 				printf("	pop rax\n");
+				gen_lvar(tmp->vector);
+				printf("	pop rax\n");
+				printf("	pop rdi\n");
 				printf("	mov [rax],rdi\n");
 				printf("	push rdi\n");
 				tmp=tmp->rhs;
+				// pop stack top
+				printf("	pop rax\n");
 			}
 
 			return;

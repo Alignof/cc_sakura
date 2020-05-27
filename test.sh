@@ -72,4 +72,8 @@ assert 3  "func(){a=9;return a;} main(){b=3;c=func();b;}"
 assert 1  "func(a){return a;} main(){b=func(1);b;}"
 assert 1  "func(a){return a;} main(){a=func(1);a;}"
 
+assert 5  "add(a,b){return a+b;} main(){add(2,3);}"
+assert 5  "add(a,b){return a+b;} main(){a=2;b=3;add(a,b);}"
+assert 9  "add(a,b,c){return a+b+c;} main(){a=2;b=3;c=4;add(a,b,c);}"
+
 echo OK
