@@ -286,6 +286,7 @@ Node *primary(){
 			lvar->next=locals;
 			lvar->name=tok->str;
 			lvar->len=tok->len;
+			if(*(token->str)!='(') lvar_count++;
 			
 			if(locals){
 				lvar->offset=locals->offset+8;
@@ -320,7 +321,6 @@ Node *primary(){
 			}
 		}else{
 			node->kind=ND_LVAR;
-			lvar_count++;
 		}
 
 		return node;
@@ -410,11 +410,10 @@ Node *equelity(){
 Node *assign(){
 	Node *node=equelity();
 
-	if(consume("=")){
+	if(consume("="))
 		node=new_node(ND_ASSIGN,node,assign());
-	}else{
-		return node;
-	}
+
+	return node;
 }
 
 Node *expr(){
@@ -501,8 +500,12 @@ void program(){
 	int i=0;
 	int counter;
 	Node *tmp;
+	Node **args_ptr;
 
 	while(!at_eof()){
+		// reset lvar list
+		locals=NULL;
+		// reset lvar counter
 		lvar_count=0;
 		counter=0;
 		func_list[i]=(Func *)malloc(sizeof(Func));
@@ -522,16 +525,26 @@ void program(){
 
 		// get argument
 		expect("(");
+		counter=0;
 		if(!(consume(")"))){
-			tmp=func_list[i]->args;
+			// set args node
+			args_ptr=&(func_list[i]->args);
+			tmp=*args_ptr;
 			while(token->kind == TK_NUM || token->kind ==TK_IDENT){
-				tmp->vector=primary();
-				tmp=tmp->vector;
+				*args_ptr=(Node *)calloc(1,sizeof(Node));
+				(*args_ptr)->kind=ND_ARG;
+				(*args_ptr)->val=counter;
+				(*args_ptr)->vector=primary();
+				(*args_ptr)->rhs=tmp;
+				// go to next
+				tmp=*args_ptr;
+
+				counter++;
 
 				if(!(consume(",")))
 					break;
 			}
-			tmp->vector=NULL;
+			args_ptr=NULL;
 			expect(")");
 		}
 

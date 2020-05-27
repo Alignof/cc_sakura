@@ -17,7 +17,7 @@ main:
 	push 2
 	pop rdi
 	pop rax
-	cmp rax,rdi
+	cmp rdi,rax
 	setl al
 	movzb rax,al
 	push rax

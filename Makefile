@@ -1,5 +1,5 @@
 CC	 := gcc
-CFLAGS 	 :=-std=c11 -g -O0 -static
+CFLAGS 	 :=-std=c11 -g -O0 -static -Wall
 
 INCLUDE  := -I./include
 TARGET   := ./cc_sakura

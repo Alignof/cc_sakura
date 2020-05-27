@@ -31,18 +31,18 @@ typedef enum{
 	ND_EQ,		// ==
 	ND_NE,		// !=
 	ND_ASSIGN,	// =
-	ND_LVAR,	//local valiable
-	ND_NUM,		//integer
-	ND_IF,		//if
-	ND_ELSE,	//else
-	ND_IFELSE,	//if-else
-	ND_WHILE,	//while
-	ND_FOR,		//for
-	ND_BLOCK,	//{}
-	ND_CALL_FUNC,	//func();
-	ND_RETURN,	//return
+	ND_LVAR,	// local valiable
+	ND_NUM,		// integer
+	ND_IF,		// if
+	ND_ELSE,	// else
+	ND_IFELSE,	// if-else
+	ND_WHILE,	// while
+	ND_FOR,		// for
+	ND_BLOCK,	// {}
+	ND_ARG,		// function argument;
+	ND_CALL_FUNC,	// func();
+	ND_RETURN,	// return
 }NodeKind;
-
 
 typedef struct Token Token;
 typedef struct Node Node;

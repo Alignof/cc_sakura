@@ -14,11 +14,9 @@ void gen_lvar(Node *node){
 }
 
 void gen_arg(int arg_num,Node *tmp){
-	int arg;
 	char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
 	gen(tmp);
-
 	printf("	pop rax\n");
 	printf("	mov %s,rax\n",reg[arg_num]);
 }
@@ -26,6 +24,8 @@ void gen_arg(int arg_num,Node *tmp){
 void gen(Node *node){
 	int arg=0;
 	Node *tmp;
+	char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
+
 	switch(node->kind){
 		case ND_RETURN:
 			gen(node->rhs);
@@ -54,10 +54,14 @@ void gen(Node *node){
 			printf("	push rdi\n");
 			return;
 		case ND_IF:
+			// adjust rsp
+			printf("	push rax\n");
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			printf("	je .Lend%03d\n",label_end);
+			// adjust rsp
+			printf("	pop rax\n");
 			gen(node->rhs);
 			printf(".Lend%03d:\n",label_end);
 			label_end++;
@@ -80,6 +84,8 @@ void gen(Node *node){
 			label_else++;
 			return;
 		case ND_WHILE:
+			// adjust rsp
+			printf("	push rax\n");
 			// condition
 			printf(".Lbegin%03d:\n",label_begin);
 			gen(node->lhs);
@@ -118,6 +124,21 @@ void gen(Node *node){
 
 			printf("	call %s\n",node->str);
 			printf("	push rax\n");
+			return;
+		case ND_ARG:
+			tmp=node;
+			while(tmp){
+				// generate arg as lvar
+				gen(tmp->vector);
+				gen_lvar(tmp->vector);
+				printf("	push %s\n",reg[tmp->val]);
+				printf("	pop rdi\n");
+				printf("	pop rax\n");
+				printf("	mov [rax],rdi\n");
+				printf("	push rdi\n");
+				tmp=tmp->rhs;
+			}
+
 			return;
 	}
 
