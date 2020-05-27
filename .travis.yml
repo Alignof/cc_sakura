@@ -1,0 +1,11 @@
+language: c
+
+compiler:
+  - gcc
+
+script:
+    - uname -a
+    - make -v 
+    - gcc -v 
+    - make CFLAGS="${CXXFLAGS}" CC="${CXX}" install
+    - make CFLAGS="${CXXFLAGS}" CC="${CXX}" test
