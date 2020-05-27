@@ -15,6 +15,10 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	@[ -d $(OBJDIR) ]
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
+
+install: $(OBJECTS)
+	$(CC) -O2 -o $(TARGET) $^ $(LDFLAGS)
+
 test: cc_sakura
 	./test.sh
 
@@ -25,4 +29,4 @@ clean:
 	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out
 	rm -f $(OBJECTS) $(TARGET)
 
-.PHONY: test func_test clean
+.PHONY: test func_test clean install
