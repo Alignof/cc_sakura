@@ -7,5 +7,5 @@ script:
     - uname -a
     - make -v 
     - gcc -v 
-    - make CFLAGS="${CXXFLAGS}" CC="${CXX}" install
-    - make CFLAGS="${CXXFLAGS}" CC="${CXX}" test
+    - make CFLAGS="${CFLAGS}" CC="${CC}" install
+    - make CFLAGS="${CFLAGS}" CC="${CC}" test
