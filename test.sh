@@ -77,4 +77,7 @@ assert 5  "add(a,b){return a+b;} main(){a=2;b=3;add(a,b);}"
 assert 9  "add(a,b,c){return a+b+c;} main(){a=2;b=3;c=4;add(a,b,c);}"
 
 assert 55  "fibo(num){if(num==0){return 0;}if(num==1){return 1;} return fibo(num-1)+fibo(num-2);} main(){fibo(10);}"
+
+assert 10  "main(){a=0;b=1;b=&a;a=10;*b;}"
+assert 2  "main(){a=2;b=3;c=&b+8;*c;}"
 echo OK

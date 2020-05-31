@@ -20,7 +20,7 @@ typedef enum{
 }TokenKind;
 
 typedef enum{
-	ND_ADD,		// *
+	ND_ADD,		// +
 	ND_SUB,		// -
 	ND_MUL,		// *
 	ND_DIV,		// /
@@ -42,6 +42,8 @@ typedef enum{
 	ND_ARG,		// function argument;
 	ND_CALL_FUNC,	// func();
 	ND_RETURN,	// return
+	ND_ADDRESS,	// &a
+	ND_DEREF,	// *a
 }NodeKind;
 
 typedef struct Token Token;

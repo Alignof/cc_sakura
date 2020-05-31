@@ -25,7 +25,7 @@ Token *new_token(TokenKind kind,Token *cur,char *str){
 
 bool issymbol(char *str, bool *flag){
 	int i;
-	char single_tokens[]="+-*/()<>=,;";
+	char single_tokens[]="+-*/&()<>=,;";
 	char multi_tokens[]="<=>!";
 	int size;
 	
@@ -331,6 +331,11 @@ Node *primary(){
 }
 
 Node *unary(){
+	if(consume("*"))
+		return new_node(ND_DEREF,new_node_num(0),unary());
+	if(consume("&"))
+		return new_node(ND_ADDRESS,new_node_num(0),unary());
+
 	if(consume("+"))
 		//ignore +
 		return primary();
