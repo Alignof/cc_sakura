@@ -92,6 +92,15 @@ Token *tokenize(char *p){
 			continue;
 		}
 
+		//Is Type:int?
+		if(strncmp(p,"int",3)==0 && !is_alnum(p[3])){
+			cur=new_token(TK_TYPE,cur,p);
+			cur->len=3;
+			cur->str=p;
+			p+=3;
+			continue;
+		}
+
 		//Is if?
 		if(strncmp(p,"if",2)==0 && !is_alnum(p[2])){
 			cur=new_token(TK_IF,cur,p);
@@ -181,7 +190,7 @@ bool consume_ret(){
 }
 
 bool consume_reserved_word(char *keyword,TokenKind kind){
-	if(token->kind != kind ||
+	if(	token->kind != kind ||
 		token->len!=strlen(keyword)||
 		memcmp(token->str,keyword,token->len))
 		return false;
@@ -515,6 +524,11 @@ void program(){
 		counter=0;
 		func_list[i]=(Func *)malloc(sizeof(Func));
 
+		// type of function return value
+		if(!consume_reserved_word("int",TK_TYPE))
+			error(token->str,"not a function type token.");
+
+		// Is function?
 		if(token->kind != TK_IDENT ||!('a' <= *(token->str) && *(token->str) <= 'z'))
 			error(token->str,"not a function.");
 
