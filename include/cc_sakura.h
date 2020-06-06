@@ -7,6 +7,7 @@
 
 
 typedef enum{
+	TK_TYPE,
 	TK_RESERVED,
 	TK_IDENT,
 	TK_NUM,
@@ -20,11 +21,13 @@ typedef enum{
 }TokenKind;
 
 typedef enum{
-	ND_ADD,		// *
+	ND_ADD,		// +
 	ND_SUB,		// -
 	ND_MUL,		// *
 	ND_DIV,		// /
 	ND_GT,		// >
+	ND_ADDRESS,	// &a
+	ND_DEREF,	// *a
 	ND_GE,		// >=
 	ND_LT,		// <
 	ND_LE,		// <=
@@ -42,6 +45,7 @@ typedef enum{
 	ND_ARG,		// function argument;
 	ND_CALL_FUNC,	// func();
 	ND_RETURN,	// return
+	ND_TYPE,	// int,double,char...
 }NodeKind;
 
 typedef struct Token Token;
