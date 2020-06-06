@@ -279,7 +279,7 @@ Node *primary(){
 		return node;
 	}
 
-	// Is variable
+	// variable
 	Token *tok=consume_ident();
 	if(tok){
 		Node *node=calloc(1,sizeof(Node));
@@ -287,28 +287,11 @@ Node *primary(){
 
 		LVar *lvar=find_lvar(tok);
 		if(lvar){
-			//variable exist
+			// variable exist
 			node->offset=lvar->offset;
-		}else{
-			//variable does not exist.
-			lvar=calloc(1,sizeof(LVar));
-			lvar->next=locals;
-			lvar->name=tok->str;
-			lvar->len=tok->len;
-			if(*(token->str)!='(') lvar_count++;
-			
-			if(locals){
-				lvar->offset=locals->offset+8;
-			}else{
-				lvar->offset=8;
-			}
-			node->offset=lvar->offset;
-			//locals == head of list
-			locals=lvar;
-		}
-
-		// Is func?
-		if(*(token->str)=='('){
+			node->kind=ND_LVAR;
+		}else if(*(token->str)=='('){
+			// function
 			expect("(");
 
 			node->kind=ND_CALL_FUNC;
@@ -329,7 +312,8 @@ Node *primary(){
 				expect(")");
 			}
 		}else{
-			node->kind=ND_LVAR;
+			//variable does not exist.
+			error(token->str,"this variable is not declaration");
 		}
 
 		return node;
@@ -431,7 +415,42 @@ Node *assign(){
 }
 
 Node *expr(){
-	Node *node=assign();
+	Node *node;
+
+	if(consume_reserved_word("int",TK_TYPE)){
+		// variable declaration
+		Token *tok=consume_ident();
+		if(tok){
+			node=calloc(1,sizeof(Node));
+			LVar *lvar=find_lvar(tok);
+
+			if(lvar){
+				error(token->str,"this variable has already existed.");
+			}else{
+				lvar=calloc(1,sizeof(LVar));
+				lvar->next=locals;
+				lvar->name=tok->str;
+				lvar->len=tok->len;
+				lvar_count++;
+			}
+			
+			if(locals)
+				lvar->offset=locals->offset+8;
+			else
+				lvar->offset=8;
+			
+			node->kind=ND_LVAR;
+			node->offset=lvar->offset;
+
+			// locals == new lvar
+			locals=lvar;
+		}else{
+			error(token->str,"not a variable.");
+		}
+	}else{
+		node=assign();
+	}
+
 	return node;
 }
 
@@ -549,11 +568,11 @@ void program(){
 			// set args node
 			args_ptr=&(func_list[i]->args);
 			tmp=*args_ptr;
-			while(token->kind == TK_NUM || token->kind ==TK_IDENT){
+			while(token->kind == TK_NUM || token->kind == TK_TYPE){
 				*args_ptr=(Node *)calloc(1,sizeof(Node));
 				(*args_ptr)->kind=ND_ARG;
 				(*args_ptr)->val=counter;
-				(*args_ptr)->vector=primary();
+				(*args_ptr)->vector=expr();
 				(*args_ptr)->rhs=tmp;
 				// go to next
 				tmp=*args_ptr;
