@@ -80,4 +80,7 @@ assert 55 "int fibo(int num){if(num==0){return 0;}if(num==1){return 1;} return f
 
 assert 10 "int main(){int a; int b; a=0;b=1;b=&a;a=10;*b;}"
 assert 2  "int main(){int a; int b;int c; a=2;b=3;c=&b+8;*c;}"
+assert 3  "int main(){int x; int *y; y=&x;*y=3;return x;}"
+assert 3  "int main(){int x; int *y; int **z; y=&x;z=&y;**z=3;return x;}"
+
 echo OK
