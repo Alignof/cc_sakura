@@ -21,31 +21,31 @@ typedef enum{
 }TokenKind;
 
 typedef enum{
-	ND_ADD,		// +
-	ND_SUB,		// -
-	ND_MUL,		// *
-	ND_DIV,		// /
-	ND_GT,		// >
-	ND_ADDRESS,	// &a
-	ND_DEREF,	// *a
-	ND_GE,		// >=
-	ND_LT,		// <
-	ND_LE,		// <=
-	ND_EQ,		// ==
-	ND_NE,		// !=
-	ND_ASSIGN,	// =
-	ND_LVAR,	// local valiable
-	ND_NUM,		// integer
-	ND_IF,		// if
-	ND_ELSE,	// else
-	ND_IFELSE,	// if-else
-	ND_WHILE,	// while
-	ND_FOR,		// for
-	ND_BLOCK,	// {}
-	ND_ARG,		// function argument;
-	ND_CALL_FUNC,	// func();
-	ND_RETURN,	// return
-	ND_TYPE,	// int,double,char...
+	ND_ADD,		//  +
+	ND_SUB,		//  -
+	ND_MUL,		//  *
+	ND_DIV,		//  /
+	ND_GT,		//  >
+	ND_ADDRESS,	//  &a
+	ND_DEREF,	//  *a
+	ND_GE,		//  >=
+	ND_LT,		//  <
+	ND_LE,		//  <=
+	ND_EQ,		//  ==
+	ND_NE,		//  !=
+	ND_ASSIGN,	//  =
+	ND_LVAR,	//  local valiable
+	ND_NUM,		//  integer
+	ND_IF,		//  if
+	ND_ELSE,	//  else
+	ND_IFELSE,	//  if-else
+	ND_WHILE,	//  while
+	ND_FOR,		//  for
+	ND_BLOCK,	//  {}
+	ND_ARG,		//  function argument;
+	ND_CALL_FUNC,	//  func();
+	ND_RETURN,	//  return
+	ND_TYPE,	//  int,double,char...
 }NodeKind;
 
 typedef struct Token Token;
@@ -53,7 +53,7 @@ typedef struct Node Node;
 typedef struct LVar LVar;
 typedef struct Func Func;
 
-//code token
+// code token
 struct Token{
 	TokenKind kind;
 	Token *next;
@@ -62,7 +62,7 @@ struct Token{
 	int len;
 };
 
-//tree object
+// tree object
 struct Node{
 	NodeKind kind;
 	Node *lhs;
@@ -73,7 +73,7 @@ struct Node{
 	int offset;
 };
 
-//function
+// function
 struct Func{
 	int argc;
 	int lvarc;
@@ -83,15 +83,22 @@ struct Func{
 	Node *code[100];
 };
 
-//local variable
+// local variable
 struct LVar{
-	LVar *next;
-	char *name;
 	int len;
 	int offset;
+	char *name;
+	LVar *next;
+	Type type;
 };
 
-//parse.c
+// type of variable
+struct Type{
+	enum {INT,PTR} ty;
+	struct Type *ptr_to;
+};
+
+// parse.c
 int lvar_count;
 Token *token;
 Func *func_list[100];
@@ -128,7 +135,7 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-//codegan.c
+// codegan.c
 int label_begin;
 int label_end;
 int label_else;

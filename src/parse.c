@@ -416,6 +416,7 @@ Node *assign(){
 
 Node *expr(){
 	Node *node;
+	int star_count=0;
 
 	if(consume_reserved_word("int",TK_TYPE)){
 		// variable declaration
