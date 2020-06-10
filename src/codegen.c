@@ -44,7 +44,10 @@ void gen(Node *node){
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
-			gen_lvar(node->lhs);
+
+			if(node->lhs->kind==ND_DEREF) gen(node->lhs->rhs);
+			else gen_lvar(node->lhs);
+
 			gen(node->rhs);
 
 			printf("	pop rdi\n");

@@ -613,4 +613,3 @@ void program(){
 	}
 	func_list[i]=NULL;
 }
-
