@@ -415,10 +415,18 @@ Node *assign(){
 }
 
 Node *expr(){
+	int i;
 	Node *node;
+	Type *newtype;
 	int star_count=0;
 
 	if(consume_reserved_word("int",TK_TYPE)){
+		// count asterisk
+		while(token->kind==TK_RESERVED && *(token->str)=='*'){
+			star_count++;
+			token=token->next;
+		}
+
 		// variable declaration
 		Token *tok=consume_ident();
 		if(tok){
@@ -433,6 +441,16 @@ Node *expr(){
 				lvar->name=tok->str;
 				lvar->len=tok->len;
 				lvar_count++;
+
+				// add type list
+				newtype=&(lvar->type);
+				newtype->ptr_to=calloc(1,sizeof(Type));
+				for(i=0;i<star_count;i++){
+					newtype->ty=PTR;
+					newtype->ptr_to=calloc(1,sizeof(Type));
+					newtype=newtype->ptr_to;
+				}
+				newtype->ty=INT;
 			}
 			
 			if(locals)
@@ -456,8 +474,8 @@ Node *expr(){
 }
 
 Node *stmt(){
-	Node *node;
-	Node *tmp;
+	Node *node=NULL;
+	Node *tmp=NULL;
 
 	if(consume_reserved_word("return",TK_RETURN)){
 		node=new_node(ND_RETURN,node,expr());

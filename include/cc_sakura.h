@@ -52,6 +52,7 @@ typedef struct Token Token;
 typedef struct Node Node;
 typedef struct LVar LVar;
 typedef struct Func Func;
+typedef struct Type Type;
 
 // code token
 struct Token{
@@ -73,14 +74,21 @@ struct Node{
 	int offset;
 };
 
+// type of variable
+struct Type{
+	enum {INT,PTR} ty;
+	Type *ptr_to;
+};
+
 // function
 struct Func{
 	int argc;
 	int lvarc;
 	char *name;
-	Func *next;
 	Node *args;
 	Node *code[100];
+	Func *next;
+	Type type;
 };
 
 // local variable
@@ -90,12 +98,6 @@ struct LVar{
 	char *name;
 	LVar *next;
 	Type type;
-};
-
-// type of variable
-struct Type{
-	enum {INT,PTR} ty;
-	struct Type *ptr_to;
 };
 
 // parse.c
