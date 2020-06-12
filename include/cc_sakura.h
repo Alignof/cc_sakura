@@ -63,21 +63,22 @@ struct Token{
 	int len;
 };
 
+// type of variable
+struct Type{
+	enum {INT,PTR} ty;
+	Type *ptr_to;
+};
+
 // tree object
 struct Node{
 	NodeKind kind;
 	Node *lhs;
 	Node *rhs;
 	Node *vector;
+	Type type;
 	int val;
 	char *str;
 	int offset;
-};
-
-// type of variable
-struct Type{
-	enum {INT,PTR} ty;
-	Type *ptr_to;
 };
 
 // function
@@ -85,10 +86,10 @@ struct Func{
 	int argc;
 	int lvarc;
 	char *name;
+	Type type;
 	Node *args;
 	Node *code[100];
 	Func *next;
-	Type type;
 };
 
 // local variable
@@ -96,8 +97,8 @@ struct LVar{
 	int len;
 	int offset;
 	char *name;
-	LVar *next;
 	Type type;
+	LVar *next;
 };
 
 // parse.c
