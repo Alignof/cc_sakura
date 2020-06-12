@@ -13,163 +13,6 @@ void error(char *loc,char *fmt, ...){
 	exit(1);
 }
 
-Token *new_token(TokenKind kind,Token *cur,char *str){
-	Token *new=calloc(1,sizeof(Token));
-	new->kind=kind;
-	//Remaining characters
-	new->str=str;
-	new->len=1;
-	cur->next=new;
-	return new;
-}
-
-bool issymbol(char *str, bool *flag){
-	int i;
-	char single_tokens[]="+-*/&()<>=,;";
-	char multi_tokens[]="<=>!";
-	int size;
-	
-	//Is multi token? (<=,==,!=,>=)
-	size=sizeof(multi_tokens)/sizeof(char);
-	for(i=0;i<size;i++){
-		if(*str==multi_tokens[i] && *(str+1)=='='){
-			*flag=false;
-			return true;
-		}
-	}
-	
-	//Is single token? (+,-,*,/,<,>)
-	size=sizeof(single_tokens)/sizeof(char);
-	for(i=0;i<size;i++){
-		if(*str==single_tokens[i]){
-			*flag=true;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool isblock(char *str){
-	return *str=='{' || *str=='}';
-}
-
-bool at_eof(){
-	return token->kind==TK_EOF;
-}
-
-int is_alnum(char c){
-	return ('a'<=c && c<='z')||
-	('A'<=c && c<='Z')||
-	('0'<=c && c<='9')||
-	(c=='_');
-}
-
-Token *tokenize(char *p){
-	bool is_single_token;
-	Token head;
-	head.next=NULL;
-
-	//set head pointer to cur
-	Token *cur=&head;
-
-	while(*p){
-		if(isspace(*p)){
-			p++;
-			continue;
-		}
-
-		//judge single token or multi token or isn't token
-		if(issymbol(p,&is_single_token)){
-			if(is_single_token){
-				cur=new_token(TK_RESERVED,cur,p);
-				p++;
-			}else{
-				cur=new_token(TK_RESERVED,cur,p);
-				p+=2;
-				cur->len=2;
-			}
-			continue;
-		}
-
-		//Is Type:int?
-		if(strncmp(p,"int",3)==0 && !is_alnum(p[3])){
-			cur=new_token(TK_TYPE,cur,p);
-			cur->len=3;
-			cur->str=p;
-			p+=3;
-			continue;
-		}
-
-		//Is if?
-		if(strncmp(p,"if",2)==0 && !is_alnum(p[2])){
-			cur=new_token(TK_IF,cur,p);
-			cur->len=2;
-			cur->str=p;
-			p+=2;
-			continue;
-		}
-
-		//Is else?
-		if(strncmp(p,"else",4)==0 && !is_alnum(p[4])){
-			cur=new_token(TK_ELSE,cur,p);
-			cur->len=4;
-			cur->str=p;
-			p+=4;
-			continue;
-		}
-
-		//Is while?
-		if(strncmp(p,"while",5)==0 && !is_alnum(p[5])){
-			cur=new_token(TK_WHILE,cur,p);
-			cur->len=5;
-			cur->str=p;
-			p+=5;
-			continue;
-		}
-		
-		//Is block? '{' or '}'
-		if(isblock(p)){
-			cur=new_token(TK_BLOCK,cur,p);
-			cur->len=1;
-			cur->val=*p;
-			cur->str=p;
-			p+=1;
-			continue;
-		}
-		
-		//Is return?
-		if(strncmp(p,"return",6)==0 && !is_alnum(p[6])){
-			cur=new_token(TK_RETURN,cur,p);
-			cur->len=6;
-			cur->str=p;
-			p+=6;
-			continue;
-		}
-
-		//Is valiable?
-		if('a'<=*p && *p<='z'){
-			cur=new_token(TK_IDENT,cur,p++);
-			cur->len=1;
-			continue;
-		}
-
-		if(isdigit(*p)){
-			//add number token
-			cur=new_token(TK_NUM,cur,p);
-			//set number
-			cur->val=strtol(p,&p,10);
-			continue;
-		}
-
-		error(token->str,"cat not tokenize.");
-	}
-
-	//add EOF token
-	new_token(TK_EOF,cur,p);
-	return head.next;
-}
-
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
@@ -198,13 +41,6 @@ bool consume_reserved_word(char *keyword,TokenKind kind){
 	return true;
 }
 
-
-int len_val(char *str){
-	int counter;
-	for(counter=0;(('a' <= *str && *str <= 'z') || ('0' <= *str && *str <= '9'));str++)
-		counter++;
-	return counter;
-}
 
 Token *consume_ident(){
 	// judge whether token is a ident and token pointer
@@ -325,17 +161,45 @@ Node *primary(){
 }
 
 Node *unary(){
-	if(consume("*"))
-		return new_node(ND_DEREF,new_node_num(0),unary());
-	if(consume("&"))
-		return new_node(ND_ADDRESS,new_node_num(0),unary());
+	Node *node;
+
+	if(consume("*")){
+		node=new_node(ND_DEREF,new_node_num(0),unary());
+		if(node->rhs->type.ptr_to==NULL || node->rhs->type.ptr_to->ty==PTR)
+			node->type.ty=PTR;
+
+		return node;
+	}
+
+	if(consume("&")){
+		node=new_node(ND_ADDRESS,new_node_num(0),unary());
+		node->type.ty=PTR;
+
+		return node;
+	}
+
 
 	if(consume("+"))
 		//ignore +
 		return primary();
+
 	if(consume("-"))
 		//convert 0-n
 		return new_node(ND_SUB,new_node_num(0),primary());
+
+
+	if(consume_reserved_word("sizeof",TK_SIZEOF)){
+		// sizeof(5) => 4
+		// sizeof(&a) => 8
+		node=new_node(ND_NUM,node,unary());
+
+		if(node->rhs->type.ty==INT)
+			node->val=4;
+		if(node->rhs->type.ty==PTR)
+			node->val=8;
+
+		return node;
+	}
 
 	return primary();
 }
@@ -358,22 +222,27 @@ Node *mul(){
 }
 
 Node *add(){
+	int ptrtype;
 	Node *pointer_size;
-	Node *pointer_calc;
 
 	//jmp mul()
 	Node *node=mul();
 
 	for(;;){
 		if(consume("+")){
-			if(node->type.ty==INT){
-				// int
-				node=new_node(ND_ADD,node,mul());
-			}else{
+			node=new_node(ND_ADD,node,mul());
+
+			if(node->lhs->type.ty==PTR || node->rhs->type.ty==PTR){
+				node->type.ty=PTR;
 				pointer_size=calloc(1,sizeof(Node));
 				pointer_size->kind=ND_NUM;
+	
+				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
+					ptrtype=node->lhs->type.ptr_to->ty;
+				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
+					ptrtype=node->rhs->type.ptr_to->ty;
 
-				if(node->type.ptr_to->ty==INT){
+				if(ptrtype==INT){
 					// int pointer
 					pointer_size->val=4;
 				}else{
@@ -381,11 +250,37 @@ Node *add(){
 					pointer_size->val=8;
 				}
 
-				pointer_calc=new_node(ND_MUL,mul(),pointer_size);
-				node=new_node(ND_ADD,node,pointer_calc);
+				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
+					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
+				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
+					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
 			}
 		}else if(consume("-")){
 			node=new_node(ND_SUB,node,mul());
+			
+			if(node->lhs->type.ty==PTR || node->rhs->type.ty==PTR){
+				node->type.ty=PTR;
+				pointer_size=calloc(1,sizeof(Node));
+				pointer_size->kind=ND_NUM;
+	
+				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
+					ptrtype=node->lhs->type.ptr_to->ty;
+				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
+					ptrtype=node->rhs->type.ptr_to->ty;
+
+				if(ptrtype==INT){
+					// int pointer
+					pointer_size->val=4;
+				}else{
+					// int pointer pointer ...
+					pointer_size->val=8;
+				}
+
+				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
+					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
+				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
+					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
+			}
 		}else{
 			return node;
 		}
@@ -470,6 +365,8 @@ Node *expr(){
 					newtype->ptr_to=calloc(1,sizeof(Type));
 					newtype=newtype->ptr_to;
 				}
+
+				if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
 				newtype->ty=INT;
 			}
 			
