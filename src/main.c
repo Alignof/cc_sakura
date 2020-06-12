@@ -2,7 +2,7 @@
 
 int main(int argc,char **argv){
 	int i,j;
-	Node *tmp;
+
 	char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
 	if(argc!=2){
