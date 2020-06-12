@@ -87,6 +87,8 @@ assert 3  "int main(){int x; int *y; y=&x;*y=3;return x;}"
 assert 3  "int main(){int x; int *y; int **z; y=&x;z=&y;**z=3;return x;}"
 
 assert 4  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; *q;}"
-assert 8  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; *q; q=p+3; return *q;}"
+assert 4  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=2+p; *q;}"
+assert 8  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; q=p+3; return *q;}"
+assert 2  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; q=q-1; return *q;}"
 
 echo OK

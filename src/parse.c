@@ -161,17 +161,29 @@ Node *primary(){
 }
 
 Node *unary(){
+	Node *node;
+
 	if(consume("*"))
 		return new_node(ND_DEREF,new_node_num(0),unary());
+
 	if(consume("&"))
 		return new_node(ND_ADDRESS,new_node_num(0),unary());
+
 
 	if(consume("+"))
 		//ignore +
 		return primary();
+
 	if(consume("-"))
 		//convert 0-n
 		return new_node(ND_SUB,new_node_num(0),primary());
+
+
+	if(consume_reserved_word("sizeof",TK_SIZEOF)){
+		// sizeof(5) => 4
+		// sizeof(&a) => 8
+		node=new_node(ND_NUM,node,unary());
+	}
 
 	return primary();
 }
@@ -194,22 +206,26 @@ Node *mul(){
 }
 
 Node *add(){
+	int ptrtype;
 	Node *pointer_size;
-	Node *pointer_calc;
 
 	//jmp mul()
 	Node *node=mul();
 
 	for(;;){
 		if(consume("+")){
-			if(node->type.ty==INT){
-				// int
-				node=new_node(ND_ADD,node,mul());
-			}else{
+			node=new_node(ND_ADD,node,mul());
+
+			if(node->lhs->type.ty==PTR || node->rhs->type.ty==PTR){
 				pointer_size=calloc(1,sizeof(Node));
 				pointer_size->kind=ND_NUM;
+	
+				if(node->lhs->type.ty==PTR)
+					ptrtype=node->lhs->type.ptr_to->ty;
+				if(node->rhs->type.ty==PTR)
+					ptrtype=node->rhs->type.ptr_to->ty;
 
-				if(node->type.ptr_to->ty==INT){
+				if(ptrtype==INT){
 					// int pointer
 					pointer_size->val=4;
 				}else{
@@ -217,18 +233,24 @@ Node *add(){
 					pointer_size->val=8;
 				}
 
-				pointer_calc=new_node(ND_MUL,mul(),pointer_size);
-				node=new_node(ND_ADD,node,pointer_calc);
+				if(node->lhs->type.ty==PTR)
+					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
+				if(node->rhs->type.ty==PTR)
+					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
 			}
 		}else if(consume("-")){
-			if(node->type.ty==INT){
-				// int
-				node=new_node(ND_SUB,node,mul());
-			}else{
+			node=new_node(ND_SUB,node,mul());
+			
+			if(node->lhs->type.ty==PTR || node->rhs->type.ty==PTR){
 				pointer_size=calloc(1,sizeof(Node));
 				pointer_size->kind=ND_NUM;
+	
+				if(node->lhs->type.ty==PTR)
+					ptrtype=node->lhs->type.ptr_to->ty;
+				if(node->rhs->type.ty==PTR)
+					ptrtype=node->rhs->type.ptr_to->ty;
 
-				if(node->type.ptr_to->ty==INT){
+				if(ptrtype==INT){
 					// int pointer
 					pointer_size->val=4;
 				}else{
@@ -236,8 +258,10 @@ Node *add(){
 					pointer_size->val=8;
 				}
 
-				pointer_calc=new_node(ND_MUL,mul(),pointer_size);
-				node=new_node(ND_SUB,node,pointer_calc);
+				if(node->lhs->type.ty==PTR)
+					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
+				if(node->rhs->type.ty==PTR)
+					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
 			}
 		}else{
 			return node;
