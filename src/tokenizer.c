@@ -122,6 +122,15 @@ Token *tokenize(char *p){
 			continue;
 		}
 		
+		//Is sizeof?
+		if(strncmp(p,"sizeof",6)==0 && !is_alnum(p[6])){
+			cur=new_token(TK_WHILE,cur,p);
+			cur->len=6;
+			cur->str=p;
+			p+=6;
+			continue;
+		}
+		
 		//Is block? '{' or '}'
 		if(isblock(p)){
 			cur=new_token(TK_BLOCK,cur,p);
@@ -163,6 +172,4 @@ Token *tokenize(char *p){
 	new_token(TK_EOF,cur,p);
 	return head.next;
 }
-
-
 

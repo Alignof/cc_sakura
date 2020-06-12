@@ -221,7 +221,24 @@ Node *add(){
 				node=new_node(ND_ADD,node,pointer_calc);
 			}
 		}else if(consume("-")){
-			node=new_node(ND_SUB,node,mul());
+			if(node->type.ty==INT){
+				// int
+				node=new_node(ND_SUB,node,mul());
+			}else{
+				pointer_size=calloc(1,sizeof(Node));
+				pointer_size->kind=ND_NUM;
+
+				if(node->type.ptr_to->ty==INT){
+					// int pointer
+					pointer_size->val=4;
+				}else{
+					// int pointer pointer ...
+					pointer_size->val=8;
+				}
+
+				pointer_calc=new_node(ND_MUL,mul(),pointer_size);
+				node=new_node(ND_SUB,node,pointer_calc);
+			}
 		}else{
 			return node;
 		}
