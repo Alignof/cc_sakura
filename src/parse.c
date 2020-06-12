@@ -201,7 +201,7 @@ bool consume_reserved_word(char *keyword,TokenKind kind){
 
 int len_val(char *str){
 	int counter;
-	for(counter=0;('a' <= *str && *str <= 'z');str++)
+	for(counter=0;(('a' <= *str && *str <= 'z') || ('0' <= *str && *str <= '9'));str++)
 		counter++;
 	return counter;
 }
@@ -288,8 +288,9 @@ Node *primary(){
 		LVar *lvar=find_lvar(tok);
 		if(lvar){
 			// variable exist
-			node->offset=lvar->offset;
 			node->kind=ND_LVAR;
+			node->offset=lvar->offset;
+			node->type=lvar->type;
 		}else if(*(token->str)=='('){
 			// function
 			expect("(");
@@ -301,7 +302,7 @@ Node *primary(){
 			// have argument?
 			if(!(consume(")"))){
 				tmp=node;
-				while(token->kind == TK_NUM || token->kind ==TK_IDENT){
+				while(token->kind == TK_NUM || token->kind ==TK_IDENT || TK_RESERVED){
 					tmp->vector=equelity();
 					tmp=tmp->vector;
 
@@ -357,12 +358,32 @@ Node *mul(){
 }
 
 Node *add(){
+	Node *pointer_size;
+	Node *pointer_calc;
+
 	//jmp mul()
 	Node *node=mul();
 
 	for(;;){
 		if(consume("+")){
-			node=new_node(ND_ADD,node,mul());
+			if(node->type.ty==INT){
+				// int
+				node=new_node(ND_ADD,node,mul());
+			}else{
+				pointer_size=calloc(1,sizeof(Node));
+				pointer_size->kind=ND_NUM;
+
+				if(node->type.ptr_to->ty==INT){
+					// int pointer
+					pointer_size->val=4;
+				}else{
+					// int pointer pointer ...
+					pointer_size->val=8;
+				}
+
+				pointer_calc=new_node(ND_MUL,mul(),pointer_size);
+				node=new_node(ND_ADD,node,pointer_calc);
+			}
 		}else if(consume("-")){
 			node=new_node(ND_SUB,node,mul());
 		}else{
@@ -444,7 +465,6 @@ Node *expr(){
 
 				// add type list
 				newtype=&(lvar->type);
-				newtype->ptr_to=calloc(1,sizeof(Type));
 				for(i=0;i<star_count;i++){
 					newtype->ty=PTR;
 					newtype->ptr_to=calloc(1,sizeof(Type));
@@ -460,6 +480,7 @@ Node *expr(){
 			
 			node->kind=ND_LVAR;
 			node->offset=lvar->offset;
+			node->type=lvar->type;
 
 			// locals == new lvar
 			locals=lvar;
@@ -571,13 +592,13 @@ void program(){
 			error(token->str,"not a function.");
 
 		// get string len
-		for(counter=0;('a' <= token->str[counter] && token->str[counter] <= 'z');counter++)
+		for(counter=0;(('a' <= token->str[counter] && token->str[counter] <= 'z') || ('0' <= token->str[counter] && token->str[counter] <= '9'));counter++)
 
 		func_list[i]->name=(char *)calloc(counter,sizeof(char));
 		strncpy(func_list[i]->name,token->str,counter);
 
 		// consume function name
-		while('a' <= *(token->str) && *(token->str) <= 'z')
+		while(('a' <= *(token->str) && *(token->str) <= 'z') || ('0' <= *(token->str) && *(token->str) <= '9'))
 			token=token->next;
 
 		// get argument

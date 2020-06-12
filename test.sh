@@ -4,7 +4,10 @@ assert() {
 	input="$2"
 
 	./cc_sakura "$input" > tmp.s
-	gcc -o tmp tmp.s
+	gcc -c tmp.s 
+	gcc -I./include -c -o src/obj/func_for_test.o src/func_for_test.c
+	gcc -o tmp tmp.o src/obj/func_for_test.o
+	#gcc -o tmp tmp.s
 	./tmp
 	actual="$?"
 
@@ -82,5 +85,8 @@ assert 10 "int main(){int a; int b; a=0;b=1;b=&a;a=10;*b;}"
 assert 2  "int main(){int a; int b;int c; a=2;b=3;c=&b+8;*c;}"
 assert 3  "int main(){int x; int *y; y=&x;*y=3;return x;}"
 assert 3  "int main(){int x; int *y; int **z; y=&x;z=&y;**z=3;return x;}"
+
+assert 4  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; *q;}"
+assert 8  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; *q; q=p+3; return *q;}"
 
 echo OK
