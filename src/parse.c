@@ -163,11 +163,20 @@ Node *primary(){
 Node *unary(){
 	Node *node;
 
-	if(consume("*"))
-		return new_node(ND_DEREF,new_node_num(0),unary());
+	if(consume("*")){
+		node=new_node(ND_DEREF,new_node_num(0),unary());
+		if(node->rhs->type.ptr_to==NULL || node->rhs->type.ptr_to->ty==PTR)
+			node->type.ty=PTR;
 
-	if(consume("&"))
-		return new_node(ND_ADDRESS,new_node_num(0),unary());
+		return node;
+	}
+
+	if(consume("&")){
+		node=new_node(ND_ADDRESS,new_node_num(0),unary());
+		node->type.ty=PTR;
+
+		return node;
+	}
 
 
 	if(consume("+"))
@@ -183,6 +192,13 @@ Node *unary(){
 		// sizeof(5) => 4
 		// sizeof(&a) => 8
 		node=new_node(ND_NUM,node,unary());
+
+		if(node->rhs->type.ty==INT)
+			node->val=4;
+		if(node->rhs->type.ty==PTR)
+			node->val=8;
+
+		return node;
 	}
 
 	return primary();
@@ -217,12 +233,13 @@ Node *add(){
 			node=new_node(ND_ADD,node,mul());
 
 			if(node->lhs->type.ty==PTR || node->rhs->type.ty==PTR){
+				node->type.ty=PTR;
 				pointer_size=calloc(1,sizeof(Node));
 				pointer_size->kind=ND_NUM;
 	
-				if(node->lhs->type.ty==PTR)
+				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
 					ptrtype=node->lhs->type.ptr_to->ty;
-				if(node->rhs->type.ty==PTR)
+				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
 					ptrtype=node->rhs->type.ptr_to->ty;
 
 				if(ptrtype==INT){
@@ -233,21 +250,22 @@ Node *add(){
 					pointer_size->val=8;
 				}
 
-				if(node->lhs->type.ty==PTR)
+				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
 					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-				if(node->rhs->type.ty==PTR)
+				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
 					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
 			}
 		}else if(consume("-")){
 			node=new_node(ND_SUB,node,mul());
 			
 			if(node->lhs->type.ty==PTR || node->rhs->type.ty==PTR){
+				node->type.ty=PTR;
 				pointer_size=calloc(1,sizeof(Node));
 				pointer_size->kind=ND_NUM;
 	
-				if(node->lhs->type.ty==PTR)
+				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
 					ptrtype=node->lhs->type.ptr_to->ty;
-				if(node->rhs->type.ty==PTR)
+				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
 					ptrtype=node->rhs->type.ptr_to->ty;
 
 				if(ptrtype==INT){
@@ -258,9 +276,9 @@ Node *add(){
 					pointer_size->val=8;
 				}
 
-				if(node->lhs->type.ty==PTR)
+				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
 					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-				if(node->rhs->type.ty==PTR)
+				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
 					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
 			}
 		}else{
@@ -347,6 +365,8 @@ Node *expr(){
 					newtype->ptr_to=calloc(1,sizeof(Type));
 					newtype=newtype->ptr_to;
 				}
+
+				if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
 				newtype->ty=INT;
 			}
 			

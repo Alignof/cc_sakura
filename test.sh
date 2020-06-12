@@ -91,4 +91,11 @@ assert 4  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=2+p; *q;}"
 assert 8  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; q=p+3; return *q;}"
 assert 2  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; q=q-1; return *q;}"
 
+assert 4  "int main(){int x; sizeof(x);}"
+assert 8  "int main(){int *x; sizeof(x);}"
+assert 8  "int main(){int x; sizeof(&x);}"
+assert 4  "int main(){int x; sizeof(x+2);}"
+assert 8  "int main(){int *x; sizeof(x+2);}"
+assert 8  "int main(){int *x; sizeof((x));}"
+
 echo OK

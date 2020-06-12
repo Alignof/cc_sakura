@@ -124,7 +124,7 @@ Token *tokenize(char *p){
 		
 		//Is sizeof?
 		if(strncmp(p,"sizeof",6)==0 && !is_alnum(p[6])){
-			cur=new_token(TK_WHILE,cur,p);
+			cur=new_token(TK_SIZEOF,cur,p);
 			cur->len=6;
 			cur->str=p;
 			p+=6;
