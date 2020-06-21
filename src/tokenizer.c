@@ -24,7 +24,7 @@ int len_val(char *str){
 
 bool issymbol(char *str, bool *flag){
 	int i;
-	char single_tokens[]="+-*/&()<>=,;";
+	char single_tokens[]="+-*/&()<>=,;[]";
 	char multi_tokens[]="<=>!";
 	int size;
 	

@@ -66,8 +66,9 @@ struct Token{
 
 // type of variable
 struct Type{
-	enum {INT,PTR} ty;
+	enum {INT,PTR,ARRAY} ty;
 	Type *ptr_to;
+	size_t alloc_size;
 };
 
 // tree object

@@ -38,9 +38,13 @@ void gen(Node *node){
 			return;
 		case ND_LVAR:
 			gen_lvar(node);
-			printf("	pop rax\n");
-			printf("	mov rax,[rax]\n");
-			printf("	push rax\n");
+
+			if(node->type.ty != ARRAY){
+				printf("	pop rax\n");
+				printf("	mov rax,[rax]\n");
+				printf("	push rax\n");
+			}
+
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)

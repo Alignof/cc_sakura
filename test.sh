@@ -98,4 +98,19 @@ assert 4  "int main(){int x; sizeof(x+2);}"
 assert 8  "int main(){int *x; sizeof(x+2);}"
 assert 8  "int main(){int *x; sizeof((x));}"
 
+assert 1  "int main(){int a[4]; *a=1; return *a;}"
+assert 1  "int main(){int a[4]; *a=1; *a=1; return *a;}"
+assert 2  "int main(){int a[4]; *a=1; *(a+1)=2; return *(a+1);}"
+assert 1  "int main(){int a[4]; int *p; *a=1; return *a;}"
+assert 1  "int main(){int a[4]; int *p; p=a; *p=1; return *a;}"
+assert 3  "int main(){int a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);}"
+
+assert 1  "int main(){int a[4]; a[0]=1; return a[0];}"
+assert 3  "int main(){int a[4]; a[0]=1; a[1]=2; return a[0]+a[1];}"
+assert 3  "int main(){int a[4]; a[2]=3; return a[2];}"
+
+assert 10  "int main(){int a[4]; a[0]=1; a[1]=2; a[2]=3; a[3]=4; return a[0]+a[1]+a[2]+a[3];}"
+assert 10  "int main(){int a[4]; int sum; int i; sum=0; i=0; while(i<4){a[i]=i; i=i+1;} return sum;}"
+assert 10  "int main(){int a[4]; int sum; int i; sum=0; i=0; while(i<4){a[i]=i; i=i+1;} i=0; while(i<=4){sum=sum+a[i];} return sum;}"
+
 echo OK
