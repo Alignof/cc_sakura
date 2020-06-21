@@ -411,7 +411,7 @@ Node *expr(){
 			}
 
 			if(locals)
-				lvar->offset=(locals->offset)+(locals->type.alloc_size);
+				lvar->offset=(locals->offset)+8;
 			else
 				lvar->offset=8;
 			
