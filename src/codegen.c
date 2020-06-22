@@ -91,7 +91,7 @@ void gen(Node *node){
 			return;
 		case ND_WHILE:
 			// adjust rsp
-			printf("	push rax\n");
+			//printf("	push rax\n");
 			// condition
 			printf(".Lbegin%03d:\n",label_begin);
 			gen(node->lhs);
