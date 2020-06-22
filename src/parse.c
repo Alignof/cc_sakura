@@ -73,6 +73,7 @@ int expect_number(){
 	// judge whether token is a number and move the pointer to the next and return value
 	if(token->kind!=TK_NUM)
 		error(token->str,"not a number");
+
 	int val=token->val;
 	token=token->next;
 	return val;
@@ -106,6 +107,7 @@ Node *new_node_num(int val){
 
 Node *primary(){
 	Node *tmp;
+	Node *pointer_size;
 
 	if(consume("(")){
 		//jmp expr
@@ -153,6 +155,25 @@ Node *primary(){
 			error(token->str,"this variable is not declaration");
 		}
 
+		if(*(token->str)=='['){
+			// Is array index
+			expect("[");
+
+			// a[1] == *(a+1)
+			node=new_node(ND_ADD,node,mul());
+
+			pointer_size=calloc(1,sizeof(Node));
+			pointer_size->kind=ND_NUM;
+			pointer_size->val=8;
+			node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
+
+			node=new_node(ND_DEREF,new_node_num(0),node);
+			node->type.ty=INT;
+
+			expect("]");
+		}
+
+
 		return node;
 	}
 
@@ -162,10 +183,13 @@ Node *primary(){
 
 Node *unary(){
 	Node *node;
+	Type *rhs_ptr_to;
 
 	if(consume("*")){
 		node=new_node(ND_DEREF,new_node_num(0),unary());
-		if(node->rhs->type.ptr_to==NULL || node->rhs->type.ptr_to->ty==PTR)
+		rhs_ptr_to=node->rhs->type.ptr_to;
+
+		if(rhs_ptr_to==NULL || rhs_ptr_to->ty==PTR || rhs_ptr_to->ty==ARRAY)
 			node->type.ty=PTR;
 
 		return node;
@@ -223,6 +247,8 @@ Node *mul(){
 
 Node *add(){
 	int ptrtype;
+	Type *lhs_type;
+	Type *rhs_type;
 	Node *pointer_size;
 
 	//jmp mul()
@@ -231,16 +257,22 @@ Node *add(){
 	for(;;){
 		if(consume("+")){
 			node=new_node(ND_ADD,node,mul());
+			lhs_type=&(node->lhs->type);
+			rhs_type=&(node->rhs->type);
 
-			if(node->lhs->type.ty==PTR || node->rhs->type.ty==PTR){
+			if((lhs_type->ty==PTR || rhs_type->ty==PTR) || (lhs_type->ty==ARRAY || rhs_type->ty==ARRAY)){
+			/*
+				// address = rsp - offset
+				node->kind=ND_SUB;
+			*/
 				node->type.ty=PTR;
 				pointer_size=calloc(1,sizeof(Node));
 				pointer_size->kind=ND_NUM;
 	
-				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
-					ptrtype=node->lhs->type.ptr_to->ty;
-				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
-					ptrtype=node->rhs->type.ptr_to->ty;
+				if((lhs_type->ty==PTR || lhs_type->ty==ARRAY) && lhs_type->ptr_to!=NULL)
+					ptrtype=lhs_type->ptr_to->ty;
+				if((rhs_type->ty==PTR || rhs_type->ty==ARRAY) && rhs_type->ptr_to!=NULL)
+					ptrtype=rhs_type->ptr_to->ty;
 
 				if(ptrtype==INT){
 					// int pointer
@@ -250,23 +282,29 @@ Node *add(){
 					pointer_size->val=8;
 				}
 
-				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
+				if((lhs_type->ty==PTR || lhs_type->ty==ARRAY) && lhs_type->ptr_to!=NULL)
 					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
+				if((rhs_type->ty==PTR || rhs_type->ty==ARRAY) && rhs_type->ptr_to!=NULL)
 					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
 			}
 		}else if(consume("-")){
 			node=new_node(ND_SUB,node,mul());
+			lhs_type=&(node->lhs->type);
+			rhs_type=&(node->rhs->type);
 			
-			if(node->lhs->type.ty==PTR || node->rhs->type.ty==PTR){
+			if((lhs_type->ty==PTR || rhs_type->ty==PTR) || (lhs_type->ty==ARRAY || rhs_type->ty==ARRAY)){
+			/*
+				// address = rsp - offset
+				node->kind=ND_ADD;
+			*/
 				node->type.ty=PTR;
 				pointer_size=calloc(1,sizeof(Node));
 				pointer_size->kind=ND_NUM;
 	
-				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
-					ptrtype=node->lhs->type.ptr_to->ty;
-				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
-					ptrtype=node->rhs->type.ptr_to->ty;
+				if((lhs_type->ty==PTR || lhs_type->ty==ARRAY) && lhs_type->ptr_to!=NULL)
+					ptrtype=lhs_type->ptr_to->ty;
+				if((rhs_type->ty==PTR || rhs_type->ty==ARRAY) && rhs_type->ptr_to!=NULL)
+					ptrtype=rhs_type->ptr_to->ty;
 
 				if(ptrtype==INT){
 					// int pointer
@@ -276,9 +314,9 @@ Node *add(){
 					pointer_size->val=8;
 				}
 
-				if(node->lhs->type.ty==PTR && node->lhs->type.ptr_to!=NULL)
+				if((lhs_type->ty==PTR || lhs_type->ty==ARRAY) && lhs_type->ptr_to!=NULL)
 					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-				if(node->rhs->type.ty==PTR && node->rhs->type.ptr_to!=NULL)
+				if((rhs_type->ty==PTR || rhs_type->ty==ARRAY) && rhs_type->ptr_to!=NULL)
 					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
 			}
 		}else{
@@ -347,6 +385,7 @@ Node *expr(){
 		Token *tok=consume_ident();
 		if(tok){
 			node=calloc(1,sizeof(Node));
+			node->kind=ND_LVAR;
 			LVar *lvar=find_lvar(tok);
 
 			if(lvar){
@@ -356,6 +395,7 @@ Node *expr(){
 				lvar->next=locals;
 				lvar->name=tok->str;
 				lvar->len=tok->len;
+				lvar->type.alloc_size=8;
 				lvar_count++;
 
 				// add type list
@@ -369,16 +409,25 @@ Node *expr(){
 				if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
 				newtype->ty=INT;
 			}
-			
+
 			if(locals)
-				lvar->offset=locals->offset+8;
+				lvar->offset=(locals->offset)+8;
 			else
 				lvar->offset=8;
 			
-			node->kind=ND_LVAR;
-			node->offset=lvar->offset;
-			node->type=lvar->type;
+			// Is array
+			if(consume("[")){
+				lvar_count+=(token->val)-1;
+				lvar->type.alloc_size=(token->val)*8;
+				lvar->offset+=(lvar->type.alloc_size)-8;
+				token=token->next;
+				expect("]");
 
+				lvar->type.ty=ARRAY;
+			}
+			
+			node->type=lvar->type;
+			node->offset=lvar->offset;
 			// locals == new lvar
 			locals=lvar;
 		}else{

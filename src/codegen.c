@@ -38,9 +38,13 @@ void gen(Node *node){
 			return;
 		case ND_LVAR:
 			gen_lvar(node);
-			printf("	pop rax\n");
-			printf("	mov rax,[rax]\n");
-			printf("	push rax\n");
+
+			if(node->type.ty != ARRAY){
+				printf("	pop rax\n");
+				printf("	mov rax,[rax]\n");
+				printf("	push rax\n");
+			}
+
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
@@ -88,6 +92,7 @@ void gen(Node *node){
 		case ND_WHILE:
 			// adjust rsp
 			printf("	push rax\n");
+
 			// condition
 			printf(".Lbegin%03d:\n",label_begin);
 			gen(node->lhs);
@@ -98,6 +103,8 @@ void gen(Node *node){
 
 			// else expression
 			gen(node->rhs);
+			printf("	pop rax\n");
+
 			// continue
 			printf("	jmp .Lbegin%03d\n",label_end);
 			printf(".Lend%03d:\n",label_begin);

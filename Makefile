@@ -22,11 +22,8 @@ install: $(OBJECTS)
 test: cc_sakura
 	./test.sh
 
-func_test: cc_sakura
-	./test_func.sh
-
 clean:
 	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out
 	rm -f $(OBJECTS) $(TARGET)
 
-.PHONY: test func_test clean install
+.PHONY: test clean install
