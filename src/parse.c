@@ -518,6 +518,7 @@ void function(Func *func){
 void program(){
 	int i=0;
 	int counter;
+	char *def_name;
 	Node *tmp;
 	Node **args_ptr;
 
@@ -540,43 +541,51 @@ void program(){
 		// get string len
 		for(counter=0;(('a' <= token->str[counter] && token->str[counter] <= 'z') || ('0' <= token->str[counter] && token->str[counter] <= '9'));counter++)
 
-		func_list[i]->name=(char *)calloc(counter,sizeof(char));
-		strncpy(func_list[i]->name,token->str,counter);
+		def_name=token->str;
 
 		// consume function name
 		while(('a' <= *(token->str) && *(token->str) <= 'z') || ('0' <= *(token->str) && *(token->str) <= '9'))
 			token=token->next;
 
-		// get argument
-		expect("(");
-		counter=0;
-		if(!(consume(")"))){
-			// set args node
-			args_ptr=&(func_list[i]->args);
-			tmp=*args_ptr;
-			while(token->kind == TK_NUM || token->kind == TK_TYPE){
-				*args_ptr=(Node *)calloc(1,sizeof(Node));
-				(*args_ptr)->kind=ND_ARG;
-				(*args_ptr)->val=counter;
-				(*args_ptr)->vector=expr();
-				(*args_ptr)->rhs=tmp;
-				// go to next
+		// function
+		if(consume("(")){
+			func_list[i]->name=(char *)calloc(counter,sizeof(char));
+			strncpy(func_list[i]->name,def_name,counter);
+
+			counter=0;
+			// get argument
+			if(!(consume(")"))){
+				// set args node
+				args_ptr=&(func_list[i]->args);
 				tmp=*args_ptr;
+				while(token->kind == TK_NUM || token->kind == TK_TYPE){
+					*args_ptr=(Node *)calloc(1,sizeof(Node));
+					(*args_ptr)->kind=ND_ARG;
+					(*args_ptr)->val=counter;
+					(*args_ptr)->vector=expr();
+					(*args_ptr)->rhs=tmp;
+					// go to next
+					tmp=*args_ptr;
 
-				counter++;
+					counter++;
 
-				if(!(consume(",")))
-					break;
+					if(!(consume(",")))
+						break;
+				}
+				args_ptr=NULL;
+				func_list[i]->args->val=counter-1;
+				expect(")");
 			}
-			args_ptr=NULL;
-			func_list[i]->args->val=counter-1;
-			expect(")");
-		}
 
-		// get function block
-		consume("{");
-		function(func_list[i++]);
-		consume("}");
+			// get function block
+			consume("{");
+			function(func_list[i++]);
+			consume("}");
+
+		// gloval variable
+		}else{
+			expect(";");
+		}
 	}
 	func_list[i]=NULL;
 }
