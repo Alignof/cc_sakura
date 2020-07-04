@@ -79,6 +79,15 @@ int expect_number(){
 	return val;
 }
 
+GVar *find_gvar(Token *tok){
+	//while var not equal NULL
+	for (GVar *var=globals;var;var=var->next){
+		if(var->len==tok->len && !memcmp(tok->str,var->name,var->len))
+			return var;
+	}
+	return NULL;
+}
+
 LVar *find_lvar(Token *tok){
 	//while var not equal NULL
 	for (LVar *var=locals;var;var=var->next){
@@ -518,7 +527,7 @@ void function(Func *func){
 void program(){
 	int i=0;
 	int counter;
-	char *def_name;
+	int star_count;
 	Node *tmp;
 	Node **args_ptr;
 
@@ -527,30 +536,31 @@ void program(){
 		locals=NULL;
 		// reset lvar counter
 		lvar_count=0;
+
 		counter=0;
+		star_count=0;
 		func_list[i]=(Func *)malloc(sizeof(Func));
 
 		// type of function return value
 		if(!consume_reserved_word("int",TK_TYPE))
 			error(token->str,"not a function type token.");
 
+		// count asterisk
+		while(token->kind==TK_RESERVED && *(token->str)=='*'){
+			star_count++;
+			token=token->next;
+		}
+
 		// Is function?
 		if(token->kind != TK_IDENT ||!('a' <= *(token->str) && *(token->str) <= 'z'))
 			error(token->str,"not a function.");
 
-		// get string len
-		for(counter=0;(('a' <= token->str[counter] && token->str[counter] <= 'z') || ('0' <= token->str[counter] && token->str[counter] <= '9'));counter++)
-
-		def_name=token->str;
-
-		// consume function name
-		while(('a' <= *(token->str) && *(token->str) <= 'z') || ('0' <= *(token->str) && *(token->str) <= '9'))
-			token=token->next;
+		Token *def_name=consume_ident();
 
 		// function
 		if(consume("(")){
 			func_list[i]->name=(char *)calloc(counter,sizeof(char));
-			strncpy(func_list[i]->name,def_name,counter);
+			strncpy(func_list[i]->name,def_name->str,def_name->len);
 
 			counter=0;
 			// get argument
@@ -561,7 +571,7 @@ void program(){
 				while(token->kind == TK_NUM || token->kind == TK_TYPE){
 					*args_ptr=(Node *)calloc(1,sizeof(Node));
 					(*args_ptr)->kind=ND_ARG;
-					(*args_ptr)->val=counter;
+					(*args_ptr)->val=def_name->len;
 					(*args_ptr)->vector=expr();
 					(*args_ptr)->rhs=tmp;
 					// go to next
@@ -584,6 +594,39 @@ void program(){
 
 		// gloval variable
 		}else{
+
+			// if not token -> error
+			if(!def_name) error(token->str,"not a variable.");
+
+			GVar *gvar=calloc(1,sizeof(GVar));
+			gvar->next=globals;
+			gvar->name=def_name->str;
+			gvar->len=def_name->len;
+			gvar->type.alloc_size=8;
+
+			// add type list
+			Type *newtype;
+			newtype=&(gvar->type);
+			for(i=0;i<star_count;i++){
+				newtype->ty=PTR;
+				newtype->ptr_to=calloc(1,sizeof(Type));
+				newtype=newtype->ptr_to;
+			}
+
+			if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
+			newtype->ty=INT;
+
+			// Is array
+			if(consume("[")){
+				gvar->type.alloc_size=(token->val)*8;
+				token=token->next;
+				expect("]");
+
+				gvar->type.ty=ARRAY;
+			}
+			
+			// locals == new lvar
+			globals=gvar;
 			expect(";");
 		}
 	}

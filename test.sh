@@ -109,4 +109,8 @@ assert 1  "int main(){int a[4]; a[0]=1; return a[0];}"
 assert 3  "int main(){int a[4]; a[0]=1; a[1]=2; return a[0]+a[1];}"
 assert 10  "int main(){int a[5]; int sum; int i; sum=0; i=0; while(i<5){a[i]=i; i=i+1;} i=0; while(i<5){sum=sum+a[i];i=i+1;} return sum;}"
 
+assert 0  "int a; int main(){0;}"
+assert 0  "int a; int b; int main(){0;}"
+assert 0  "int a; int b; int main(){a=0;}"
+
 echo OK
