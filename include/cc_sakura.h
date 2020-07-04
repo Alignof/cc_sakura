@@ -36,6 +36,7 @@ typedef enum{
 	ND_NE,		//  !=
 	ND_ASSIGN,	//  =
 	ND_LVAR,	//  local valiable
+	ND_GVAR,	//  local valiable
 	ND_NUM,		//  integer
 	ND_IF,		//  if
 	ND_ELSE,	//  else
@@ -161,5 +162,6 @@ int label_end;
 int label_else;
 void gen(Node *node);
 void gen_lvar(Node *node);
+void gen_gvar(Node *node);
 
 

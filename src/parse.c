@@ -160,8 +160,17 @@ Node *primary(){
 				expect(")");
 			}
 		}else{
-			//variable does not exist.
-			error(token->str,"this variable is not declaration");
+			GVar *gvar=find_gvar(tok);
+			if(gvar){
+				// variable exist
+				node->kind=ND_GVAR;
+				node->type=gvar->type;
+				node->str=tok->str;
+				node->val=tok->len;
+			}else{
+				//variable does not exist.
+				error(token->str,"this variable is not declaration");
+			}
 		}
 
 		if(*(token->str)=='['){
@@ -404,7 +413,6 @@ Node *expr(){
 				lvar->next=locals;
 				lvar->name=tok->str;
 				lvar->len=tok->len;
-				lvar->type.alloc_size=8;
 				lvar_count++;
 
 				// add type list
@@ -571,7 +579,7 @@ void program(){
 				while(token->kind == TK_NUM || token->kind == TK_TYPE){
 					*args_ptr=(Node *)calloc(1,sizeof(Node));
 					(*args_ptr)->kind=ND_ARG;
-					(*args_ptr)->val=def_name->len;
+					(*args_ptr)->val=counter;
 					(*args_ptr)->vector=expr();
 					(*args_ptr)->rhs=tmp;
 					// go to next
@@ -594,7 +602,6 @@ void program(){
 
 		// gloval variable
 		}else{
-
 			// if not token -> error
 			if(!def_name) error(token->str,"not a variable.");
 
@@ -602,7 +609,11 @@ void program(){
 			gvar->next=globals;
 			gvar->name=def_name->str;
 			gvar->len=def_name->len;
-			gvar->type.alloc_size=8;
+
+			if(star_count==0)
+				gvar->type.alloc_size=4;
+			else
+				gvar->type.alloc_size=8;
 
 			// add type list
 			Type *newtype;
