@@ -36,6 +36,7 @@ typedef enum{
 	ND_NE,		//  !=
 	ND_ASSIGN,	//  =
 	ND_LVAR,	//  local valiable
+	ND_GVAR,	//  local valiable
 	ND_NUM,		//  integer
 	ND_IF,		//  if
 	ND_ELSE,	//  else
@@ -52,6 +53,7 @@ typedef enum{
 typedef struct Token Token;
 typedef struct Node Node;
 typedef struct LVar LVar;
+typedef struct GVar GVar;
 typedef struct Func Func;
 typedef struct Type Type;
 
@@ -94,6 +96,15 @@ struct Func{
 	Func *next;
 };
 
+// global variable
+struct GVar{
+	int len;
+	int address;
+	char *name;
+	Type type;
+	GVar *next;
+};
+
 // local variable
 struct LVar{
 	int len;
@@ -117,6 +128,7 @@ char *user_input;
 Token *token;
 Func *func_list[100];
 LVar *locals;
+GVar *globals;
 
 void error(char *loc,char *fmt, ...);
 bool consume(char *op);
@@ -129,6 +141,8 @@ Token *consume_ident();
 
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
+GVar *find_gvar(Token *tok);
+LVar *find_lvar(Token *tok);
 
 void program();
 void function(Func *func);
@@ -148,5 +162,6 @@ int label_end;
 int label_else;
 void gen(Node *node);
 void gen_lvar(Node *node);
+void gen_gvar(Node *node);
 
 
