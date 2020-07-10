@@ -4,7 +4,7 @@ tmp*
 a.out
 cc_sakura
 
-samplecode/
+testing/
 
 .gdb_history
 *.txt
