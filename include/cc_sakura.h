@@ -148,7 +148,6 @@ int type_size(TypeKind type);
 Token *consume_ident();
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
-Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
 GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
 
@@ -164,6 +163,11 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+
+// parse_substream.c
+void pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
+void call_function(Node *node,Token *tok);
+void array_index(Node *node);
 
 // codegan.c
 int label_begin;

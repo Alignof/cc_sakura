@@ -1,9 +1,6 @@
 #include "cc_sakura.h"
 
 Node *primary(){
-	Node *tmp;
-	Node *pointer_size;
-
 	if(consume("(")){
 		//jmp expr
 		Node *node=expr();
@@ -25,26 +22,7 @@ Node *primary(){
 			node->offset=lvar->offset;
 			node->type=lvar->type;
 		}else if(*(token->str)=='('){
-			// function
-			expect("(");
-
-			node->kind=ND_CALL_FUNC;
-			node->str=(char *)calloc(tok->len,sizeof(char));
-			strncpy(node->str,tok->str,tok->len);
-
-			// have argument?
-			if(!(consume(")"))){
-				tmp=node;
-				while(token->kind == TK_NUM || token->kind ==TK_IDENT || TK_RESERVED){
-					tmp->vector=equelity();
-					tmp=tmp->vector;
-
-					if(!(consume(",")))
-						break;
-				}
-				tmp->vector=NULL;
-				expect(")");
-			}
+			call_function(node,tok);
 		}else{
 			GVar *gvar=find_gvar(tok);
 			if(gvar){
@@ -59,24 +37,8 @@ Node *primary(){
 			}
 		}
 
-		if(*(token->str)=='['){
-			// Is array index
-			expect("[");
-
-			// a[1] == *(a+1)
-			node=new_node(ND_ADD,node,mul());
-
-			pointer_size=calloc(1,sizeof(Node));
-			pointer_size->kind=ND_NUM;
-			pointer_size->val=8;
-			node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-
-			node=new_node(ND_DEREF,new_node_num(0),node);
-			node->type.ty=INT;
-
-			expect("]");
-		}
-
+		if(*(token->str)=='[')
+			array_index(node);
 
 		return node;
 	}
