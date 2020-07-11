@@ -4,6 +4,11 @@ int label_begin=0;
 int label_end=0;
 int label_else=0;
 
+void gen_gvar(Node *node){
+	printf("	lea rax,  _%.*s[rip]\n",node->val,node->str);
+	printf("	push rax\n");
+}
+
 void gen_lvar(Node *node){
 	if(node->kind != ND_LVAR && node->kind != ND_CALL_FUNC)
 		error(token->str,"not a variable");
@@ -36,6 +41,16 @@ void gen(Node *node){
 		case ND_NUM:
 			printf("	push %d\n",node->val);
 			return;
+		case ND_GVAR:
+			gen_gvar(node);
+
+			if(node->type.ty != ARRAY){
+				printf("	pop rax\n");
+				printf("	mov rax,[rax]\n");
+				printf("	push rax\n");
+			}
+
+			return;
 		case ND_LVAR:
 			gen_lvar(node);
 
@@ -50,7 +65,8 @@ void gen(Node *node){
 			// gen_lvar(variable) = gen(expr)
 
 			if(node->lhs->kind==ND_DEREF) gen(node->lhs->rhs);
-			else gen_lvar(node->lhs);
+			else if(node->lhs->kind==ND_LVAR) gen_lvar(node->lhs);
+			else if(node->lhs->kind==ND_GVAR) gen_gvar(node->lhs);
 
 			gen(node->rhs);
 

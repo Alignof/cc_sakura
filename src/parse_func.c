@@ -78,6 +78,15 @@ int expect_number(){
 	return val;
 }
 
+GVar *find_gvar(Token *tok){
+	//while var not equal NULL
+	for (GVar *var=globals;var;var=var->next){
+		if(var->len==tok->len && !memcmp(tok->str,var->name,var->len))
+			return var;
+	}
+	return NULL;
+}
+
 LVar *find_lvar(Token *tok){
 	//while var not equal NULL
 	for (LVar *var=locals;var;var=var->next){
