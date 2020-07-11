@@ -136,4 +136,3 @@ Token *tokenize(char *p){
 	new_token(TK_EOF,now,p);
 	return head.next;
 }
-

@@ -1,110 +1,5 @@
 #include "cc_sakura.h"
 
-void error(char *loc,char *fmt, ...){
-	va_list ap;
-	va_start(ap,fmt);
-
-	int pos=loc-user_input;
-	fprintf(stderr,"%s\n",user_input);
-	fprintf(stderr,"%*s",pos,"");
-	fprintf(stderr,"^ ");
-	vfprintf(stderr,fmt,ap);
-	fprintf(stderr,"\n");
-	exit(1);
-}
-
-bool consume(char *op){
-	// judge whether op is a symbol and return judge result
-	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-		strlen(op)!=token->len||
-		memcmp(token->str,op,token->len))
-		return false;
-	token=token->next;
-	return true;
-}
-
-bool consume_ret(){
-	if(token->kind != TK_RETURN ||
-		token->len!=6||
-		memcmp(token->str,"return",token->len))
-		return false;
-	token=token->next;
-	return true;
-}
-
-bool consume_reserved_word(char *keyword,TokenKind kind){
-	if(	token->kind != kind ||
-		token->len!=strlen(keyword)||
-		memcmp(token->str,keyword,token->len))
-		return false;
-	token=token->next;
-	return true;
-}
-
-
-Token *consume_ident(){
-	// judge whether token is a ident and token pointer
-	if(token->kind != TK_IDENT ||
-		!('a' <= *(token->str) && *(token->str) <= 'z'))
-		return false;
-	
-	Token *ret=token;
-	//check variable length
-	int _len=len_val(token->str);
-	token->len=_len;
-	
-	//move next token 
-	for(int i=0;i<_len;i++)
-		token=token->next;
-
-	return ret;
-}
-
-void expect(char *op){
-	// judge whether op is a symbol and move the pointer to the next
-	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-		strlen(op)!=token->len||
-		memcmp(token->str,op,token->len))
-		error(token->str,"not a charctor.");
-	token=token->next;
-}
-
-int expect_number(){
-	// judge whether token is a number and move the pointer to the next and return value
-	if(token->kind!=TK_NUM)
-		error(token->str,"not a number");
-
-	int val=token->val;
-	token=token->next;
-	return val;
-}
-
-LVar *find_lvar(Token *tok){
-	//while var not equal NULL
-	for (LVar *var=locals;var;var=var->next){
-		if(var->len==tok->len && !memcmp(tok->str,var->name,var->len))
-			return var;
-	}
-	return NULL;
-}
-
-Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
-	//create new node(symbol)
-	Node *node=calloc(1,sizeof(Node));
-	node->kind=kind;
-	node->lhs=lhs;
-	node->rhs=rhs;
-	return node;
-}
-
-Node *new_node_num(int val){
-	//create new node(number)
-	Node *node=calloc(1,sizeof(Node));
-	node->kind=ND_NUM;
-	node->val=val;
-	return node;
-}
-
 Node *primary(){
 	Node *tmp;
 	Node *pointer_size;
@@ -136,7 +31,7 @@ Node *primary(){
 			node->kind=ND_CALL_FUNC;
 			node->str=(char *)calloc(tok->len,sizeof(char));
 			strncpy(node->str,tok->str,tok->len);
-			
+
 			// have argument?
 			if(!(consume(")"))){
 				tmp=node;
@@ -208,7 +103,7 @@ Node *unary(){
 		return primary();
 
 	if(consume("-"))
-		//convert 0-n
+		//convert to 0-n
 		return new_node(ND_SUB,new_node_num(0),primary());
 
 
@@ -216,11 +111,7 @@ Node *unary(){
 		// sizeof(5) => 4
 		// sizeof(&a) => 8
 		node=new_node(ND_NUM,node,unary());
-
-		if(node->rhs->type.ty==INT)
-			node->val=4;
-		if(node->rhs->type.ty==PTR)
-			node->val=8;
+		node->val=type_size(node->rhs->type.ty);
 
 		return node;
 	}
@@ -260,64 +151,48 @@ Node *add(){
 			lhs_type=&(node->lhs->type);
 			rhs_type=&(node->rhs->type);
 
-			if((lhs_type->ty==PTR || rhs_type->ty==PTR) || (lhs_type->ty==ARRAY || rhs_type->ty==ARRAY)){
-			/*
-				// address = rsp - offset
-				node->kind=ND_SUB;
-			*/
+			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8){
+				/*
+				   address = rsp - offset
+				   node->kind=ND_SUB;
+				   */
 				node->type.ty=PTR;
 				pointer_size=calloc(1,sizeof(Node));
 				pointer_size->kind=ND_NUM;
-	
-				if((lhs_type->ty==PTR || lhs_type->ty==ARRAY) && lhs_type->ptr_to!=NULL)
+
+				if(type_size(lhs_type->ty)==8 && lhs_type->ptr_to!=NULL){
 					ptrtype=lhs_type->ptr_to->ty;
-				if((rhs_type->ty==PTR || rhs_type->ty==ARRAY) && rhs_type->ptr_to!=NULL)
-					ptrtype=rhs_type->ptr_to->ty;
-
-				if(ptrtype==INT){
-					// int pointer
-					pointer_size->val=4;
-				}else{
-					// int pointer pointer ...
-					pointer_size->val=8;
-				}
-
-				if((lhs_type->ty==PTR || lhs_type->ty==ARRAY) && lhs_type->ptr_to!=NULL)
+					pointer_size->val=type_size(ptrtype);
 					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-				if((rhs_type->ty==PTR || rhs_type->ty==ARRAY) && rhs_type->ptr_to!=NULL)
+				}else if(type_size(rhs_type->ty)==8 && rhs_type->ptr_to!=NULL){
+					ptrtype=rhs_type->ptr_to->ty;
+					pointer_size->val=type_size(ptrtype);
 					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
+				}
 			}
 		}else if(consume("-")){
 			node=new_node(ND_SUB,node,mul());
 			lhs_type=&(node->lhs->type);
 			rhs_type=&(node->rhs->type);
-			
-			if((lhs_type->ty==PTR || rhs_type->ty==PTR) || (lhs_type->ty==ARRAY || rhs_type->ty==ARRAY)){
-			/*
-				// address = rsp - offset
-				node->kind=ND_ADD;
-			*/
+
+			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8){
+				/*
+				   address = rsp - offset
+				   node->kind=ND_SUB;
+				   */
 				node->type.ty=PTR;
 				pointer_size=calloc(1,sizeof(Node));
 				pointer_size->kind=ND_NUM;
-	
-				if((lhs_type->ty==PTR || lhs_type->ty==ARRAY) && lhs_type->ptr_to!=NULL)
+
+				if(type_size(lhs_type->ty)==8 && lhs_type->ptr_to!=NULL){
 					ptrtype=lhs_type->ptr_to->ty;
-				if((rhs_type->ty==PTR || rhs_type->ty==ARRAY) && rhs_type->ptr_to!=NULL)
-					ptrtype=rhs_type->ptr_to->ty;
-
-				if(ptrtype==INT){
-					// int pointer
-					pointer_size->val=4;
-				}else{
-					// int pointer pointer ...
-					pointer_size->val=8;
-				}
-
-				if((lhs_type->ty==PTR || lhs_type->ty==ARRAY) && lhs_type->ptr_to!=NULL)
+					pointer_size->val=type_size(ptrtype);
 					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-				if((rhs_type->ty==PTR || rhs_type->ty==ARRAY) && rhs_type->ptr_to!=NULL)
+				}else if(type_size(rhs_type->ty)==8 && rhs_type->ptr_to!=NULL){
+					ptrtype=rhs_type->ptr_to->ty;
+					pointer_size->val=type_size(ptrtype);
 					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
+				}
 			}
 		}else{
 			return node;
@@ -341,7 +216,6 @@ Node *relational(){
 		}else{
 			return node;
 		}
-		
 	}
 }
 
@@ -414,7 +288,7 @@ Node *expr(){
 				lvar->offset=(locals->offset)+8;
 			else
 				lvar->offset=8;
-			
+
 			// Is array
 			if(consume("[")){
 				lvar_count+=(token->val)-1;
@@ -425,7 +299,7 @@ Node *expr(){
 
 				lvar->type.ty=ARRAY;
 			}
-			
+
 			node->type=lvar->type;
 			node->offset=lvar->offset;
 			// locals == new lvar
@@ -482,7 +356,7 @@ Node *stmt(){
 		}
 	}else if(consume("{")){
 		node=new_node(ND_BLOCK,node,NULL);
-		
+
 		Node *tmp=calloc(1,sizeof(Node));
 		node->vector=tmp;
 		while(token->kind!=TK_BLOCK){
@@ -540,7 +414,7 @@ void program(){
 		// get string len
 		for(counter=0;(('a' <= token->str[counter] && token->str[counter] <= 'z') || ('0' <= token->str[counter] && token->str[counter] <= '9'));counter++)
 
-		func_list[i]->name=(char *)calloc(counter,sizeof(char));
+			func_list[i]->name=(char *)calloc(counter,sizeof(char));
 		strncpy(func_list[i]->name,token->str,counter);
 
 		// consume function name

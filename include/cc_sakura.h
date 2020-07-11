@@ -49,6 +49,13 @@ typedef enum{
 	ND_TYPE,	//  int,double,char...
 }NodeKind;
 
+typedef enum{
+	INT,
+	PTR,
+	ARRAY,
+}TypeKind;
+
+
 typedef struct Token Token;
 typedef struct Node Node;
 typedef struct LVar LVar;
@@ -66,7 +73,7 @@ struct Token{
 
 // type of variable
 struct Type{
-	enum {INT,PTR,ARRAY} ty;
+	TypeKind ty;
 	Type *ptr_to;
 	size_t alloc_size;
 };
@@ -110,6 +117,7 @@ bool isblock(char *str);
 bool at_eof();
 Token *tokenize(char *p);
 Token *new_token(TokenKind kind,Token *cur,char *str);
+bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind);
 
 // parse.c
 int lvar_count;
@@ -124,11 +132,11 @@ bool consume_ret();
 bool consume_reserved_word();
 void expect(char *op);
 int expect_number();
-
+int type_size(TypeKind type);
 Token *consume_ident();
-
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
+LVar *find_lvar(Token *tok);
 
 void program();
 void function(Func *func);
