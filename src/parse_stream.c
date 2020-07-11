@@ -137,10 +137,8 @@ Node *mul(){
 }
 
 Node *add(){
-	int ptrtype;
 	Type *lhs_type;
 	Type *rhs_type;
-	Node *pointer_size;
 
 	//jmp mul()
 	Node *node=mul();
@@ -151,49 +149,17 @@ Node *add(){
 			lhs_type=&(node->lhs->type);
 			rhs_type=&(node->rhs->type);
 
-			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8){
-				/*
-				   address = rsp - offset
-				   node->kind=ND_SUB;
-				   */
-				node->type.ty=PTR;
-				pointer_size=calloc(1,sizeof(Node));
-				pointer_size->kind=ND_NUM;
+			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8)
+				pointer_calc(node,lhs_type,rhs_type);
 
-				if(type_size(lhs_type->ty)==8 && lhs_type->ptr_to!=NULL){
-					ptrtype=lhs_type->ptr_to->ty;
-					pointer_size->val=type_size(ptrtype);
-					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-				}else if(type_size(rhs_type->ty)==8 && rhs_type->ptr_to!=NULL){
-					ptrtype=rhs_type->ptr_to->ty;
-					pointer_size->val=type_size(ptrtype);
-					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
-				}
-			}
 		}else if(consume("-")){
 			node=new_node(ND_SUB,node,mul());
 			lhs_type=&(node->lhs->type);
 			rhs_type=&(node->rhs->type);
 
-			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8){
-				/*
-				   address = rsp - offset
-				   node->kind=ND_SUB;
-				   */
-				node->type.ty=PTR;
-				pointer_size=calloc(1,sizeof(Node));
-				pointer_size->kind=ND_NUM;
+			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8)
+				pointer_calc(node,lhs_type,rhs_type);
 
-				if(type_size(lhs_type->ty)==8 && lhs_type->ptr_to!=NULL){
-					ptrtype=lhs_type->ptr_to->ty;
-					pointer_size->val=type_size(ptrtype);
-					node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-				}else if(type_size(rhs_type->ty)==8 && rhs_type->ptr_to!=NULL){
-					ptrtype=rhs_type->ptr_to->ty;
-					pointer_size->val=type_size(ptrtype);
-					node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
-				}
-			}
 		}else{
 			return node;
 		}

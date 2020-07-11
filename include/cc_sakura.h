@@ -119,7 +119,7 @@ Token *tokenize(char *p);
 Token *new_token(TokenKind kind,Token *cur,char *str);
 bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind);
 
-// parse.c
+// parse_func.c
 int lvar_count;
 char *user_input;
 Token *token;
@@ -137,7 +137,9 @@ Token *consume_ident();
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
 LVar *find_lvar(Token *tok);
+Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
 
+// parse_stream.c
 void program();
 void function(Func *func);
 Node *stmt();

@@ -113,5 +113,29 @@ int type_size(TypeKind type){
 		case ARRAY:
 			return 8;
 	}
+
+	error(token->str,"unknown type");
 }
 
+Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
+	int ptrtype;
+
+	node->type.ty=PTR;
+	lhs_type=&(node->lhs->type);
+	rhs_type=&(node->rhs->type);
+
+	Node *pointer_size=calloc(1,sizeof(Node));
+	pointer_size->kind=ND_NUM;
+
+	if(type_size(lhs_type->ty)==8 && lhs_type->ptr_to!=NULL){
+		ptrtype=lhs_type->ptr_to->ty;
+		pointer_size->val=type_size(ptrtype);
+		node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
+	}else if(type_size(rhs_type->ty)==8 && rhs_type->ptr_to!=NULL){
+		ptrtype=rhs_type->ptr_to->ty;
+		pointer_size->val=type_size(ptrtype);
+		node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
+	}
+
+	return node;
+}
