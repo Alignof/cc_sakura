@@ -21,6 +21,7 @@ Node *primary(){
 			node->kind=ND_LVAR;
 			node->offset=lvar->offset;
 			node->type=lvar->type;
+		// call function
 		}else if(*(token->str)=='('){
 			node=call_function(node,tok);
 		}else{
@@ -180,10 +181,8 @@ Node *assign(){
 }
 
 Node *expr(){
-	int i;
-	Node *node;
-	Type *newtype;
 	int star_count=0;
+	Node *node;
 
 	if(consume_reserved_word("int",TK_TYPE)){
 		// count asterisk
@@ -194,55 +193,10 @@ Node *expr(){
 
 		// variable declaration
 		Token *tok=consume_ident();
-		if(tok){
-			node=calloc(1,sizeof(Node));
-			node->kind=ND_LVAR;
-			LVar *lvar=find_lvar(tok);
-
-			if(lvar){
-				error(token->str,"this variable has already existed.");
-			}else{
-				lvar=calloc(1,sizeof(LVar));
-				lvar->next=locals;
-				lvar->name=tok->str;
-				lvar->len=tok->len;
-				lvar_count++;
-
-				// add type list
-				newtype=&(lvar->type);
-				for(i=0;i<star_count;i++){
-					newtype->ty=PTR;
-					newtype->ptr_to=calloc(1,sizeof(Type));
-					newtype=newtype->ptr_to;
-				}
-
-				if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
-				newtype->ty=INT;
-			}
-
-			if(locals)
-				lvar->offset=(locals->offset)+8;
-			else
-				lvar->offset=8;
-
-			// Is array
-			if(consume("[")){
-				lvar_count+=(token->val)-1;
-				lvar->type.alloc_size=(token->val)*8;
-				lvar->offset+=(lvar->type.alloc_size)-8;
-				token=token->next;
-				expect("]");
-
-				lvar->type.ty=ARRAY;
-			}
-
-			node->type=lvar->type;
-			node->offset=lvar->offset;
-			// locals == new lvar
-			locals=lvar;
-		}else{
+		if(tok)
+			node=local_variable(node,tok,star_count);
+		else
 			error(token->str,"not a variable.");
-		}
 	}else{
 		node=assign();
 	}
@@ -256,9 +210,9 @@ Node *stmt(){
 
 	if(consume_reserved_word("return",TK_RETURN)){
 		node=new_node(ND_RETURN,node,expr());
-		if(!consume(";")){
+		if(!consume(";"))
 			error(token->str,"not a ';' token.");
-		}
+
 	}else if(consume_reserved_word("if",TK_IF)){
 		node=new_node(ND_IF,node,NULL);
 		if(consume("(")){
@@ -267,7 +221,7 @@ Node *stmt(){
 			//check end of caret
 			expect(")");
 
-			// (cond)if expr
+			// (cond)<-if->expr
 			node->lhs=tmp;
 			node->rhs=stmt();
 		}
@@ -286,7 +240,7 @@ Node *stmt(){
 			//check end of caret
 			expect(")");
 
-			// (cond)if expr
+			// (cond)<-while->expr
 			node->lhs=tmp;
 			node->rhs=stmt();
 		}
@@ -326,7 +280,6 @@ void function(Func *func){
 }
 
 void program(){
-	int i;
 	int func_index=0;
 	int star_count;
 
@@ -369,43 +322,7 @@ void program(){
 
 		// gloval variable
 		}else{
-			// if not token -> error
-			if(!def_name) error(token->str,"not a variable.");
-
-			GVar *gvar=calloc(1,sizeof(GVar));
-			gvar->next=globals;
-			gvar->name=def_name->str;
-			gvar->len=def_name->len;
-
-			if(star_count==0)
-				gvar->type.alloc_size=4;
-			else
-				gvar->type.alloc_size=8;
-
-			// add type list
-			Type *newtype;
-			newtype=&(gvar->type);
-			for(i=0;i<star_count;i++){
-				newtype->ty=PTR;
-				newtype->ptr_to=calloc(1,sizeof(Type));
-				newtype=newtype->ptr_to;
-			}
-
-			if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
-			newtype->ty=INT;
-
-			// Is array
-			if(consume("[")){
-				gvar->type.alloc_size=(token->val)*8;
-				token=token->next;
-				expect("]");
-
-				gvar->type.ty=ARRAY;
-			}
-			
-			// locals == new lvar
-			globals=gvar;
-			expect(";");
+			global_variable(star_count,def_name);
 		}
 	}
 	func_list[func_index]=NULL;
