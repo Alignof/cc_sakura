@@ -9,16 +9,17 @@ bool at_eof(){
 }
 
 int is_alnum(char c){
-	return ('a'<=c && c<='z')||
-	('A'<=c && c<='Z')||
-	('0'<=c && c<='9')||
-	(c=='_');
+	return	('a'<=c && c<='z')||
+		('A'<=c && c<='Z')||
+		('0'<=c && c<='9')||
+		(c=='_');
 }
 
 int len_val(char *str){
-	int counter;
-	for(counter=0;(('a' <= *str && *str <= 'z') || ('0' <= *str && *str <= '9'));str++)
+	int counter=0;
+	for(;(('a' <= *str && *str <= 'z') || ('0' <= *str && *str <= '9'));str++)
 		counter++;
+
 	return counter;
 }
 
@@ -59,13 +60,25 @@ Token *new_token(TokenKind kind,Token *cur,char *str){
 	return new;
 }
 
+bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind){
+	if(strncmp(*p,str,len)!=0 || is_alnum((*p)[len]))
+		return false;
+
+	*now=new_token(tk_kind,*now,*p);
+	(*now)->len=len;
+	(*now)->str=*p;
+	*p+=len;
+
+	return true;
+}
+
 Token *tokenize(char *p){
 	bool is_single_token;
 	Token head;
 	head.next=NULL;
 
 	//set head pointer to cur
-	Token *cur=&head;
+	Token *now=&head;
 
 	while(*p){
 		if(isspace(*p)){
@@ -75,93 +88,44 @@ Token *tokenize(char *p){
 
 		//judge single token or multi token or isn't token
 		if(issymbol(p,&is_single_token)){
-			if(is_single_token){
-				cur=new_token(TK_RESERVED,cur,p);
-				p++;
-			}else{
-				cur=new_token(TK_RESERVED,cur,p);
+			now=new_token(TK_RESERVED,now,p);
+			if(is_single_token) p++;
+			else{
 				p+=2;
-				cur->len=2;
+				now->len=2;
 			}
 			continue;
 		}
 
-		//Is Type:int?
-		if(strncmp(p,"int",3)==0 && !is_alnum(p[3])){
-			cur=new_token(TK_TYPE,cur,p);
-			cur->len=3;
-			cur->str=p;
-			p+=3;
-			continue;
-		}
+		if(consume_reserved(&p,"int",3,&now,TK_TYPE))	   continue;
+		if(consume_reserved(&p,"if",2,&now,TK_IF))	   continue;
+		if(consume_reserved(&p,"else",4,&now,TK_ELSE))	   continue;
+		if(consume_reserved(&p,"while",5,&now,TK_WHILE))   continue;
+		if(consume_reserved(&p,"sizeof",6,&now,TK_SIZEOF)) continue;
+		if(consume_reserved(&p,"return",6,&now,TK_RETURN)) continue;
 
-		//Is if?
-		if(strncmp(p,"if",2)==0 && !is_alnum(p[2])){
-			cur=new_token(TK_IF,cur,p);
-			cur->len=2;
-			cur->str=p;
-			p+=2;
-			continue;
-		}
-
-		//Is else?
-		if(strncmp(p,"else",4)==0 && !is_alnum(p[4])){
-			cur=new_token(TK_ELSE,cur,p);
-			cur->len=4;
-			cur->str=p;
-			p+=4;
-			continue;
-		}
-
-		//Is while?
-		if(strncmp(p,"while",5)==0 && !is_alnum(p[5])){
-			cur=new_token(TK_WHILE,cur,p);
-			cur->len=5;
-			cur->str=p;
-			p+=5;
-			continue;
-		}
-		
-		//Is sizeof?
-		if(strncmp(p,"sizeof",6)==0 && !is_alnum(p[6])){
-			cur=new_token(TK_SIZEOF,cur,p);
-			cur->len=6;
-			cur->str=p;
-			p+=6;
-			continue;
-		}
-		
 		//Is block? '{' or '}'
 		if(isblock(p)){
-			cur=new_token(TK_BLOCK,cur,p);
-			cur->len=1;
-			cur->val=*p;
-			cur->str=p;
+			now=new_token(TK_BLOCK,now,p);
+			now->len=1;
+			now->val=*p;
+			now->str=p;
 			p+=1;
 			continue;
 		}
 		
-		//Is return?
-		if(strncmp(p,"return",6)==0 && !is_alnum(p[6])){
-			cur=new_token(TK_RETURN,cur,p);
-			cur->len=6;
-			cur->str=p;
-			p+=6;
-			continue;
-		}
-
 		//Is valiable?
 		if('a'<=*p && *p<='z'){
-			cur=new_token(TK_IDENT,cur,p++);
-			cur->len=1;
+			now=new_token(TK_IDENT,now,p++);
+			now->len=1;
 			continue;
 		}
 
 		if(isdigit(*p)){
 			//add number token
-			cur=new_token(TK_NUM,cur,p);
+			now=new_token(TK_NUM,now,p);
 			//set number
-			cur->val=strtol(p,&p,10);
+			now->val=strtol(p,&p,10);
 			continue;
 		}
 
@@ -169,7 +133,6 @@ Token *tokenize(char *p){
 	}
 
 	//add EOF token
-	new_token(TK_EOF,cur,p);
+	new_token(TK_EOF,now,p);
 	return head.next;
 }
-

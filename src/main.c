@@ -2,7 +2,7 @@
 
 int main(int argc,char **argv){
 	int i,j;
-	int type_size;
+	int t_size;
 
 	char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
@@ -29,12 +29,8 @@ int main(int argc,char **argv){
 	// set global variable
 	GVar *start=globals;
 	for (GVar *var=start;var;var=var->next){
-		if(var->type.ty==INT || var->type.ty==ARRAY)
-			type_size=4;
-		else if(var->type.ty==PTR)
-			type_size=8;
-
-		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.alloc_size,type_size);
+		t_size=type_size(var->type.ty);
+		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.alloc_size,t_size);
 	}
 
 	//generate assembly at first expr
