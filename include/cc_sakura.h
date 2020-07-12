@@ -168,6 +168,7 @@ Node *primary();
 Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
 Node *call_function(Node *node,Token *tok);
 Node *array_index(Node *node);
+void get_argument(int func_index);
 
 // codegan.c
 int label_begin;

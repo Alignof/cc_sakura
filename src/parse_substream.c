@@ -64,3 +64,33 @@ Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
 
 	return node;
 }
+
+void get_argument(int func_index){
+	int arg_counter=0;
+	Node *tmp;
+	Node **args_ptr;
+
+	// get argument
+	if(!(consume(")"))){
+		// set args node
+		args_ptr=&(func_list[func_index]->args);
+		tmp=*args_ptr;
+		while(token->kind == TK_NUM || token->kind == TK_TYPE){
+			*args_ptr=(Node *)calloc(1,sizeof(Node));
+			(*args_ptr)->kind=ND_ARG;
+			(*args_ptr)->val=arg_counter;
+			(*args_ptr)->vector=expr();
+			(*args_ptr)->rhs=tmp;
+			// go to next
+			tmp=*args_ptr;
+
+			arg_counter++;
+
+			if(!(consume(",")))
+				break;
+		}
+		args_ptr=NULL;
+		func_list[func_index]->args->val=arg_counter-1;
+		expect(")");
+	}
+}

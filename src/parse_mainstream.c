@@ -326,21 +326,17 @@ void function(Func *func){
 }
 
 void program(){
-	int i=0;
-	int counter;
+	int i;
+	int func_index=0;
 	int star_count;
-	Node *tmp;
-	Node **args_ptr;
 
 	while(!at_eof()){
 		// reset lvar list
 		locals=NULL;
 		// reset lvar counter
 		lvar_count=0;
-
-		counter=0;
 		star_count=0;
-		func_list[i]=(Func *)malloc(sizeof(Func));
+		func_list[func_index]=(Func *)malloc(sizeof(Func));
 
 		// type of function return value
 		if(!consume_reserved_word("int",TK_TYPE))
@@ -360,37 +356,15 @@ void program(){
 
 		// function
 		if(consume("(")){
-			func_list[i]->name=(char *)calloc(counter,sizeof(char));
-			strncpy(func_list[i]->name,def_name->str,def_name->len);
-
-			counter=0;
-			// get argument
-			if(!(consume(")"))){
-				// set args node
-				args_ptr=&(func_list[i]->args);
-				tmp=*args_ptr;
-				while(token->kind == TK_NUM || token->kind == TK_TYPE){
-					*args_ptr=(Node *)calloc(1,sizeof(Node));
-					(*args_ptr)->kind=ND_ARG;
-					(*args_ptr)->val=counter;
-					(*args_ptr)->vector=expr();
-					(*args_ptr)->rhs=tmp;
-					// go to next
-					tmp=*args_ptr;
-
-					counter++;
-
-					if(!(consume(",")))
-						break;
-				}
-				args_ptr=NULL;
-				func_list[i]->args->val=counter-1;
-				expect(")");
-			}
+			func_list[func_index]->name=(char *)calloc(def_name->len,sizeof(char));
+			strncpy(func_list[func_index]->name,def_name->str,def_name->len);
+			
+			// get arguments
+			get_argument(func_index);
 
 			// get function block
 			consume("{");
-			function(func_list[i++]);
+			function(func_list[func_index++]);
 			consume("}");
 
 		// gloval variable
@@ -434,5 +408,5 @@ void program(){
 			expect(";");
 		}
 	}
-	func_list[i]=NULL;
+	func_list[func_index]=NULL;
 }
