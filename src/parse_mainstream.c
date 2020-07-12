@@ -13,7 +13,6 @@ Node *primary(){
 	Token *tok=consume_ident();
 	if(tok){
 		Node *node=calloc(1,sizeof(Node));
-		//node->kind=ND_LVAR;
 
 		LVar *lvar=find_lvar(tok);
 		if(lvar){
@@ -71,7 +70,7 @@ Node *unary(){
 
 
 	if(consume("+"))
-		//ignore +
+		//ignore +n
 		return primary();
 
 	if(consume("-"))
@@ -226,6 +225,7 @@ Node *stmt(){
 		}
 
 		if(consume_reserved_word("else",TK_ELSE)){
+			// if()~ <-else-> expr
 			Node *else_block=new_node(ND_ELSE,node,stmt());
 			else_block->lhs=node->rhs;
 			node->rhs=else_block;
