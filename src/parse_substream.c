@@ -1,6 +1,6 @@
 #include "cc_sakura.h"
 
-void call_function(Node *node,Token *tok){
+Node *call_function(Node *node,Token *tok){
 	expect("(");
 
 	node->kind=ND_CALL_FUNC;
@@ -20,11 +20,12 @@ void call_function(Node *node,Token *tok){
 		tmp->vector=NULL;
 		expect(")");
 	}
+
+	return node;
 }
 
-void array_index(Node *node){
+Node *array_index(Node *node){
 	Node *pointer_size;
-
 	// Is array index
 	expect("[");
 
@@ -40,9 +41,11 @@ void array_index(Node *node){
 	node->type.ty=INT;
 
 	expect("]");
+
+	return node;
 }
 
-void pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
+Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
 	int ptrtype;
 
 	node->type.ty=PTR;
@@ -58,4 +61,6 @@ void pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
 		pointer_size->val=type_size(ptrtype);
 		node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
 	}
+
+	return node;
 }

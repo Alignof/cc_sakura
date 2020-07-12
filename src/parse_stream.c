@@ -22,7 +22,7 @@ Node *primary(){
 			node->offset=lvar->offset;
 			node->type=lvar->type;
 		}else if(*(token->str)=='('){
-			call_function(node,tok);
+			node=call_function(node,tok);
 		}else{
 			GVar *gvar=find_gvar(tok);
 			if(gvar){
@@ -38,7 +38,7 @@ Node *primary(){
 		}
 
 		if(*(token->str)=='[')
-			array_index(node);
+			node=array_index(node);
 
 		return node;
 	}
@@ -55,7 +55,7 @@ Node *unary(){
 		node=new_node(ND_DEREF,new_node_num(0),unary());
 		rhs_ptr_to=node->rhs->type.ptr_to;
 
-		if(rhs_ptr_to==NULL || rhs_ptr_to->ty==PTR || rhs_ptr_to->ty==ARRAY)
+		if(rhs_ptr_to==NULL || type_size(rhs_ptr_to->ty)==8)
 			node->type.ty=PTR;
 
 		return node;
@@ -121,7 +121,7 @@ Node *add(){
 			rhs_type=&(node->rhs->type);
 
 			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8)
-				pointer_calc(node,lhs_type,rhs_type);
+				node=pointer_calc(node,lhs_type,rhs_type);
 
 		}else if(consume("-")){
 			node=new_node(ND_SUB,node,mul());
@@ -129,7 +129,7 @@ Node *add(){
 			rhs_type=&(node->rhs->type);
 
 			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8)
-				pointer_calc(node,lhs_type,rhs_type);
+				node=pointer_calc(node,lhs_type,rhs_type);
 
 		}else{
 			return node;

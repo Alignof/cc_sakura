@@ -165,9 +165,9 @@ Node *unary();
 Node *primary();
 
 // parse_substream.c
-void pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
-void call_function(Node *node,Token *tok);
-void array_index(Node *node);
+Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
+Node *call_function(Node *node,Token *tok);
+Node *array_index(Node *node);
 
 // codegan.c
 int label_begin;
