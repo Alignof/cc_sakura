@@ -169,8 +169,8 @@ Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
 Node *call_function(Node *node,Token *tok);
 Node *array_index(Node *node);
 void get_argument(int func_index);
-void global_variable();
-Node *local_variable(Node *node,Token *tok,int star_count);
+void declare_global_variable();
+Node *declare_local_variable(Node *node,Token *tok,int star_count);
 
 // codegan.c
 int label_begin;

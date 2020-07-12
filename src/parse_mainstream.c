@@ -194,7 +194,7 @@ Node *expr(){
 		// variable declaration
 		Token *tok=consume_ident();
 		if(tok)
-			node=local_variable(node,tok,star_count);
+			node=declare_local_variable(node,tok,star_count);
 		else
 			error(token->str,"not a variable.");
 	}else{
@@ -206,7 +206,6 @@ Node *expr(){
 
 Node *stmt(){
 	Node *node=NULL;
-	Node *tmp=NULL;
 
 	if(consume_reserved_word("return",TK_RETURN)){
 		node=new_node(ND_RETURN,node,expr());
@@ -217,45 +216,45 @@ Node *stmt(){
 		node=new_node(ND_IF,node,NULL);
 		if(consume("(")){
 			//jmp expr
-			Node *tmp=expr();
+			Node *cond=expr();
 			//check end of caret
 			expect(")");
 
 			// (cond)<-if->expr
-			node->lhs=tmp;
+			node->lhs=cond;
 			node->rhs=stmt();
 		}
 
 		if(consume_reserved_word("else",TK_ELSE)){
-			tmp=new_node(ND_ELSE,node,stmt());
-			tmp->lhs=node->rhs;
-			node->rhs=tmp;
+			Node *else_block=new_node(ND_ELSE,node,stmt());
+			else_block->lhs=node->rhs;
+			node->rhs=else_block;
 			node->kind=ND_IFELSE;
 		}
 	}else if(consume_reserved_word("while",TK_WHILE)){
 		node=new_node(ND_WHILE,node,NULL);
 		if(consume("(")){
 			//jmp expr
-			Node *tmp=expr();
+			Node *cond=expr();
 			//check end of caret
 			expect(")");
 
 			// (cond)<-while->expr
-			node->lhs=tmp;
+			node->lhs=cond;
 			node->rhs=stmt();
 		}
 	}else if(consume("{")){
 		node=new_node(ND_BLOCK,node,NULL);
 
-		Node *tmp=calloc(1,sizeof(Node));
-		node->vector=tmp;
+		Node *block_code=calloc(1,sizeof(Node));
+		node->vector=block_code;
 		while(token->kind!=TK_BLOCK){
 			//Is first?
-			if(tmp->vector){
-				tmp=stmt();
+			if(block_code->vector){
+				block_code=stmt();
 			}else{
-				tmp->vector=stmt();
-				tmp=tmp->vector;
+				block_code->vector=stmt();
+				block_code=block_code->vector;
 			}
 		}
 		expect("}");
@@ -320,9 +319,9 @@ void program(){
 			function(func_list[func_index++]);
 			consume("}");
 
-		// gloval variable
+		// global variable
 		}else{
-			global_variable(star_count,def_name);
+			declare_global_variable(star_count,def_name);
 		}
 	}
 	func_list[func_index]=NULL;

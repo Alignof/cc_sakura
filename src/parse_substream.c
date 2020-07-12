@@ -9,15 +9,15 @@ Node *call_function(Node *node,Token *tok){
 
 	// have argument?
 	if(!(consume(")"))){
-		Node *tmp=node;
+		Node *now=node;
 		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED){
-			tmp->vector=equelity();
-			tmp=tmp->vector;
+			now->vector=equelity();
+			now=now->vector;
 
 			if(!(consume(",")))
 				break;
 		}
-		tmp->vector=NULL;
+		now->vector=NULL;
 		expect(")");
 	}
 
@@ -67,22 +67,22 @@ Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
 
 void get_argument(int func_index){
 	int arg_counter=0;
-	Node *tmp;
+	Node *next;
 	Node **args_ptr;
 
 	// get argument
 	if(!(consume(")"))){
 		// set args node
 		args_ptr=&(func_list[func_index]->args);
-		tmp=*args_ptr;
+		next=*args_ptr;
 		while(token->kind == TK_NUM || token->kind == TK_TYPE){
 			*args_ptr=(Node *)calloc(1,sizeof(Node));
 			(*args_ptr)->kind=ND_ARG;
 			(*args_ptr)->val=arg_counter;
 			(*args_ptr)->vector=expr();
-			(*args_ptr)->rhs=tmp;
+			(*args_ptr)->rhs=next;
 			// go to next
-			tmp=*args_ptr;
+			next=*args_ptr;
 
 			arg_counter++;
 
@@ -95,7 +95,7 @@ void get_argument(int func_index){
 	}
 }
 
-void global_variable(int star_count,Token* def_name){
+void declare_global_variable(int star_count,Token* def_name){
 	// if not token -> error
 	if(!def_name) error(token->str,"not a variable.");
 
@@ -130,7 +130,7 @@ void global_variable(int star_count,Token* def_name){
 	expect(";");
 }
 
-Node *local_variable(Node *node,Token *tok,int star_count){
+Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	int i;
 	Type *newtype;
 
