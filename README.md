@@ -80,5 +80,11 @@ int a[10]; int main(){0;} => 0
 int a; int b; int main(){a=2;a;} => 2
 int a; int b; int main(){a=2;b=3;a+b;} => 5
 int a; int b; int main(){int a;a=2;b=3;a+b;} => 5
+int main(){char a;a=2;return a;} => 2
+int main(){char a;char b;char c;char d; a=3;b=2;c=12;d=17;(d-c)*(a+b);} => 25
+int main(){char a;char b;char c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;} => 9
+int main(){char x; char *y; char **z; y=&x;z=&y;**z=3;return x;} => 3
+int main(){char x; sizeof(x+2);} => 1
+int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);} => 3
 OK
 ```

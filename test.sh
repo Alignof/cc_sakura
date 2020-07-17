@@ -116,8 +116,11 @@ assert 5  "int a; int b; int main(){a=2;b=3;a+b;}"
 assert 5  "int a; int b; int main(){int a;a=2;b=3;a+b;}"
 
 assert 2  "int main(){char a;a=2;return a;}"
+assert 25 "int main(){char a;char b;char c;char d; a=3;b=2;c=12;d=17;(d-c)*(a+b);}"
 assert 9  "int main(){char a;char b;char c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;}"
-assert 2  "int main(){char a;char b;char c; a=2;b=3;if(a<b) c=b-a/a; else c=a+b*b-a;c;}"
+assert 3  "int main(){char x; char *y; char **z; y=&x;z=&y;**z=3;return x;}"
+assert 1  "int main(){char x; sizeof(x+2);}"
+assert 3  "int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);}"
 
 
 echo OK
