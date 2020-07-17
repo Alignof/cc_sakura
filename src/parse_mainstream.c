@@ -291,14 +291,21 @@ void program(){
 		func_list[func_index]=(Func *)malloc(sizeof(Func));
 
 		// type of function return value
-		if(!consume_reserved_word("int",TK_TYPE))
-			error(token->str,"not a function type token.");
+		if(token->kind==TK_TYPE){
+			if(!consume_reserved_word("int",TK_TYPE))	func_list[func_index]->type.ty=INT;
+			else if(!consume_reserved_word("char",TK_TYPE)) func_list[func_index]->type.ty=CHAR;
+			else error(token->str,"not a function type token.");
+		}
 
 		// count asterisk
 		while(token->kind==TK_RESERVED && *(token->str)=='*'){
 			star_count++;
 			token=token->next;
 		}
+
+		if(star_count)
+			func_list[func_index]->type.ty=PTR;
+
 
 		// Is function?
 		if(token->kind != TK_IDENT ||!('a' <= *(token->str) && *(token->str) <= 'z'))

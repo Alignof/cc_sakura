@@ -98,6 +98,7 @@ Token *tokenize(char *p){
 		}
 
 		if(consume_reserved(&p,"int",3,&now,TK_TYPE))	   continue;
+		if(consume_reserved(&p,"char",3,&now,TK_TYPE))	   continue;
 		if(consume_reserved(&p,"if",2,&now,TK_IF))	   continue;
 		if(consume_reserved(&p,"else",4,&now,TK_ELSE))	   continue;
 		if(consume_reserved(&p,"while",5,&now,TK_WHILE))   continue;
