@@ -52,6 +52,11 @@ Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
 	Node *pointer_size=calloc(1,sizeof(Node));
 	pointer_size->kind=ND_NUM;
 
+	if(type_size(lhs_type->ty)==1 || type_size(rhs_type->ty)==1){
+		node->type.ty=CHAR;
+		return node;
+	}
+
 	if(type_size(lhs_type->ty)==8 && lhs_type->ptr_to!=NULL){
 		ptrtype=lhs_type->ptr_to->ty;
 		pointer_size->val=type_size(ptrtype);
