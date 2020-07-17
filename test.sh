@@ -54,13 +54,13 @@ assert 1  "int main(){int a; a=0;if(3>2) a=1;a;}"
 assert 0  "int main(){int a; a=0;if(3<2) a=1;a;}"
 assert 7  "int main(){int a; a=1+2;if(3>2) a=10-3;a;}"
 assert 3  "int main(){int a; a=1+2;if(3<2) a=10-3;a;}"
-assert 1  "int main(){int a;int b;int c; a=2;b=3;c=a+b;if(a<b) c=b-a;c;}"
-assert 5  "int main(){int a;int b;int c; a=2;b=3;c=a+b;if(a>b) c=b-a;c;}"
+assert 1  "int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a<b) c=b-a;c;}"
+assert 5  "int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a>b) c=b-a;c;}"
 
 assert 5  "int main(){int a; if(2>3) a=3-2; else a=2+3;a;}"
 assert 1  "int main(){int a; if(2<3) a=3-2; else a=2+3;a;}"
-assert 9  "int main(){int a;int b;int c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;}"
-assert 2  "int main(){int a;int b;int c; a=2;b=3;if(a<b) c=b-a/a; else c=a+b*b-a;c;}"
+assert 9  "int main(){int a; int b;int c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;}"
+assert 2  "int main(){int a; int b;int c; a=2;b=3;if(a<b) c=b-a/a; else c=a+b*b-a;c;}"
 
 assert 0  "int main(){int a; a=10;while(a>0) a=a-1;a;}"
 assert 10 "int main(){int a; a=10;while(a<0) a=a-1;a;}"
@@ -114,5 +114,10 @@ assert 0  "int a[10]; int main(){0;}"
 assert 2  "int a; int b; int main(){a=2;a;}"
 assert 5  "int a; int b; int main(){a=2;b=3;a+b;}"
 assert 5  "int a; int b; int main(){int a;a=2;b=3;a+b;}"
+
+assert 2  "int main(){char a;a=2;return a;}"
+assert 9  "int main(){char a;char b;char c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;}"
+assert 2  "int main(){char a;char b;char c; a=2;b=3;if(a<b) c=b-a/a; else c=a+b*b-a;c;}"
+
 
 echo OK

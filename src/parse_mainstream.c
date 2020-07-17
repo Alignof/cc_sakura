@@ -120,7 +120,7 @@ Node *add(){
 			lhs_type=&(node->lhs->type);
 			rhs_type=&(node->rhs->type);
 
-			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8)
+			if(type_size(lhs_type->ty)!=4 || type_size(rhs_type->ty)!=4)
 				node=pointer_calc(node,lhs_type,rhs_type);
 
 		}else if(consume("-")){
@@ -183,7 +183,14 @@ Node *expr(){
 	int star_count=0;
 	Node *node;
 
-	if(consume_reserved_word("int",TK_TYPE)){
+	if(token->kind==TK_TYPE){
+		node=calloc(1,sizeof(Node));
+		node->kind=ND_LVAR;
+
+		// check type
+		if(consume_reserved_word("int",TK_TYPE)) node->type.ty=INT;
+		else if(consume_reserved_word("char",TK_TYPE)) node->type.ty=CHAR;
+		
 		// count asterisk
 		while(token->kind==TK_RESERVED && *(token->str)=='*'){
 			star_count++;
@@ -291,14 +298,21 @@ void program(){
 		func_list[func_index]=(Func *)malloc(sizeof(Func));
 
 		// type of function return value
-		if(!consume_reserved_word("int",TK_TYPE))
-			error(token->str,"not a function type token.");
+		if(token->kind==TK_TYPE){
+			if(consume_reserved_word("int",TK_TYPE))	func_list[func_index]->type.ty=INT;
+			else if(consume_reserved_word("char",TK_TYPE))  func_list[func_index]->type.ty=CHAR;
+			else error(token->str,"not a function type token.");
+		}
 
 		// count asterisk
 		while(token->kind==TK_RESERVED && *(token->str)=='*'){
 			star_count++;
 			token=token->next;
 		}
+
+		if(star_count)
+			func_list[func_index]->type.ty=PTR;
+
 
 		// Is function?
 		if(token->kind != TK_IDENT ||!('a' <= *(token->str) && *(token->str) <= 'z'))

@@ -52,6 +52,11 @@ Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
 	Node *pointer_size=calloc(1,sizeof(Node));
 	pointer_size->kind=ND_NUM;
 
+	if(type_size(lhs_type->ty)==1 || type_size(rhs_type->ty)==1){
+		node->type.ty=CHAR;
+		return node;
+	}
+
 	if(type_size(lhs_type->ty)==8 && lhs_type->ptr_to!=NULL){
 		ptrtype=lhs_type->ptr_to->ty;
 		pointer_size->val=type_size(ptrtype);
@@ -134,16 +139,14 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	int i;
 	Type *newtype;
 
-	node=calloc(1,sizeof(Node));
-	node->kind=ND_LVAR;
 	LVar *lvar=find_lvar(tok);
-
 	if(lvar) error(token->str,"this variable has already existed.");
 
 	lvar=calloc(1,sizeof(LVar));
 	lvar->next=locals;
 	lvar->name=tok->str;
 	lvar->len=tok->len;
+	lvar->type.ty=node->type.ty;
 	lvar_count++;
 
 	// add type list
@@ -155,7 +158,6 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	}
 
 	if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
-	newtype->ty=INT;
 
 	if(locals)
 		lvar->offset=(locals->offset)+8;
