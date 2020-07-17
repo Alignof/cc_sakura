@@ -183,7 +183,14 @@ Node *expr(){
 	int star_count=0;
 	Node *node;
 
-	if(consume_reserved_word("int",TK_TYPE)){
+	if(token->kind==TK_TYPE){
+		node=calloc(1,sizeof(Node));
+		node->kind=ND_LVAR;
+
+		// check type
+		if(consume_reserved_word("int",TK_TYPE)) node->type.ty=INT;
+		else if(consume_reserved_word("char",TK_TYPE)) node->type.ty=CHAR;
+		
 		// count asterisk
 		while(token->kind==TK_RESERVED && *(token->str)=='*'){
 			star_count++;
@@ -292,8 +299,8 @@ void program(){
 
 		// type of function return value
 		if(token->kind==TK_TYPE){
-			if(!consume_reserved_word("int",TK_TYPE))	func_list[func_index]->type.ty=INT;
-			else if(!consume_reserved_word("char",TK_TYPE)) func_list[func_index]->type.ty=CHAR;
+			if(consume_reserved_word("int",TK_TYPE))	func_list[func_index]->type.ty=INT;
+			else if(consume_reserved_word("char",TK_TYPE))  func_list[func_index]->type.ty=CHAR;
 			else error(token->str,"not a function type token.");
 		}
 

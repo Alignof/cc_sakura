@@ -134,16 +134,14 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	int i;
 	Type *newtype;
 
-	node=calloc(1,sizeof(Node));
-	node->kind=ND_LVAR;
 	LVar *lvar=find_lvar(tok);
-
 	if(lvar) error(token->str,"this variable has already existed.");
 
 	lvar=calloc(1,sizeof(LVar));
 	lvar->next=locals;
 	lvar->name=tok->str;
 	lvar->len=tok->len;
+	lvar->type.ty=node->type.ty;
 	lvar_count++;
 
 	// add type list
@@ -155,7 +153,6 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	}
 
 	if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
-	newtype->ty=INT;
 
 	if(locals)
 		lvar->offset=(locals->offset)+8;

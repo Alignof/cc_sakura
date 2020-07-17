@@ -115,6 +115,8 @@ Node *new_node_num(int val){
 
 int type_size(TypeKind type){
 	switch(type){
+		case CHAR:
+			return 1;
 		case INT:
 			return 4;
 		case PTR:
