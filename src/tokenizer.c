@@ -111,7 +111,15 @@ Token *tokenize(char *p){
 			now->len=1;
 			now->val=*p;
 			now->str=p;
-			p+=1;
+			p++;
+			continue;
+		}
+
+		//Is string?
+		if(*p=='"'){
+			p++;
+			while(*p!='"')	now=new_token(TK_STR,now,p++);
+			p++;
 			continue;
 		}
 		

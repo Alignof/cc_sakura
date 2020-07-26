@@ -16,7 +16,7 @@ Node *primary(){
 
 		LVar *lvar=find_lvar(tok);
 		if(lvar){
-			// variable exist
+			// local variable exist
 			node->kind=ND_LVAR;
 			node->offset=lvar->offset;
 			node->type=lvar->type;
@@ -26,7 +26,7 @@ Node *primary(){
 		}else{
 			GVar *gvar=find_gvar(tok);
 			if(gvar){
-				// variable exist
+				// global variable exist
 				node->kind=ND_GVAR;
 				node->type=gvar->type;
 				node->str=tok->str;
@@ -68,6 +68,24 @@ Node *unary(){
 		return node;
 	}
 
+	if(token->kind==TK_STR){
+		consume("\"");
+		Node *node=calloc(1,sizeof(Node));
+		node->kind=ND_STR;
+		node->type.ty=PTR;
+		node->str=token->str;
+		node->val=strings ? strings->val+1 : 0;
+		node->offset=consume_string();
+
+		if(strings==NULL){
+			strings=node;
+		}else{
+			node->vector=strings;
+			strings=node;
+		}
+
+		return node;
+	}
 
 	if(consume("+"))
 		//ignore +n

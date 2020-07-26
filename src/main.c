@@ -33,6 +33,13 @@ int main(int argc,char **argv){
 		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.alloc_size,t_size);
 	}
 
+	// set string
+	Node *_start=strings;
+	for (Node *var=_start;var;var=var->vector){
+		printf(".LC%d:\n",var->val);
+		printf("	.string \"%.*s\"\n",var->offset,var->str);
+	}
+
 	//generate assembly at first expr
 	for(i=0;func_list[i];i++){
 		label_begin=0;
