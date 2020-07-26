@@ -23,6 +23,16 @@ bool consume(char *op){
 	return true;
 }
 
+int consume_string(){
+	int len=0;
+	while(token->kind==TK_STR){
+		token=token->next;
+		len++;
+	}
+
+	return len;
+}
+
 bool consume_ret(){
 	if(token->kind != TK_RETURN  || token->len!=6 ||
 		memcmp(token->str,"return",token->len))

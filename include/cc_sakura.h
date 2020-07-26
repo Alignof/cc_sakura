@@ -17,6 +17,7 @@ typedef enum{
 	TK_FOR,
 	TK_SIZEOF,
 	TK_BLOCK,
+	TK_STR,
 	TK_RETURN,
 	TK_EOF,
 }TokenKind;
@@ -36,7 +37,8 @@ typedef enum{
 	ND_NE,		//  !=
 	ND_ASSIGN,	//  =
 	ND_LVAR,	//  local valiable
-	ND_GVAR,	//  local valiable
+	ND_GVAR,	//  global valiable
+	ND_STR,		//  "string"
 	ND_NUM,		//  integer
 	ND_IF,		//  if
 	ND_ELSE,	//  else
@@ -138,11 +140,13 @@ Token *token;
 Func *func_list[100];
 LVar *locals;
 GVar *globals;
+Node *strings;
 
 void error(char *loc,char *fmt, ...);
 bool consume(char *op);
 bool consume_ret();
 bool consume_reserved_word();
+int consume_string();
 void expect(char *op);
 int expect_number();
 int type_size(TypeKind type);
