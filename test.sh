@@ -6,7 +6,7 @@ assert() {
 	./cc_sakura "$input" > tmp.s
 	gcc -c tmp.s 
 	gcc -I./include -c -o src/obj/func_for_test.o src/func_for_test.c
-	gcc -o tmp tmp.o src/obj/func_for_test.o
+	gcc -o tmp -static tmp.s src/obj/func_for_test.o
 	#gcc -o tmp tmp.s
 	./tmp
 	actual="$?"
@@ -122,6 +122,6 @@ assert() {
 # assert 1  "int main(){char x; sizeof(x+2);}"
 # assert 3  "int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);}"
 
-assert 68  'int main(){char *x; x="hello";x[1];}'
+assert 101  'int main(){char *x; x="hello"; x[1];}'
 
 echo OK

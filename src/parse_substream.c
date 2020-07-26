@@ -24,6 +24,11 @@ Node *call_function(Node *node,Token *tok){
 	return node;
 }
 
+TypeKind get_pointer_type(Type *given){
+	while(given->ty==PTR) given=given->ptr_to;
+	return given->ty;
+}
+
 Node *array_index(Node *node){
 	Node *pointer_size;
 	// Is array index
@@ -34,7 +39,7 @@ Node *array_index(Node *node){
 
 	pointer_size=calloc(1,sizeof(Node));
 	pointer_size->kind=ND_NUM;
-	pointer_size->val=8;
+	pointer_size->val=type_size(get_pointer_type(&(node->lhs->type)));
 	node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
 
 	node=new_node(ND_DEREF,new_node_num(0),node);
@@ -152,8 +157,9 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	// add type list
 	newtype=&(lvar->type);
 	for(i=0;i<star_count;i++){
-		newtype->ty=PTR;
 		newtype->ptr_to=calloc(1,sizeof(Type));
+		newtype->ptr_to->ty=newtype->ty;
+		newtype->ty=PTR;
 		newtype=newtype->ptr_to;
 	}
 

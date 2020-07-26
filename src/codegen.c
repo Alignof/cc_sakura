@@ -68,9 +68,10 @@ void gen(Node *node){
 
 			return;
 		case ND_STR:
-			printf("	mov edi, OFFSET FLAT:.LC%d\n",node->val);
-			//printf("	lea rax, .LC%d[rip]\n",node->val);
-			printf("	push rdi\n");
+			//printf("	mov eax, OFFSET FLAT:.LC%d\n",node->val);
+			printf("	lea rax, .LC%d[rip]\n",node->val);
+			//printf("	mov rax,[rax]\n");
+			printf("	push rax\n");
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
