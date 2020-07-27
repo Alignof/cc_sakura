@@ -86,5 +86,7 @@ int main(){char a;char b;char c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;} => 
 int main(){char x; char *y; char **z; y=&x;z=&y;**z=3;return x;} => 3
 int main(){char x; sizeof(x+2);} => 1
 int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);} => 3
+int main(){char *x; x="hello"; x[1];} => 101
+int main(){char *x; x="hello"; *(x+2);} => 108
 OK
 ```
