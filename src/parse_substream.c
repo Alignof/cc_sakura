@@ -107,7 +107,7 @@ void get_argument(int func_index){
 
 void declare_global_variable(int star_count,Token* def_name){
 	// if not token -> error
-	if(!def_name) error(token->str,"not a variable.");
+	if(!def_name) error_at(token->str,"not a variable.");
 
 	GVar *gvar=calloc(1,sizeof(GVar));
 	gvar->next=globals;
@@ -145,7 +145,7 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	Type *newtype;
 
 	LVar *lvar=find_lvar(tok);
-	if(lvar) error(token->str,"this variable has already existed.");
+	if(lvar) error_at(token->str,"this variable has already existed.");
 
 	lvar=calloc(1,sizeof(LVar));
 	lvar->next=locals;

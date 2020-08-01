@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 
 typedef enum{
@@ -124,6 +125,10 @@ struct LVar{
 	LVar *next;
 };
 
+// main
+char *read_file(char *path);
+void get_code(int argc,char **argv);
+
 // tokenizer
 int len_val(char *str);
 bool issymbol(char *str, bool *flag);
@@ -136,6 +141,7 @@ bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind);
 // parse_func.c
 int lvar_count;
 char *user_input;
+char filename[100];
 Token *token;
 Func *func_list[100];
 LVar *locals;
@@ -143,6 +149,7 @@ GVar *globals;
 Node *strings;
 
 void error(char *loc,char *fmt, ...);
+void error_at(char *loc,char *msg);
 bool consume(char *op);
 bool consume_ret();
 bool consume_reserved_word();
