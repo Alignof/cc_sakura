@@ -4,6 +4,7 @@ char *read_file(char *path){
 	FILE *fp;
 	char *buf;
 
+	strcpy(filename,path);
 	if ((fp=fopen(path,"r")) == NULL) {
 		fprintf(stderr,"File open error.\n");
 		exit(1);
@@ -33,8 +34,9 @@ void get_code(int argc,char **argv){
 	if(argc==2){
 		user_input=read_file(argv[1]);
 	}else if(argc==3){
-		if(!strcmp(argv[1],"-c")){
+		if(!strcmp(argv[1],"-cl")){
 			user_input=argv[2];
+			strcpy(filename,"command line");
 		}else{
 			fprintf(stderr,"Incorrect option\n");
 			exit(1);

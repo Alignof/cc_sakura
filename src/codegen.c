@@ -11,7 +11,7 @@ void gen_gvar(Node *node){
 
 void gen_lvar(Node *node){
 	if(node->kind != ND_LVAR && node->kind != ND_CALL_FUNC)
-		error(token->str,"not a variable");
+		error_at(token->str,"not a variable");
 
 	printf("	mov rax,rbp\n");
 	printf("	sub rax,%d\n",node->offset);

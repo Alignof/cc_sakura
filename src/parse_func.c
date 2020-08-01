@@ -13,6 +13,30 @@ void error(char *loc,char *fmt, ...){
 	exit(1);
 }
 
+void error_at(char *loc,char *msg){
+	char *start=loc;
+	while(user_input<start && start[-1]!='\n') start--;
+
+	char *end=loc;
+	while(*end!='\n') end++;
+
+	int line_num=1;
+	for(char *c=user_input;c<loc;c++){
+		if(*c=='\n') line_num++;
+	}
+
+	// consume \t
+	while(*start=='\t') start++;
+
+	int indent=fprintf(stderr,"%s:%d ",filename,line_num);
+	fprintf(stderr,"%.*s\n",(int)(end-start),start);
+
+	int pos=indent+loc-start;
+	fprintf(stderr,"%*s",pos,"");
+	fprintf(stderr,"^ %s\n",msg);
+	exit(1);
+}
+
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
@@ -35,7 +59,7 @@ int consume_string(){
 
 bool consume_ret(){
 	if(token->kind != TK_RETURN  || token->len!=6 ||
-		memcmp(token->str,"return",token->len))
+			memcmp(token->str,"return",token->len))
 		return false;
 	token=token->next;
 	return true;
@@ -43,8 +67,8 @@ bool consume_ret(){
 
 bool consume_reserved_word(char *keyword,TokenKind kind){
 	if(	token->kind != kind ||
-		token->len!=strlen(keyword)||
-		memcmp(token->str,keyword,token->len))
+			token->len!=strlen(keyword)||
+			memcmp(token->str,keyword,token->len))
 		return false;
 	token=token->next;
 	return true;
@@ -74,14 +98,14 @@ void expect(char *op){
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
 			strlen(op)!=token->len||
 			memcmp(token->str,op,token->len))
-		error(token->str,"not a charctor.");
+		error_at(token->str,"not a charctor.");
 	token=token->next;
 }
 
 int expect_number(){
 	// judge whether token is a number and move the pointer to the next and return value
 	if(token->kind!=TK_NUM)
-		error(token->str,"not a number");
+		error_at(token->str,"not a number");
 
 	int val=token->val;
 	token=token->next;
@@ -134,7 +158,6 @@ int type_size(TypeKind type){
 		case ARRAY:
 			return 8;
 		default:
-			error(token->str,"unknown type");
+			error_at(token->str,"unknown type");
 	}
 }
-

@@ -33,7 +33,7 @@ Node *primary(){
 				node->val=tok->len;
 			}else{
 				//variable does not exist.
-				error(token->str,"this variable is not declaration");
+				error_at(token->str,"this variable is not declaration");
 			}
 		}
 
@@ -220,7 +220,7 @@ Node *expr(){
 		if(tok)
 			node=declare_local_variable(node,tok,star_count);
 		else
-			error(token->str,"not a variable.");
+			error_at(token->str,"not a variable.");
 	}else{
 		node=assign();
 	}
@@ -234,7 +234,7 @@ Node *stmt(){
 	if(consume_reserved_word("return",TK_RETURN)){
 		node=new_node(ND_RETURN,node,expr());
 		if(!consume(";"))
-			error(token->str,"not a ';' token.");
+			error_at(token->str,"not a ';' token.");
 
 	}else if(consume_reserved_word("if",TK_IF)){
 		node=new_node(ND_IF,node,NULL);
@@ -285,8 +285,10 @@ Node *stmt(){
 		expect("}");
 	}else{
 		node=expr();
-		if(!consume(";"))
-			error(token->str,"not a ';' token.");
+		if(!consume(";")){
+			while(*(token->str)!='\n') (token->str)--;
+			error_at(token->str,"not a ';' token.");
+		}
 	}
 
 	return node;
@@ -319,7 +321,7 @@ void program(){
 		if(token->kind==TK_TYPE){
 			if(consume_reserved_word("int",TK_TYPE))	func_list[func_index]->type.ty=INT;
 			else if(consume_reserved_word("char",TK_TYPE))  func_list[func_index]->type.ty=CHAR;
-			else error(token->str,"not a function type token.");
+			else error_at(token->str,"not a function type token.");
 		}
 
 		// count asterisk
@@ -334,7 +336,7 @@ void program(){
 
 		// Is function?
 		if(token->kind != TK_IDENT ||!('a' <= *(token->str) && *(token->str) <= 'z'))
-			error(token->str,"not a function.");
+			error_at(token->str,"not a function.");
 
 		Token *def_name=consume_ident();
 

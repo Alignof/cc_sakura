@@ -1,9 +1,12 @@
 int main(){
-	int x;
-	int y;
+	int count;
+	int price;
+	count=0;
+	price=16;
 
-	x=3;
-	y=4;
+	while(count<price){
+		count=count+1;
+	}
 
-	return x+y;
+	return count;
 }

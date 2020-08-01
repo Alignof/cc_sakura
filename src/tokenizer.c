@@ -138,7 +138,7 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		error(token->str,"cat not tokenize.");
+		error_at(p,"cat not tokenize.");
 	}
 
 	//add EOF token

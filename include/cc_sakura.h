@@ -141,6 +141,7 @@ bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind);
 // parse_func.c
 int lvar_count;
 char *user_input;
+char filename[100];
 Token *token;
 Func *func_list[100];
 LVar *locals;
@@ -148,6 +149,7 @@ GVar *globals;
 Node *strings;
 
 void error(char *loc,char *fmt, ...);
+void error_at(char *loc,char *msg);
 bool consume(char *op);
 bool consume_ret();
 bool consume_reserved_word();
