@@ -1,20 +1,61 @@
 #include "cc_sakura.h"
 
+char *read_file(char *path){
+	FILE *fp;
+	char *buf;
+
+	if ((fp=fopen(path,"r")) == NULL) {
+		fprintf(stderr,"File open error.\n");
+		exit(1);
+	}
+
+	// get file size
+	if(fseek(fp, 0L, SEEK_END)==-1)
+		error("%s: fseek:%s",path,strerror(errno));
+	size_t size=ftell(fp);
+	
+	if(fseek(fp, 0L, SEEK_SET)==-1)
+		error("%s: fseek:%s",path,strerror(errno));
+
+	buf=calloc(1,size+2);
+	fread(buf,size,1,fp);
+
+	if(size==0 || buf[size-1]!='\n')
+		buf[size++]='\n';
+
+	buf[size]='\0';
+	fclose(fp);
+
+	return buf;
+}
+
+void get_code(int argc,char **argv){
+	if(argc==2){
+		user_input=read_file(argv[1]);
+	}else if(argc==3){
+		if(!strcmp(argv[1],"-c")){
+			user_input=argv[2];
+		}else{
+			fprintf(stderr,"Incorrect option\n");
+			exit(1);
+		}
+	}else{
+		fprintf(stderr,"Incorrect number of arguments\n");
+		exit(1);
+	}
+}
+
 int main(int argc,char **argv){
 	int i,j;
 	int t_size;
 
 	char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
-	if(argc!=2){
-		fprintf(stderr,"Incorrect number of arguments\n");
-		return 1;
-	}
-	
 	// get source code
-	user_input=argv[1];
+	get_code(argc,argv);
+
 	// tokenize
-	token=tokenize(argv[1]);
+	token=tokenize(user_input);
 	// make syntax tree
 	program();
 

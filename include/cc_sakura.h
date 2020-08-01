@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 
 typedef enum{
@@ -123,6 +124,10 @@ struct LVar{
 	Type type;
 	LVar *next;
 };
+
+// main
+char *read_file(char *path);
+void get_code(int argc,char **argv);
 
 // tokenizer
 int len_val(char *str);
