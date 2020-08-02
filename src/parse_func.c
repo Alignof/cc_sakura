@@ -14,6 +14,8 @@ void error(char *loc,char *fmt, ...){
 }
 
 void error_at(char *loc,char *msg){
+	while(user_input<loc && (loc[-1]=='\n' || loc[-1]=='\t')) loc--;
+
 	char *start=loc;
 	while(user_input<start && start[-1]!='\n') start--;
 
