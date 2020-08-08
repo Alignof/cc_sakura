@@ -1,11 +1,10 @@
-int fibo(int num){
-	if(num==0) return 0;
-	if(num==1) return 1;
-
-	return fibo(num-1)+fibo(num-2);
-}
-
 int main(){
-	/* calc fibonacci sequence*/
-	return fibo(10);
+	int i;
+	int a;
+
+	a=1
+	for(i=0;i<10;i=i+1)
+		a=a*2;
+	
+	return a;
 }

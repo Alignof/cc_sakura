@@ -256,6 +256,25 @@ Node *stmt(){
 			node->rhs=else_block;
 			node->kind=ND_IFELSE;
 		}
+	}else if(consume_reserved_word("for",TK_FOR)){
+		node=new_node(ND_FOR,node,NULL);
+		if(consume("(")){
+			//jmp expr
+			Node *init=expr();
+			expect(";");
+			Node *cond=expr();
+			expect(";");
+			Node *calc=expr();
+			//check end of caret
+			expect(")");
+
+			// +----------------------+
+			// +-> (init->cond->calc) +<-for->expr
+			node->rhs=stmt();
+			node->lhs=init;
+			node->lhs->vector=cond;
+			node->lhs->vector->vector=calc;
+		}
 	}else if(consume_reserved_word("while",TK_WHILE)){
 		node=new_node(ND_WHILE,node,NULL);
 		if(consume("(")){

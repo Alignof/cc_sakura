@@ -112,6 +112,7 @@ Token *tokenize(char *p){
 		if(consume_reserved(&p,"char",4,&now,TK_TYPE))	   continue;
 		if(consume_reserved(&p,"if",2,&now,TK_IF))	   continue;
 		if(consume_reserved(&p,"else",4,&now,TK_ELSE))	   continue;
+		if(consume_reserved(&p,"for",3,&now,TK_FOR))	   continue;
 		if(consume_reserved(&p,"while",5,&now,TK_WHILE))   continue;
 		if(consume_reserved(&p,"sizeof",6,&now,TK_SIZEOF)) continue;
 		if(consume_reserved(&p,"return",6,&now,TK_RETURN)) continue;
