@@ -10,7 +10,7 @@ Node *call_function(Node *node,Token *tok){
 	// have argument?
 	if(!(consume(")"))){
 		Node *now=node;
-		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED){
+		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED || token->kind == TK_STR){
 			now->vector=equelity();
 			now=now->vector;
 

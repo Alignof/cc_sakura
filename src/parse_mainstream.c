@@ -73,15 +73,27 @@ Node *unary(){
 		Node *node=calloc(1,sizeof(Node));
 		node->kind=ND_STR;
 		node->type.ty=PTR;
-		node->str=token->str;
-		node->val=strings ? strings->val+1 : 0;
-		node->offset=consume_string();
 
-		if(strings==NULL){
-			strings=node;
+		Token *tok=consume_ident();
+		Str *fstr=find_string(tok);
+		// has already
+		if(fstr){
+			node->str=fstr->str;
+			node->val=fstr->label_num;
+			node->offset=fstr->len;
+		// new one
 		}else{
-			node->vector=strings;
-			strings=node;
+			Str *new=calloc(1,sizeof(Str));
+			new->str=token->str;
+			new->label_num=strings ? strings->label_num+1 : 0;
+			new->len=consume_string();
+
+			if(strings==NULL){
+				strings=new;
+			}else{
+				new->next=strings;
+				strings=new;
+			}
 		}
 
 		return node;

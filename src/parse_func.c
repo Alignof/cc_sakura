@@ -132,6 +132,14 @@ LVar *find_lvar(Token *tok){
 	return NULL;
 }
 
+Str *find_string(Token *tok){
+	for (Str *var=strings;var;var=var->next){
+		if(var->len==tok->len && !memcmp(tok->str,var->str,var->len))
+			return var;
+	}
+	return NULL;
+}
+
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
 	//create new node(symbol)
 	Node *node=calloc(1,sizeof(Node));

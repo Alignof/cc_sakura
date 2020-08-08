@@ -67,6 +67,7 @@ typedef struct LVar LVar;
 typedef struct GVar GVar;
 typedef struct Func Func;
 typedef struct Type Type;
+typedef struct Str  Str;
 
 // code token
 struct Token{
@@ -125,6 +126,13 @@ struct LVar{
 	LVar *next;
 };
 
+struct Str{
+	int len;
+	int label_num;
+	char *str;
+	Str *next;
+};
+
 // main
 char *read_file(char *path);
 void get_code(int argc,char **argv);
@@ -133,6 +141,7 @@ void get_code(int argc,char **argv);
 int len_val(char *str);
 bool issymbol(char *str, bool *flag);
 bool isblock(char *str);
+int is_alnum(char c);
 bool at_eof();
 Token *tokenize(char *p);
 Token *new_token(TokenKind kind,Token *cur,char *str);
@@ -146,7 +155,7 @@ Token *token;
 Func *func_list[100];
 LVar *locals;
 GVar *globals;
-Node *strings;
+Str *strings;
 
 void error(char *loc,char *fmt, ...);
 void error_at(char *loc,char *msg);
@@ -162,6 +171,7 @@ Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
 GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
+Str *find_string(Token *tok);
 
 // parse_stream.c
 void program();
@@ -177,11 +187,11 @@ Node *unary();
 Node *primary();
 
 // parse_substream.c
+void declare_global_variable();
+void get_argument(int func_index);
 Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
 Node *call_function(Node *node,Token *tok);
 Node *array_index(Node *node);
-void get_argument(int func_index);
-void declare_global_variable();
 Node *declare_local_variable(Node *node,Token *tok,int star_count);
 
 // codegan.c
