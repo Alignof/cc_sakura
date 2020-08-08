@@ -127,6 +127,31 @@ void gen(Node *node){
 			printf(".Lend%03d:\n",lend);
 
 			return;
+		case ND_FOR:
+			// adjust rsp
+			printf("	push rax\n");
+
+			gen(node->lhs);
+			// condition
+			printf(".Lbegin%03d:\n",lbegin);
+			gen(node->lhs->vector);
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			// if cond true then loop end.
+			printf("	je .Lend%03d\n",lend);
+			label_end++;
+
+			// else expression
+			gen(node->rhs);
+			gen(node->lhs->vector->vector);
+			printf("	pop rax\n");
+
+			// continue
+			printf("	jmp .Lbegin%03d\n",lend);
+			printf(".Lend%03d:\n",lbegin);
+			label_begin++;
+
+			return;
 		case ND_WHILE:
 			// adjust rsp
 			printf("	push rax\n");

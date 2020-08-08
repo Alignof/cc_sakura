@@ -72,6 +72,9 @@ assert -cl 2  "int main(){int a; int b;int c; a=2;b=3;if(a<b) c=b-a/a; else c=a+
 assert -cl 0  "int main(){int a; a=10;while(a>0) a=a-1;a;}"
 assert -cl 10 "int main(){int a; a=10;while(a<0) a=a-1;a;}"
 
+assert -cl 10 "int main(){int a; int i; a=0; for(i=0;i<10;i=i+1) a=a+1;a;}"
+assert -cl 64 "int main(){int a; int i; a=1; for(i=0;i<6;i=i+1) a=a*2;a;}"
+
 assert -cl 2  "int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;}"
 assert -cl 13 "int main(){int a;int b;int c; a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;}"
 
@@ -132,6 +135,6 @@ assert -cl 3  "int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(
 assert -cl 101  'int main(){char *x; x="hello"; x[1];}'
 assert -cl 108  'int main(){char *x; x="hello"; *(x+2);}'
 
-assert 55 test.c
+assert -cl 5  'int main(){int i; int x[10];/* calc */ for(i=0;i<10;i=i+1) x[i]=i; return x[5];}'
 
 echo OK
