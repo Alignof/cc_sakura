@@ -354,7 +354,7 @@ void program(){
 
 
 		// Is function?
-		if(token->kind != TK_IDENT ||!('a' <= *(token->str) && *(token->str) <= 'z'))
+		if(token->kind != TK_IDENT ||!(is_alnum(*token->str)))
 			error_at(token->str,"not a function.");
 
 		Token *def_name=consume_ident();

@@ -80,7 +80,7 @@ bool consume_reserved_word(char *keyword,TokenKind kind){
 Token *consume_ident(){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||
-			!('a' <= *(token->str) && *(token->str) <= 'z'))
+			!(is_alnum(*(token->str))))
 		return false;
 
 	Token *ret=token;
