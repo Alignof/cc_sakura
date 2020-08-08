@@ -27,8 +27,11 @@ void gen_arg(int arg_num,Node *tmp){
 }
 
 void gen(Node *node){
-	int arg=0;
 	Node *tmp;
+	int arg=0;
+	int lbegin=label_begin;
+	int lend=label_end;
+	int lelse=label_else;
 
 	switch(node->kind){
 		case ND_RETURN:
@@ -68,9 +71,7 @@ void gen(Node *node){
 
 			return;
 		case ND_STR:
-			//printf("	mov eax, OFFSET FLAT:.LC%d\n",node->val);
 			printf("	lea rax, .LC%d[rip]\n",node->val);
-			//printf("	mov rax,[rax]\n");
 			printf("	push rax\n");
 			return;
 		case ND_ASSIGN:
@@ -101,54 +102,54 @@ void gen(Node *node){
 
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lend%03d\n",label_end);
+			printf("	je .Lend%03d\n",lend);
 			printf("	pop rax\n");
+			label_end++;
 			gen(node->rhs);
 
-			printf(".Lend%03d:\n",label_end);
-			label_end++;
+			printf(".Lend%03d:\n",lend);
 			return;
 		case ND_IFELSE:
 			// condition
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lelse%03d\n",label_else);
+			printf("	je .Lelse%03d\n",lelse);
+			label_else++;
 
 			// expr in if
 			gen(node->rhs->lhs);
-			printf("	jmp .Lend%03d\n",label_end);
-			printf(".Lelse%03d:\n",label_else);
+			printf("	jmp .Lend%03d\n",lend);
+			printf(".Lelse%03d:\n",lelse);
+			label_end++;
 
 			// expr in else
 			gen(node->rhs->rhs);
-			printf(".Lend%03d:\n",label_end);
+			printf(".Lend%03d:\n",lend);
 
-			label_end++;
-			label_else++;
 			return;
 		case ND_WHILE:
 			// adjust rsp
 			printf("	push rax\n");
 
 			// condition
-			printf(".Lbegin%03d:\n",label_begin);
+			printf(".Lbegin%03d:\n",lbegin);
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// if cond true then loop end.
-			printf("	je .Lend%03d\n",label_end);
+			printf("	je .Lend%03d\n",lend);
+			label_end++;
 
 			// else expression
 			gen(node->rhs);
 			printf("	pop rax\n");
 
 			// continue
-			printf("	jmp .Lbegin%03d\n",label_end);
-			printf(".Lend%03d:\n",label_begin);
-
+			printf("	jmp .Lbegin%03d\n",lend);
+			printf(".Lend%03d:\n",lbegin);
 			label_begin++;
-			label_end++;
+
 			return;
 		case ND_BLOCK:
 			tmp=node->vector;

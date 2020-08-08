@@ -1,3 +1,7 @@
+int receivecoin(){
+	return 1;
+}
+
 int main(){
 	int count;
 	int price;
@@ -7,6 +11,7 @@ int main(){
 
 	while(count<price){
 		if(receivecoin()) count=count+1;
-		if(askedfortime()) count=get_hour();
 	}
+
+	return count;
 }

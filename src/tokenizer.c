@@ -86,6 +86,9 @@ Token *tokenize(char *p){
 			continue;
 		}
 
+		if(*p=='/' && *(p+1)=='/')
+			while(*(p++) != '\n');
+
 		//judge single token or multi token or isn't token
 		if(issymbol(p,&is_single_token)){
 			now=new_token(TK_RESERVED,now,p);
