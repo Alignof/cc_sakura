@@ -132,6 +132,6 @@ assert -cl 3  "int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(
 assert -cl 101  'int main(){char *x; x="hello"; x[1];}'
 assert -cl 108  'int main(){char *x; x="hello"; *(x+2);}'
 
-assert 16 test.c
+assert 55 test.c
 
 echo OK

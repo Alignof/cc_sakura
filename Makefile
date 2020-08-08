@@ -22,6 +22,10 @@ install: $(OBJECTS)
 test: cc_sakura
 	./test.sh
 
+file_test: cc_sakura
+	./cc_sakura test.c > tmp.s && gcc tmp.s -o tmp
+	./tmp || echo $$?
+
 clean:
 	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out
 	rm -f $(OBJECTS) $(TARGET)
