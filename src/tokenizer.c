@@ -86,8 +86,16 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		if(*p=='/' && *(p+1)=='/')
-			while(*(p++) != '\n');
+		if(*p=='/' && *(p+1)=='/'){
+			while(*p != '\n') p++;
+			continue;
+		}
+
+		if(*p=='/' && *(p+1)=='*'){
+			while(!(*(p-1)=='*' && *p=='/')) p++;
+			p++;
+			continue;
+		}
 
 		//judge single token or multi token or isn't token
 		if(issymbol(p,&is_single_token)){
