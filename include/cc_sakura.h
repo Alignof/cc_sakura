@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 
 
@@ -148,6 +149,7 @@ Token *new_token(TokenKind kind,Token *cur,char *str);
 bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind);
 
 // parse_func.c
+int rsp;
 int lvar_count;
 char *user_input;
 char filename[100];
@@ -162,11 +164,12 @@ void error_at(char *loc,char *msg);
 bool consume(char *op);
 bool consume_ret();
 bool consume_reserved_word();
-int consume_string();
+int string_len();
 void expect(char *op);
 int expect_number();
 int type_size(TypeKind type);
 Token *consume_ident();
+Token *consume_string();
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
 GVar *find_gvar(Token *tok);
