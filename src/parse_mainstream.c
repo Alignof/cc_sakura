@@ -87,6 +87,7 @@ Node *unary(){
 			new->len=tok->len;
 			new->str=tok->str;
 			new->label_num=strings ? strings->label_num+1 : 0;
+			node->val=new->label_num;
 
 			if(strings==NULL){
 				strings=new;
