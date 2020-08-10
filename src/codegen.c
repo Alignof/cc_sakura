@@ -1,8 +1,8 @@
 #include "cc_sakura.h"
 
-int label_begin=0;
-int label_end=0;
-int label_else=0;
+int label_begin;
+int label_end;
+int label_else;
 
 void gen_gvar(Node *node){
 	printf("	lea rax,  _%.*s[rip]\n",node->val,node->str);
@@ -139,6 +139,7 @@ void gen(Node *node){
 			printf("	cmp rax,0\n");
 			// if cond true then loop end.
 			printf("	je .Lend%03d\n",lend);
+			printf("	pop rax\n");
 			label_end++;
 
 			// else expression
@@ -163,6 +164,7 @@ void gen(Node *node){
 			printf("	cmp rax,0\n");
 			// if cond true then loop end.
 			printf("	je .Lend%03d\n",lend);
+			printf("	pop rax\n");
 			label_end++;
 
 			// else expression
@@ -183,27 +185,35 @@ void gen(Node *node){
 			}
 			return;
 		case ND_CALL_FUNC:
-			tmp=node->vector;
+			tmp=node->next;
 
 			if(tmp!=NULL){
-				while(tmp->vector!=NULL){
+				while(tmp->next!=NULL){
 					gen_arg(arg,tmp);
-					tmp=tmp->vector;
+					tmp=tmp->next;
 					arg++;
 				}
 				gen_arg(arg,tmp);
 			}
 
+			printf("	push rbp\n");
+			printf("	mov rbp,rsp\n");
+			printf("	and rsp,-16\n");
+
 			printf("	call %s\n",node->str);
+
+			printf("	mov rsp,rbp\n");
+			printf("	pop rbp\n");
+
 			printf("	push rax\n");
 			return;
 		case ND_ARG:
 			tmp=node;
 			while(tmp){
 				// generate arg as lvar
-				gen(tmp->vector);
+				gen(tmp->next);
 				printf("	pop rax\n");
-				gen_lvar(tmp->vector);
+				gen_lvar(tmp->next);
 				printf("	pop rax\n");
 				printf("	pop rdi\n");
 				printf("	mov [rax],rdi\n");
@@ -249,32 +259,38 @@ void gen(Node *node){
 			printf("	idiv rax,rdi\n");
 			break;
 		case ND_GT:
-			printf("	cmp rdi,rax\n");
+			//printf("	cmp rdi,rax\n");
+			printf("	cmp edi,eax\n");
 			printf("	setl al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_GE:
-			printf("	cmp rdi,rax\n");
+			//printf("	cmp rdi,rax\n");
+			printf("	cmp edi,eax\n");
 			printf("	setge al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_LT:
-			printf("	cmp rax,rdi\n");
+			//printf("	cmp rax,rdi\n");
+			printf("	cmp eax,edi\n");
 			printf("	setl al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_LE:
-			printf("	cmp rax,rdi\n");
+			//printf("	cmp rax,rdi\n");
+			printf("	cmp eax,edi\n");
 			printf("	setle al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_EQ:
-			printf("	cmp rax,rdi\n");
+			//printf("	cmp rax,rdi\n");
+			printf("	cmp eax,edi\n");
 			printf("	sete al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_NE:
-			printf("	cmp rax,rdi\n");
+			//printf("	cmp rax,rdi\n");
+			printf("	cmp eax,edi\n");
 			printf("	setne al\n");
 			printf("	movzb rax,al\n");
 			break;

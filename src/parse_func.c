@@ -49,7 +49,7 @@ bool consume(char *op){
 	return true;
 }
 
-int consume_string(){
+int string_len(){
 	int len=0;
 	while(token->kind==TK_STR){
 		token=token->next;
@@ -74,6 +74,25 @@ bool consume_reserved_word(char *keyword,TokenKind kind){
 		return false;
 	token=token->next;
 	return true;
+}
+
+Token *consume_string(){
+	// judge whether token is a ident and token pointer
+	if(token->kind != TK_STR || !(isascii(*(token->str))))
+		return false;
+
+	Token *ret=token;
+	int counter=0;
+	for(char *str=token->str;*str!='"';str++)
+		counter++;
+
+	token->len=counter;
+
+	//move next token 
+	for(int i=0;i<counter;i++)
+		token=token->next;
+
+	return ret;
 }
 
 

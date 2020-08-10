@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 
 
@@ -90,6 +91,7 @@ struct Node{
 	NodeKind kind;
 	Node *lhs;
 	Node *rhs;
+	Node *next;
 	Node *vector;
 	Type type;
 	int val;
@@ -162,11 +164,12 @@ void error_at(char *loc,char *msg);
 bool consume(char *op);
 bool consume_ret();
 bool consume_reserved_word();
-int consume_string();
+int string_len();
 void expect(char *op);
 int expect_number();
 int type_size(TypeKind type);
 Token *consume_ident();
+Token *consume_string();
 Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
 Node *new_node_num(int val);
 GVar *find_gvar(Token *tok);

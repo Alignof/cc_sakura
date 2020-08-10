@@ -74,7 +74,7 @@ Node *unary(){
 		node->kind=ND_STR;
 		node->type.ty=PTR;
 
-		Token *tok=consume_ident();
+		Token *tok=consume_string();
 		Str *fstr=find_string(tok);
 		// has already
 		if(fstr){
@@ -84,9 +84,10 @@ Node *unary(){
 		// new one
 		}else{
 			Str *new=calloc(1,sizeof(Str));
-			new->str=token->str;
+			new->len=tok->len;
+			new->str=tok->str;
 			new->label_num=strings ? strings->label_num+1 : 0;
-			new->len=consume_string();
+			node->val=new->label_num;
 
 			if(strings==NULL){
 				strings=new;
