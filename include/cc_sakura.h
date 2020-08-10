@@ -91,6 +91,7 @@ struct Node{
 	NodeKind kind;
 	Node *lhs;
 	Node *rhs;
+	Node *next;
 	Node *vector;
 	Type type;
 	int val;

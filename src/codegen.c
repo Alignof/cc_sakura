@@ -185,12 +185,12 @@ void gen(Node *node){
 			}
 			return;
 		case ND_CALL_FUNC:
-			tmp=node->vector;
+			tmp=node->next;
 
 			if(tmp!=NULL){
-				while(tmp->vector!=NULL){
+				while(tmp->next!=NULL){
 					gen_arg(arg,tmp);
-					tmp=tmp->vector;
+					tmp=tmp->next;
 					arg++;
 				}
 				gen_arg(arg,tmp);
@@ -211,9 +211,9 @@ void gen(Node *node){
 			tmp=node;
 			while(tmp){
 				// generate arg as lvar
-				gen(tmp->vector);
+				gen(tmp->next);
 				printf("	pop rax\n");
-				gen_lvar(tmp->vector);
+				gen_lvar(tmp->next);
 				printf("	pop rax\n");
 				printf("	pop rdi\n");
 				printf("	mov [rax],rdi\n");
