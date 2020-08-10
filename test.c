@@ -1,20 +1,5 @@
 int main(){
 	int i;
-<<<<<<< HEAD
-	int a;
-	int pow;
-
-/*
-	a=1;
-	//scanf("%d",&pow);
-	pow=5;
-	for(i=0;i<pow;i=i+1)
-		a=a*2;
-	
-	printf("2^%d=%d\n",pow,a);
-*/
-	printf("hello world!\n");
-=======
 	int three;
 	int five;
 
@@ -39,6 +24,5 @@ int main(){
 		five=five+1;
 	}
 
->>>>>>> fix
 	return 0;
 }
