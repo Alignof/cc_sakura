@@ -87,16 +87,14 @@ int main(int argc,char **argv){
 	label_else=0;
 	//generate assembly at first expr
 	for(i=0;func_list[i];i++){
-		rsp=0;
 		printf("%s:\n",func_list[i]->name);
 		printf("	push rbp\n");
 		printf("	mov rbp,rsp\n");
 		printf("	sub rsp,%d\n",func_list[i]->lvarc*8);
-		if(func_list[i]->lvarc%2) rsp++;
 
 		if(func_list[i]->args){
 			// push argument stack
-			for(j=func_list[i]->args->val;j>=0;j--) printf("	push %s\n",reg[j],rsp++);
+			for(j=func_list[i]->args->val;j>=0;j--) printf("	push %s\n",reg[j]);
 
 			// set local variable
 			gen(func_list[i]->args);
@@ -104,13 +102,13 @@ int main(int argc,char **argv){
 
 		for(j=0;func_list[i]->code[j]!=NULL;j++){
 			gen(func_list[i]->code[j]);
-			printf("\n	pop rax\n",rsp++);
+			printf("\n	pop rax\n");
 		}
 
 		// epiroge
 		// rax=return value
 		printf("	mov rsp,rbp\n");
-		printf("	pop rbp\n",rsp++);
+		printf("	pop rbp\n");
 		printf("	ret\n\n");
 	}
 

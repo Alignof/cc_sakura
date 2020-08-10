@@ -149,7 +149,6 @@ Token *new_token(TokenKind kind,Token *cur,char *str);
 bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind);
 
 // parse_func.c
-int rsp;
 int lvar_count;
 char *user_input;
 char filename[100];

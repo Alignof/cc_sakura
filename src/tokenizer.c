@@ -17,8 +17,7 @@ int is_alnum(char c){
 
 int len_val(char *str){
 	int counter=0;
-	for(;(is_alnum(*str) || *str==' ' || *str=='\t');str++)
-	//for(;is_alnum(*str);str++)
+	for(;is_alnum(*str);str++)
 		counter++;
 
 	return counter;
