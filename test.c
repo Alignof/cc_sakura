@@ -3,7 +3,7 @@ int main(){
 	int max;
 
 	scanf("%d",&max);
-	for(i=0;i<max;i=i+1){
+	for(i=1;i<=max;i=i+1){
 		if(i%3+i%5==0)
 			printf("FizzBuzz\n");
 		else if(i%3==0)
@@ -13,5 +13,6 @@ int main(){
 		else
 			printf("%d\n",i);
 	}
+
 	return 0;
 }

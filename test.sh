@@ -37,7 +37,7 @@ assert -cl 15 "int main(){5*(9-6);}"
 assert -cl 4  "int main(){(3+5)/2;}"
 assert -cl 17 "int main(){(-3+5)+15;}"
 assert -cl 21 "int main(){(-3*-2)+15;}"
-assert -cl 2 "int main(){5%3;}"
+assert -cl 0 "int main(){(-3*-2)%(5*(9-6)/5);}"
 
 assert -cl 0  "int main(){5<4;}"
 assert -cl 1  "int main(){5>4;}"
