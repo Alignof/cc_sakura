@@ -4,37 +4,30 @@ C Compiler Sakura
 [https://www.sigbus.info/compilerbook](https://www.sigbus.info/compilerbook)を見ながら勉強していく。
 
 ## example
+
+### FizzBuzz  
 ```c
 int main(){
 	int i;
-	int three;
-	int five;
+	int max;
 
-	three=0;
-	five=0;
-	for(i=0;i<100;i=i+1){
-		if(three+five == 8){
+	scanf("%d",&max);
+	for(i=1;i<=max;i=i+1){
+		if(i%3+i%5==0)
 			printf("FizzBuzz\n");
-			three=0;
-			five=0;
-		}else if(three==3){
+		else if(i%3==0)
 			printf("Fizz\n");
-			three=0;
-		}else if(five==5){
+		else if(i%5==0)
 			printf("Buzz\n");
-			five=0;
-		}else{
+		else
 			printf("%d\n",i);
-		}
-
-		three=three+1;
-		five=five+1;
 	}
 
 	return 0;
 }
 ```
 
+### testcode  
 ```c
 ./test.sh
 int main(){0;} => 0
@@ -46,6 +39,7 @@ int main(){5*(9-6);} => 15
 int main(){(3+5)/2;} => 4
 int main(){(-3+5)+15;} => 17
 int main(){(-3*-2)+15;} => 21
+int main(){(-3*-2)%(5*(9-6)/5);} => 0
 int main(){5<4;} => 0
 int main(){5>4;} => 1
 int main(){12 == 12;} => 1
