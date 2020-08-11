@@ -98,11 +98,6 @@ Token *consume_string(){
 
 Token *consume_ident(){
 	// judge whether token is a ident and token pointer
-/*
-	if((token->kind != TK_IDENT && token->kind != TK_STR) ||
-		!(is_alnum(*(token->str))))
-		return NULL;
-*/
 	if(token->kind != TK_IDENT ||
 		!(is_alnum(*(token->str))))
 		return NULL;

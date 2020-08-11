@@ -139,7 +139,6 @@ void gen(Node *node){
 			printf("	cmp rax,0\n");
 			// if cond true then loop end.
 			printf("	je .Lend%03d\n",lend);
-			printf("	pop rax\n");
 			label_end++;
 
 			// else expression
@@ -150,6 +149,7 @@ void gen(Node *node){
 			// continue
 			printf("	jmp .Lbegin%03d\n",lend);
 			printf(".Lend%03d:\n",lbegin);
+			printf("	push rax\n");
 			label_begin++;
 
 			return;
@@ -164,7 +164,6 @@ void gen(Node *node){
 			printf("	cmp rax,0\n");
 			// if cond true then loop end.
 			printf("	je .Lend%03d\n",lend);
-			printf("	pop rax\n");
 			label_end++;
 
 			// else expression
@@ -174,6 +173,7 @@ void gen(Node *node){
 			// continue
 			printf("	jmp .Lbegin%03d\n",lend);
 			printf(".Lend%03d:\n",lbegin);
+			printf("	push rax\n");
 			label_begin++;
 
 			return;
