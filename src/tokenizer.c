@@ -25,7 +25,7 @@ int len_val(char *str){
 
 bool issymbol(char *str, bool *flag){
 	int i;
-	char single_tokens[]="+-*/&()<>=,;[]";
+	char single_tokens[]="+-*/%&()<>=,;[]";
 	char multi_tokens[]="<=>!";
 	int size;
 	
@@ -38,7 +38,7 @@ bool issymbol(char *str, bool *flag){
 		}
 	}
 	
-	//Is single token? (+,-,*,/,<,>)
+	//Is single token? (+,-,*,/,%,<,>)
 	size=sizeof(single_tokens)/sizeof(char);
 	for(i=0;i<size;i++){
 		if(*str==single_tokens[i]){
