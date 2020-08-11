@@ -17,7 +17,7 @@ int is_alnum(char c){
 
 int len_val(char *str){
 	int counter=0;
-	for(;(('a' <= *str && *str <= 'z') || ('0' <= *str && *str <= '9'));str++)
+	for(;is_alnum(*str);str++)
 		counter++;
 
 	return counter;
@@ -135,18 +135,24 @@ Token *tokenize(char *p){
 			continue;
 		}
 		
-		//Is valiable?
-		if('a'<=*p && *p<='z'){
-			now=new_token(TK_IDENT,now,p++);
-			now->len=1;
+		//Is number?
+		if(isdigit(*p)){
+			if(now->kind==TK_IDENT){
+				now=new_token(TK_IDENT,now,p++);
+				now->len=1;
+			}else{
+				//add number token
+				now=new_token(TK_NUM,now,p);
+				//set number
+				now->val=strtol(p,&p,10);
+			}
 			continue;
 		}
 
-		if(isdigit(*p)){
-			//add number token
-			now=new_token(TK_NUM,now,p);
-			//set number
-			now->val=strtol(p,&p,10);
+		//Is valiable?
+		if(is_alnum(*p)){
+			now=new_token(TK_IDENT,now,p++);
+			now->len=1;
 			continue;
 		}
 

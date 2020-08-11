@@ -48,6 +48,7 @@ assert -cl 0  "int main(){12 != 12;}"
 
 assert -cl 8  "int main(){5+3;6+2;}"
 assert -cl 5  "int main(){int a;int b;a=3;b=2;a+b;}"
+assert -cl 5  "int main(){int a_1;int b_2;a_1=3;b_2=2;a_1+b_2;}"
 assert -cl 5  "int main(){int a;a=8;a=a-3;a;}"
 assert -cl 25 "int main(){int a;int b;int c;int d; a=3;b=2;c=12;d=17;(d-c)*(a+b);}"
 
@@ -135,6 +136,6 @@ assert -cl 3  "int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(
 assert -cl 101  'int main(){char *x; x="hello"; x[1];}'
 assert -cl 108  'int main(){char *x; x="hello"; *(x+2);}'
 
-assert -cl 5  'int main(){int i; int x[10];/* calc */ for(i=0;i<10;i=i+1) x[i]=i; return x[5];}'
+assert -cl 5  'int main(){int i; int x[10];/* set counter */ for(i=0;i<10;i=i+1) x[i]=i; return x[5];}'
 
 echo OK

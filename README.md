@@ -5,6 +5,37 @@ C Compiler Sakura
 
 ## example
 ```c
+int main(){
+	int i;
+	int three;
+	int five;
+
+	three=0;
+	five=0;
+	for(i=0;i<100;i=i+1){
+		if(three+five == 8){
+			printf("FizzBuzz\n");
+			three=0;
+			five=0;
+		}else if(three==3){
+			printf("Fizz\n");
+			three=0;
+		}else if(five==5){
+			printf("Buzz\n");
+			five=0;
+		}else{
+			printf("%d\n",i);
+		}
+
+		three=three+1;
+		five=five+1;
+	}
+
+	return 0;
+}
+```
+
+```c
 ./test.sh
 int main(){0;} => 0
 int main(){42;} => 42
@@ -23,6 +54,7 @@ int main(){12 != 13;} => 1
 int main(){12 != 12;} => 0
 int main(){5+3;6+2;} => 8
 int main(){int a;int b;a=3;b=2;a+b;} => 5
+int main(){int a_1;int b_2;a_1=3;b_2=2;a_1+b_2;} => 5
 int main(){int a;a=8;a=a-3;a;} => 5
 int main(){int a;int b;int c;int d; a=3;b=2;c=12;d=17;(d-c)*(a+b);} => 25
 int main(){int abc; int def; abc=3;def=2;abc+def;} => 5
@@ -33,14 +65,16 @@ int main(){int a; a=0;if(3>2) a=1;a;} => 1
 int main(){int a; a=0;if(3<2) a=1;a;} => 0
 int main(){int a; a=1+2;if(3>2) a=10-3;a;} => 7
 int main(){int a; a=1+2;if(3<2) a=10-3;a;} => 3
-int main(){int a;int b;int c; a=2;b=3;c=a+b;if(a<b) c=b-a;c;} => 1
-int main(){int a;int b;int c; a=2;b=3;c=a+b;if(a>b) c=b-a;c;} => 5
+int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a<b) c=b-a;c;} => 1
+int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a>b) c=b-a;c;} => 5
 int main(){int a; if(2>3) a=3-2; else a=2+3;a;} => 5
 int main(){int a; if(2<3) a=3-2; else a=2+3;a;} => 1
-int main(){int a;int b;int c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;} => 9
-int main(){int a;int b;int c; a=2;b=3;if(a<b) c=b-a/a; else c=a+b*b-a;c;} => 2
+int main(){int a; int b;int c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;} => 9
+int main(){int a; int b;int c; a=2;b=3;if(a<b) c=b-a/a; else c=a+b*b-a;c;} => 2
 int main(){int a; a=10;while(a>0) a=a-1;a;} => 0
 int main(){int a; a=10;while(a<0) a=a-1;a;} => 10
+int main(){int a; int i; a=0; for(i=0;i<10;i=i+1) a=a+1;a;} => 10
+int main(){int a; int i; a=1; for(i=0;i<6;i=i+1) a=a*2;a;} => 64
 int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;} => 2
 int main(){int a;int b;int c; a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;} => 13
 int func(){return 9;} int main(){int b; b=func();b;} => 9
@@ -88,5 +122,6 @@ int main(){char x; sizeof(x+2);} => 1
 int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);} => 3
 int main(){char *x; x="hello"; x[1];} => 101
 int main(){char *x; x="hello"; *(x+2);} => 108
+int main(){int i; int x[10];/* set counter */ for(i=0;i<10;i=i+1) x[i]=i; return x[5];} => 5
 OK
 ```

@@ -77,18 +77,16 @@ int main(int argc,char **argv){
 	}
 
 	// set string
-	Node *_start=strings;
-	for (Node *var=_start;var;var=var->vector){
-		printf(".LC%d:\n",var->val);
-		printf("	.string \"%.*s\"\n",var->offset,var->str);
+	for (Str *var=strings;var;var=var->next){
+		printf(".LC%d:\n",var->label_num);
+		printf("	.string \"%.*s\"\n",var->len,var->str);
 	}
 
+	label_begin=0;
+	label_end=0;
+	label_else=0;
 	//generate assembly at first expr
 	for(i=0;func_list[i];i++){
-		label_begin=0;
-		label_end=0;
-		label_else=0;
-
 		printf("%s:\n",func_list[i]->name);
 		printf("	push rbp\n");
 		printf("	mov rbp,rsp\n");

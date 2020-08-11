@@ -10,14 +10,14 @@ Node *call_function(Node *node,Token *tok){
 	// have argument?
 	if(!(consume(")"))){
 		Node *now=node;
-		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED){
-			now->vector=equelity();
-			now=now->vector;
+		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED || token->kind == TK_STR){
+			now->next=equelity();
+			now=now->next;
 
 			if(!(consume(",")))
 				break;
 		}
-		now->vector=NULL;
+		now->next=NULL;
 		expect(")");
 	}
 
@@ -89,7 +89,7 @@ void get_argument(int func_index){
 			*args_ptr=(Node *)calloc(1,sizeof(Node));
 			(*args_ptr)->kind=ND_ARG;
 			(*args_ptr)->val=arg_counter;
-			(*args_ptr)->vector=expr();
+			(*args_ptr)->next=expr();
 			(*args_ptr)->rhs=next;
 			// go to next
 			next=*args_ptr;
