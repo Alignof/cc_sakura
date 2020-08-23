@@ -47,6 +47,11 @@ assert -cl 0  "int main(){12 == 11;}"
 assert -cl 1  "int main(){12 != 13;}"
 assert -cl 0  "int main(){12 != 12;}"
 
+assert -cl 1  "int main(){1 && 1;}"
+assert -cl 0  "int main(){1 && 0;}"
+assert -cl 0  "int main(){0 || 0;}"
+assert -cl 1  "int main(){1 || 0;}"
+
 assert -cl 8  "int main(){5+3;6+2;}"
 assert -cl 5  "int main(){int a;int b;a=3;b=2;a+b;}"
 assert -cl 5  "int main(){int a_1;int b_2;a_1=3;b_2=2;a_1+b_2;}"

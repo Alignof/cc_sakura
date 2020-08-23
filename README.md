@@ -13,7 +13,7 @@ int main(){
 
 	scanf("%d",&max);
 	for(i=1;i<=max;i=i+1){
-		if(i%3+i%5==0)
+		if(i%3==0 && i%5==0)
 			printf("FizzBuzz\n");
 		else if(i%3==0)
 			printf("Fizz\n");
@@ -46,6 +46,10 @@ int main(){12 == 12;} => 1
 int main(){12 == 11;} => 0
 int main(){12 != 13;} => 1
 int main(){12 != 12;} => 0
+int main(){1 && 1;} => 1
+int main(){1 && 0;} => 0
+int main(){0 || 0;} => 0
+int main(){1 || 0;} => 1
 int main(){5+3;6+2;} => 8
 int main(){int a;int b;a=3;b=2;a+b;} => 5
 int main(){int a_1;int b_2;a_1=3;b_2=2;a_1+b_2;} => 5

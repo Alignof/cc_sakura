@@ -7,17 +7,23 @@ Node *call_function(Node *node,Token *tok){
 	node->str=(char *)calloc(tok->len,sizeof(char));
 	strncpy(node->str,tok->str,tok->len);
 
+	int ctr=0;
 	// have argument?
 	if(!(consume(")"))){
-		Node *now=node;
+		Node *now;
+		Node *prev=NULL;
 		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED || token->kind == TK_STR){
-			now->next=equelity();
-			now=now->next;
+			now=logical();
+			now->next=prev;
+			prev=now;
+			ctr++;
 
 			if(!(consume(",")))
 				break;
 		}
-		now->next=NULL;
+		//now->next=NULL;
+		node->next=now;
+		node->val=ctr-1;
 		expect(")");
 	}
 
