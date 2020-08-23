@@ -1,4 +1,3 @@
-/*
 int main(){
 	int i;
 	int max;
@@ -18,19 +17,3 @@ int main(){
 	return 0;
 }
 
-*/
-int main(){
-	int a;
-	int b;
-
-	a=1;
-	b=0;
-	printf("this is test.\n");
-	printf("a=%d\n",a);
-	printf("a+b=%d\n",a+b);
-	printf("a==b%d\n",a==b);
-	printf("a&&b=%d\n",a&&b);
-	printf("a||b=%d\n",a||b);
-
-	return 0;
-}
