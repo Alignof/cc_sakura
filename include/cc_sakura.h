@@ -186,6 +186,7 @@ Node *stmt();
 Node *expr();
 Node *assign();
 Node *relational();
+Node *logical();
 Node *equelity();
 Node *add();
 Node *mul();

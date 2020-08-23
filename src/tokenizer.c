@@ -25,10 +25,10 @@ int len_val(char *str){
 
 bool issymbol(char *str, bool *flag){
 	int i;
-	char single_symbol[]="+-*/%&()<>=,;[]";
-	char multi_symbol[]="<,>,&,|";
-	char multi_eq[]="<=>!";
 	int size;
+	char single_symbol[]="+-*/%&()<>=,;[]";
+	char multi_symbol[]="<>&|+-";
+	char multi_eq[]="<=>!";
 	
 	//Is multi equal? (<=,==,!=,>=)
 	size=sizeof(multi_eq)/sizeof(char);
@@ -39,11 +39,11 @@ bool issymbol(char *str, bool *flag){
 		}
 	}
 	
-	//Is multi symbol? (<<,>>,&&,||)
+	//Is multi symbol? (<<,>>,&&,||,++,--)
 	size=sizeof(multi_symbol)/sizeof(char);
 	for(i=0;i<size;i++){
-		if(*str==multi_symbol[i]){
-			*flag=true;
+		if(*str==multi_symbol[i] && *(str+1)==multi_symbol[i]){
+			*flag=false;
 			return true;
 		}
 	}

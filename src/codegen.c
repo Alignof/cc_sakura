@@ -182,12 +182,13 @@ void gen(Node *node){
 			return;
 		case ND_CALL_FUNC:
 			tmp=node->next;
+			arg=node->val;
 
 			if(tmp!=NULL){
 				while(tmp->next!=NULL){
 					gen_arg(arg,tmp);
 					tmp=tmp->next;
-					arg++;
+					arg--;
 				}
 				gen_arg(arg,tmp);
 			}
@@ -293,6 +294,14 @@ void gen(Node *node){
 			//printf("	cmp rax,rdi\n");
 			printf("	cmp eax,edi\n");
 			printf("	setne al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_AND:
+			printf("	and eax,edi\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_OR:
+			printf("	or eax,edi\n");
 			printf("	movzb rax,al\n");
 			break;
 	}

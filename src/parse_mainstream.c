@@ -203,8 +203,21 @@ Node *equelity(){
 	}
 }
 
-Node *assign(){
+Node *logical(){
 	Node *node=equelity();
+	for(;;){
+		if(consume("&&")){
+			node=new_node(ND_AND,node,equelity());
+		}else if(consume("||")){
+			node=new_node(ND_OR,node,equelity());
+		}else{
+			return node;
+		}
+	}
+}
+
+Node *assign(){
+	Node *node=logical();
 
 	if(consume("="))
 		node=new_node(ND_ASSIGN,node,assign());
