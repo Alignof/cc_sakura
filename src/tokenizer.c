@@ -25,23 +25,33 @@ int len_val(char *str){
 
 bool issymbol(char *str, bool *flag){
 	int i;
-	char single_tokens[]="+-*/%&()<>=,;[]";
-	char multi_tokens[]="<=>!";
 	int size;
+	char single_symbol[]="+-*/%&()<>=,;[]";
+	char multi_symbol[]="<>&|+-";
+	char multi_eq[]="<=>!";
 	
-	//Is multi token? (<=,==,!=,>=)
-	size=sizeof(multi_tokens)/sizeof(char);
+	//Is multi equal? (<=,==,!=,>=)
+	size=sizeof(multi_eq)/sizeof(char);
 	for(i=0;i<size;i++){
-		if(*str==multi_tokens[i] && *(str+1)=='='){
+		if(*str==multi_eq[i] && *(str+1)=='='){
 			*flag=false;
 			return true;
 		}
 	}
 	
-	//Is single token? (+,-,*,/,%,<,>)
-	size=sizeof(single_tokens)/sizeof(char);
+	//Is multi symbol? (<<,>>,&&,||,++,--)
+	size=sizeof(multi_symbol)/sizeof(char);
 	for(i=0;i<size;i++){
-		if(*str==single_tokens[i]){
+		if(*str==multi_symbol[i] && *(str+1)==multi_symbol[i]){
+			*flag=false;
+			return true;
+		}
+	}
+
+	//Is single symbol? (+,-,*,/,%,<,>)
+	size=sizeof(single_symbol)/sizeof(char);
+	for(i=0;i<size;i++){
+		if(*str==single_symbol[i]){
 			*flag=true;
 			return true;
 		}

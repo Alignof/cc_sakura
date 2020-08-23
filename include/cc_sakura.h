@@ -38,6 +38,8 @@ typedef enum{
 	ND_LE,		//  <=
 	ND_EQ,		//  ==
 	ND_NE,		//  !=
+	ND_AND,		//  &&
+	ND_OR,		//  ||
 	ND_ASSIGN,	//  =
 	ND_LVAR,	//  local valiable
 	ND_GVAR,	//  global valiable
@@ -184,6 +186,7 @@ Node *stmt();
 Node *expr();
 Node *assign();
 Node *relational();
+Node *logical();
 Node *equelity();
 Node *add();
 Node *mul();

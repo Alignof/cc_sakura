@@ -1,7 +1,7 @@
 CC	 := gcc
 CFLAGS 	 :=-std=c11 -g -O0 -static -Wall
 
-INCLUDE  := -I./include
+INCLUDE  := -I ./include
 TARGET   := ./cc_sakura
 SRCDIR   := ./src
 OBJDIR   := ./src/obj
@@ -11,7 +11,7 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJDIR)/%.o: $(SRCDIR)/%.c ./include/cc_sakura.h
 	@[ -d $(OBJDIR) ]
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
@@ -23,7 +23,7 @@ test: cc_sakura
 	./test.sh
 
 file_test: cc_sakura
-	./cc_sakura test.c > tmp.s && gcc tmp.s -o tmp
+	$(TARGET) test.c > tmp.s && gcc tmp.s -o tmp
 	./tmp || echo $$?
 
 clean:
