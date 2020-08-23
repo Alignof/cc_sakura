@@ -38,6 +38,8 @@ typedef enum{
 	ND_LE,		//  <=
 	ND_EQ,		//  ==
 	ND_NE,		//  !=
+	ND_AND,		//  &&
+	ND_OR,		//  ||
 	ND_ASSIGN,	//  =
 	ND_LVAR,	//  local valiable
 	ND_GVAR,	//  global valiable
