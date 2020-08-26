@@ -1,5 +1,11 @@
 #include "cc_sakura.h"
 
+int lvar_count;
+Token *token;
+LVar *locals;
+Str *strings;
+// Func *func_list[100];
+
 Node *primary(){
 	if(consume("(")){
 		//jmp expr
