@@ -1,5 +1,11 @@
 #include "cc_sakura.h"
 
+GVar *globals;
+// int lvar_count;
+// Token *token;
+// LVar *locals;
+// Func *func_list[100];
+
 Node *call_function(Node *node,Token *tok){
 	expect("(");
 
@@ -21,7 +27,6 @@ Node *call_function(Node *node,Token *tok){
 			if(!(consume(",")))
 				break;
 		}
-		//now->next=NULL;
 		node->next=now;
 		node->val=ctr-1;
 		expect(")");

@@ -1,5 +1,8 @@
 #include "cc_sakura.h"
 
+// GVar *globals;
+// char filename[100];
+
 void error(char *loc,char *fmt, ...){
 	va_list ap;
 	va_start(ap,fmt);
@@ -189,4 +192,6 @@ int type_size(TypeKind type){
 		default:
 			error_at(token->str,"unknown type");
 	}
+
+	return -1;
 }

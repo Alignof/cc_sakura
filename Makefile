@@ -1,5 +1,5 @@
 CC	 := gcc
-CFLAGS 	 :=-std=c11 -g -O0 -static -Wall
+CFLAGS 	 := -std=c11 -g -O0 -static -Wall
 
 INCLUDE  := -I ./include
 TARGET   := ./cc_sakura
@@ -11,7 +11,7 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c ./include/cc_sakura.h
+$(OBJDIR)/%.o: $(SRCDIR)/%.c 
 	@[ -d $(OBJDIR) ]
 	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
@@ -19,10 +19,10 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c ./include/cc_sakura.h
 install: $(OBJECTS)
 	$(CC) -O2 -o $(TARGET) $^ $(LDFLAGS)
 
-test: cc_sakura
+test: $(TARGET)
 	./test.sh
 
-file_test: cc_sakura
+file_test: $(TARGET)
 	$(TARGET) test.c > tmp.s && gcc tmp.s -o tmp
 	./tmp || echo $$?
 
