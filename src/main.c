@@ -1,5 +1,9 @@
 #include "cc_sakura.h"
 
+char *user_input;
+char filename[100];
+Func *func_list[100];
+
 char *read_file(char *path){
 	FILE *fp;
 	char *buf;

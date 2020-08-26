@@ -202,9 +202,9 @@ Node *array_index(Node *node);
 Node *declare_local_variable(Node *node,Token *tok,int star_count);
 
 // codegan.c
-int label_begin;
-int label_end;
-int label_else;
+extern int label_begin;
+extern int label_end;
+extern int label_else;
 void gen(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
