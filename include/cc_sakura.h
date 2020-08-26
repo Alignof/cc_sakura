@@ -153,14 +153,14 @@ Token *new_token(TokenKind kind,Token *cur,char *str);
 bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind);
 
 // parse_func.c
-int lvar_count;
-char *user_input;
-char filename[100];
-Token *token;
-Func *func_list[100];
-LVar *locals;
-GVar *globals;
-Str *strings;
+extern int lvar_count;
+extern char *user_input;
+extern char filename[100];
+extern Token *token;
+extern Func *func_list[100];
+extern LVar *locals;
+extern GVar *globals;
+extern Str *strings;
 
 void error(char *loc,char *fmt, ...);
 void error_at(char *loc,char *msg);
