@@ -4,7 +4,7 @@ int lvar_count;
 Token *token;
 LVar *locals;
 Str *strings;
-Func *func_list[100];
+// Func *func_list[100];
 
 Node *primary(){
 	if(consume("(")){

@@ -1,7 +1,7 @@
 #include "cc_sakura.h"
 
-char filename[100];
-GVar *globals;
+// GVar *globals;
+// char filename[100];
 
 void error(char *loc,char *fmt, ...){
 	va_list ap;

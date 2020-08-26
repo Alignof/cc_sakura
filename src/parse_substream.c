@@ -1,9 +1,10 @@
 #include "cc_sakura.h"
 
-int lvar_count;
-Token *token;
-LVar *locals;
-Func *func_list[100];
+GVar *globals;
+// int lvar_count;
+// Token *token;
+// LVar *locals;
+// Func *func_list[100];
 
 Node *call_function(Node *node,Token *tok){
 	expect("(");
