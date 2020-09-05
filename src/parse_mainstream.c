@@ -255,6 +255,11 @@ Node *expr(){
 			node=declare_local_variable(node,tok,star_count);
 		else
 			error_at(token->str,"not a variable.");
+
+		// initialize formula
+		if(consume("=")){
+			node=new_node(ND_ASSIGN,node,assign());
+		}
 	}else{
 		node=assign();
 	}

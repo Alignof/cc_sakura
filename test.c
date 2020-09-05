@@ -1,6 +1,7 @@
 int main(){
 	int i;
-	int max;
+	int max=17;
+	printf("%d\n",max);
 
 	scanf("%d",&max);
 	for(i=1;i<=max;i=i+1){
