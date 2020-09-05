@@ -9,7 +9,7 @@ C Compiler Sakura
 ```c
 int main(){
 	int i;
-	int max;
+	int max=0;
 
 	scanf("%d",&max);
 	for(i=1;i<=max;i=i+1){
