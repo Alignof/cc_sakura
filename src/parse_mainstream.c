@@ -162,7 +162,7 @@ Node *add(){
 			lhs_type=&(node->lhs->type);
 			rhs_type=&(node->rhs->type);
 
-			if(type_size(lhs_type->ty)!=4 || type_size(rhs_type->ty)!=4)
+			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8)
 				node=pointer_calc(node,lhs_type,rhs_type);
 
 		}else if(consume("-")){
