@@ -194,6 +194,7 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 
 	node->type=lvar->type;
 	node->offset=lvar->offset;
+	node->val=lvar->type.alloc_size/8;
 	// locals == new lvar
 	locals=lvar;
 

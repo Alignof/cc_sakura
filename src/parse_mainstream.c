@@ -82,6 +82,7 @@ Node *unary(){
 
 		Token *tok=consume_string();
 		Str *fstr=find_string(tok);
+
 		// has already
 		if(fstr){
 			node->str=fstr->str;
@@ -93,6 +94,8 @@ Node *unary(){
 			new->len=tok->len;
 			new->str=tok->str;
 			new->label_num=strings ? strings->label_num+1 : 0;
+			node->str=new->str;
+			node->offset=new->len;
 			node->val=new->label_num;
 
 			if(strings==NULL){
@@ -258,7 +261,21 @@ Node *expr(){
 
 		// initialize formula
 		if(consume("=")){
-			node=new_node(ND_ASSIGN,node,assign());
+			Node *init_val=assign();
+			switch(init_val->kind){
+				case ND_STR:
+					if(node->val == init_val->offset+1 || node->val == -1)
+						node=new_node(ND_ASSIGN,node,init_val);
+					else
+						error_at(token->str,"Invalid array size");
+					break;
+				case ND_BLOCK:
+					error_at(token->str,"Not yet implemented.");
+					break;
+				default:
+					node=new_node(ND_ASSIGN,node,init_val);
+					break;
+			}
 		}
 	}else{
 		node=assign();
