@@ -86,7 +86,7 @@ struct Token{
 struct Type{
 	TypeKind ty;
 	Type *ptr_to;
-	size_t array_size;
+	size_t index_size;
 };
 
 // tree object

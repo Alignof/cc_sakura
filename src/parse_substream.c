@@ -1,7 +1,7 @@
 #include "cc_sakura.h"
 
 GVar *globals;
-// int alloc_size;
+int alloc_size;
 // Token *token;
 // LVar *locals;
 // Func *func_list[100];
@@ -120,7 +120,7 @@ void declare_global_variable(int star_count,Token* def_name){
 	gvar->next=globals;
 	gvar->name=def_name->str;
 	gvar->len=def_name->len;
-	gvar->type.array_size=(star_count)?8:type_size(gvar->type.ty);
+	gvar->type.index_size=(star_count)?8:type_size(gvar->type.ty);
 
 	// add type list
 	Type *newtype;
@@ -136,7 +136,7 @@ void declare_global_variable(int star_count,Token* def_name){
 
 	// Is array
 	if(consume("[")){
-		gvar->type.array_size=(token->val)*type_size(gvar->type.ty);
+		gvar->type.index_size=(token->val)*type_size(gvar->type.ty);
 		gvar->type.ty=ARRAY;
 		token=token->next;
 		expect("]");
@@ -159,7 +159,6 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	lvar->name=tok->str;
 	lvar->len=tok->len;
 	lvar->type.ty=node->type.ty;
-	alloc_size++;
 
 	// add type list
 	newtype=&(lvar->type);
@@ -172,27 +171,32 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 
 	if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
 
-	if(locals)
-		lvar->offset=(locals->offset)+type_size(lvar->type.ty);
-	else
-		lvar->offset=type_size(lvar->type.ty);
 
 	// Is array
 	if(consume("[")){
-		alloc_size+=(token->val)-1;
-		lvar->type.array_size=(token->val);
-		lvar->offset+=(lvar->type.array_size - 1)*type_size(lvar->type.ty);
+		lvar->type.index_size=(token->val);
+		int array_size=(lvar->type.index_size)*type_size(lvar->type.ty);
+		array_size=(array_size%8)?array_size/8*8+8:array_size;
+		lvar->offset=((locals)?(locals->offset):0) + array_size;
 		token=token->next;
 		expect("]");
+
+		alloc_size+=array_size;
 
 		lvar->type.ptr_to=calloc(1,sizeof(Type));
 		lvar->type.ptr_to->ty=lvar->type.ty;
 		lvar->type.ty=ARRAY;
+	}else{
+		if(locals)
+			lvar->offset=(locals->offset)+8;
+		else
+			lvar->offset=8;
+		alloc_size+=8;
 	}
 
 	node->type=lvar->type;
 	node->offset=lvar->offset;
-	node->val=lvar->type.array_size/type_size(lvar->type.ty);
+	node->val=lvar->type.index_size/type_size(lvar->type.ty);
 	// locals == new lvar
 	locals=lvar;
 

@@ -80,7 +80,7 @@ int main(int argc,char **argv){
 	GVar *start=globals;
 	for (GVar *var=start;var;var=var->next){
 		t_size=type_size(var->type.ty);
-		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.array_size,t_size);
+		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.index_size,t_size);
 	}
 
 	// set string
