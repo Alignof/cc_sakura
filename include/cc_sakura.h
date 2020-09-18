@@ -86,7 +86,7 @@ struct Token{
 struct Type{
 	TypeKind ty;
 	Type *ptr_to;
-	size_t alloc_size;
+	size_t array_size;
 };
 
 // tree object
@@ -105,7 +105,7 @@ struct Node{
 // function
 struct Func{
 	int argc;
-	int lvarc;
+	int stack_size;
 	char *name;
 	Type type;
 	Node *args;

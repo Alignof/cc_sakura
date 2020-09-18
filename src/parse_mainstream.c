@@ -1,6 +1,6 @@
 #include "cc_sakura.h"
 
-int lvar_count;
+int alloc_size;
 Token *token;
 LVar *locals;
 Str *strings;
@@ -376,7 +376,7 @@ void function(Func *func){
 	while(!consume("}"))
 		func->code[i++]=stmt();
 
-	func->lvarc=lvar_count;
+	func->stack_size=alloc_size;
 	func->code[i]=NULL;
 }
 
@@ -388,7 +388,7 @@ void program(){
 		// reset lvar list
 		locals=NULL;
 		// reset lvar counter
-		lvar_count=0;
+		alloc_size=0;
 		star_count=0;
 		func_list[func_index]=(Func *)malloc(sizeof(Func));
 

@@ -80,7 +80,7 @@ int main(int argc,char **argv){
 	GVar *start=globals;
 	for (GVar *var=start;var;var=var->next){
 		t_size=type_size(var->type.ty);
-		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.alloc_size,t_size);
+		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.array_size,t_size);
 	}
 
 	// set string
@@ -97,7 +97,7 @@ int main(int argc,char **argv){
 		printf("%s:\n",func_list[i]->name);
 		printf("	push rbp\n");
 		printf("	mov rbp,rsp\n");
-		printf("	sub rsp,%d\n",func_list[i]->lvarc*8);
+		printf("	sub rsp,%d\n",func_list[i]->stack_size);
 
 		if(func_list[i]->args){
 			// push argument stack
