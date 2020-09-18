@@ -137,7 +137,7 @@ assert -cl 25 "int main(){char a;char b;char c;char d; a=3;b=2;c=12;d=17;(d-c)*(
 assert -cl 9  "int main(){char a;char b;char c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;}"
 assert -cl 3  "int main(){char x; char *y; char **z; y=&x;z=&y;**z=3;return x;}"
 assert -cl 4  "int main(){char x; sizeof(x+2);}"
-assert -cl 3  "int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);}"
+assert -cl 3  "int main(){char a[4]; *a=1; *(a+1)=2; char *p; p=a; return *p + *(p+1);}"
 
 assert -cl 101  'int main(){char *x; x="hello"; x[1];}'
 assert -cl 108  'int main(){char *x; x="hello"; *(x+2);}'

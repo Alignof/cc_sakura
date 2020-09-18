@@ -50,7 +50,7 @@ Node *array_index(Node *node){
 
 	pointer_size=calloc(1,sizeof(Node));
 	pointer_size->kind=ND_NUM;
-	pointer_size->val=type_size(get_pointer_type(&(node->lhs->type)));
+	pointer_size->val=type_size(get_pointer_type(&(node->lhs->type.ptr_to->ty)));
 	node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
 
 	node=new_node(ND_DEREF,new_node_num(0),node);
