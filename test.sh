@@ -137,6 +137,7 @@ assert -cl 108  'int main(){char *x; x="hello"; *(x+2);}'
 assert -cl 5  'int main(){int i; int x[10];/* set counter */ for(i=9;i>=0;i=i-1) x[i]=i; return x[5];}'
 assert -cl 5  'int main(){int i; int x[10];/* set counter */ for(i=0;i<10;i=i+1) x[i]=i; return x[5];}'
 assert -cl 5  "int main(){int a=8;a=a-3;a;}"
+assert -cl 108 'int main(){char *x="hello"; *(x+2);}'
 assert -cl 108 'int main(){char x[6]="hello"; *(x+2);}'
 
 echo OK

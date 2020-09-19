@@ -6,6 +6,30 @@ int alloc_size;
 // LVar *locals;
 // Func *func_list[100];
 
+Node *init_formula(Node *node,Node *init_val){
+	switch(init_val->kind){
+		case ND_STR:
+			if(node->type.ty==PTR){
+				node=new_node(ND_ASSIGN,node,init_val);
+			}else if(node->type.ty==ARRAY){
+				if(node->type.index_size == init_val->offset+1 || node->type.index_size == -1)
+					node=new_node(ND_ASSIGN,node,init_val);
+				else	error_at(token->str,"Invalid array size");
+			}else{
+				error_at(token->str,"Invalid assign");
+			}
+			break;
+		case ND_BLOCK:
+			error_at(token->str,"Not yet implemented.");
+			break;
+		default:
+			node=new_node(ND_ASSIGN,node,init_val);
+			break;
+	}
+
+	return node;
+}
+
 Node *call_function(Node *node,Token *tok){
 	expect("(");
 

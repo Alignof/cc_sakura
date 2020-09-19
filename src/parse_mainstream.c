@@ -262,20 +262,7 @@ Node *expr(){
 		// initialize formula
 		if(consume("=")){
 			Node *init_val=assign();
-			switch(init_val->kind){
-				case ND_STR:
-					if(node->val == init_val->offset+1 || node->val == -1)
-						node=new_node(ND_ASSIGN,node,init_val);
-					else
-						error_at(token->str,"Invalid array size");
-					break;
-				case ND_BLOCK:
-					error_at(token->str,"Not yet implemented.");
-					break;
-				default:
-					node=new_node(ND_ASSIGN,node,init_val);
-					break;
-			}
+			node=init_formula(node,init_val);
 		}
 	}else{
 		node=assign();

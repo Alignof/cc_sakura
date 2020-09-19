@@ -1,4 +1,5 @@
 int main(){
+/*
 	int i;
 	int max=0;
 
@@ -13,6 +14,14 @@ int main(){
 		else
 			printf("%d\n",i);
 	}
+*/
+	char hello[13]="Hello World!";
+	printf("%s\n",hello);
+	printf("%c\n",hello[0]);
+	printf("%c\n",hello[1]);
+	printf("%c\n",hello[2]);
+	printf("%c\n",hello[3]);
+	printf("%c\n",hello[4]);
 
 	return 0;
 }

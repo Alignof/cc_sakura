@@ -196,6 +196,7 @@ Node *primary();
 // parse_substream.c
 void declare_global_variable();
 void get_argument(int func_index);
+Node *init_formula(Node *node,Node *init_val);
 Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
 Node *call_function(Node *node,Token *tok);
 Node *array_index(Node *node);
