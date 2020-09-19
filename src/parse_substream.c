@@ -64,6 +64,7 @@ Node *array_index(Node *node){
 Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
 	int ptrtype;
 
+
 	node->type.ty=PTR;
 	Node *pointer_size=calloc(1,sizeof(Node));
 	pointer_size->kind=ND_NUM;

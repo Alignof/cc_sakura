@@ -90,7 +90,12 @@ void gen(Node *node){
 			}else{
 				printf("	pop rdi\n");
 				printf("	pop rax\n");
-				printf("	mov [rax],rdi\n");
+
+				if(node->lhs->type.ty==INT)
+					printf("	mov [rax],edi\n");
+				else
+					printf("	mov [rax],rdi\n");
+
 				printf("	push rdi\n");
 			}
 
@@ -265,37 +270,31 @@ void gen(Node *node){
 			printf("	mov rax,rdx\n");
 			break;
 		case ND_GT:
-			//printf("	cmp rdi,rax\n");
 			printf("	cmp edi,eax\n");
 			printf("	setl al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_GE:
-			//printf("	cmp rdi,rax\n");
 			printf("	cmp edi,eax\n");
-			printf("	setge al\n");
+			printf("	setle al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_LT:
-			//printf("	cmp rax,rdi\n");
 			printf("	cmp eax,edi\n");
 			printf("	setl al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_LE:
-			//printf("	cmp rax,rdi\n");
 			printf("	cmp eax,edi\n");
 			printf("	setle al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_EQ:
-			//printf("	cmp rax,rdi\n");
 			printf("	cmp eax,edi\n");
 			printf("	sete al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_NE:
-			//printf("	cmp rax,rdi\n");
 			printf("	cmp eax,edi\n");
 			printf("	setne al\n");
 			printf("	movzb rax,al\n");
