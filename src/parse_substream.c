@@ -10,10 +10,10 @@ Node *init_formula(Node *node,Node *init_val){
 	switch(init_val->kind){
 		case ND_STR:
 			if(node->type.ty==PTR){
-				node=new_node(ND_ASSIGN,node,init_val);
+				node->vector=new_node(ND_ASSIGN,node,init_val);
 			}else if(node->type.ty==ARRAY){
 				if(node->type.index_size == init_val->offset+1 || node->type.index_size == -1)
-					node=new_node(ND_ASSIGN,node,init_val);
+					node->vector=new_node(ND_ASSIGN,node,init_val);
 				else	error_at(token->str,"Invalid array size");
 			}else{
 				error_at(token->str,"Invalid assign");
@@ -23,7 +23,7 @@ Node *init_formula(Node *node,Node *init_val){
 			error_at(token->str,"Not yet implemented.");
 			break;
 		default:
-			node=new_node(ND_ASSIGN,node,init_val);
+			node->vector=new_node(ND_ASSIGN,node,init_val);
 			break;
 	}
 
@@ -199,29 +199,40 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 
 	// Is array
 	if(consume("[")){
-		lvar->type.index_size=(token->val);
-		int array_size=(lvar->type.index_size)*type_size(lvar->type.ty);
-		array_size=(array_size%8)?array_size/8*8+8:array_size;
-		lvar->offset=((locals)?(locals->offset):0) + array_size;
-		token=token->next;
-		expect("]");
-
-		alloc_size+=array_size;
-
 		lvar->type.ptr_to=calloc(1,sizeof(Type));
 		lvar->type.ptr_to->ty=lvar->type.ty;
-		lvar->type.ty=ARRAY;
+		lvar->type.ty=PTR;
+		lvar->offset=((locals)?(locals->offset)+8:8);
+		node->type=lvar->type;
+		node->offset=lvar->offset;
+
+		Node *body=calloc(1,sizeof(node));
+		body->type=lvar->type;
+		body->type.ty=ARRAY;
+		body->type.index_size=(token->val);
+
+		int array_size=(body->type.index_size)*type_size(body->type.ty);
+		array_size=(array_size%8)?array_size/8*8+8:array_size;
+		body->offset=((locals)?(locals->offset):0) + array_size + 8;
+		token=token->next;
+
+		expect("]");
+		alloc_size+=array_size+8;
+
+		Node *init_val=new_node(ND_ADDRESS,NULL,node);
+		node=new_node(ND_ASSIGN,node,init_val);
 	}else{
 		if(locals)
 			lvar->offset=(locals->offset)+8;
 		else
 			lvar->offset=8;
 		alloc_size+=8;
+
+		node->type=lvar->type;
+		node->offset=lvar->offset;
+		node->val=lvar->type.index_size/type_size(lvar->type.ty);
 	}
 
-	node->type=lvar->type;
-	node->offset=lvar->offset;
-	node->val=lvar->type.index_size/type_size(lvar->type.ty);
 	// locals == new lvar
 	locals=lvar;
 

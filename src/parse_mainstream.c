@@ -68,7 +68,7 @@ Node *unary(){
 	}
 
 	if(consume("&")){
-		node=new_node(ND_ADDRESS,new_node_num(0),unary());
+		node=new_node(ND_ADDRESS,NULL,unary());
 		node->type.ty=PTR;
 
 		return node;
