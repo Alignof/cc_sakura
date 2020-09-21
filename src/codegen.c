@@ -66,6 +66,7 @@ void gen(Node *node){
 				printf("	push rax\n");
 			}
 
+			// init formula
 			if(node->vector != NULL) gen(node->vector);
 			return;
 		case ND_ARRAY:
@@ -90,9 +91,10 @@ void gen(Node *node){
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
-			if(node->lhs->kind==ND_DEREF) gen(node->lhs->rhs);
-			else if(node->lhs->kind==ND_GVAR) gen_gvar(node->lhs);
-			else if(node->lhs->kind==ND_LVAR) gen_lvar(node->lhs);
+			if(node->lhs->kind==ND_DEREF)	   gen(node->lhs->rhs);
+			else if(node->lhs->kind==ND_GVAR)  gen_gvar(node->lhs);
+			else if(node->lhs->kind==ND_LVAR)  gen_lvar(node->lhs);
+			else if(node->lhs->kind==ND_ARRAY) gen_lvar(node->lhs);
 
 			gen(node->rhs);
 

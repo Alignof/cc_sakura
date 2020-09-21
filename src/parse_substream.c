@@ -201,17 +201,18 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	if(consume("[")){
 		node->kind=ND_ARRAY;
 
+		// body
+		int array_size=(token->val)*type_size(lvar->type.ptr_to->ty);
+		array_size=(array_size%8)?array_size/8*8+8:array_size;
+		node->val=((locals)?(locals->offset):0) + array_size;
+
 		// pointer
 		lvar->type.ptr_to=calloc(1,sizeof(Type));
 		lvar->type.ptr_to->ty=lvar->type.ty;
 		lvar->type.ty=PTR;
 		lvar->type.index_size=(token->val);
-		lvar->offset=((locals)?(locals->offset)+8:8);
+		lvar->offset=node->val+8;
 
-		// body
-		int array_size=(lvar->type.index_size)*type_size(lvar->type.ptr_to->ty);
-		array_size=(array_size%8)?array_size/8*8+8:array_size;
-		node->val=((locals)?(locals->offset):0) + array_size + 8;
 		token=token->next;
 
 		expect("]");
