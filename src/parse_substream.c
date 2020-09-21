@@ -209,7 +209,7 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 		// pointer
 		lvar->type.ptr_to=calloc(1,sizeof(Type));
 		lvar->type.ptr_to->ty=lvar->type.ty;
-		lvar->type.ty=PTR;
+		lvar->type.ty=ARRAY;
 		lvar->type.index_size=(token->val);
 		lvar->offset=node->val+8;
 

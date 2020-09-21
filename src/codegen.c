@@ -81,9 +81,11 @@ void gen(Node *node){
 				printf("	mov [rax],rdi\n");
 				printf("	push rdi\n");
 			}
-
 			gen_lvar(node);
 			printf("	push rax\n");
+
+			// init formula
+			if(node->vector != NULL) gen(node->vector);
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n",node->val);
