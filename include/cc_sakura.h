@@ -43,6 +43,7 @@ typedef enum{
 	ND_ASSIGN,	//  =
 	ND_LVAR,	//  local valiable
 	ND_GVAR,	//  global valiable
+	ND_ARRAY,	//  array
 	ND_STR,		//  "string"
 	ND_NUM,		//  integer
 	ND_IF,		//  if

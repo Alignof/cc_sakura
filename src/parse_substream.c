@@ -199,40 +199,33 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 
 	// Is array
 	if(consume("[")){
+		node->kind=ND_ARRAY;
+
+		// pointer
 		lvar->type.ptr_to=calloc(1,sizeof(Type));
 		lvar->type.ptr_to->ty=lvar->type.ty;
 		lvar->type.ty=PTR;
+		lvar->type.index_size=(token->val);
 		lvar->offset=((locals)?(locals->offset)+8:8);
-		node->type=lvar->type;
-		node->offset=lvar->offset;
 
-		Node *body=calloc(1,sizeof(node));
-		body->type=lvar->type;
-		body->type.ty=ARRAY;
-		body->type.index_size=(token->val);
-
-		int array_size=(body->type.index_size)*type_size(body->type.ty);
+		// body
+		int array_size=(lvar->type.index_size)*type_size(lvar->type.ptr_to->ty);
 		array_size=(array_size%8)?array_size/8*8+8:array_size;
-		body->offset=((locals)?(locals->offset):0) + array_size + 8;
+		node->val=((locals)?(locals->offset):0) + array_size + 8;
 		token=token->next;
 
 		expect("]");
 		alloc_size+=array_size+8;
-
-		Node *init_val=new_node(ND_ADDRESS,NULL,node);
-		node=new_node(ND_ASSIGN,node,init_val);
 	}else{
 		if(locals)
 			lvar->offset=(locals->offset)+8;
 		else
 			lvar->offset=8;
 		alloc_size+=8;
-
-		node->type=lvar->type;
-		node->offset=lvar->offset;
-		node->val=lvar->type.index_size/type_size(lvar->type.ty);
 	}
 
+	node->type=lvar->type;
+	node->offset=lvar->offset;
 	// locals == new lvar
 	locals=lvar;
 
