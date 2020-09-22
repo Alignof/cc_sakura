@@ -81,8 +81,8 @@ void gen(Node *node){
 				printf("	mov [rax],rdi\n");
 				printf("	push rdi\n");
 			}
+			printf("	pop rax\n");
 			gen_lvar(node);
-			printf("	push rax\n");
 
 			// init formula
 			if(node->vector != NULL) gen(node->vector);
