@@ -191,7 +191,6 @@ void gen(Node *node){
 
 			// else expression
 			gen(node->rhs);
-			printf("	pop rax\n");
 
 			// continue
 			printf("	jmp .Lbegin%03d\n",lend);
@@ -204,6 +203,7 @@ void gen(Node *node){
 			tmp=node->vector;
 			while(tmp->vector){
 				gen(tmp->vector);
+				printf("	pop rax\n");
 				tmp=tmp->vector;
 			}
 			return;
