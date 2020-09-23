@@ -167,7 +167,7 @@ void declare_global_variable(int star_count,Token* def_name){
 		expect("]");
 	}
 	
-	// locals == new lvar
+	// globals == new lvar
 	globals=gvar;
 	expect(";");
 }
