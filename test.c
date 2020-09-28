@@ -18,20 +18,6 @@ int main(){
 }
 */
 int main(){
-	int a[5];
-	int sum;
-	int i;
-
-	sum=0;
-	i=0;
-
-	while(i<5){
-		a[i]=i;
-		i=i+1;
-	}
-
-	i=0;
-	while(i<5){sum=sum+a[i];i=i+1;}
-
+	int a[5]={0,1,2,3,4};
 	return sum;
 }

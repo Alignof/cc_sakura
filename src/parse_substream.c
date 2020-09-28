@@ -30,6 +30,11 @@ Node *init_formula(Node *node,Node *init_val){
 	return node;
 }
 
+Node *array_block(Node *node){
+
+	return node;
+}
+
 Node *call_function(Node *node,Token *tok){
 	expect("(");
 
