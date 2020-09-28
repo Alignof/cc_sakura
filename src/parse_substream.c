@@ -30,7 +30,23 @@ Node *init_formula(Node *node,Node *init_val){
 	return node;
 }
 
-Node *array_block(Node *node){
+Node *array_block(){
+	Node *node=new_node(ND_BLOCK,node,NULL);
+
+	Node *block_code=calloc(1,sizeof(Node));
+	node->vector=block_code;
+	while(token->kind!=TK_BLOCK){
+		//Is first?
+		if(block_code->vector){
+			block_code=expr();
+		}else{
+			block_code->vector=expr();
+			block_code=block_code->vector;
+		}
+
+		consume(",");
+	}
+	expect("}");
 
 	return node;
 }

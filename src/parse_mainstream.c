@@ -262,13 +262,10 @@ Node *expr(){
 		// initialize formula
 		if(consume("=")){
 			Node *init_val;
-			init_val=assign();
-			/*
 			if(consume("{"))
 				init_val=array_block(node);
 			else
 				init_val=assign();
-			*/
 
 			node=init_formula(node,init_val);
 		}
@@ -346,14 +343,11 @@ Node *stmt(){
 		while(token->kind!=TK_BLOCK){
 			//Is first?
 			if(block_code->vector){
-				block_code=expr();
+				block_code=stmt();
 			}else{
-				block_code->vector=expr();
+				block_code->vector=stmt();
 				block_code=block_code->vector;
 			}
-
-			if(!(consume(";") || consume(",")))
-				error_at(token->str,"not a ';' token.");
 		}
 		expect("}");
 	}else{
