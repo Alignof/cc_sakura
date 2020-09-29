@@ -19,9 +19,6 @@ Node *init_formula(Node *node,Node *init_val){
 				error_at(token->str,"Invalid assign");
 			}
 			break;
-		case ND_BLOCK:
-			error_at(token->str,"Not yet implemented.");
-			break;
 		default:
 			node->vector=new_node(ND_ASSIGN,node,init_val);
 			break;
@@ -30,23 +27,26 @@ Node *init_formula(Node *node,Node *init_val){
 	return node;
 }
 
-Node *array_block(){
-	Node *node=new_node(ND_BLOCK,node,NULL);
+Node *array_block(Node *arr){
+	int ctr=0;
+	Node *src;
+	Node *node;
 
-	Node *block_code=calloc(1,sizeof(Node));
-	node->vector=block_code;
 	while(token->kind!=TK_BLOCK){
 		//Is first?
-		if(block_code->vector){
-			block_code=expr();
+		if(node->vector!=NULL){
+			node=new_node(ND_ASSIGN,arr,expr());
 		}else{
-			block_code->vector=expr();
-			block_code=block_code->vector;
+			node->vector=new_node(ND_ASSIGN,node,expr());
+			node=node->vector;
 		}
 
 		consume(",");
 	}
 	expect("}");
+
+	if(arr->type.index_size != ctr)
+		error_at(token->str,"Invalid array size");
 
 	return node;
 }
@@ -85,23 +85,19 @@ TypeKind get_pointer_type(Type *given){
 	return given->ty;
 }
 
-Node *array_index(Node *node){
+Node *array_index(Node *node,Node *index){
 	Node *pointer_size;
-	// Is array index
-	expect("[");
 
 	// a[1] == *(a+1)
-	node=new_node(ND_ADD,node,mul());
+	node=new_node(ND_ADD,node,index);
 
 	pointer_size=calloc(1,sizeof(Node));
 	pointer_size->kind=ND_NUM;
 	pointer_size->val=type_size(get_pointer_type(&(node->lhs->type.ptr_to->ty)));
 	node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
 
-	node=new_node(ND_DEREF,new_node_num(0),node);
+	node=new_node(ND_DEREF,NULL,node);
 	node->type.ty=INT;
-
-	expect("]");
 
 	return node;
 }

@@ -201,7 +201,7 @@ Node *init_formula(Node *node,Node *init_val);
 Node *array_block();
 Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
 Node *call_function(Node *node,Token *tok);
-Node *array_index(Node *node);
+Node *array_index(Node *node,Node *index);
 Node *declare_local_variable(Node *node,Token *tok,int star_count);
 
 // codegan.c

@@ -43,8 +43,11 @@ Node *primary(){
 			}
 		}
 
-		if(*(token->str)=='[')
-			node=array_index(node);
+		// Is array index
+		if(consume("[")){
+			node=array_index(node,mul());
+			expect("]");
+		}
 
 		return node;
 	}
@@ -261,13 +264,10 @@ Node *expr(){
 
 		// initialize formula
 		if(consume("=")){
-			Node *init_val;
 			if(consume("{"))
-				init_val=array_block(node);
+				node=array_block(node);
 			else
-				init_val=assign();
-
-			node=init_formula(node,init_val);
+				node=init_formula(node,assign());
 		}
 	}else{
 		node=assign();
