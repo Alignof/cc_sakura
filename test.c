@@ -19,21 +19,17 @@ int main(){
 */
 
 int main(){
-	int a[5];
-	int sum;
-	int i;
-	sum=0;
-
-	i=0;
-	while(i<5){
-		a[i]=i;
-		i=i+1;
-	}
-
-	i=0;
-	while(i<5){
-		sum=sum+a[i];
-		i=i+1;
-	}
-	return sum;
+	int a[5]={0,1,2,3,4};
+	return a[4];
 }
+/*
+int main(){
+	int a[5];
+	a[4]=4;
+	a[3]=3;
+	a[2]=2;
+	a[1]=1;
+	a[0]=0;
+	return a[4];
+}
+*/

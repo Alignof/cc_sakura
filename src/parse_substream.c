@@ -30,25 +30,30 @@ Node *init_formula(Node *node,Node *init_val){
 Node *array_block(Node *arr){
 	int ctr=0;
 	Node *src;
+	Node *newone;
 	Node *node;
 
 	while(token->kind!=TK_BLOCK){
+		src=array_index(arr,new_node_num(ctr));
 		//Is first?
 		if(node->vector!=NULL){
-			node=new_node(ND_ASSIGN,arr,expr());
+			node=new_node(ND_ASSIGN,src,expr());
 		}else{
-			node->vector=new_node(ND_ASSIGN,node,expr());
-			node=node->vector;
+			newone=new_node(ND_ASSIGN,src,expr());
+			newone->vector=node;
+			node=newone;
 		}
 
 		consume(",");
+		ctr++;
 	}
 	expect("}");
 
 	if(arr->type.index_size != ctr)
 		error_at(token->str,"Invalid array size");
 
-	return node;
+	arr->next=node;
+	return arr;
 }
 
 Node *call_function(Node *node,Token *tok){
@@ -94,7 +99,7 @@ Node *array_index(Node *node,Node *index){
 	pointer_size=calloc(1,sizeof(Node));
 	pointer_size->kind=ND_NUM;
 	pointer_size->val=type_size(get_pointer_type(&(node->lhs->type.ptr_to->ty)));
-	node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
+	node->rhs=new_node(ND_MUL,index,pointer_size);
 
 	node=new_node(ND_DEREF,NULL,node);
 	node->type.ty=INT;
