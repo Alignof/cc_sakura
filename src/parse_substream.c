@@ -35,6 +35,7 @@ Node *array_block(Node *arr){
 	Node *clone=calloc(1,sizeof(Node));
 	memcpy(clone,arr,sizeof(Node));
 	clone->val=0;
+	clone->kind=ND_LVAR;
 
 	while(token->kind!=TK_BLOCK){
 		src=array_index(clone,new_node_num(ctr));

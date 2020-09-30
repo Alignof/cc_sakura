@@ -107,10 +107,9 @@ void gen(Node *node){
 				if(node->vector != NULL) gen(node->vector);
 				if(node->next != NULL) expand_next(node);
 			}else{
-				printf("	pop rax\n");
+				//printf("	pop rax\n");
 				gen_lvar(node);
 			}
-
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n",node->val);
