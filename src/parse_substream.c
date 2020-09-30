@@ -30,29 +30,31 @@ Node *init_formula(Node *node,Node *init_val){
 Node *array_block(Node *arr){
 	int ctr=0;
 	Node *src;
-	Node *newone;
-	Node *node;
+	Node *dst=calloc(1,sizeof(Node));
+
+	Node *clone=calloc(1,sizeof(Node));
+	memcpy(clone,arr,sizeof(Node));
+	clone->val=0;
 
 	while(token->kind!=TK_BLOCK){
-		src=array_index(arr,new_node_num(ctr));
+		src=array_index(clone,new_node_num(ctr));
 		//Is first?
-		if(node->vector!=NULL){
-			node=new_node(ND_ASSIGN,src,expr());
+		if(ctr==0){
+			dst=new_node(ND_ASSIGN,src,expr());
+			arr->next=dst;
 		}else{
-			newone=new_node(ND_ASSIGN,src,expr());
-			newone->vector=node;
-			node=newone;
+			dst->next=new_node(ND_ASSIGN,src,expr());
+			dst=dst->next;
 		}
-
 		consume(",");
 		ctr++;
 	}
+
 	expect("}");
 
 	if(arr->type.index_size != ctr)
 		error_at(token->str,"Invalid array size");
 
-	arr->next=node;
 	return arr;
 }
 
