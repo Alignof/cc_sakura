@@ -140,6 +140,7 @@ assert -cl 5  "int main(){int a=8;a=a-3;a;}"
 assert -cl 108 'int main(){char *x="hello"; *(x+2);}'
 assert -cl 108 'int main(){char x[6]="hello"; *(x+2);}'
 assert -cl 4 'int main(){int a[5]={0,1,2,3,4}; return a[4];}'
+assert -cl 4 'int main(){int a[]={0,1,2,3,4,5}; return a[4];}'
 assert -cl 4 'int add(int x,int y){return x+y;} int main(){int a[5]={0,1,2,add(1,3),4}; return a[3];}'
 
 echo OK

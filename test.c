@@ -19,6 +19,6 @@ int main(){
 */
 
 int main(){
-	int a[]={0,1,2,add(3,7),4};
+	int a[]={0,1,2,3,4};
 	return a[3];
 }

@@ -29,6 +29,7 @@ Node *init_formula(Node *node,Node *init_val){
 
 Node *array_block(Node *arr){
 	int ctr=0;
+	int isize=arr->type.index_size;
 	Node *src;
 	Node *dst=calloc(1,sizeof(Node));
 
@@ -52,8 +53,15 @@ Node *array_block(Node *arr){
 	}
 
 	expect("}");
+	
+	if(isize == -1){
+		int asize=align_array_size(ctr,arr->type.ptr_to->ty);
+		alloc_size+=asize+8;
+		arr->val=((locals)?(locals->offset):0) + asize;
+		locals->type.index_size=ctr;
+	}
 
-	if(arr->type.index_size != ctr)
+	if(isize != -1 && arr->type.index_size != ctr)
 		error_at(token->str,"Invalid array size");
 
 	return arr;
@@ -224,23 +232,27 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 
 	// Is array
 	if(consume("[")){
+		int isize=-1;
+		node->val=-1;
 		node->kind=ND_ARRAY;
 
-		// body
-		int array_size=align_array_size(token->val,lvar->type.ptr_to->ty);
-		node->val=((locals)?(locals->offset):0) + array_size;
+		if(*(token->str)!=']'){
+			// body
+			int asize=align_array_size(token->val,lvar->type.ptr_to->ty);
+			alloc_size+=asize+8;
+			node->val=((locals)?(locals->offset):0) + asize;
+			isize=token->val;
+			token=token->next;
+		}
 
 		// pointer
 		lvar->type.ptr_to=calloc(1,sizeof(Type));
 		lvar->type.ptr_to->ty=lvar->type.ty;
 		lvar->type.ty=ARRAY;
-		lvar->type.index_size=(token->val);
+		lvar->type.index_size=isize;
 		lvar->offset=node->val+8;
 
-		token=token->next;
-
 		expect("]");
-		alloc_size+=array_size+8;
 	}else{
 		if(locals)
 			lvar->offset=(locals->offset)+8;
