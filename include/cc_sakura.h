@@ -195,6 +195,7 @@ Node *unary();
 Node *primary();
 
 // parse_substream.c
+int align_array_size(int isize,TypeKind array_type);
 void declare_global_variable();
 void get_argument(int func_index);
 Node *init_formula(Node *node,Node *init_val);

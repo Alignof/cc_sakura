@@ -227,8 +227,7 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 		node->kind=ND_ARRAY;
 
 		// body
-		int array_size=(token->val)*type_size(lvar->type.ptr_to->ty);
-		array_size=(array_size%8)?array_size/8*8+8:array_size;
+		int array_size=align_array_size(token->val,lvar->type.ptr_to->ty);
 		node->val=((locals)?(locals->offset):0) + array_size;
 
 		// pointer
@@ -256,4 +255,9 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	locals=lvar;
 
 	return node;
+}
+
+int align_array_size(int isize,TypeKind array_type){
+	int array_size=isize*type_size(array_type);
+	return (array_size%8)?array_size/8*8+8:array_size;
 }

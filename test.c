@@ -19,17 +19,6 @@ int main(){
 */
 
 int main(){
-	int a[5]={0,1,2,3,4};
-	return a[4];
+	int a[]={0,1,2,add(3,7),4};
+	return a[3];
 }
-/*
-int main(){
-	int a[5];
-	a[0]=0;
-	a[1]=1;
-	a[2]=2;
-	a[3]=3;
-	a[4]=4;
-	return a[4];
-}
-*/
