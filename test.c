@@ -20,21 +20,16 @@ int main(){
 
 int main(){
 	int a[5]={0,1,2,3,4};
-	printf("%d\n",a[0]);
-	printf("%d\n",a[1]);
-	printf("%d\n",a[2]);
-	printf("%d\n",a[3]);
-	printf("%d\n",a[4]);
 	return a[4];
 }
 /*
 int main(){
 	int a[5];
-	a[4]=4;
-	a[3]=3;
-	a[2]=2;
-	a[1]=1;
 	a[0]=0;
+	a[1]=1;
+	a[2]=2;
+	a[3]=3;
+	a[4]=4;
 	return a[4];
 }
 */
