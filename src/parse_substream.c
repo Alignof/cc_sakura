@@ -54,15 +54,27 @@ Node *array_block(Node *arr){
 
 	expect("}");
 	
+	// ommitted
 	if(isize == -1){
 		int asize=align_array_size(ctr,arr->type.ptr_to->ty);
 		alloc_size+=asize+8;
 		arr->val=((locals)?(locals->offset):0) + asize;
 		locals->type.index_size=ctr;
+	// too many
+	}else if(arr->type.index_size < ctr){
+		error_at(token->str,"Invalid array size");
+	// too little
+	}else if(arr->type.index_size > ctr){
+		while(ctr != arr->type.index_size){
+			src=array_index(clone,new_node_num(ctr));
+			dst->next=new_node(ND_ASSIGN,src,new_node_num(0));
+			dst=dst->next;
+
+			ctr++;
+			consume(",");
+		}
 	}
 
-	if(isize != -1 && arr->type.index_size != ctr)
-		error_at(token->str,"Invalid array size");
 
 	return arr;
 }
