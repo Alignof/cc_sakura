@@ -423,6 +423,17 @@ void program(){
 		// global variable
 		}else{
 			declare_global_variable(star_count,def_name);
+/*
+			// initialize formula
+			if(consume("=")){
+				if(consume("{"))
+					node=array_block(node);
+				else
+					node=init_formula(node,assign());
+			}else{
+				node=init_formula(node,new_node_num(0));
+			}
+*/
 		}
 	}
 	func_list[func_index]=NULL;

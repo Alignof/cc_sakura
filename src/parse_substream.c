@@ -246,7 +246,7 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	if(consume("[")){
 		int isize=-1;
 		node->val=-1;
-		node->kind=ND_ARRAY;
+		node->kind=ND_LARRAY;
 
 		if(*(token->str)!=']'){
 			// body

@@ -10,7 +10,7 @@ void gen_gvar(Node *node){
 }
 
 void gen_lvar(Node *node){
-	if(node->kind!=ND_LVAR && node->kind!=ND_ARRAY && node->kind!=ND_CALL_FUNC)
+	if(node->kind!=ND_LVAR && node->kind!=ND_LARRAY && node->kind!=ND_CALL_FUNC)
 		error_at(token->str,"not a variable");
 
 	printf("	mov rax,rbp\n");
@@ -91,7 +91,7 @@ void gen(Node *node){
 			// init formula
 			if(node->vector != NULL) gen(node->vector);
 			return;
-		case ND_ARRAY:
+		case ND_LARRAY:
 			if(node->val != 0){
 				gen_lvar(node);
 				printf("	mov rax,rbp\n");
@@ -120,7 +120,7 @@ void gen(Node *node){
 			if(node->lhs->kind==ND_DEREF)	   gen(node->lhs->rhs);
 			else if(node->lhs->kind==ND_GVAR)  gen_gvar(node->lhs);
 			else if(node->lhs->kind==ND_LVAR)  gen_lvar(node->lhs);
-			else if(node->lhs->kind==ND_ARRAY) gen_lvar(node->lhs);
+			else if(node->lhs->kind==ND_LARRAY) gen_lvar(node->lhs);
 
 			gen(node->rhs);
 
