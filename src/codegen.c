@@ -10,7 +10,7 @@ void gen_gvar(Node *node){
 }
 
 void gen_lvar(Node *node){
-	if(node->kind != ND_LVAR && node->kind != ND_CALL_FUNC)
+	if(node->kind!=ND_LVAR && node->kind!=ND_LARRAY && node->kind!=ND_CALL_FUNC)
 		error_at(token->str,"not a variable");
 
 	printf("	mov rax,rbp\n");
@@ -24,6 +24,26 @@ void gen_arg(int arg_num,Node *tmp){
 	gen(tmp);
 	printf("	pop rax\n");
 	printf("	mov %s,rax\n",reg[arg_num]);
+}
+
+void expand_next(Node *node){
+	while(node){
+		gen(node);
+		printf("	pop rax\n");
+		node=node->next;
+	}
+		
+	printf("	push rax\n");
+	return;
+}
+
+void expand_vector(Node *node){
+	while(node){
+		gen(node);
+		printf("	pop rax\n");
+		node=node->vector;
+	}
+	return;
 }
 
 void gen(Node *node){
@@ -57,17 +77,23 @@ void gen(Node *node){
 		case ND_LVAR:
 			gen_lvar(node);
 
-			if(node->type.ty != ARRAY){
-				printf("	pop rax\n");
-				if(node->type.ty==CHAR){
-					printf("	movzx ecx,BYTE PTR [rax]\n");
-					printf("	push rcx\n");
-				}else{
-					printf("	mov rax,[rax]\n");
-					printf("	push rax\n");
-				}
+			printf("	pop rax\n");
+			if(node->type.ty==CHAR){
+				printf("	movzx ecx,BYTE PTR [rax]\n");
+				printf("	push rcx\n");
+			}else{
+				printf("	mov rax,[rax]\n");
+				printf("	push rax\n");
 			}
 
+			// init formula
+			if(node->vector != NULL) gen(node->vector);
+			return;
+		case ND_LARRAY:
+			gen_lvar(node);
+
+			// init formula
+			if(node->vector != NULL) expand_next(node->vector);
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n",node->val);
@@ -75,10 +101,10 @@ void gen(Node *node){
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
-
-			if(node->lhs->kind==ND_DEREF) gen(node->lhs->rhs);
-			else if(node->lhs->kind==ND_LVAR) gen_lvar(node->lhs);
-			else if(node->lhs->kind==ND_GVAR) gen_gvar(node->lhs);
+			if(node->lhs->kind==ND_DEREF)	   gen(node->lhs->rhs);
+			else if(node->lhs->kind==ND_GVAR)  gen_gvar(node->lhs);
+			else if(node->lhs->kind==ND_LVAR)  gen_lvar(node->lhs);
+			else if(node->lhs->kind==ND_LARRAY) gen_lvar(node->lhs);
 
 			gen(node->rhs);
 
@@ -90,7 +116,12 @@ void gen(Node *node){
 			}else{
 				printf("	pop rdi\n");
 				printf("	pop rax\n");
-				printf("	mov [rax],rdi\n");
+
+				if(node->lhs->type.ty==INT)
+					printf("	mov [rax],edi\n");
+				else
+					printf("	mov [rax],rdi\n");
+
 				printf("	push rdi\n");
 			}
 
@@ -168,7 +199,6 @@ void gen(Node *node){
 
 			// else expression
 			gen(node->rhs);
-			printf("	pop rax\n");
 
 			// continue
 			printf("	jmp .Lbegin%03d\n",lend);
@@ -178,11 +208,7 @@ void gen(Node *node){
 
 			return;
 		case ND_BLOCK:
-			tmp=node->vector;
-			while(tmp->vector){
-				gen(tmp->vector);
-				tmp=tmp->vector;
-			}
+			expand_vector(node->vector);
 			return;
 		case ND_CALL_FUNC:
 			tmp=node->next;
@@ -265,37 +291,31 @@ void gen(Node *node){
 			printf("	mov rax,rdx\n");
 			break;
 		case ND_GT:
-			//printf("	cmp rdi,rax\n");
 			printf("	cmp edi,eax\n");
 			printf("	setl al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_GE:
-			//printf("	cmp rdi,rax\n");
 			printf("	cmp edi,eax\n");
-			printf("	setge al\n");
+			printf("	setle al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_LT:
-			//printf("	cmp rax,rdi\n");
 			printf("	cmp eax,edi\n");
 			printf("	setl al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_LE:
-			//printf("	cmp rax,rdi\n");
 			printf("	cmp eax,edi\n");
 			printf("	setle al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_EQ:
-			//printf("	cmp rax,rdi\n");
 			printf("	cmp eax,edi\n");
 			printf("	sete al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_NE:
-			//printf("	cmp rax,rdi\n");
 			printf("	cmp eax,edi\n");
 			printf("	setne al\n");
 			printf("	movzb rax,al\n");

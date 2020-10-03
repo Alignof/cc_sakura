@@ -1,3 +1,4 @@
+/*
 int main(){
 	int i;
 	int max=0;
@@ -13,7 +14,11 @@ int main(){
 		else
 			printf("%d\n",i);
 	}
-
 	return 0;
 }
+*/
 
+int main(){
+	int a[]={0,1,2,3,4};
+	return a[4];
+}

@@ -80,7 +80,7 @@ int main(int argc,char **argv){
 	GVar *start=globals;
 	for (GVar *var=start;var;var=var->next){
 		t_size=type_size(var->type.ty);
-		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.alloc_size,t_size);
+		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.index_size,t_size);
 	}
 
 	// set string
@@ -92,12 +92,13 @@ int main(int argc,char **argv){
 	label_begin=0;
 	label_end=0;
 	label_else=0;
+
 	//generate assembly at first expr
 	for(i=0;func_list[i];i++){
 		printf("%s:\n",func_list[i]->name);
 		printf("	push rbp\n");
 		printf("	mov rbp,rsp\n");
-		printf("	sub rsp,%d\n",func_list[i]->lvarc*8);
+		printf("	sub rsp,%d\n",func_list[i]->stack_size);
 
 		if(func_list[i]->args){
 			// push argument stack
@@ -106,6 +107,10 @@ int main(int argc,char **argv){
 			// set local variable
 			gen(func_list[i]->args);
 		}
+
+		/*
+		 * global init (main)
+		 */
 
 		for(j=0;func_list[i]->code[j]!=NULL;j++){
 			gen(func_list[i]->code[j]);

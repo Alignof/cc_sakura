@@ -12,8 +12,7 @@ assert() {
 	fi
 
 	gcc -c tmp.s 
-	gcc -I./include -c -o src/obj/func_for_test.o src/func_for_test.c
-	gcc -o tmp -static tmp.s src/obj/func_for_test.o
+	gcc -o tmp -static tmp.s 
 	#gcc -o tmp tmp.s
 	./tmp
 	actual="$?"
@@ -98,15 +97,8 @@ assert -cl 9  "int add(int a,int b,int c){return a+b+c;} int main(){int a;int b;
 
 assert -cl 55 "int fibo(int num){if(num==0){return 0;}if(num==1){return 1;} return fibo(num-1)+fibo(num-2);} int main(){fibo(10);}"
 
-assert -cl 10 "int main(){int a; int b; a=0;b=1;b=&a;a=10;*b;}"
-assert -cl 2  "int main(){int a; int b;int c; a=2;b=3;c=&b+8;*c;}"
 assert -cl 3  "int main(){int x; int *y; y=&x;*y=3;return x;}"
 assert -cl 3  "int main(){int x; int *y; int **z; y=&x;z=&y;**z=3;return x;}"
-
-assert -cl 4  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; *q;}"
-assert -cl 4  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=2+p; *q;}"
-assert -cl 8  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; q=p+3; return *q;}"
-assert -cl 2  "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; q=q-1; return *q;}"
 
 assert -cl 4  "int main(){int x; sizeof(x);}"
 assert -cl 8  "int main(){int *x; sizeof(x);}"
@@ -136,13 +128,21 @@ assert -cl 2  "int main(){char a;a=2;return a;}"
 assert -cl 25 "int main(){char a;char b;char c;char d; a=3;b=2;c=12;d=17;(d-c)*(a+b);}"
 assert -cl 9  "int main(){char a;char b;char c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;}"
 assert -cl 3  "int main(){char x; char *y; char **z; y=&x;z=&y;**z=3;return x;}"
-assert -cl 1  "int main(){char x; sizeof(x+2);}"
-assert -cl 3  "int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);}"
+assert -cl 4  "int main(){char x; sizeof(x+2);}"
+assert -cl 3  "int main(){char a[4]; *a=1; *(a+1)=2; char *p; p=a; return *p + *(p+1);}"
 
 assert -cl 101  'int main(){char *x; x="hello"; x[1];}'
 assert -cl 108  'int main(){char *x; x="hello"; *(x+2);}'
 
+assert -cl 5  'int main(){int i; int x[10];/* set counter */ for(i=9;i>=0;i=i-1) x[i]=i; return x[5];}'
 assert -cl 5  'int main(){int i; int x[10];/* set counter */ for(i=0;i<10;i=i+1) x[i]=i; return x[5];}'
 assert -cl 5  "int main(){int a=8;a=a-3;a;}"
+assert -cl 108 'int main(){char *x="hello"; *(x+2);}'
+assert -cl 108 'int main(){char x[]="hello"; *(x+2);}'
+assert -cl 108 'int main(){char x[6]="hello"; *(x+2);}'
+assert -cl 4 'int main(){int a[]={0,1,2,3,4}; return a[4];}'
+assert -cl 4 'int main(){int a[5]={0,1,2,3,4}; return a[4];}'
+assert -cl 0 'int main(){int a[5]={0,1,2}; return a[4];}'
+assert -cl 4 'int add(int x,int y){return x+y;} int main(){int a[5]={0,1,2,add(1,3),4}; return a[3];}'
 
 echo OK

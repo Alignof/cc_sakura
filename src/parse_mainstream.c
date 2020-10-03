@@ -1,6 +1,6 @@
 #include "cc_sakura.h"
 
-int lvar_count;
+int alloc_size;
 Token *token;
 LVar *locals;
 Str *strings;
@@ -23,7 +23,11 @@ Node *primary(){
 		LVar *lvar=find_lvar(tok);
 		if(lvar){
 			// local variable exist
-			node->kind=ND_LVAR;
+			if(lvar->type.ty==ARRAY)
+				node->kind=ND_LARRAY;
+			else
+				node->kind=ND_LVAR;
+
 			node->offset=lvar->offset;
 			node->type=lvar->type;
 		// call function
@@ -43,8 +47,11 @@ Node *primary(){
 			}
 		}
 
-		if(*(token->str)=='[')
-			node=array_index(node);
+		// Is array index
+		if(consume("[")){
+			node=array_index(node,mul());
+			expect("]");
+		}
 
 		return node;
 	}
@@ -68,7 +75,7 @@ Node *unary(){
 	}
 
 	if(consume("&")){
-		node=new_node(ND_ADDRESS,new_node_num(0),unary());
+		node=new_node(ND_ADDRESS,NULL,unary());
 		node->type.ty=PTR;
 
 		return node;
@@ -82,6 +89,7 @@ Node *unary(){
 
 		Token *tok=consume_string();
 		Str *fstr=find_string(tok);
+
 		// has already
 		if(fstr){
 			node->str=fstr->str;
@@ -93,6 +101,8 @@ Node *unary(){
 			new->len=tok->len;
 			new->str=tok->str;
 			new->label_num=strings ? strings->label_num+1 : 0;
+			node->str=new->str;
+			node->offset=new->len;
 			node->val=new->label_num;
 
 			if(strings==NULL){
@@ -159,7 +169,7 @@ Node *add(){
 			lhs_type=&(node->lhs->type);
 			rhs_type=&(node->rhs->type);
 
-			if(type_size(lhs_type->ty)!=4 || type_size(rhs_type->ty)!=4)
+			if(type_size(lhs_type->ty)==8 || type_size(rhs_type->ty)==8)
 				node=pointer_calc(node,lhs_type,rhs_type);
 
 		}else if(consume("-")){
@@ -258,7 +268,10 @@ Node *expr(){
 
 		// initialize formula
 		if(consume("=")){
-			node=new_node(ND_ASSIGN,node,assign());
+			if(consume("{"))
+				node=array_block(node);
+			else
+				node=init_formula(node,assign());
 		}
 	}else{
 		node=assign();
@@ -330,14 +343,14 @@ Node *stmt(){
 		node=new_node(ND_BLOCK,node,NULL);
 
 		Node *block_code=calloc(1,sizeof(Node));
-		node->vector=block_code;
 		while(token->kind!=TK_BLOCK){
 			//Is first?
-			if(block_code->vector){
-				block_code=stmt();
-			}else{
+			if(block_code->rhs){
 				block_code->vector=stmt();
 				block_code=block_code->vector;
+			}else{
+				block_code=stmt();
+				node->vector=block_code;
 			}
 		}
 		expect("}");
@@ -359,7 +372,7 @@ void function(Func *func){
 	while(!consume("}"))
 		func->code[i++]=stmt();
 
-	func->lvarc=lvar_count;
+	func->stack_size=alloc_size;
 	func->code[i]=NULL;
 }
 
@@ -371,7 +384,7 @@ void program(){
 		// reset lvar list
 		locals=NULL;
 		// reset lvar counter
-		lvar_count=0;
+		alloc_size=0;
 		star_count=0;
 		func_list[func_index]=(Func *)malloc(sizeof(Func));
 
@@ -414,6 +427,19 @@ void program(){
 		// global variable
 		}else{
 			declare_global_variable(star_count,def_name);
+
+/*
+			// initialize formula
+			if(consume("=")){
+				if(consume("{"))
+					globals->init=array_block(node);
+				else
+					globals->init=init_formula(node,assign());
+			}else{
+				globals->init=init_formula(node,new_node_num(0));
+			}
+*/
+
 		}
 	}
 	func_list[func_index]=NULL;
