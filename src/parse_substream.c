@@ -251,8 +251,8 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 		if(*(token->str)!=']'){
 			// body
 			int asize=align_array_size(token->val,lvar->type.ptr_to->ty);
-			alloc_size+=asize+8;
-			node->val=((locals)?(locals->offset):0) + asize;
+			alloc_size+=asize;
+			lvar->offset=((locals)?(locals->offset):0) + asize;
 			isize=token->val;
 			token=token->next;
 		}
@@ -262,7 +262,6 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 		lvar->type.ptr_to->ty=lvar->type.ty;
 		lvar->type.ty=ARRAY;
 		lvar->type.index_size=isize;
-		lvar->offset=node->val+8;
 
 		expect("]");
 	}else{

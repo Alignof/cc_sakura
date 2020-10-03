@@ -92,24 +92,11 @@ void gen(Node *node){
 			if(node->vector != NULL) gen(node->vector);
 			return;
 		case ND_LARRAY:
-			if(node->val != 0){
-				gen_lvar(node);
-				printf("	mov rax,rbp\n");
-				printf("	sub rax,%d\n",node->val);
-				printf("	push rax\n");
+			gen_lvar(node);
 
-				printf("	pop rdi\n");
-				printf("	pop rax\n");
-				printf("	mov [rax],rdi\n");
-				gen_lvar(node);
-
-				// init formula
-				if(node->vector != NULL) gen(node->vector);
-				if(node->next != NULL) expand_next(node);
-			}else{
-				//printf("	pop rax\n");
-				gen_lvar(node);
-			}
+			// init formula
+			if(node->vector != NULL) gen(node->vector);
+			if(node->next != NULL) expand_next(node);
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n",node->val);

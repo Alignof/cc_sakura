@@ -122,6 +122,7 @@ struct GVar{
 	char *name;
 	Type type;
 	GVar *next;
+	Node *init;
 };
 
 // local variable
