@@ -20,6 +20,6 @@ int main(){
 
 int main(){
 	char hello[]="Hello World!";
-	//printf("%s\n",hello);
+	printf("%s\n",hello);
 	return hello[0];
 }
