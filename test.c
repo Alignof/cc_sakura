@@ -18,8 +18,8 @@ int main(){
 }
 */
 
-int a;
-
 int main(){
-	return a;
+	char hello[]="Hello World!";
+	//printf("%s\n",hello);
+	return hello[0];
 }

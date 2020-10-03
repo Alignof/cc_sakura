@@ -13,7 +13,7 @@ Node *init_formula(Node *node,Node *init_val){
 				node->vector=new_node(ND_ASSIGN,node,init_val);
 			}else if(node->type.ty==ARRAY){
 				if(node->type.index_size == init_val->offset+1 || node->type.index_size == -1)
-					node->vector=new_node(ND_ASSIGN,node,init_val);
+					node=array_str(node,init_val);
 				else	error_at(token->str,"Invalid array size");
 			}else{
 				error_at(token->str,"Invalid assign");
@@ -27,6 +27,47 @@ Node *init_formula(Node *node,Node *init_val){
 	return node;
 }
 
+Node *array_str(Node *arr,Node *init_val){
+	int ctr=0;
+	int isize=arr->type.index_size;
+	Node *src;
+	Node *dst=calloc(1,sizeof(Node));
+
+	Node *clone=calloc(1,sizeof(Node));
+	memcpy(clone,arr,sizeof(Node));
+	clone->kind=ND_LARRAY;
+
+	while(ctr < init_val->offset){
+		src=array_index(clone,new_node_num(ctr));
+		//Is first?
+		if(ctr==0){
+			dst=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
+			arr->next=dst;
+		}else{
+			dst->next=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
+			dst=dst->next;
+		}
+		ctr++;
+	}
+
+	// '\0'
+	dst->next=new_node(ND_ASSIGN,src,new_node_num('\0'));
+	dst=dst->next;
+	ctr++;
+
+	// ommitted
+	if(isize == -1){
+		int asize=align_array_size(ctr,arr->type.ptr_to->ty);
+		alloc_size+=asize;
+		arr->offset=((locals)?(locals->offset):0) + asize;
+		clone->offset=arr->offset;
+		locals->offset=arr->offset;
+		locals->type.index_size=ctr;
+	}
+
+	return arr;
+}
+
 Node *array_block(Node *arr){
 	int ctr=0;
 	int isize=arr->type.index_size;
@@ -35,8 +76,7 @@ Node *array_block(Node *arr){
 
 	Node *clone=calloc(1,sizeof(Node));
 	memcpy(clone,arr,sizeof(Node));
-	clone->val=0;
-	clone->kind=ND_LVAR;
+	clone->kind=ND_LARRAY;
 
 	while(token->kind!=TK_BLOCK){
 		src=array_index(clone,new_node_num(ctr));
@@ -57,8 +97,10 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		int asize=align_array_size(ctr,arr->type.ptr_to->ty);
-		alloc_size+=asize+8;
-		arr->val=((locals)?(locals->offset):0) + asize;
+		alloc_size+=asize;
+		arr->offset=((locals)?(locals->offset):0) + asize;
+		clone->offset=arr->offset;
+		locals->offset=arr->offset;
 		locals->type.index_size=ctr;
 	// too many
 	}else if(arr->type.index_size < ctr){
