@@ -23,7 +23,11 @@ Node *primary(){
 		LVar *lvar=find_lvar(tok);
 		if(lvar){
 			// local variable exist
-			node->kind=ND_LVAR;
+			if(lvar->type.ty==ARRAY)
+				node->kind=ND_LARRAY;
+			else
+				node->kind=ND_LVAR;
+
 			node->offset=lvar->offset;
 			node->type=lvar->type;
 		// call function
@@ -43,8 +47,11 @@ Node *primary(){
 			}
 		}
 
-		if(*(token->str)=='[')
-			node=array_index(node);
+		// Is array index
+		if(consume("[")){
+			node=array_index(node,mul());
+			expect("]");
+		}
 
 		return node;
 	}
@@ -261,8 +268,10 @@ Node *expr(){
 
 		// initialize formula
 		if(consume("=")){
-			Node *init_val=assign();
-			node=init_formula(node,init_val);
+			if(consume("{"))
+				node=array_block(node);
+			else
+				node=init_formula(node,assign());
 		}
 	}else{
 		node=assign();
@@ -418,6 +427,19 @@ void program(){
 		// global variable
 		}else{
 			declare_global_variable(star_count,def_name);
+
+/*
+			// initialize formula
+			if(consume("=")){
+				if(consume("{"))
+					globals->init=array_block(node);
+				else
+					globals->init=init_formula(node,assign());
+			}else{
+				globals->init=init_formula(node,new_node_num(0));
+			}
+*/
+
 		}
 	}
 	func_list[func_index]=NULL;

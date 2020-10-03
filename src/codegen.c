@@ -10,7 +10,7 @@ void gen_gvar(Node *node){
 }
 
 void gen_lvar(Node *node){
-	if(node->kind!=ND_LVAR && node->kind!=ND_ARRAY && node->kind!=ND_CALL_FUNC)
+	if(node->kind!=ND_LVAR && node->kind!=ND_LARRAY && node->kind!=ND_CALL_FUNC)
 		error_at(token->str,"not a variable");
 
 	printf("	mov rax,rbp\n");
@@ -24,6 +24,28 @@ void gen_arg(int arg_num,Node *tmp){
 	gen(tmp);
 	printf("	pop rax\n");
 	printf("	mov %s,rax\n",reg[arg_num]);
+}
+
+void expand_next(Node *node){
+	while(node->next){
+		gen(node->next);
+		printf("	pop rax\n");
+		node=node->next;
+	}
+		
+	printf("	push rax\n");
+	return;
+}
+
+void expand_vector(Node *node){
+	if(!node) return;
+
+	while(node->vector){
+		gen(node->vector);
+		printf("	pop rax\n");
+		node=node->vector;
+	}
+	return;
 }
 
 void gen(Node *node){
@@ -69,23 +91,12 @@ void gen(Node *node){
 			// init formula
 			if(node->vector != NULL) gen(node->vector);
 			return;
-		case ND_ARRAY:
-			if(node->val != 0){
-				gen_lvar(node);
-				printf("	mov rax,rbp\n");
-				printf("	sub rax,%d\n",node->val);
-				printf("	push rax\n");
-
-				printf("	pop rdi\n");
-				printf("	pop rax\n");
-				printf("	mov [rax],rdi\n");
-				printf("	push rdi\n");
-			}
-			printf("	pop rax\n");
+		case ND_LARRAY:
 			gen_lvar(node);
 
 			// init formula
 			if(node->vector != NULL) gen(node->vector);
+			if(node->next != NULL) expand_next(node);
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n",node->val);
@@ -96,7 +107,7 @@ void gen(Node *node){
 			if(node->lhs->kind==ND_DEREF)	   gen(node->lhs->rhs);
 			else if(node->lhs->kind==ND_GVAR)  gen_gvar(node->lhs);
 			else if(node->lhs->kind==ND_LVAR)  gen_lvar(node->lhs);
-			else if(node->lhs->kind==ND_ARRAY) gen_lvar(node->lhs);
+			else if(node->lhs->kind==ND_LARRAY) gen_lvar(node->lhs);
 
 			gen(node->rhs);
 
@@ -200,12 +211,7 @@ void gen(Node *node){
 
 			return;
 		case ND_BLOCK:
-			tmp=node->vector;
-			while(tmp->vector){
-				gen(tmp->vector);
-				printf("	pop rax\n");
-				tmp=tmp->vector;
-			}
+			expand_vector(node->vector);
 			return;
 		case ND_CALL_FUNC:
 			tmp=node->next;

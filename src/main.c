@@ -92,6 +92,7 @@ int main(int argc,char **argv){
 	label_begin=0;
 	label_end=0;
 	label_else=0;
+
 	//generate assembly at first expr
 	for(i=0;func_list[i];i++){
 		printf("%s:\n",func_list[i]->name);
@@ -106,6 +107,10 @@ int main(int argc,char **argv){
 			// set local variable
 			gen(func_list[i]->args);
 		}
+
+		/*
+		 * global init (main)
+		 */
 
 		for(j=0;func_list[i]->code[j]!=NULL;j++){
 			gen(func_list[i]->code[j]);

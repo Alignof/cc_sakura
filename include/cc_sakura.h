@@ -43,7 +43,8 @@ typedef enum{
 	ND_ASSIGN,	//  =
 	ND_LVAR,	//  local valiable
 	ND_GVAR,	//  global valiable
-	ND_ARRAY,	//  array
+	ND_LARRAY,	//  local array
+	ND_GARRAY,	//  global array
 	ND_STR,		//  "string"
 	ND_NUM,		//  integer
 	ND_IF,		//  if
@@ -121,6 +122,7 @@ struct GVar{
 	char *name;
 	Type type;
 	GVar *next;
+	Node *init;
 };
 
 // local variable
@@ -130,8 +132,7 @@ struct LVar{
 	char *name;
 	Type type;
 	LVar *next;
-};
-
+}; 
 struct Str{
 	int len;
 	int label_num;
@@ -195,12 +196,15 @@ Node *unary();
 Node *primary();
 
 // parse_substream.c
+int align_array_size(int isize,TypeKind array_type);
 void declare_global_variable();
 void get_argument(int func_index);
 Node *init_formula(Node *node,Node *init_val);
+Node *array_block();
+Node *array_str(Node *arr,Node *init_val);
 Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
 Node *call_function(Node *node,Token *tok);
-Node *array_index(Node *node);
+Node *array_index(Node *node,Node *index);
 Node *declare_local_variable(Node *node,Token *tok,int star_count);
 
 // codegan.c
