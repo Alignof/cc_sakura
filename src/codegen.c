@@ -27,8 +27,8 @@ void gen_arg(int arg_num,Node *tmp){
 }
 
 void expand_next(Node *node){
-	while(node->next){
-		gen(node->next);
+	while(node){
+		gen(node);
 		printf("	pop rax\n");
 		node=node->next;
 	}
@@ -38,10 +38,8 @@ void expand_next(Node *node){
 }
 
 void expand_vector(Node *node){
-	if(!node) return;
-
-	while(node->vector){
-		gen(node->vector);
+	while(node){
+		gen(node);
 		printf("	pop rax\n");
 		node=node->vector;
 	}
@@ -95,8 +93,7 @@ void gen(Node *node){
 			gen_lvar(node);
 
 			// init formula
-			if(node->vector != NULL) gen(node->vector);
-			if(node->next != NULL) expand_next(node);
+			if(node->vector != NULL) expand_next(node->vector);
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n",node->val);

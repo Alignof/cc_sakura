@@ -19,7 +19,6 @@ int main(){
 */
 
 int main(){
-	char hello[]="Hello World!";
-	printf("%s\n",hello);
-	return hello[0];
+	int a[]={0,1,2,3,4};
+	return a[4];
 }

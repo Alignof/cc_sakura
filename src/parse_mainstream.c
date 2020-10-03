@@ -343,14 +343,14 @@ Node *stmt(){
 		node=new_node(ND_BLOCK,node,NULL);
 
 		Node *block_code=calloc(1,sizeof(Node));
-		node->vector=block_code;
 		while(token->kind!=TK_BLOCK){
 			//Is first?
-			if(block_code->vector){
-				block_code=stmt();
-			}else{
+			if(block_code->rhs){
 				block_code->vector=stmt();
 				block_code=block_code->vector;
+			}else{
+				block_code=stmt();
+				node->vector=block_code;
 			}
 		}
 		expect("}");
