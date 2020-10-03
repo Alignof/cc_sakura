@@ -42,7 +42,7 @@ Node *array_str(Node *arr,Node *init_val){
 		//Is first?
 		if(ctr==0){
 			dst=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
-			arr->next=dst;
+			arr->vector=dst;
 		}else{
 			dst->next=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
 			dst=dst->next;
@@ -83,7 +83,7 @@ Node *array_block(Node *arr){
 		//Is first?
 		if(ctr==0){
 			dst=new_node(ND_ASSIGN,src,expr());
-			arr->next=dst;
+			arr->vector=dst;
 		}else{
 			dst->next=new_node(ND_ASSIGN,src,expr());
 			dst=dst->next;
