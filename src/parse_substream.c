@@ -1,7 +1,7 @@
 #include "cc_sakura.h"
 
 GVar *globals;
-int alloc_size;
+//int alloc_size;
 // Token *token;
 // LVar *locals;
 // Func *func_list[100];
