@@ -156,6 +156,7 @@ bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind);
 
 // parse_func.c
 extern int lvar_count;
+extern int alloc_size;
 extern char *user_input;
 extern char filename[100];
 extern Token *token;
