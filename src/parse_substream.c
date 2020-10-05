@@ -224,15 +224,17 @@ void get_argument(int func_index){
 	}
 }
 
-void declare_global_variable(int star_count,Token* def_name){
+Node *declare_global_variable(int star_count,Token* def_name){
 	// if not token -> error
 	if(!def_name) error_at(token->str,"not a variable.");
+
+	Node *node=calloc(1,sizeof(Node));
+	node->kind=ND_LVAR;
 
 	GVar *gvar=calloc(1,sizeof(GVar));
 	gvar->next=globals;
 	gvar->name=def_name->str;
 	gvar->len=def_name->len;
-	gvar->type.index_size=(star_count)?8:type_size(gvar->type.ty);
 
 	// add type list
 	Type *newtype;
@@ -248,7 +250,19 @@ void declare_global_variable(int star_count,Token* def_name){
 
 	// Is array
 	if(consume("[")){
-		gvar->type.index_size=(token->val)*type_size(gvar->type.ty);
+		int isize=-1;
+		node->val=-1;
+		node->kind=ND_GARRAY;
+
+		if(*(token->str)!=']'){
+			// body
+			isize=token->val;
+			token=token->next;
+		}
+
+		gvar->type.ptr_to=calloc(1,sizeof(Type));
+		gvar->type.ptr_to->ty=gvar->type.ty;
+		gvar->type.index_size=isize;
 		gvar->type.ty=ARRAY;
 		token=token->next;
 		expect("]");
@@ -257,6 +271,10 @@ void declare_global_variable(int star_count,Token* def_name){
 	// globals == new lvar
 	globals=gvar;
 	expect(";");
+
+	node->type=gvar->type;
+
+	return node;
 }
 
 Node *declare_local_variable(Node *node,Token *tok,int star_count){
@@ -291,7 +309,6 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 		node->kind=ND_LARRAY;
 
 		if(*(token->str)!=']'){
-			// body
 			int asize=align_array_size(token->val,lvar->type.ptr_to->ty);
 			alloc_size+=asize;
 			lvar->offset=((locals)?(locals->offset):0) + asize;
@@ -299,7 +316,6 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 			token=token->next;
 		}
 
-		// pointer
 		lvar->type.ptr_to=calloc(1,sizeof(Type));
 		lvar->type.ptr_to->ty=lvar->type.ty;
 		lvar->type.ty=ARRAY;

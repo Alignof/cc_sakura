@@ -56,7 +56,6 @@ void get_code(int argc,char **argv){
 
 int main(int argc,char **argv){
 	int i,j;
-	int t_size;
 
 	char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
@@ -79,8 +78,8 @@ int main(int argc,char **argv){
 	// set global variable
 	GVar *start=globals;
 	for (GVar *var=start;var;var=var->next){
-		t_size=type_size(var->type.ty);
-		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.index_size,t_size);
+		int ty_size=type_size(var->type.ty);
+		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.index_size,ty_size);
 	}
 
 	// set string

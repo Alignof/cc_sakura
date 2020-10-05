@@ -426,17 +426,17 @@ void program(){
 
 		// global variable
 		}else{
-			declare_global_variable(star_count,def_name);
+			Node *init_gv=declare_global_variable(star_count,def_name);
 
 /*
 			// initialize formula
 			if(consume("=")){
 				if(consume("{"))
-					globals->init=array_block(node);
+					globals->init=array_block(init_gv);
 				else
-					globals->init=init_formula(node,assign());
+					globals->init=init_formula(init_gv,assign());
 			}else{
-				globals->init=init_formula(node,new_node_num(0));
+				globals->init=init_formula(init_gv,new_node_num(0));
 			}
 */
 
