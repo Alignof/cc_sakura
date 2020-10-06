@@ -10,7 +10,7 @@ Node *init_formula(Node *node,Node *init_val){
 	switch(init_val->kind){
 		case ND_STR:
 			if(node->type.ty==PTR){
-				node->vector=new_node(ND_ASSIGN,node,init_val);
+				node=new_node(ND_ASSIGN,node,init_val);
 			}else if(node->type.ty==ARRAY){
 				if(node->type.index_size == init_val->offset+1 || node->type.index_size == -1)
 					node=array_str(node,init_val);
@@ -20,7 +20,7 @@ Node *init_formula(Node *node,Node *init_val){
 			}
 			break;
 		default:
-			node->vector=new_node(ND_ASSIGN,node,init_val);
+			node=new_node(ND_ASSIGN,node,init_val);
 			break;
 	}
 
@@ -229,7 +229,7 @@ Node *declare_global_variable(int star_count,Token* def_name){
 	if(!def_name) error_at(token->str,"not a variable.");
 
 	Node *node=calloc(1,sizeof(Node));
-	node->kind=ND_LVAR;
+	node->kind=ND_GVAR;
 
 	GVar *gvar=calloc(1,sizeof(GVar));
 	gvar->next=globals;
@@ -257,6 +257,7 @@ Node *declare_global_variable(int star_count,Token* def_name){
 		if(*(token->str)!=']'){
 			// body
 			isize=token->val;
+			gvar->memsize=align_array_size(token->val,gvar->type.ptr_to->ty);
 			token=token->next;
 		}
 
@@ -264,15 +265,17 @@ Node *declare_global_variable(int star_count,Token* def_name){
 		gvar->type.ptr_to->ty=gvar->type.ty;
 		gvar->type.index_size=isize;
 		gvar->type.ty=ARRAY;
-		token=token->next;
 		expect("]");
+	}else{
+		gvar->memsize=type_size(gvar->type.ty);
 	}
 	
 	// globals == new lvar
 	globals=gvar;
-	expect(";");
 
 	node->type=gvar->type;
+	node->str=gvar->name;
+	node->val=gvar->len;
 
 	return node;
 }

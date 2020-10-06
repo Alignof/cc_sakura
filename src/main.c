@@ -78,8 +78,8 @@ int main(int argc,char **argv){
 	// set global variable
 	GVar *start=globals;
 	for (GVar *var=start;var;var=var->next){
-		int ty_size=type_size(var->type.ty);
-		printf(".comm	_%.*s,%ld,%d\n",var->len,var->name,var->type.index_size,ty_size);
+		int comm_align=(var->memsize >= 32)? 32 : var->memsize/8*8;
+		printf(".comm	_%.*s,%d,%d\n",var->len,var->name,var->memsize,comm_align);
 	}
 
 	// set string
@@ -107,9 +107,13 @@ int main(int argc,char **argv){
 			gen(func_list[i]->args);
 		}
 
-		/*
-		 * global init (main)
-		 */
+		// global init (main)
+		if(strncmp(func_list[i]->name,"main",4) == 0){
+			GVar *start=globals;
+			for (GVar *var=start;var;var=var->next){
+				gen(var->init);
+			}
+		}
 
 		for(j=0;func_list[i]->code[j]!=NULL;j++){
 			gen(func_list[i]->code[j]);

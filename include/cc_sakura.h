@@ -118,7 +118,7 @@ struct Func{
 // global variable
 struct GVar{
 	int len;
-	//int address;
+	int memsize;
 	char *name;
 	Type type;
 	GVar *next;

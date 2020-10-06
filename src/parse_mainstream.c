@@ -271,7 +271,7 @@ Node *expr(){
 			if(consume("{"))
 				node=array_block(node);
 			else
-				node=init_formula(node,assign());
+				node->vector=init_formula(node,assign());
 		}
 	}else{
 		node=assign();
@@ -428,7 +428,6 @@ void program(){
 		}else{
 			Node *init_gv=declare_global_variable(star_count,def_name);
 
-/*
 			// initialize formula
 			if(consume("=")){
 				if(consume("{"))
@@ -438,8 +437,8 @@ void program(){
 			}else{
 				globals->init=init_formula(init_gv,new_node_num(0));
 			}
-*/
 
+			expect(";");
 		}
 	}
 	func_list[func_index]=NULL;
