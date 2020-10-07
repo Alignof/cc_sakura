@@ -58,12 +58,16 @@ Node *array_str(Node *arr,Node *init_val){
 
 	// ommitted
 	if(isize == -1){
-		int asize=align_array_size(ctr,arr->type.ptr_to->ty);
-		alloc_size+=asize;
-		arr->offset=((locals)?(locals->offset):0) + asize;
-		clone->offset=arr->offset;
-		locals->offset=arr->offset;
-		locals->type.index_size=ctr;
+		if(arr->kind == ND_LARRAY){
+			int asize=align_array_size(ctr,arr->type.ptr_to->ty);
+			alloc_size+=asize;
+			arr->offset=((locals)?(locals->offset):0) + asize;
+			clone->offset=arr->offset;
+			locals->offset=arr->offset;
+			locals->type.index_size=ctr;
+		}else{
+			globals->memsize=align_array_size(ctr,arr->type.ptr_to->ty);
+		}
 	}
 
 	return head;

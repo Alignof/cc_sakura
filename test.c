@@ -18,7 +18,7 @@ int main(){
 }
 */
 
-char *a="hello!";
+char a[]="hello!";
 
 int main(){
 	printf("%s\n",a);
