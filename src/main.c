@@ -80,6 +80,7 @@ int main(int argc,char **argv){
 	for (GVar *var=start;var;var=var->next){
 		int comm_align=(var->memsize >= 32)? 32 : var->memsize/8*8;
 		printf(".comm	_%.*s,%d,%d\n",var->len,var->name,var->memsize,comm_align);
+		//printf("_%.*s:\n	.zero %d\n",var->len,var->name,var->memsize);
 	}
 
 	// set string
@@ -111,7 +112,7 @@ int main(int argc,char **argv){
 		if(strncmp(func_list[i]->name,"main",4) == 0){
 			GVar *start=globals;
 			for (GVar *var=start;var;var=var->next){
-				gen(var->init);
+				if(var->init) expand_next(var->init);
 			}
 		}
 

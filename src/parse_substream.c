@@ -30,19 +30,20 @@ Node *init_formula(Node *node,Node *init_val){
 Node *array_str(Node *arr,Node *init_val){
 	int ctr=0;
 	int isize=arr->type.index_size;
+	Node *head;
 	Node *src;
 	Node *dst=calloc(1,sizeof(Node));
 
 	Node *clone=calloc(1,sizeof(Node));
 	memcpy(clone,arr,sizeof(Node));
-	clone->kind=ND_LARRAY;
+	clone->kind=arr->kind;
 
 	while(ctr < init_val->offset){
 		src=array_index(clone,new_node_num(ctr));
 		//Is first?
 		if(ctr==0){
 			dst=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
-			arr->vector=dst;
+			head=dst;
 		}else{
 			dst->next=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
 			dst=dst->next;
@@ -51,7 +52,7 @@ Node *array_str(Node *arr,Node *init_val){
 	}
 
 	// '\0'
-	dst->next=new_node(ND_ASSIGN,src,new_node_num('\0'));
+	dst->next=new_node(ND_ASSIGN,array_index(clone,new_node_num(init_val->offset)),new_node_num('\0'));
 	dst=dst->next;
 	ctr++;
 
@@ -65,7 +66,7 @@ Node *array_str(Node *arr,Node *init_val){
 		locals->type.index_size=ctr;
 	}
 
-	return arr;
+	return head;
 }
 
 Node *array_block(Node *arr){
@@ -163,7 +164,7 @@ Node *array_index(Node *node,Node *index){
 
 	pointer_size=calloc(1,sizeof(Node));
 	pointer_size->kind=ND_NUM;
-	pointer_size->val=type_size(get_pointer_type(&(node->lhs->type.ptr_to->ty)));
+	pointer_size->val=type_size(get_pointer_type(node->lhs->type.ptr_to));
 	node->rhs=new_node(ND_MUL,index,pointer_size);
 
 	node=new_node(ND_DEREF,NULL,node);
@@ -224,7 +225,7 @@ void get_argument(int func_index){
 	}
 }
 
-Node *declare_global_variable(int star_count,Token* def_name){
+Node *declare_global_variable(int star_count,Token* def_name,Type toplv_type){
 	// if not token -> error
 	if(!def_name) error_at(token->str,"not a variable.");
 
@@ -235,18 +236,19 @@ Node *declare_global_variable(int star_count,Token* def_name){
 	gvar->next=globals;
 	gvar->name=def_name->str;
 	gvar->len=def_name->len;
+	gvar->type=toplv_type;
 
 	// add type list
 	Type *newtype;
 	newtype=&(gvar->type);
 	for(int i=0;i<star_count;i++){
-		newtype->ty=PTR;
 		newtype->ptr_to=calloc(1,sizeof(Type));
+		newtype->ptr_to->ty=newtype->ty;
+		newtype->ty=PTR;
 		newtype=newtype->ptr_to;
 	}
 
 	if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
-	newtype->ty=INT;
 
 	// Is array
 	if(consume("[")){

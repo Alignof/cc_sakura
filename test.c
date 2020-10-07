@@ -18,8 +18,9 @@ int main(){
 }
 */
 
-int a=4;
+char *a="hello!";
 
 int main(){
-	return a;
+	printf("%s\n",a);
+	return a[2];
 }

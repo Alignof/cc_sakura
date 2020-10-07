@@ -214,5 +214,7 @@ extern int label_else;
 void gen(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
+void expand_next(Node *node);
+void expand_vector(Node *node);
 
 
