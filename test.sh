@@ -118,8 +118,8 @@ assert -cl 1  "int main(){int a[4]; a[0]=1; return a[0];}"
 assert -cl 3  "int main(){int a[4]; a[0]=1; a[1]=2; return a[0]+a[1];}"
 assert -cl 10  "int main(){int a[5]; int sum; int i; sum=0; i=0; while(i<5){a[i]=i; i=i+1;} i=0; while(i<5){sum=sum+a[i];i=i+1;} return sum;}"
 
-assert -cl 0  "int a; int main(){0;}"
-assert -cl 0  "int a[10]; int main(){0;}"
+assert -cl 0  "int a; int main(){a;}"
+assert -cl 0  "int a[10]; int main(){a[5];}"
 assert -cl 2  "int a; int b; int main(){a=2;a;}"
 assert -cl 5  "int a; int b; int main(){a=2;b=3;a+b;}"
 assert -cl 5  "int a; int b; int main(){int a;a=2;b=3;a+b;}"
@@ -148,5 +148,8 @@ assert -cl 5  "int a=8; int main(){a=a-3;a;}"
 assert -cl 108 'char *x="hello"; int main(){*(x+2);}'
 assert -cl 108 'char x[]="hello"; int main(){*(x+2);}'
 assert -cl 108 'char x[6]="hello"; int main(){*(x+2);}'
+assert -cl 4 'int a[]={0,1,2,3,4}; int main(){return a[4];}'
+assert -cl 4 'int a[5]={0,1,2,3,4}; int main(){return a[4];}'
+assert -cl 0 'int a[5]={0,1,2}; int main(){return a[4];}'
 
 echo OK

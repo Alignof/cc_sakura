@@ -264,7 +264,7 @@ Node *expr(){
 		// initialize formula
 		if(consume("=")){
 			if(consume("{"))
-				node=array_block(node);
+				node->vector=array_block(node);
 			else
 				node->vector=init_formula(node,assign());
 		}

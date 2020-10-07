@@ -78,17 +78,18 @@ Node *array_block(Node *arr){
 	int isize=arr->type.index_size;
 	Node *src;
 	Node *dst=calloc(1,sizeof(Node));
+	Node *head;
 
 	Node *clone=calloc(1,sizeof(Node));
 	memcpy(clone,arr,sizeof(Node));
-	clone->kind=ND_LARRAY;
+	clone->kind=arr->kind;
 
 	while(token->kind!=TK_BLOCK){
 		src=array_index(clone,new_node_num(ctr));
 		//Is first?
 		if(ctr==0){
 			dst=new_node(ND_ASSIGN,src,expr());
-			arr->vector=dst;
+			head=dst;
 		}else{
 			dst->next=new_node(ND_ASSIGN,src,expr());
 			dst=dst->next;
@@ -101,12 +102,16 @@ Node *array_block(Node *arr){
 	
 	// ommitted
 	if(isize == -1){
-		int asize=align_array_size(ctr,arr->type.ptr_to->ty);
-		alloc_size+=asize;
-		arr->offset=((locals)?(locals->offset):0) + asize;
-		clone->offset=arr->offset;
-		locals->offset=arr->offset;
-		locals->type.index_size=ctr;
+		if(arr->kind == ND_LARRAY){
+			int asize=align_array_size(ctr,arr->type.ptr_to->ty);
+			alloc_size+=asize;
+			arr->offset=((locals)?(locals->offset):0) + asize;
+			clone->offset=arr->offset;
+			locals->offset=arr->offset;
+			locals->type.index_size=ctr;
+		}else{
+			globals->memsize=align_array_size(ctr,arr->type.ptr_to->ty);
+		}
 	// too many
 	}else if(arr->type.index_size < ctr){
 		error_at(token->str,"Invalid array size");
@@ -123,7 +128,7 @@ Node *array_block(Node *arr){
 	}
 
 
-	return arr;
+	return head;
 }
 
 Node *call_function(Node *node,Token *tok){
