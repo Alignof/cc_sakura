@@ -22,12 +22,7 @@ Node *primary(){
 
 		LVar *lvar=find_lvar(tok);
 		if(lvar){
-			// local variable exist
-			if(lvar->type.ty==ARRAY)
-				node->kind=ND_LARRAY;
-			else
-				node->kind=ND_LVAR;
-
+			node->kind=(lvar->type.ty==ARRAY)? ND_LARRAY : ND_LVAR;
 			node->offset=lvar->offset;
 			node->type=lvar->type;
 		// call function
@@ -37,7 +32,7 @@ Node *primary(){
 			GVar *gvar=find_gvar(tok);
 			if(gvar){
 				// global variable exist
-				node->kind=ND_GVAR;
+				node->kind=(gvar->type.ty==ARRAY)? ND_GARRAY : ND_GVAR;
 				node->type=gvar->type;
 				node->str=tok->str;
 				node->val=tok->len;
@@ -269,9 +264,9 @@ Node *expr(){
 		// initialize formula
 		if(consume("=")){
 			if(consume("{"))
-				node=array_block(node);
+				node->vector=array_block(node);
 			else
-				node=init_formula(node,assign());
+				node->vector=init_formula(node,assign());
 		}
 	}else{
 		node=assign();
@@ -379,6 +374,8 @@ void function(Func *func){
 void program(){
 	int func_index=0;
 	int star_count;
+	Type toplv_type;
+	toplv_type=(Type){0};
 
 	while(!at_eof()){
 		// reset lvar list
@@ -390,8 +387,8 @@ void program(){
 
 		// type of function return value
 		if(token->kind==TK_TYPE){
-			if(consume_reserved_word("int",TK_TYPE))	func_list[func_index]->type.ty=INT;
-			else if(consume_reserved_word("char",TK_TYPE))  func_list[func_index]->type.ty=CHAR;
+			if(consume_reserved_word("int",TK_TYPE))	toplv_type.ty=INT;
+			else if(consume_reserved_word("char",TK_TYPE))  toplv_type.ty=CHAR;
 			else error_at(token->str,"not a function type token.");
 		}
 
@@ -400,9 +397,6 @@ void program(){
 			star_count++;
 			token=token->next;
 		}
-
-		if(star_count)
-			func_list[func_index]->type.ty=PTR;
 
 
 		// Is function?
@@ -413,6 +407,7 @@ void program(){
 
 		// function
 		if(consume("(")){
+			func_list[func_index]->type=toplv_type;
 			func_list[func_index]->name=(char *)calloc(def_name->len,sizeof(char));
 			strncpy(func_list[func_index]->name,def_name->str,def_name->len);
 			
@@ -426,20 +421,20 @@ void program(){
 
 		// global variable
 		}else{
-			declare_global_variable(star_count,def_name);
+			Node *init_gv=declare_global_variable(star_count,def_name,toplv_type);
 
-/*
 			// initialize formula
 			if(consume("=")){
 				if(consume("{"))
-					globals->init=array_block(node);
+					globals->init=array_block(init_gv);
 				else
-					globals->init=init_formula(node,assign());
+					globals->init=init_formula(init_gv,assign());
 			}else{
-				globals->init=init_formula(node,new_node_num(0));
+				if(init_gv->kind == ND_GVAR)
+					globals->init=init_formula(init_gv,new_node_num(0));
 			}
-*/
 
+			expect(";");
 		}
 	}
 	func_list[func_index]=NULL;

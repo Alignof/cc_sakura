@@ -18,7 +18,9 @@ int main(){
 }
 */
 
+
+int a[]={1,2,3};
 int main(){
-	int a[]={0,1,2,3,4};
-	return a[4];
+	printf("%s\n",a);
+	return a[2];
 }

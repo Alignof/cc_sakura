@@ -1,7 +1,7 @@
 #include "cc_sakura.h"
 
 GVar *globals;
-int alloc_size;
+//int alloc_size;
 // Token *token;
 // LVar *locals;
 // Func *func_list[100];
@@ -10,7 +10,7 @@ Node *init_formula(Node *node,Node *init_val){
 	switch(init_val->kind){
 		case ND_STR:
 			if(node->type.ty==PTR){
-				node->vector=new_node(ND_ASSIGN,node,init_val);
+				node=new_node(ND_ASSIGN,node,init_val);
 			}else if(node->type.ty==ARRAY){
 				if(node->type.index_size == init_val->offset+1 || node->type.index_size == -1)
 					node=array_str(node,init_val);
@@ -20,7 +20,7 @@ Node *init_formula(Node *node,Node *init_val){
 			}
 			break;
 		default:
-			node->vector=new_node(ND_ASSIGN,node,init_val);
+			node=new_node(ND_ASSIGN,node,init_val);
 			break;
 	}
 
@@ -30,19 +30,20 @@ Node *init_formula(Node *node,Node *init_val){
 Node *array_str(Node *arr,Node *init_val){
 	int ctr=0;
 	int isize=arr->type.index_size;
+	Node *head;
 	Node *src;
 	Node *dst=calloc(1,sizeof(Node));
 
 	Node *clone=calloc(1,sizeof(Node));
 	memcpy(clone,arr,sizeof(Node));
-	clone->kind=ND_LARRAY;
+	clone->kind=arr->kind;
 
 	while(ctr < init_val->offset){
 		src=array_index(clone,new_node_num(ctr));
 		//Is first?
 		if(ctr==0){
 			dst=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
-			arr->vector=dst;
+			head=dst;
 		}else{
 			dst->next=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
 			dst=dst->next;
@@ -51,21 +52,25 @@ Node *array_str(Node *arr,Node *init_val){
 	}
 
 	// '\0'
-	dst->next=new_node(ND_ASSIGN,src,new_node_num('\0'));
+	dst->next=new_node(ND_ASSIGN,array_index(clone,new_node_num(init_val->offset)),new_node_num('\0'));
 	dst=dst->next;
 	ctr++;
 
 	// ommitted
 	if(isize == -1){
-		int asize=align_array_size(ctr,arr->type.ptr_to->ty);
-		alloc_size+=asize;
-		arr->offset=((locals)?(locals->offset):0) + asize;
-		clone->offset=arr->offset;
-		locals->offset=arr->offset;
-		locals->type.index_size=ctr;
+		if(arr->kind == ND_LARRAY){
+			int asize=align_array_size(ctr,arr->type.ptr_to->ty);
+			alloc_size+=asize;
+			arr->offset=((locals)?(locals->offset):0) + asize;
+			clone->offset=arr->offset;
+			locals->offset=arr->offset;
+			locals->type.index_size=ctr;
+		}else{
+			globals->memsize=align_array_size(ctr,arr->type.ptr_to->ty);
+		}
 	}
 
-	return arr;
+	return head;
 }
 
 Node *array_block(Node *arr){
@@ -73,17 +78,18 @@ Node *array_block(Node *arr){
 	int isize=arr->type.index_size;
 	Node *src;
 	Node *dst=calloc(1,sizeof(Node));
+	Node *head;
 
 	Node *clone=calloc(1,sizeof(Node));
 	memcpy(clone,arr,sizeof(Node));
-	clone->kind=ND_LARRAY;
+	clone->kind=arr->kind;
 
 	while(token->kind!=TK_BLOCK){
 		src=array_index(clone,new_node_num(ctr));
 		//Is first?
 		if(ctr==0){
 			dst=new_node(ND_ASSIGN,src,expr());
-			arr->vector=dst;
+			head=dst;
 		}else{
 			dst->next=new_node(ND_ASSIGN,src,expr());
 			dst=dst->next;
@@ -96,12 +102,16 @@ Node *array_block(Node *arr){
 	
 	// ommitted
 	if(isize == -1){
-		int asize=align_array_size(ctr,arr->type.ptr_to->ty);
-		alloc_size+=asize;
-		arr->offset=((locals)?(locals->offset):0) + asize;
-		clone->offset=arr->offset;
-		locals->offset=arr->offset;
-		locals->type.index_size=ctr;
+		if(arr->kind == ND_LARRAY){
+			int asize=align_array_size(ctr,arr->type.ptr_to->ty);
+			alloc_size+=asize;
+			arr->offset=((locals)?(locals->offset):0) + asize;
+			clone->offset=arr->offset;
+			locals->offset=arr->offset;
+			locals->type.index_size=ctr;
+		}else{
+			globals->memsize=align_array_size(ctr,arr->type.ptr_to->ty);
+		}
 	// too many
 	}else if(arr->type.index_size < ctr){
 		error_at(token->str,"Invalid array size");
@@ -118,7 +128,7 @@ Node *array_block(Node *arr){
 	}
 
 
-	return arr;
+	return head;
 }
 
 Node *call_function(Node *node,Token *tok){
@@ -163,7 +173,7 @@ Node *array_index(Node *node,Node *index){
 
 	pointer_size=calloc(1,sizeof(Node));
 	pointer_size->kind=ND_NUM;
-	pointer_size->val=type_size(get_pointer_type(&(node->lhs->type.ptr_to->ty)));
+	pointer_size->val=type_size(get_pointer_type(node->lhs->type.ptr_to));
 	node->rhs=new_node(ND_MUL,index,pointer_size);
 
 	node=new_node(ND_DEREF,NULL,node);
@@ -224,39 +234,61 @@ void get_argument(int func_index){
 	}
 }
 
-void declare_global_variable(int star_count,Token* def_name){
+Node *declare_global_variable(int star_count,Token* def_name,Type toplv_type){
 	// if not token -> error
 	if(!def_name) error_at(token->str,"not a variable.");
+
+	Node *node=calloc(1,sizeof(Node));
+	node->kind=ND_GVAR;
 
 	GVar *gvar=calloc(1,sizeof(GVar));
 	gvar->next=globals;
 	gvar->name=def_name->str;
 	gvar->len=def_name->len;
-	gvar->type.index_size=(star_count)?8:type_size(gvar->type.ty);
+	gvar->type=toplv_type;
 
 	// add type list
 	Type *newtype;
 	newtype=&(gvar->type);
 	for(int i=0;i<star_count;i++){
-		newtype->ty=PTR;
 		newtype->ptr_to=calloc(1,sizeof(Type));
+		newtype->ptr_to->ty=newtype->ty;
+		newtype->ty=PTR;
 		newtype=newtype->ptr_to;
 	}
 
 	if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
-	newtype->ty=INT;
 
 	// Is array
 	if(consume("[")){
-		gvar->type.index_size=(token->val)*type_size(gvar->type.ty);
+		int isize=-1;
+		node->val=-1;
+		node->kind=ND_GARRAY;
+
+		if(*(token->str)!=']'){
+			// body
+			isize=token->val;
+			gvar->memsize=align_array_size(token->val,gvar->type.ptr_to->ty);
+			token=token->next;
+		}
+
+		gvar->type.ptr_to=calloc(1,sizeof(Type));
+		gvar->type.ptr_to->ty=gvar->type.ty;
+		gvar->type.index_size=isize;
 		gvar->type.ty=ARRAY;
-		token=token->next;
 		expect("]");
+	}else{
+		gvar->memsize=type_size(gvar->type.ty);
 	}
 	
 	// globals == new lvar
 	globals=gvar;
-	expect(";");
+
+	node->type=gvar->type;
+	node->str=gvar->name;
+	node->val=gvar->len;
+
+	return node;
 }
 
 Node *declare_local_variable(Node *node,Token *tok,int star_count){
@@ -291,7 +323,6 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 		node->kind=ND_LARRAY;
 
 		if(*(token->str)!=']'){
-			// body
 			int asize=align_array_size(token->val,lvar->type.ptr_to->ty);
 			alloc_size+=asize;
 			lvar->offset=((locals)?(locals->offset):0) + asize;
@@ -299,7 +330,6 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 			token=token->next;
 		}
 
-		// pointer
 		lvar->type.ptr_to=calloc(1,sizeof(Type));
 		lvar->type.ptr_to->ty=lvar->type.ty;
 		lvar->type.ty=ARRAY;

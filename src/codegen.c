@@ -67,11 +67,9 @@ void gen(Node *node){
 		case ND_GVAR:
 			gen_gvar(node);
 
-			if(node->type.ty != ARRAY){
-				printf("	pop rax\n");
-				printf("	mov rax,[rax]\n");
-				printf("	push rax\n");
-			}
+			printf("	pop rax\n");
+			printf("	mov rax,[rax]\n");
+			printf("	push rax\n");
 
 			return;
 		case ND_LVAR:
@@ -89,6 +87,12 @@ void gen(Node *node){
 			// init formula
 			if(node->vector != NULL) gen(node->vector);
 			return;
+		case ND_GARRAY:
+			gen_gvar(node);
+
+			// init formula
+			if(node->vector != NULL) expand_next(node->vector);
+			return;
 		case ND_LARRAY:
 			gen_lvar(node);
 
@@ -101,9 +105,10 @@ void gen(Node *node){
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
-			if(node->lhs->kind==ND_DEREF)	   gen(node->lhs->rhs);
-			else if(node->lhs->kind==ND_GVAR)  gen_gvar(node->lhs);
-			else if(node->lhs->kind==ND_LVAR)  gen_lvar(node->lhs);
+			if(node->lhs->kind==ND_DEREF)	    gen(node->lhs->rhs);
+			else if(node->lhs->kind==ND_GVAR)   gen_gvar(node->lhs);
+			else if(node->lhs->kind==ND_GARRAY) gen_gvar(node->lhs);
+			else if(node->lhs->kind==ND_LVAR)   gen_lvar(node->lhs);
 			else if(node->lhs->kind==ND_LARRAY) gen_lvar(node->lhs);
 
 			gen(node->rhs);
