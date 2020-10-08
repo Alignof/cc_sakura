@@ -31,6 +31,8 @@ typedef enum{
 	ND_DIV,		//  /
 	ND_MOD,		//  %
 	ND_GT,		//  >
+	ND_INC,		//  ++
+	ND_DEC,		//  --
 	ND_ADDRESS,	//  &a
 	ND_DEREF,	//  *a
 	ND_GE,		//  >=

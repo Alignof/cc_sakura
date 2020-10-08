@@ -48,6 +48,10 @@ Node *primary(){
 			expect("]");
 		}
 
+		// increment/decrement
+		if(consume("++") || consume("--"))
+			error_at(token->str,"Unimplemented.");
+
 		return node;
 	}
 
