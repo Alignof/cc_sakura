@@ -9,18 +9,18 @@ GVar *globals;
 Node *init_formula(Node *node,Node *init_val){
 	switch(init_val->kind){
 		case ND_STR:
-			if(node->type.ty==PTR){
-				node=new_node(ND_ASSIGN,node,init_val);
-			}else if(node->type.ty==ARRAY){
+			if(node->type.ty == PTR){
+				node = new_node(ND_ASSIGN,node,init_val);
+			}else if(node->type.ty == ARRAY){
 				if(node->type.index_size == init_val->offset+1 || node->type.index_size == -1)
-					node=array_str(node,init_val);
+					node = array_str(node,init_val);
 				else	error_at(token->str,"Invalid array size");
 			}else{
 				error_at(token->str,"Invalid assign");
 			}
 			break;
 		default:
-			node=new_node(ND_ASSIGN,node,init_val);
+			node = new_node(ND_ASSIGN,node,init_val);
 			break;
 	}
 
@@ -28,45 +28,45 @@ Node *init_formula(Node *node,Node *init_val){
 }
 
 Node *array_str(Node *arr,Node *init_val){
-	int ctr=0;
-	int isize=arr->type.index_size;
+	int ctr	  = 0;
+	int isize = arr->type.index_size;
 	Node *head;
 	Node *src;
-	Node *dst=calloc(1,sizeof(Node));
+	Node *dst = calloc(1,sizeof(Node));
 
-	Node *clone=calloc(1,sizeof(Node));
+	Node *clone = calloc(1,sizeof(Node));
 	memcpy(clone,arr,sizeof(Node));
-	clone->kind=arr->kind;
+	clone->kind = arr->kind;
 
 	while(ctr < init_val->offset){
-		src=array_index(clone,new_node_num(ctr));
+		src = array_index(clone,new_node_num(ctr));
 		//Is first?
-		if(ctr==0){
-			dst=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
-			head=dst;
+		if(ctr == 0){
+			dst = new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
+			head = dst;
 		}else{
-			dst->next=new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
-			dst=dst->next;
+			dst->next = new_node(ND_ASSIGN,src,new_node_num(*(init_val->str + ctr)));
+			dst = dst->next;
 		}
 		ctr++;
 	}
 
 	// '\0'
-	dst->next=new_node(ND_ASSIGN,array_index(clone,new_node_num(init_val->offset)),new_node_num('\0'));
-	dst=dst->next;
+	dst->next = new_node(ND_ASSIGN,array_index(clone,new_node_num(init_val->offset)),new_node_num('\0'));
+	dst = dst->next;
 	ctr++;
 
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize=align_array_size(ctr,arr->type.ptr_to->ty);
+			int asize = align_array_size(ctr,arr->type.ptr_to->ty);
 			alloc_size+=asize;
-			arr->offset=((locals)?(locals->offset):0) + asize;
-			clone->offset=arr->offset;
-			locals->offset=arr->offset;
-			locals->type.index_size=ctr;
+			arr->offset = ((locals)?(locals->offset):0) + asize;
+			clone->offset = arr->offset;
+			locals->offset = arr->offset;
+			locals->type.index_size = ctr;
 		}else{
-			globals->memsize=align_array_size(ctr,arr->type.ptr_to->ty);
+			globals->memsize = align_array_size(ctr,arr->type.ptr_to->ty);
 		}
 	}
 
@@ -74,25 +74,25 @@ Node *array_str(Node *arr,Node *init_val){
 }
 
 Node *array_block(Node *arr){
-	int ctr=0;
-	int isize=arr->type.index_size;
+	int ctr = 0;
+	int isize = arr->type.index_size;
 	Node *src;
-	Node *dst=calloc(1,sizeof(Node));
+	Node *dst = calloc(1,sizeof(Node));
 	Node *head;
 
-	Node *clone=calloc(1,sizeof(Node));
+	Node *clone = calloc(1,sizeof(Node));
 	memcpy(clone,arr,sizeof(Node));
-	clone->kind=arr->kind;
+	clone->kind = arr->kind;
 
 	while(token->kind!=TK_BLOCK){
-		src=array_index(clone,new_node_num(ctr));
+		src = array_index(clone,new_node_num(ctr));
 		//Is first?
-		if(ctr==0){
-			dst=new_node(ND_ASSIGN,src,expr());
-			head=dst;
+		if(ctr == 0){
+			dst = new_node(ND_ASSIGN,src,expr());
+			head = dst;
 		}else{
-			dst->next=new_node(ND_ASSIGN,src,expr());
-			dst=dst->next;
+			dst->next = new_node(ND_ASSIGN,src,expr());
+			dst = dst->next;
 		}
 		consume(",");
 		ctr++;
@@ -103,14 +103,14 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize=align_array_size(ctr,arr->type.ptr_to->ty);
+			int asize = align_array_size(ctr,arr->type.ptr_to->ty);
 			alloc_size+=asize;
-			arr->offset=((locals)?(locals->offset):0) + asize;
-			clone->offset=arr->offset;
-			locals->offset=arr->offset;
-			locals->type.index_size=ctr;
+			arr->offset = ((locals)?(locals->offset):0) + asize;
+			clone->offset = arr->offset;
+			locals->offset = arr->offset;
+			locals->type.index_size = ctr;
 		}else{
-			globals->memsize=align_array_size(ctr,arr->type.ptr_to->ty);
+			globals->memsize = align_array_size(ctr,arr->type.ptr_to->ty);
 		}
 	// too many
 	}else if(arr->type.index_size < ctr){
@@ -118,9 +118,9 @@ Node *array_block(Node *arr){
 	// too little
 	}else if(arr->type.index_size > ctr){
 		while(ctr != arr->type.index_size){
-			src=array_index(clone,new_node_num(ctr));
-			dst->next=new_node(ND_ASSIGN,src,new_node_num(0));
-			dst=dst->next;
+			src = array_index(clone,new_node_num(ctr));
+			dst->next = new_node(ND_ASSIGN,src,new_node_num(0));
+			dst = dst->next;
 
 			ctr++;
 			consume(",");
@@ -134,26 +134,26 @@ Node *array_block(Node *arr){
 Node *call_function(Node *node,Token *tok){
 	expect("(");
 
-	node->kind=ND_CALL_FUNC;
-	node->str=(char *)calloc(tok->len,sizeof(char));
+	node->kind = ND_CALL_FUNC;
+	node->str = (char *)calloc(tok->len,sizeof(char));
 	strncpy(node->str,tok->str,tok->len);
 
-	int ctr=0;
+	int ctr = 0;
 	// have argument?
 	if(!(consume(")"))){
 		Node *now;
-		Node *prev=NULL;
+		Node *prev = NULL;
 		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED || token->kind == TK_STR){
-			now=logical();
-			now->next=prev;
-			prev=now;
+			now = logical();
+			now->next = prev;
+			prev = now;
 			ctr++;
 
 			if(!(consume(",")))
 				break;
 		}
-		node->next=now;
-		node->val=ctr-1;
+		node->next = now;
+		node->val = ctr-1;
 		expect(")");
 	}
 
@@ -161,7 +161,7 @@ Node *call_function(Node *node,Token *tok){
 }
 
 TypeKind get_pointer_type(Type *given){
-	while(given->ty==PTR) given=given->ptr_to;
+	while(given->ty == PTR) given = given->ptr_to;
 	return given->ty;
 }
 
@@ -169,15 +169,15 @@ Node *array_index(Node *node,Node *index){
 	Node *pointer_size;
 
 	// a[1] == *(a+1)
-	node=new_node(ND_ADD,node,index);
+	node = new_node(ND_ADD,node,index);
 
-	pointer_size=calloc(1,sizeof(Node));
-	pointer_size->kind=ND_NUM;
-	pointer_size->val=type_size(get_pointer_type(node->lhs->type.ptr_to));
-	node->rhs=new_node(ND_MUL,index,pointer_size);
+	pointer_size = calloc(1,sizeof(Node));
+	pointer_size->kind = ND_NUM;
+	pointer_size->val = type_size(get_pointer_type(node->lhs->type.ptr_to));
+	node->rhs = new_node(ND_MUL,index,pointer_size);
 
-	node=new_node(ND_DEREF,NULL,node);
-	node->type.ty=INT;
+	node = new_node(ND_DEREF,NULL,node);
+	node->type.ty = INT;
 
 	return node;
 }
@@ -186,50 +186,50 @@ Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type){
 	int ptrtype;
 
 
-	node->type.ty=PTR;
-	Node *pointer_size=calloc(1,sizeof(Node));
-	pointer_size->kind=ND_NUM;
+	node->type.ty = PTR;
+	Node *pointer_size = calloc(1,sizeof(Node));
+	pointer_size->kind = ND_NUM;
 
 
-	if(type_size(lhs_type->ty)==8 && lhs_type->ptr_to!=NULL){
-		ptrtype=lhs_type->ptr_to->ty;
-		pointer_size->val=type_size(ptrtype);
-		node->rhs=new_node(ND_MUL,node->rhs,pointer_size);
-	}else if(type_size(rhs_type->ty)==8 && rhs_type->ptr_to!=NULL){
-		ptrtype=rhs_type->ptr_to->ty;
-		pointer_size->val=type_size(ptrtype);
-		node->lhs=new_node(ND_MUL,node->lhs,pointer_size);
+	if(type_size(lhs_type->ty) == 8 && lhs_type->ptr_to!=NULL){
+		ptrtype = lhs_type->ptr_to->ty;
+		pointer_size->val = type_size(ptrtype);
+		node->rhs = new_node(ND_MUL,node->rhs,pointer_size);
+	}else if(type_size(rhs_type->ty) == 8 && rhs_type->ptr_to!=NULL){
+		ptrtype = rhs_type->ptr_to->ty;
+		pointer_size->val = type_size(ptrtype);
+		node->lhs = new_node(ND_MUL,node->lhs,pointer_size);
 	}
 
 	return node;
 }
 
 void get_argument(int func_index){
-	int arg_counter=0;
+	int arg_counter = 0;
 	Node *next;
 	Node **args_ptr;
 
 	// get argument
 	if(!(consume(")"))){
 		// set args node
-		args_ptr=&(func_list[func_index]->args);
-		next=*args_ptr;
+		args_ptr = &(func_list[func_index]->args);
+		next = *args_ptr;
 		while(token->kind == TK_NUM || token->kind == TK_TYPE){
-			*args_ptr=(Node *)calloc(1,sizeof(Node));
-			(*args_ptr)->kind=ND_ARG;
-			(*args_ptr)->val=arg_counter;
-			(*args_ptr)->next=expr();
-			(*args_ptr)->rhs=next;
+			*args_ptr = (Node *)calloc(1,sizeof(Node));
+			(*args_ptr)->kind = ND_ARG;
+			(*args_ptr)->val = arg_counter;
+			(*args_ptr)->next = expr();
+			(*args_ptr)->rhs = next;
 			// go to next
-			next=*args_ptr;
+			next = *args_ptr;
 
 			arg_counter++;
 
 			if(!(consume(",")))
 				break;
 		}
-		args_ptr=NULL;
-		func_list[func_index]->args->val=arg_counter-1;
+		args_ptr = NULL;
+		func_list[func_index]->args->val = arg_counter-1;
 		expect(")");
 	}
 }
@@ -238,55 +238,55 @@ Node *declare_global_variable(int star_count,Token* def_name,Type toplv_type){
 	// if not token -> error
 	if(!def_name) error_at(token->str,"not a variable.");
 
-	Node *node=calloc(1,sizeof(Node));
-	node->kind=ND_GVAR;
+	Node *node = calloc(1,sizeof(Node));
+	node->kind = ND_GVAR;
 
-	GVar *gvar=calloc(1,sizeof(GVar));
-	gvar->next=globals;
-	gvar->name=def_name->str;
-	gvar->len=def_name->len;
-	gvar->type=toplv_type;
+	GVar *gvar = calloc(1,sizeof(GVar));
+	gvar->next = globals;
+	gvar->name = def_name->str;
+	gvar->len = def_name->len;
+	gvar->type = toplv_type;
 
 	// add type list
 	Type *newtype;
-	newtype=&(gvar->type);
-	for(int i=0;i<star_count;i++){
-		newtype->ptr_to=calloc(1,sizeof(Type));
-		newtype->ptr_to->ty=newtype->ty;
-		newtype->ty=PTR;
-		newtype=newtype->ptr_to;
+	newtype = &(gvar->type);
+	for(int i = 0;i<star_count;i++){
+		newtype->ptr_to = calloc(1,sizeof(Type));
+		newtype->ptr_to->ty = newtype->ty;
+		newtype->ty = PTR;
+		newtype = newtype->ptr_to;
 	}
 
-	if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
+	if(star_count == 0) newtype->ptr_to = calloc(1,sizeof(Type));
 
 	// Is array
 	if(consume("[")){
-		int isize=-1;
-		node->val=-1;
-		node->kind=ND_GARRAY;
+		int isize = -1;
+		node->val = -1;
+		node->kind = ND_GARRAY;
 
 		if(*(token->str)!=']'){
 			// body
-			isize=token->val;
-			gvar->memsize=align_array_size(token->val,gvar->type.ptr_to->ty);
-			token=token->next;
+			isize = token->val;
+			gvar->memsize = align_array_size(token->val,gvar->type.ptr_to->ty);
+			token = token->next;
 		}
 
-		gvar->type.ptr_to=calloc(1,sizeof(Type));
-		gvar->type.ptr_to->ty=gvar->type.ty;
-		gvar->type.index_size=isize;
-		gvar->type.ty=ARRAY;
+		gvar->type.ptr_to = calloc(1,sizeof(Type));
+		gvar->type.ptr_to->ty = gvar->type.ty;
+		gvar->type.index_size = isize;
+		gvar->type.ty = ARRAY;
 		expect("]");
 	}else{
-		gvar->memsize=type_size(gvar->type.ty);
+		gvar->memsize = type_size(gvar->type.ty);
 	}
 	
 	// globals == new lvar
-	globals=gvar;
+	globals = gvar;
 
-	node->type=gvar->type;
-	node->str=gvar->name;
-	node->val=gvar->len;
+	node->type = gvar->type;
+	node->str = gvar->name;
+	node->val = gvar->len;
 
 	return node;
 }
@@ -295,64 +295,64 @@ Node *declare_local_variable(Node *node,Token *tok,int star_count){
 	int i;
 	Type *newtype;
 
-	LVar *lvar=find_lvar(tok);
+	LVar *lvar = find_lvar(tok);
 	if(lvar) error_at(token->str,"this variable has already existed.");
 
-	lvar=calloc(1,sizeof(LVar));
-	lvar->next=locals;
-	lvar->name=tok->str;
-	lvar->len=tok->len;
-	lvar->type.ty=node->type.ty;
+	lvar = calloc(1,sizeof(LVar));
+	lvar->next = locals;
+	lvar->name = tok->str;
+	lvar->len = tok->len;
+	lvar->type.ty = node->type.ty;
 
 	// add type list
-	newtype=&(lvar->type);
-	for(i=0;i<star_count;i++){
-		newtype->ptr_to=calloc(1,sizeof(Type));
-		newtype->ptr_to->ty=newtype->ty;
-		newtype->ty=PTR;
-		newtype=newtype->ptr_to;
+	newtype = &(lvar->type);
+	for(i = 0;i<star_count;i++){
+		newtype->ptr_to = calloc(1,sizeof(Type));
+		newtype->ptr_to->ty = newtype->ty;
+		newtype->ty = PTR;
+		newtype = newtype->ptr_to;
 	}
 
-	if(star_count==0) newtype->ptr_to=calloc(1,sizeof(Type));
+	if(star_count == 0) newtype->ptr_to = calloc(1,sizeof(Type));
 
 
 	// Is array
 	if(consume("[")){
-		int isize=-1;
-		node->val=-1;
-		node->kind=ND_LARRAY;
+		int isize = -1;
+		node->val = -1;
+		node->kind = ND_LARRAY;
 
 		if(*(token->str)!=']'){
-			int asize=align_array_size(token->val,lvar->type.ptr_to->ty);
+			int asize = align_array_size(token->val,lvar->type.ptr_to->ty);
 			alloc_size+=asize;
-			lvar->offset=((locals)?(locals->offset):0) + asize;
-			isize=token->val;
-			token=token->next;
+			lvar->offset = ((locals) ? (locals->offset) :0) + asize;
+			isize = token->val;
+			token = token->next;
 		}
 
-		lvar->type.ptr_to=calloc(1,sizeof(Type));
-		lvar->type.ptr_to->ty=lvar->type.ty;
-		lvar->type.ty=ARRAY;
-		lvar->type.index_size=isize;
+		lvar->type.ptr_to = calloc(1,sizeof(Type));
+		lvar->type.ptr_to->ty = lvar->type.ty;
+		lvar->type.ty = ARRAY;
+		lvar->type.index_size = isize;
 
 		expect("]");
 	}else{
 		if(locals)
-			lvar->offset=(locals->offset)+8;
+			lvar->offset = (locals->offset)+8;
 		else
-			lvar->offset=8;
+			lvar->offset = 8;
 		alloc_size+=8;
 	}
 
-	node->type=lvar->type;
-	node->offset=lvar->offset;
+	node->type = lvar->type;
+	node->offset = lvar->offset;
 	// locals == new lvar
-	locals=lvar;
+	locals = lvar;
 
 	return node;
 }
 
 int align_array_size(int isize,TypeKind array_type){
-	int array_size=isize*type_size(array_type);
-	return (array_size%8)?array_size/8*8+8:array_size;
+	int array_size = isize*type_size(array_type);
+	return (array_size%8) ? array_size/8*8+8 : array_size;
 }

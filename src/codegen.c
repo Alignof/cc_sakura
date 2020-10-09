@@ -76,7 +76,7 @@ void gen(Node *node){
 			gen_lvar(node);
 
 			printf("	pop rax\n");
-			if(node->type.ty==CHAR){
+			if(node->type.ty == CHAR){
 				printf("	movzx ecx,BYTE PTR [rax]\n");
 				printf("	push rcx\n");
 			}else{
@@ -105,15 +105,15 @@ void gen(Node *node){
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
-			if(node->lhs->kind==ND_DEREF)	    gen(node->lhs->rhs);
-			else if(node->lhs->kind==ND_GVAR)   gen_gvar(node->lhs);
-			else if(node->lhs->kind==ND_GARRAY) gen_gvar(node->lhs);
-			else if(node->lhs->kind==ND_LVAR)   gen_lvar(node->lhs);
-			else if(node->lhs->kind==ND_LARRAY) gen_lvar(node->lhs);
+			if(node->lhs->kind == ND_DEREF)	    gen(node->lhs->rhs);
+			else if(node->lhs->kind == ND_GVAR)   gen_gvar(node->lhs);
+			else if(node->lhs->kind == ND_GARRAY) gen_gvar(node->lhs);
+			else if(node->lhs->kind == ND_LVAR)   gen_lvar(node->lhs);
+			else if(node->lhs->kind == ND_LARRAY) gen_lvar(node->lhs);
 
 			gen(node->rhs);
 
-			if(node->lhs->type.ty==CHAR){
+			if(node->lhs->type.ty == CHAR){
 				printf("	pop rcx\n");
 				printf("	pop rax\n");
 				printf("	mov [rax],cl\n");
@@ -122,7 +122,7 @@ void gen(Node *node){
 				printf("	pop rdi\n");
 				printf("	pop rax\n");
 
-				if(node->lhs->type.ty==INT)
+				if(node->lhs->type.ty == INT)
 					printf("	mov [rax],edi\n");
 				else
 					printf("	mov [rax],rdi\n");
