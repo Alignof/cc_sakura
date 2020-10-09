@@ -25,14 +25,14 @@ typedef enum{
 }TokenKind;
 
 typedef enum{
-	ND_ADD, 		//  +
-	ND_SUB, 		//  -
-	ND_MUL, 		//  *
-	ND_DIV, 		//  /
-	ND_MOD, 		//  %
+	ND_ADD, 	//  +
+	ND_SUB, 	//  -
+	ND_MUL, 	//  *
+	ND_DIV, 	//  /
+	ND_MOD, 	//  %
 	ND_GT, 		//  >
-	ND_INC, 		//  ++
-	ND_DEC, 		//  --
+	ND_INC, 	//  ++
+	ND_DEC, 	//  --
 	ND_ADDRESS, 	//  &a
 	ND_DEREF, 	//  *a
 	ND_GE, 		//  >=
@@ -40,22 +40,22 @@ typedef enum{
 	ND_LE, 		//  <=
 	ND_EQ, 		//  ==
 	ND_NE, 		//  !=
-	ND_AND, 		//  &&
+	ND_AND, 	//  &&
 	ND_OR, 		//  ||
 	ND_ASSIGN, 	//  =
 	ND_LVAR, 	//  local valiable
 	ND_GVAR, 	//  global valiable
 	ND_LARRAY, 	//  local array
 	ND_GARRAY, 	//  global array
-	ND_STR, 		//  "string"
-	ND_NUM, 		//  integer
+	ND_STR, 	//  "string"
+	ND_NUM, 	//  integer
 	ND_IF, 		//  if
 	ND_ELSE, 	//  else
 	ND_IFELSE, 	//  if-else
 	ND_WHILE, 	//  while
-	ND_FOR, 		//  for
+	ND_FOR, 	//  for
 	ND_BLOCK, 	//  {}
-	ND_ARG, 		//  function argument;
+	ND_ARG, 	//  function argument;
 	ND_CALL_FUNC, 	//  func();
 	ND_RETURN, 	//  return
 	ND_TYPE, 	//  int, double, char...
@@ -70,12 +70,12 @@ typedef enum{
 
 
 typedef struct Token Token;
-typedef struct Node Node;
-typedef struct LVar LVar;
-typedef struct GVar GVar;
-typedef struct Func Func;
-typedef struct Type Type;
-typedef struct Str  Str;
+typedef struct Node  Node;
+typedef struct LVar  LVar;
+typedef struct GVar  GVar;
+typedef struct Func  Func;
+typedef struct Type  Type;
+typedef struct Str   Str;
 
 // code token
 struct Token{
