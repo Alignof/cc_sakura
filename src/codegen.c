@@ -5,7 +5,7 @@
 // int label_else;
 
 void gen_gvar(Node *node){
-	printf("	lea rax,  _%.*s[rip]\n", node->val,node->str);
+	printf("	lea rax,  _%.*s[rip]\n", node->val, node->str);
 	printf("	push rax\n");
 }
 

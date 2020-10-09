@@ -1,10 +1,9 @@
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <ctype.h>
+#include <string.h>
 #include <errno.h>
 
 
@@ -43,8 +42,8 @@ typedef enum{
 	ND_AND, 	//  &&
 	ND_OR, 		//  ||
 	ND_ASSIGN, 	//  =
-	ND_LVAR, 	//  local valiable
-	ND_GVAR, 	//  global valiable
+	ND_LVAR, 	//  local variable
+	ND_GVAR, 	//  global variable
 	ND_LARRAY, 	//  local array
 	ND_GARRAY, 	//  global array
 	ND_STR, 	//  "string"
@@ -148,9 +147,9 @@ void get_code(int argc, char **argv);
 
 // tokenizer
 int len_val(char *str);
+int is_alnum(char c);
 bool issymbol(char *str,  bool *flag);
 bool isblock(char *str);
-int is_alnum(char c);
 bool at_eof();
 Token *tokenize(char *p);
 Token *new_token(TokenKind kind, Token *cur, char *str);

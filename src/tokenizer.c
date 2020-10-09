@@ -9,9 +9,9 @@ bool at_eof(){
 }
 
 int is_alnum(char c){
-	return	(('a' <=  c) && (c <=  'z'))||
-		(('A' <=  c) && (c <=  'Z'))||
-		(('0' <=  c) && (c <=  '9'))||
+	return	(('a' <=  c) && (c <=  'z')) ||
+		(('A' <=  c) && (c <=  'Z')) ||
+		(('0' <=  c) && (c <=  '9')) ||
 		(c == '_');
 }
 
@@ -110,8 +110,9 @@ Token *tokenize(char *p){
 		//judge single token or multi token or isn't token
 		if(issymbol(p, &is_single_token)){
 			now = new_token(TK_RESERVED, now, p);
-			if(is_single_token) p++;
-			else{
+			if(is_single_token){
+				p++;
+			}else{
 				p += 2;
 				now->len = 2;
 			}
@@ -131,7 +132,6 @@ Token *tokenize(char *p){
 		if(isblock(p)){
 			now = new_token(TK_BLOCK, now, p);
 			now->len = 1;
-			now->val = *p;
 			now->str = p;
 			p++;
 			continue;

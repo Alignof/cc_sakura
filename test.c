@@ -18,9 +18,11 @@ int main(){
 }
 */
 
+int add(int x, int y){
+	return x+y;
+}
 
-int a[]={1,2,3};
 int main(){
-	printf("%s\n",a);
+	int a[]={1,add(1,1),3};
 	return a[2];
 }
