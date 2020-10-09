@@ -3,20 +3,20 @@
 // GVar *globals;
 // char filename[100];
 
-void error(char *loc,char *fmt, ...){
+void error(char *loc, char *fmt, ...){
 	va_list ap;
-	va_start(ap,fmt);
+	va_start(ap, fmt);
 
 	int pos = loc-user_input;
-	fprintf(stderr,"%s\n",user_input);
-	fprintf(stderr,"%*s",pos,"");
-	fprintf(stderr,"^ ");
-	vfprintf(stderr,fmt,ap);
-	fprintf(stderr,"\n");
+	fprintf(stderr, "%s\n", user_input);
+	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "^ ");
+	vfprintf(stderr, fmt, ap);
+	fprintf(stderr, "\n");
 	exit(1);
 }
 
-void error_at(char *loc,char *msg){
+void error_at(char *loc, char *msg){
 	while(user_input < loc && (loc[-1] == '\n' || loc[-1] == '\t')) loc--;
 
 	char *start = loc;
@@ -33,12 +33,12 @@ void error_at(char *loc,char *msg){
 	// consume \t
 	while(*start == '\t') start++;
 
-	int indent = fprintf(stderr,"%s:%d ",filename,line_num);
-	fprintf(stderr,"%.*s\n",(int)(end-start),start);
+	int indent = fprintf(stderr, "%s:%d ", filename, line_num);
+	fprintf(stderr, "%.*s\n", (int)(end-start), start);
 
 	int pos = indent+loc-start;
-	fprintf(stderr,"%*s",pos,"");
-	fprintf(stderr,"^ %s\n",msg);
+	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "^ %s\n", msg);
 	exit(1);
 }
 
@@ -46,7 +46,7 @@ bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
 			strlen(op) != token->len||
-			memcmp(token->str,op,token->len))
+			memcmp(token->str, op, token->len))
 		return false;
 	token = token->next;
 	return true;
@@ -64,16 +64,16 @@ int string_len(){
 
 bool consume_ret(){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
-		memcmp(token->str,"return",token->len))
+		memcmp(token->str, "return", token->len))
 		return false;
 	token = token->next;
 	return true;
 }
 
-bool consume_reserved_word(char *keyword,TokenKind kind){
+bool consume_reserved_word(char *keyword, TokenKind kind){
 	if( token->kind != kind ||
 	    token->len != strlen(keyword) ||
-	    memcmp(token->str,keyword,token->len))
+	    memcmp(token->str, keyword, token->len))
 		return false;
 
 	token = token->next;
@@ -122,15 +122,15 @@ void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
 			strlen(op) != token->len||
-			memcmp(token->str,op,token->len))
-		error_at(token->str,"not a charctor.");
+			memcmp(token->str, op, token->len))
+		error_at(token->str, "not a charctor.");
 	token = token->next;
 }
 
 int expect_number(){
 	// judge whether token is a number and move the pointer to the next and return value
 	if(token->kind != TK_NUM)
-		error_at(token->str,"not a number");
+		error_at(token->str, "not a number");
 
 	int val = token->val;
 	token = token->next;
@@ -140,7 +140,7 @@ int expect_number(){
 GVar *find_gvar(Token *tok){
 	//while var not equal NULL
 	for (GVar *var = globals;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str,var->name,var->len))
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len))
 			return var;
 	}
 	return NULL;
@@ -149,7 +149,7 @@ GVar *find_gvar(Token *tok){
 LVar *find_lvar(Token *tok){
 	//while var not equal NULL
 	for (LVar *var = locals;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str,var->name,var->len))
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len))
 			return var;
 	}
 	return NULL;
@@ -157,15 +157,15 @@ LVar *find_lvar(Token *tok){
 
 Str *find_string(Token *tok){
 	for (Str *var = strings;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str,var->str,var->len))
+		if(var->len == tok->len && !memcmp(tok->str, var->str, var->len))
 			return var;
 	}
 	return NULL;
 }
 
-Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
-	Node *node = calloc(1,sizeof(Node));
+	Node *node = calloc(1, sizeof(Node));
 	node->kind = kind;
 	node->lhs = lhs;
 	node->rhs = rhs;
@@ -174,7 +174,7 @@ Node *new_node(NodeKind kind,Node *lhs,Node *rhs){
 
 Node *new_node_num(int val){
 	//create new node(number)
-	Node *node = calloc(1,sizeof(Node));
+	Node *node = calloc(1, sizeof(Node));
 	node->kind = ND_NUM;
 	node->val = val;
 	return node;
@@ -191,7 +191,7 @@ int type_size(TypeKind type){
 		case ARRAY:
 			return 8;
 		default:
-			error_at(token->str,"unknown type");
+			error_at(token->str, "unknown type");
 	}
 
 	return -1;

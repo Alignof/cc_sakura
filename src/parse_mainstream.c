@@ -18,7 +18,7 @@ Node *primary(){
 	// variable
 	Token *tok = consume_ident();
 	if(tok){
-		Node *node = calloc(1,sizeof(Node));
+		Node *node = calloc(1, sizeof(Node));
 
 		LVar *lvar = find_lvar(tok);
 		if(lvar){
@@ -27,7 +27,7 @@ Node *primary(){
 			node->type = lvar->type;
 		// call function
 		}else if(*(token->str) == '('){
-			node = call_function(node,tok);
+			node = call_function(node, tok);
 		}else{
 			GVar *gvar = find_gvar(tok);
 			if(gvar){
@@ -38,19 +38,19 @@ Node *primary(){
 				node->val = tok->len;
 			}else{
 				//variable does not exist.
-				error_at(token->str,"this variable is not declaration");
+				error_at(token->str, "this variable is not declaration");
 			}
 		}
 
 		// Is array index
 		if(consume("[")){
-			node = array_index(node,mul());
+			node = array_index(node, mul());
 			expect("]");
 		}
 
 		// increment/decrement
 		if(consume("++") || consume("--"))
-			error_at(token->str,"Unimplemented.");
+			error_at(token->str, "Unimplemented.");
 
 		return node;
 	}
@@ -64,7 +64,7 @@ Node *unary(){
 	Type *rhs_ptr_to;
 
 	if(consume("*")){
-		node = new_node(ND_DEREF,new_node_num(0),unary());
+		node = new_node(ND_DEREF, new_node_num(0), unary());
 		rhs_ptr_to = node->rhs->type.ptr_to;
 
 		if(rhs_ptr_to == NULL || type_size(rhs_ptr_to->ty) == 8)
@@ -74,7 +74,7 @@ Node *unary(){
 	}
 
 	if(consume("&")){
-		node = new_node(ND_ADDRESS,NULL,unary());
+		node = new_node(ND_ADDRESS, NULL, unary());
 		node->type.ty = PTR;
 
 		return node;
@@ -82,7 +82,7 @@ Node *unary(){
 
 	if(token->kind == TK_STR){
 		consume("\"");
-		Node *node = calloc(1,sizeof(Node));
+		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_STR;
 		node->type.ty = PTR;
 
@@ -96,7 +96,7 @@ Node *unary(){
 			node->offset = fstr->len;
 		// new one
 		}else{
-			Str *new = calloc(1,sizeof(Str));
+			Str *new = calloc(1, sizeof(Str));
 			new->len = tok->len;
 			new->str = tok->str;
 			new->label_num = strings ? strings->label_num+1 : 0;
@@ -121,13 +121,13 @@ Node *unary(){
 
 	if(consume("-"))
 		//convert to 0-n
-		return new_node(ND_SUB,new_node_num(0),primary());
+		return new_node(ND_SUB, new_node_num(0), primary());
 
 
-	if(consume_reserved_word("sizeof",TK_SIZEOF)){
+	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
-		node = new_node(ND_NUM,node,unary());
+		node = new_node(ND_NUM, node, unary());
 		node->val = type_size(node->rhs->type.ty);
 
 		return node;
@@ -144,11 +144,11 @@ Node *mul(){
 		// is * and move the pointer next
 		if(consume("*")){
 			//create new node and jmp unary
-			node = new_node(ND_MUL,node,unary());
+			node = new_node(ND_MUL, node, unary());
 		}else if(consume("/")){
-			node = new_node(ND_DIV,node,unary());
+			node = new_node(ND_DIV, node, unary());
 		}else if(consume("%")){
-			node = new_node(ND_MOD,node,unary());
+			node = new_node(ND_MOD, node, unary());
 		}else{
 			return node;
 		}
@@ -164,20 +164,20 @@ Node *add(){
 
 	for(;;){
 		if(consume("+")){
-			node = new_node(ND_ADD,node,mul());
+			node = new_node(ND_ADD, node, mul());
 			lhs_type = &(node->lhs->type);
 			rhs_type = &(node->rhs->type);
 
 			if(type_size(lhs_type->ty) == 8 || type_size(rhs_type->ty) == 8)
-				node = pointer_calc(node,lhs_type,rhs_type);
+				node = pointer_calc(node, lhs_type, rhs_type);
 
 		}else if(consume("-")){
-			node = new_node(ND_SUB,node,mul());
+			node = new_node(ND_SUB, node, mul());
 			lhs_type = &(node->lhs->type);
 			rhs_type = &(node->rhs->type);
 
 			if(type_size(lhs_type->ty) == 8 || type_size(rhs_type->ty) == 8)
-				node = pointer_calc(node,lhs_type,rhs_type);
+				node = pointer_calc(node, lhs_type, rhs_type);
 
 		}else{
 			return node;
@@ -191,13 +191,13 @@ Node *relational(){
 	for(;;){
 		//prefer multi symbol
 		if(consume("> = ")){
-			node = new_node(ND_GE,node,add());
+			node = new_node(ND_GE, node, add());
 		}else if(consume("< = ")){
-			node = new_node(ND_LE,node,add());
+			node = new_node(ND_LE, node, add());
 		}else if(consume(">")){
-			node = new_node(ND_GT,node,add());
+			node = new_node(ND_GT, node, add());
 		}else if(consume("<")){
-			node = new_node(ND_LT,node,add());
+			node = new_node(ND_LT, node, add());
 		}else{
 			return node;
 		}
@@ -209,9 +209,9 @@ Node *equelity(){
 
 	for(;;){
 		if(consume("==")){
-			node = new_node(ND_EQ,node,relational());
+			node = new_node(ND_EQ, node, relational());
 		}else if(consume("!=")){
-			node = new_node(ND_NE,node,relational());
+			node = new_node(ND_NE, node, relational());
 		}else{
 			return node;
 		}
@@ -222,9 +222,9 @@ Node *logical(){
 	Node *node = equelity();
 	for(;;){
 		if(consume("&&")){
-			node = new_node(ND_AND,node,equelity());
+			node = new_node(ND_AND, node, equelity());
 		}else if(consume("||")){
-			node = new_node(ND_OR,node,equelity());
+			node = new_node(ND_OR, node, equelity());
 		}else{
 			return node;
 		}
@@ -235,7 +235,7 @@ Node *assign(){
 	Node *node = logical();
 
 	if(consume("="))
-		node = new_node(ND_ASSIGN,node,assign());
+		node = new_node(ND_ASSIGN, node, assign());
 
 	return node;
 }
@@ -245,12 +245,12 @@ Node *expr(){
 	Node *node;
 
 	if(token->kind == TK_TYPE){
-		node = calloc(1,sizeof(Node));
+		node = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 
 		// check type
-		if(consume_reserved_word("int",TK_TYPE)) node->type.ty = INT;
-		else if(consume_reserved_word("char",TK_TYPE)) node->type.ty = CHAR;
+		if(consume_reserved_word("int", TK_TYPE)) node->type.ty = INT;
+		else if(consume_reserved_word("char", TK_TYPE)) node->type.ty = CHAR;
 		
 		// count asterisk
 		while(token->kind == TK_RESERVED && *(token->str) == '*'){
@@ -261,16 +261,16 @@ Node *expr(){
 		// variable declaration
 		Token *tok = consume_ident();
 		if(tok)
-			node = declare_local_variable(node,tok,star_count);
+			node = declare_local_variable(node, tok, star_count);
 		else
-			error_at(token->str,"not a variable.");
+			error_at(token->str, "not a variable.");
 
 		// initialize formula
 		if(consume("=")){
 			if(consume("{"))
 				node->vector = array_block(node);
 			else
-				node->vector = init_formula(node,assign());
+				node->vector = init_formula(node, assign());
 		}
 	}else{
 		node = assign();
@@ -282,13 +282,13 @@ Node *expr(){
 Node *stmt(){
 	Node *node = NULL;
 
-	if(consume_reserved_word("return",TK_RETURN)){
-		node = new_node(ND_RETURN,node,expr());
+	if(consume_reserved_word("return", TK_RETURN)){
+		node = new_node(ND_RETURN, node, expr());
 		if(!consume(";"))
-			error_at(token->str,"not a ';' token.");
+			error_at(token->str, "not a ';' token.");
 
-	}else if(consume_reserved_word("if",TK_IF)){
-		node = new_node(ND_IF,node,NULL);
+	}else if(consume_reserved_word("if", TK_IF)){
+		node = new_node(ND_IF, node, NULL);
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -300,15 +300,15 @@ Node *stmt(){
 			node->rhs = stmt();
 		}
 
-		if(consume_reserved_word("else",TK_ELSE)){
+		if(consume_reserved_word("else", TK_ELSE)){
 			// if()~ <-else-> expr
-			Node *else_block = new_node(ND_ELSE,node,stmt());
+			Node *else_block = new_node(ND_ELSE, node, stmt());
 			else_block->lhs = node->rhs;
 			node->rhs = else_block;
 			node->kind = ND_IFELSE;
 		}
-	}else if(consume_reserved_word("for",TK_FOR)){
-		node = new_node(ND_FOR,node,NULL);
+	}else if(consume_reserved_word("for", TK_FOR)){
+		node = new_node(ND_FOR, node, NULL);
 		if(consume("(")){
 			//jmp expr
 			Node *init = expr();
@@ -326,8 +326,8 @@ Node *stmt(){
 			node->lhs->vector = cond;
 			node->lhs->vector->vector = calc;
 		}
-	}else if(consume_reserved_word("while",TK_WHILE)){
-		node = new_node(ND_WHILE,node,NULL);
+	}else if(consume_reserved_word("while", TK_WHILE)){
+		node = new_node(ND_WHILE, node, NULL);
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -339,9 +339,9 @@ Node *stmt(){
 			node->rhs = stmt();
 		}
 	}else if(consume("{")){
-		node = new_node(ND_BLOCK,node,NULL);
+		node = new_node(ND_BLOCK, node, NULL);
 
-		Node *block_code = calloc(1,sizeof(Node));
+		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
 			//Is first?
 			if(block_code->rhs){
@@ -357,7 +357,7 @@ Node *stmt(){
 		node = expr();
 		if(!consume(";")){
 			while(*(token->str)!='\n') (token->str)--;
-			error_at(token->str,"not a ';' token.");
+			error_at(token->str, "not a ';' token.");
 		}
 	}
 
@@ -391,9 +391,9 @@ void program(){
 
 		// type of function return value
 		if(token->kind == TK_TYPE){
-			if(consume_reserved_word("int",TK_TYPE))	toplv_type.ty = INT;
-			else if(consume_reserved_word("char",TK_TYPE))  toplv_type.ty = CHAR;
-			else error_at(token->str,"not a function type token.");
+			if(consume_reserved_word("int", TK_TYPE))	toplv_type.ty = INT;
+			else if(consume_reserved_word("char", TK_TYPE))  toplv_type.ty = CHAR;
+			else error_at(token->str, "not a function type token.");
 		}
 
 		// count asterisk
@@ -405,15 +405,15 @@ void program(){
 
 		// Is function?
 		if(token->kind != TK_IDENT ||!(is_alnum(*token->str)))
-			error_at(token->str,"not a function.");
+			error_at(token->str, "not a function.");
 
 		Token *def_name = consume_ident();
 
 		// function
 		if(consume("(")){
 			func_list[func_index]->type = toplv_type;
-			func_list[func_index]->name = (char *)calloc(def_name->len,sizeof(char));
-			strncpy(func_list[func_index]->name,def_name->str,def_name->len);
+			func_list[func_index]->name = (char *)calloc(def_name->len, sizeof(char));
+			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 			
 			// get arguments
 			get_argument(func_index);
@@ -425,17 +425,17 @@ void program(){
 
 		// global variable
 		}else{
-			Node *init_gv = declare_global_variable(star_count,def_name,toplv_type);
+			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
 
 			// initialize formula
 			if(consume("=")){
 				if(consume("{"))
 					globals->init = array_block(init_gv);
 				else
-					globals->init = init_formula(init_gv,assign());
+					globals->init = init_formula(init_gv, assign());
 			}else{
 				if(init_gv->kind == ND_GVAR)
-					globals->init = init_formula(init_gv,new_node_num(0));
+					globals->init = init_formula(init_gv, new_node_num(0));
 			}
 
 			expect(";");

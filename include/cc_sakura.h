@@ -25,40 +25,40 @@ typedef enum{
 }TokenKind;
 
 typedef enum{
-	ND_ADD,		//  +
-	ND_SUB,		//  -
-	ND_MUL,		//  *
-	ND_DIV,		//  /
-	ND_MOD,		//  %
-	ND_GT,		//  >
-	ND_INC,		//  ++
-	ND_DEC,		//  --
-	ND_ADDRESS,	//  &a
-	ND_DEREF,	//  *a
-	ND_GE,		//  >=
-	ND_LT,		//  <
-	ND_LE,		//  <=
-	ND_EQ,		//  ==
-	ND_NE,		//  !=
-	ND_AND,		//  &&
-	ND_OR,		//  ||
-	ND_ASSIGN,	//  =
-	ND_LVAR,	//  local valiable
-	ND_GVAR,	//  global valiable
-	ND_LARRAY,	//  local array
-	ND_GARRAY,	//  global array
-	ND_STR,		//  "string"
-	ND_NUM,		//  integer
-	ND_IF,		//  if
-	ND_ELSE,	//  else
-	ND_IFELSE,	//  if-else
-	ND_WHILE,	//  while
-	ND_FOR,		//  for
-	ND_BLOCK,	//  {}
-	ND_ARG,		//  function argument;
-	ND_CALL_FUNC,	//  func();
-	ND_RETURN,	//  return
-	ND_TYPE,	//  int,double,char...
+	ND_ADD, 		//  +
+	ND_SUB, 		//  -
+	ND_MUL, 		//  *
+	ND_DIV, 		//  /
+	ND_MOD, 		//  %
+	ND_GT, 		//  >
+	ND_INC, 		//  ++
+	ND_DEC, 		//  --
+	ND_ADDRESS, 	//  &a
+	ND_DEREF, 	//  *a
+	ND_GE, 		//  >=
+	ND_LT, 		//  <
+	ND_LE, 		//  <=
+	ND_EQ, 		//  ==
+	ND_NE, 		//  !=
+	ND_AND, 		//  &&
+	ND_OR, 		//  ||
+	ND_ASSIGN, 	//  =
+	ND_LVAR, 	//  local valiable
+	ND_GVAR, 	//  global valiable
+	ND_LARRAY, 	//  local array
+	ND_GARRAY, 	//  global array
+	ND_STR, 		//  "string"
+	ND_NUM, 		//  integer
+	ND_IF, 		//  if
+	ND_ELSE, 	//  else
+	ND_IFELSE, 	//  if-else
+	ND_WHILE, 	//  while
+	ND_FOR, 		//  for
+	ND_BLOCK, 	//  {}
+	ND_ARG, 		//  function argument;
+	ND_CALL_FUNC, 	//  func();
+	ND_RETURN, 	//  return
+	ND_TYPE, 	//  int, double, char...
 }NodeKind;
 
 typedef enum{
@@ -144,17 +144,17 @@ struct Str{
 
 // main
 char *read_file(char *path);
-void get_code(int argc,char **argv);
+void get_code(int argc, char **argv);
 
 // tokenizer
 int len_val(char *str);
-bool issymbol(char *str, bool *flag);
+bool issymbol(char *str,  bool *flag);
 bool isblock(char *str);
 int is_alnum(char c);
 bool at_eof();
 Token *tokenize(char *p);
-Token *new_token(TokenKind kind,Token *cur,char *str);
-bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind);
+Token *new_token(TokenKind kind, Token *cur, char *str);
+bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
 
 // parse_func.c
 extern int lvar_count;
@@ -167,8 +167,8 @@ extern LVar *locals;
 extern GVar *globals;
 extern Str *strings;
 
-void error(char *loc,char *fmt, ...);
-void error_at(char *loc,char *msg);
+void error(char *loc, char *fmt,  ...);
+void error_at(char *loc, char *msg);
 bool consume(char *op);
 bool consume_ret();
 bool consume_reserved_word();
@@ -178,7 +178,7 @@ int expect_number();
 int type_size(TypeKind type);
 Token *consume_ident();
 Token *consume_string();
-Node *new_node(NodeKind kind,Node *lhs,Node *rhs);
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
@@ -199,16 +199,16 @@ Node *unary();
 Node *primary();
 
 // parse_substream.c
-int align_array_size(int isize,TypeKind array_type);
+int align_array_size(int isize, TypeKind array_type);
 void get_argument(int func_index);
-Node *init_formula(Node *node,Node *init_val);
+Node *init_formula(Node *node, Node *init_val);
 Node *array_block();
-Node *array_str(Node *arr,Node *init_val);
-Node *pointer_calc(Node *node,Type *lhs_type,Type *rhs_type);
-Node *call_function(Node *node,Token *tok);
-Node *array_index(Node *node,Node *index);
+Node *array_str(Node *arr, Node *init_val);
+Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type);
+Node *call_function(Node *node, Token *tok);
+Node *array_index(Node *node, Node *index);
 Node *declare_global_variable();
-Node *declare_local_variable(Node *node,Token *tok,int star_count);
+Node *declare_local_variable(Node *node, Token *tok, int star_count);
 
 // codegan.c
 extern int label_begin;

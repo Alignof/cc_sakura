@@ -5,7 +5,7 @@
 // int label_else;
 
 void gen_gvar(Node *node){
-	printf("	lea rax,  _%.*s[rip]\n",node->val,node->str);
+	printf("	lea rax,  _%.*s[rip]\n", node->val,node->str);
 	printf("	push rax\n");
 }
 
@@ -14,16 +14,16 @@ void gen_lvar(Node *node){
 		error_at(token->str,"not a variable");
 
 	printf("	mov rax,rbp\n");
-	printf("	sub rax,%d\n",node->offset);
+	printf("	sub rax,%d\n", node->offset);
 	printf("	push rax\n");
 }
 
-void gen_arg(int arg_num,Node *tmp){
-	char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
+void gen_arg(int arg_num, Node *tmp){
+	char reg[6][4]={"rdi", "rsi","rdx","rcx","r8","r9"};
 
 	gen(tmp);
 	printf("	pop rax\n");
-	printf("	mov %s,rax\n",reg[arg_num]);
+	printf("	mov %s,rax\n", reg[arg_num]);
 }
 
 void expand_next(Node *node){
@@ -62,7 +62,7 @@ void gen(Node *node){
 			printf("	ret\n");
 			return;
 		case ND_NUM:
-			printf("	push %d\n",node->val);
+			printf("	push %d\n", node->val);
 			return;
 		case ND_GVAR:
 			gen_gvar(node);
@@ -100,7 +100,7 @@ void gen(Node *node){
 			if(node->vector != NULL) expand_next(node->vector);
 			return;
 		case ND_STR:
-			printf("	lea rax, .LC%d[rip]\n",node->val);
+			printf("	lea rax, .LC%d[rip]\n", node->val);
 			printf("	push rax\n");
 			return;
 		case ND_ASSIGN:
@@ -137,30 +137,30 @@ void gen(Node *node){
 
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lend%03d\n",lend);
+			printf("	je .Lend%03d\n", lend);
 			printf("	pop rax\n");
 			label_end++;
 			gen(node->rhs);
 
-			printf(".Lend%03d:\n",lend);
+			printf(".Lend%03d:\n", lend);
 			return;
 		case ND_IFELSE:
 			// condition
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lelse%03d\n",lelse);
+			printf("	je .Lelse%03d\n", lelse);
 			label_else++;
 
 			// expr in if
 			gen(node->rhs->lhs);
-			printf("	jmp .Lend%03d\n",lend);
-			printf(".Lelse%03d:\n",lelse);
+			printf("	jmp .Lend%03d\n", lend);
+			printf(".Lelse%03d:\n", lelse);
 			label_end++;
 
 			// expr in else
 			gen(node->rhs->rhs);
-			printf(".Lend%03d:\n",lend);
+			printf(".Lend%03d:\n", lend);
 
 			return;
 		case ND_FOR:
@@ -169,12 +169,12 @@ void gen(Node *node){
 
 			gen(node->lhs);
 			// condition
-			printf(".Lbegin%03d:\n",lbegin);
+			printf(".Lbegin%03d:\n", lbegin);
 			gen(node->lhs->vector);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// if cond true then loop end.
-			printf("	je .Lend%03d\n",lend);
+			printf("	je .Lend%03d\n", lend);
 			label_end++;
 
 			// else expression
@@ -183,8 +183,8 @@ void gen(Node *node){
 			printf("	pop rax\n");
 
 			// continue
-			printf("	jmp .Lbegin%03d\n",lend);
-			printf(".Lend%03d:\n",lbegin);
+			printf("	jmp .Lbegin%03d\n", lend);
+			printf(".Lend%03d:\n", lbegin);
 			printf("	push rax\n");
 			label_begin++;
 
@@ -194,20 +194,20 @@ void gen(Node *node){
 			printf("	push rax\n");
 
 			// condition
-			printf(".Lbegin%03d:\n",lbegin);
+			printf(".Lbegin%03d:\n", lbegin);
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// if cond true then loop end.
-			printf("	je .Lend%03d\n",lend);
+			printf("	je .Lend%03d\n", lend);
 			label_end++;
 
 			// else expression
 			gen(node->rhs);
 
 			// continue
-			printf("	jmp .Lbegin%03d\n",lend);
-			printf(".Lend%03d:\n",lbegin);
+			printf("	jmp .Lbegin%03d\n", lend);
+			printf(".Lend%03d:\n", lbegin);
 			printf("	push rax\n");
 			label_begin++;
 
@@ -221,18 +221,18 @@ void gen(Node *node){
 
 			if(tmp!=NULL){
 				while(tmp->next!=NULL){
-					gen_arg(arg,tmp);
+					gen_arg(arg, tmp);
 					tmp=tmp->next;
 					arg--;
 				}
-				gen_arg(arg,tmp);
+				gen_arg(arg, tmp);
 			}
 
 			printf("	push rbp\n");
 			printf("	mov rbp,rsp\n");
 			printf("	and rsp,-16\n");
 
-			printf("	call %s\n",node->str);
+			printf("	call %s\n", node->str);
 
 			printf("	mov rsp,rbp\n");
 			printf("	pop rbp\n");

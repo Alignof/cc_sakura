@@ -23,14 +23,14 @@ int len_val(char *str){
 	return counter;
 }
 
-bool issymbol(char *str, bool *flag){
+bool issymbol(char *str,  bool *flag){
 	int i;
 	int size;
 	char single_symbol[] = "+-*/%&()<>=,;[]";
 	char multi_symbol[] = "<>&|+-";
 	char multi_eq[] = "<=>!";
 	
-	//Is multi equal? ( < =  , == , !=  , > =  )
+	//Is multi equal? (<=, ==, !=, >=)
 	size = sizeof(multi_eq)/sizeof(char);
 	for(i = 0;i < size;i++){
 		if((*str == multi_eq[i]) && (*(str+1) == '=')){
@@ -60,8 +60,8 @@ bool issymbol(char *str, bool *flag){
 	return false;
 }
 
-Token *new_token(TokenKind kind,Token *cur,char *str){
-	Token *new = calloc(1,sizeof(Token));
+Token *new_token(TokenKind kind, Token *cur, char *str){
+	Token *new = calloc(1, sizeof(Token));
 	new->kind = kind;
 	//Remaining characters
 	new->str = str;
@@ -70,11 +70,11 @@ Token *new_token(TokenKind kind,Token *cur,char *str){
 	return new;
 }
 
-bool consume_reserved(char **p,char *str,int len,Token **now,TokenKind tk_kind){
-	if(strncmp(*p,str,len) !=  0 || is_alnum((*p)[len]))
+bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
+	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len]))
 		return false;
 
-	*now = new_token(tk_kind,*now,*p);
+	*now = new_token(tk_kind, *now, *p);
 	(*now)->len = len;
 	(*now)->str = *p;
 	*p += len;
@@ -97,39 +97,39 @@ Token *tokenize(char *p){
 		}
 
 		if((*p == '/') && (*(p+1) == '/')){
-			while(*p  !=   '\n') p++;
+			while(*p != '\n') p++;
 			continue;
 		}
 
 		if((*p == '/') && (*(p+1) == '*')){
-			while(!(*(p-1) == '*' && *p == '/')) p++;
+			while(!((*(p-1) == '*') && (*p == '/'))) p++;
 			p++;
 			continue;
 		}
 
 		//judge single token or multi token or isn't token
-		if(issymbol(p,&is_single_token)){
-			now = new_token(TK_RESERVED,now,p);
+		if(issymbol(p, &is_single_token)){
+			now = new_token(TK_RESERVED, now, p);
 			if(is_single_token) p++;
 			else{
-				p +=  2;
+				p += 2;
 				now->len = 2;
 			}
 			continue;
 		}
 
-		if(consume_reserved(&p,"int",3,&now,TK_TYPE))	   continue;
-		if(consume_reserved(&p,"char",4,&now,TK_TYPE))	   continue;
-		if(consume_reserved(&p,"if",2,&now,TK_IF))	   continue;
-		if(consume_reserved(&p,"else",4,&now,TK_ELSE))	   continue;
-		if(consume_reserved(&p,"for",3,&now,TK_FOR))	   continue;
-		if(consume_reserved(&p,"while",5,&now,TK_WHILE))   continue;
-		if(consume_reserved(&p,"sizeof",6,&now,TK_SIZEOF)) continue;
-		if(consume_reserved(&p,"return",6,&now,TK_RETURN)) continue;
+		if(consume_reserved(&p, "int",	  3, &now, TK_TYPE))	continue;
+		if(consume_reserved(&p, "char",   4, &now, TK_TYPE))	continue;
+		if(consume_reserved(&p, "if",	  2, &now, TK_IF))	continue;
+		if(consume_reserved(&p, "else",	  4, &now, TK_ELSE))	continue;
+		if(consume_reserved(&p, "for",	  3, &now, TK_FOR))	continue;
+		if(consume_reserved(&p, "while",  5, &now, TK_WHILE))   continue;
+		if(consume_reserved(&p, "sizeof", 6, &now, TK_SIZEOF))  continue;
+		if(consume_reserved(&p, "return", 6, &now, TK_RETURN))  continue;
 
 		//Is block? '{' or '}'
 		if(isblock(p)){
-			now = new_token(TK_BLOCK,now,p);
+			now = new_token(TK_BLOCK, now, p);
 			now->len = 1;
 			now->val = *p;
 			now->str = p;
@@ -140,7 +140,7 @@ Token *tokenize(char *p){
 		//Is string?
 		if(*p == '"'){
 			p++;
-			while(*p != '"') now = new_token(TK_STR,now,p++);
+			while(*p != '"') now = new_token(TK_STR, now, p++);
 			p++;
 			continue;
 		}
@@ -148,28 +148,28 @@ Token *tokenize(char *p){
 		//Is number?
 		if(isdigit(*p)){
 			if(now->kind == TK_IDENT){
-				now = new_token(TK_IDENT,now,p++);
+				now = new_token(TK_IDENT, now, p++);
 				now->len = 1;
 			}else{
 				//add number token
-				now = new_token(TK_NUM,now,p);
+				now = new_token(TK_NUM, now, p);
 				//set number
-				now->val = strtol(p,&p,10);
+				now->val = strtol(p, &p, 10);
 			}
 			continue;
 		}
 
 		//Is valiable?
 		if(is_alnum(*p)){
-			now = new_token(TK_IDENT,now,p++);
+			now = new_token(TK_IDENT, now, p++);
 			now->len = 1;
 			continue;
 		}
 
-		error_at(p,"cat not tokenize.");
+		error_at(p, "cat not tokenize.");
 	}
 
 	//add EOF token
-	new_token(TK_EOF,now,p);
+	new_token(TK_EOF, now, p);
 	return head.next;
 }
