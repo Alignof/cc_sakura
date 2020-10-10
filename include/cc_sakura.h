@@ -107,13 +107,21 @@ struct Node{
 
 // function
 struct Func{
-	int argc;
+	//int argc;
 	int stack_size;
 	char *name;
 	Type type;
 	Node *args;
 	Node *code[100];
 	Func *next;
+};
+
+// string
+struct Str{
+	int len;
+	int label_num;
+	char *str;
+	Str *next;
 };
 
 // global variable
@@ -134,12 +142,6 @@ struct LVar{
 	Type type;
 	LVar *next;
 }; 
-struct Str{
-	int len;
-	int label_num;
-	char *str;
-	Str *next;
-};
 
 // main
 char *read_file(char *path);

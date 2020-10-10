@@ -1,4 +1,4 @@
-# Specification 
+# Internal specifications of cc\_sakura
 2020 10.09 Takana Norimasa
 
 ## enums
@@ -80,13 +80,13 @@ Token, Node, LVar, GVar, Func, Type, Str...
 
 ### Token
 struct of parsed token.
-| type/name		| description			| example			|
-| :--			| :--				| :--				|
-| TokenKind kind	| kind of token			| TK\_NUM			|
-| Token \*next   	| next chained list		| (next address of Token)	|
-| int val       	| value of immediate		| 1970				|
-| char \*str     	| name				| "1970 + year..."		|
-| int len       	| name of length		| 4 				|
+| type/name		| description				| example			|
+| :--			| :--					| :--				|
+| TokenKind kind	| kind of token				| TK\_NUM			|
+| Token \*next   	| next chained list			| (next address of Token)	|
+| int val       	| value of immediate			| 1970				|
+| char \*str     	| pointer at the head of the name	| "1970 + year..."		|
+| int len       	| name of length			| 4 				|
 
 
 ### Node
@@ -98,7 +98,7 @@ struct of syntax tree node.
 | Node \*rhs    	| node of right hand side	| (right hand node address)	|
 | Node \*next   	| **see table below**		| (next argument chain)		|
 | Node \*vector 	| **see table below**		| NULL				|
-| Type type		| node type 			| struct Type			|
+| Type type		| node type 			| (struct Type)			|
 | int val		| **see table below**		| 0				|
 | int offset		| local variable offset		| 0				|
 | char \*str    	| name  			| NULL				|
@@ -152,13 +152,36 @@ struct of syntax tree node.
 
 
 
+### Type
+struct of type of variable kind.
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| TypeKind ty		| type of variable(INT,CHAR...)	| ARRAY				|
+| Type \*ptr\_to	| next chained list		| (next Type chain)		|
+| size\_t index\_size	| sizo of array index		| 5				|
 
 
 
+### Func
+struct of function
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int stack\_size	| size to reserve on the stack	| 16				|
+| char \*name		| function name			| add				|
+| Type type		| type of function		| (struct Type)			|
+| Node \*args		| chained list of arguments	| (next argument chain)		|
+| Node \*code[100]	| codes				| (codes list)			|
+| Func \*next		| chained list of Func		| (next argument chain)		|
 
 
-
-
+### Str
+struct of string
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int len		| string length(excluding EoS)	| 6				|
+| int label\_num	| string label			| 0				|
+| char \*str		| string name			| hello!			|
+| Str \*next		| chained list of Str		| (next Str chain)		|
 
 
 

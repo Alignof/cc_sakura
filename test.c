@@ -24,5 +24,7 @@ int add(int x, int y){
 
 int main(){
 	int a[]={1,add(1,1),3};
+	char str="string";
+
 	return a[2];
 }
