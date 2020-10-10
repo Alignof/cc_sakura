@@ -108,6 +108,8 @@ struct of syntax tree node.
 | Nodekind		| node-\>vector means				|
 | :--			| :--						|
 | ND\_LVAR		| chain list of initialize formula -> (next) 	|
+| ND\_LARRAY		| chain list of initialize formula -> (next) 	|
+| ND\_GARRAY		| chain list of initialize formula -> (next) 	|
 | ND\_FOR		| exit conditions -> code or block code		|
 | ND\_BLOCK		| chain of block code 				|
 
@@ -117,6 +119,7 @@ struct of syntax tree node.
 | Nodekind		| node-\>next means			|
 | :--			| :--					|
 | ND\_ASSIGN		| chain of initialize formula		|
+| ND\_CALL\_FUNC	| head of argument chained lists	|
 | ND\_AND		| chain of arguments			|
 | ND\_OR		| chain of arguments			|
 | ND\_EQ		| chain of arguments			|
@@ -171,7 +174,7 @@ struct of function
 | Type type		| type of function		| (struct Type)			|
 | Node \*args		| chained list of arguments	| (next argument chain)		|
 | Node \*code[100]	| codes				| (codes list)			|
-| Func \*next		| chained list of Func		| (next argument chain)		|
+| Func \*next		| chained list of Func		| (next Func chain)		|
 
 
 ### Str
@@ -185,7 +188,27 @@ struct of string
 
 
 
+### Gvar
+struct of global variable
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int len;		| name length 			| 1				|
+| int memsize;		| allocate memory size		| 4				|
+| char \*name;		| variable name			| "x=3;\nint main(){\n\tint"	|
+| Type type;		| variable type			| (struct Type)			|
+| GVar \*next;		| chained list of Gvar		| (next Gvar chain)		|
+| Node \*init;		| node of initialize formula	| (node of initialize assign)	|
 
+
+### Lvar
+struct of local variable
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int len;		| name length 			| 1				|
+| int offset;		| offset from rsp		| 16				|
+| char \*name;		| variable name			| "y){\n\treturn x+y;"		|
+| Type type;		| variable type			| (struct Type)			|
+| LVar \*next;		| chained list of Lvar		| (next Lvar chain)		|
 
 
 

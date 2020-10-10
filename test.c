@@ -17,14 +17,10 @@ int main(){
 	return 0;
 }
 */
-
-int add(int x, int y){
-	return x+y;
-}
-
+int x=3;
 int main(){
-	int a[]={1,add(1,1),3};
-	char str="string";
+	int a[]={1,x,3};
 
-	return a[2];
+	x=x+3;
+	return x;
 }
