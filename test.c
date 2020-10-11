@@ -17,10 +17,10 @@ int main(){
 	return 0;
 }
 */
-
-
-int a[]={1,2,3};
+int x=3;
 int main(){
-	printf("%s\n",a);
-	return a[2];
+	int a[]={1,x,3};
+
+	x=x+3;
+	return x;
 }

@@ -190,9 +190,9 @@ Node *relational(){
 
 	for(;;){
 		//prefer multi symbol
-		if(consume("> = ")){
+		if(consume(">=")){
 			node = new_node(ND_GE, node, add());
-		}else if(consume("< = ")){
+		}else if(consume("<=")){
 			node = new_node(ND_LE, node, add());
 		}else if(consume(">")){
 			node = new_node(ND_GT, node, add());
