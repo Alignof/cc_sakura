@@ -99,6 +99,15 @@ void gen(Node *node){
 			// init formula
 			if(node->vector != NULL) expand_next(node->vector);
 			return;
+		case ND_PREID:
+			gen(node->lhs);
+			gen(node->rhs);
+			return;
+		case ND_POSTID:
+			gen(node->lhs);
+			gen(node->rhs);
+			printf("	pop rax\n");
+			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n", node->val);
 			printf("	push rax\n");

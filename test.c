@@ -17,10 +17,9 @@ int main(){
 	return 0;
 }
 */
-int x=3;
-int main(){
-	int a[]={1,x,3};
 
-	x=x+3;
-	return x;
+int main(){
+	int x=3;
+	int a=x++;
+	return x+a;
 }

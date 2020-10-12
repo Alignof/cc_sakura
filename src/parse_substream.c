@@ -7,7 +7,6 @@ GVar *globals;
 // Func *func_list[100];
 
 Node *incdec(Node *node, IncDecKind idtype){
-	error_at(token->str, "Unimplemented.");
 	/*
 	 * a++;
 	 * a <-- (ND_POSTID) --> a = a+1;
@@ -21,21 +20,21 @@ Node *incdec(Node *node, IncDecKind idtype){
 
 	// increment or decrement
 	if(idtype == PRE_INC || idtype == POST_INC)
-		;
+		plmi_one = new_node(ND_ASSIGN, node, new_node(ND_ADD,node,new_node_num(1)));
 	else
-		;
+		plmi_one = new_node(ND_ASSIGN, node, new_node(ND_SUB,node,new_node_num(1)));
 
-	// pre or post
-	if(idtype == POST_INC || idtype == POST_DEC){
-		new->kind = ND_POSTID;
+	// pre
+	if(idtype == PRE_INC || idtype == PRE_DEC){
+		new->kind = ND_PREID;
 		new->lhs  = plmi_one;
 		new->rhs  = node;
+	// post
 	}else{
-		new->kind = ND_PREID;
+		new->kind = ND_POSTID;
 		new->lhs  = node;
 		new->rhs  = plmi_one;
 	}
-
 
 	return new;
 }
