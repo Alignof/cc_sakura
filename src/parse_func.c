@@ -169,6 +169,11 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	node->kind = kind;
 	node->lhs = lhs;
 	node->rhs = rhs;
+
+	if(kind == ND_ADD || kind == ND_SUB){
+		if(type_size(lhs->type.ty) == 8 || type_size(rhs->type.ty) == 8)
+			node = pointer_calc(node, lhs->type, rhs->type);
+	}
 	return node;
 }
 

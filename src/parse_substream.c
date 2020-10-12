@@ -6,6 +6,40 @@ GVar *globals;
 // LVar *locals;
 // Func *func_list[100];
 
+Node *incdec(Node *node, IncDecKind idtype){
+	error_at(token->str, "Unimplemented.");
+	/*
+	 * a++;
+	 * a <-- (ND_POSTID) --> a = a+1;
+	 *
+	 * --a;
+	 * a = a-1; <-- (ND_PREID) --> a;
+	 */
+
+	Node *new = calloc(1,sizeof(Node));
+	Node *plmi_one = calloc(1,sizeof(Node));
+
+	// increment or decrement
+	if(idtype == PRE_INC || idtype == POST_INC)
+		;
+	else
+		;
+
+	// pre or post
+	if(idtype == POST_INC || idtype == POST_DEC){
+		new->kind = ND_POSTID;
+		new->lhs  = plmi_one;
+		new->rhs  = node;
+	}else{
+		new->kind = ND_PREID;
+		new->lhs  = node;
+		new->rhs  = plmi_one;
+	}
+
+
+	return new;
+}
+
 Node *init_formula(Node *node, Node *init_val){
 	switch(init_val->kind){
 		case ND_STR:
@@ -182,7 +216,7 @@ Node *array_index(Node *node, Node *index){
 	return node;
 }
 
-Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
+Node *pointer_calc(Node *node, Type lhs_type, Type rhs_type){
 	int ptrtype;
 
 
@@ -191,12 +225,12 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	pointer_size->kind = ND_NUM;
 
 
-	if(type_size(lhs_type->ty) == 8 && lhs_type->ptr_to!=NULL){
-		ptrtype = lhs_type->ptr_to->ty;
+	if(type_size(lhs_type.ty) == 8 && lhs_type.ptr_to!=NULL){
+		ptrtype = lhs_type.ptr_to->ty;
 		pointer_size->val = type_size(ptrtype);
 		node->rhs = new_node(ND_MUL, node->rhs, pointer_size);
-	}else if(type_size(rhs_type->ty) == 8 && rhs_type->ptr_to!=NULL){
-		ptrtype = rhs_type->ptr_to->ty;
+	}else if(type_size(rhs_type.ty) == 8 && rhs_type.ptr_to!=NULL){
+		ptrtype = rhs_type.ptr_to->ty;
 		pointer_size->val = type_size(ptrtype);
 		node->lhs = new_node(ND_MUL, node->lhs, pointer_size);
 	}
