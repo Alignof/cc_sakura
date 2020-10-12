@@ -127,6 +127,13 @@ Node *unary(){
 		//convert to 0-n
 		return new_node(ND_SUB, new_node_num(0), primary());
 
+	// increment
+	if(consume("++"))
+		return incdec(primary(), PRE_INC);
+
+	// decrement
+	if(consume("--"))
+		return incdec(primary(), PRE_DEC);
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  = > 4

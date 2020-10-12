@@ -152,4 +152,8 @@ assert -cl 4 'int a[]={0,1,2,3,4}; int main(){return a[4];}'
 assert -cl 4 'int a[5]={0,1,2,3,4}; int main(){return a[4];}'
 assert -cl 0 'int a[5]={0,1,2}; int main(){return a[4];}'
 
+assert -cl 7 'int main(){int x=3; int a=x++; return a+x;}'
+assert -cl 8 'int main(){int x=3; int a=++x; return a+x;}'
+assert -cl 5 'int main(){int x=3; int a=x--; return a+x;}'
+assert -cl 4 'int main(){int x=3; int a=--x; return a+x;}'
 echo OK

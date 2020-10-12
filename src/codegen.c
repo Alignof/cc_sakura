@@ -101,6 +101,7 @@ void gen(Node *node){
 			return;
 		case ND_PREID:
 			gen(node->lhs);
+			printf("	pop rax\n");
 			gen(node->rhs);
 			return;
 		case ND_POSTID:
