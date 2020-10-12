@@ -30,8 +30,8 @@ typedef enum{
 	ND_DIV, 	//  /
 	ND_MOD, 	//  %
 	ND_GT, 		//  >
-	ND_INC, 	//  ++
-	ND_DEC, 	//  --
+	ND_PREID, 	//  ++a, --a
+	ND_POSTID, 	//  a++, a--
 	ND_ADDRESS, 	//  &a
 	ND_DEREF, 	//  *a
 	ND_GE, 		//  >=
@@ -66,6 +66,13 @@ typedef enum{
 	PTR,
 	ARRAY,
 }TypeKind;
+
+typedef enum{
+	PRE_INC,
+	PRE_DEC,
+	POST_INC,
+	POST_DEC,
+}IncDecKind;
 
 
 typedef struct Token Token;
@@ -203,9 +210,10 @@ Node *primary();
 int align_array_size(int isize, TypeKind array_type);
 void get_argument(int func_index);
 Node *init_formula(Node *node, Node *init_val);
+Node *incdec(Node *node, IncDecKind idtype);
 Node *array_block();
 Node *array_str(Node *arr, Node *init_val);
-Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type);
+Node *pointer_calc(Node *node, Type lhs_type, Type rhs_type);
 Node *call_function(Node *node, Token *tok);
 Node *array_index(Node *node, Node *index);
 Node *declare_global_variable();

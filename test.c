@@ -1,10 +1,9 @@
-/*
 int main(){
 	int i;
 	int max=0;
 
 	scanf("%d",&max);
-	for(i=1;i<=max;i=i+1){
+	for(i=1;i<=max;i++){
 		if(i%3==0 && i%5==0)
 			printf("FizzBuzz\n");
 		else if(i%3==0)
@@ -15,12 +14,4 @@ int main(){
 			printf("%d\n",i);
 	}
 	return 0;
-}
-*/
-int x=3;
-int main(){
-	int a[]={1,x,3};
-
-	x=x+3;
-	return x;
 }

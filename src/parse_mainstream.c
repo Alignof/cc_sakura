@@ -37,7 +37,7 @@ Node *primary(){
 				node->str = tok->str;
 				node->val = tok->len;
 			}else{
-				//variable does not exist.
+				// variable does not exist.
 				error_at(token->str, "this variable is not declaration");
 			}
 		}
@@ -48,14 +48,18 @@ Node *primary(){
 			expect("]");
 		}
 
-		// increment/decrement
-		if(consume("++") || consume("--"))
-			error_at(token->str, "Unimplemented.");
+		// increment
+		if(consume("++"))
+			node = incdec(node, POST_INC);
+
+		// decrement
+		if(consume("--"))
+			node = incdec(node, POST_DEC);
 
 		return node;
 	}
 
-	//return new num node
+	// return new num node
 	return new_node_num(expect_number());
 }
 
@@ -123,6 +127,13 @@ Node *unary(){
 		//convert to 0-n
 		return new_node(ND_SUB, new_node_num(0), primary());
 
+	// increment
+	if(consume("++"))
+		return incdec(primary(), PRE_INC);
+
+	// decrement
+	if(consume("--"))
+		return incdec(primary(), PRE_DEC);
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  = > 4
@@ -156,29 +167,14 @@ Node *mul(){
 }
 
 Node *add(){
-	Type *lhs_type;
-	Type *rhs_type;
-
 	//jmp mul()
 	Node *node = mul();
 
 	for(;;){
 		if(consume("+")){
 			node = new_node(ND_ADD, node, mul());
-			lhs_type = &(node->lhs->type);
-			rhs_type = &(node->rhs->type);
-
-			if(type_size(lhs_type->ty) == 8 || type_size(rhs_type->ty) == 8)
-				node = pointer_calc(node, lhs_type, rhs_type);
-
 		}else if(consume("-")){
 			node = new_node(ND_SUB, node, mul());
-			lhs_type = &(node->lhs->type);
-			rhs_type = &(node->rhs->type);
-
-			if(type_size(lhs_type->ty) == 8 || type_size(rhs_type->ty) == 8)
-				node = pointer_calc(node, lhs_type, rhs_type);
-
 		}else{
 			return node;
 		}
