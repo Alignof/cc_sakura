@@ -12,7 +12,7 @@ int main(){
 	int max=0;
 
 	scanf("%d",&max);
-	for(i=1;i<=max;i=i+1){
+	for(i=1;i<=max;i++){
 		if(i%3==0 && i%5==0)
 			printf("FizzBuzz\n");
 		else if(i%3==0)
@@ -22,7 +22,6 @@ int main(){
 		else
 			printf("%d\n",i);
 	}
-
 	return 0;
 }
 ```
@@ -84,14 +83,8 @@ int add(int a,int b){return a+b;} int main(){add(2,3);} => 5
 int add(int a,int b){return a+b;} int main(){int a;int b; a=2;b=3;add(a,b);} => 5
 int add(int a,int b,int c){return a+b+c;} int main(){int a;int b;int c; a=2;b=3;c=4;add(a,b,c);} => 9
 int fibo(int num){if(num==0){return 0;}if(num==1){return 1;} return fibo(num-1)+fibo(num-2);} int main(){fibo(10);} => 55
-int main(){int a; int b; a=0;b=1;b=&a;a=10;*b;} => 10
-int main(){int a; int b;int c; a=2;b=3;c=&b+8;*c;} => 2
 int main(){int x; int *y; y=&x;*y=3;return x;} => 3
 int main(){int x; int *y; int **z; y=&x;z=&y;**z=3;return x;} => 3
-int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; *q;} => 4
-int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=2+p; *q;} => 4
-int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; q=p+3; return *q;} => 8
-int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q; q=p+2; q=q-1; return *q;} => 2
 int main(){int x; sizeof(x);} => 4
 int main(){int *x; sizeof(x);} => 8
 int main(){int x; sizeof(&x);} => 8
@@ -107,8 +100,8 @@ int main(){int a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);} => 3
 int main(){int a[4]; a[0]=1; return a[0];} => 1
 int main(){int a[4]; a[0]=1; a[1]=2; return a[0]+a[1];} => 3
 int main(){int a[5]; int sum; int i; sum=0; i=0; while(i<5){a[i]=i; i=i+1;} i=0; while(i<5){sum=sum+a[i];i=i+1;} return sum;} => 10
-int a; int main(){0;} => 0
-int a[10]; int main(){0;} => 0
+int a; int main(){a;} => 0
+int a[10]; int main(){a[5];} => 0
 int a; int b; int main(){a=2;a;} => 2
 int a; int b; int main(){a=2;b=3;a+b;} => 5
 int a; int b; int main(){int a;a=2;b=3;a+b;} => 5
@@ -116,8 +109,8 @@ int main(){char a;a=2;return a;} => 2
 int main(){char a;char b;char c;char d; a=3;b=2;c=12;d=17;(d-c)*(a+b);} => 25
 int main(){char a;char b;char c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;} => 9
 int main(){char x; char *y; char **z; y=&x;z=&y;**z=3;return x;} => 3
-int main(){char x; sizeof(x+2);} => 1
-int main(){char a[4]; *a=1; *(a+1)=2; int *p; p=a; return *p + *(p+1);} => 3
+int main(){char x; sizeof(x+2);} => 4
+int main(){char a[4]; *a=1; *(a+1)=2; char *p; p=a; return *p + *(p+1);} => 3
 int main(){char *x; x="hello"; x[1];} => 101
 int main(){char *x; x="hello"; *(x+2);} => 108
 int main(){int i; int x[10];/* set counter */ for(i=0;i<10;i=i+1) x[i]=i; return x[5];} => 5
@@ -129,5 +122,16 @@ int main(){int a[]={0,1,2,3,4}; return a[4];} => 4
 int main(){int a[5]={0,1,2,3,4}; return a[4];} => 4
 int main(){int a[5]={0,1,2}; return a[4];} => 0
 int add(int x,int y){return x+y;} int main(){int a[5]={0,1,2,add(1,3),4}; return a[3];} => 4
+int a=8; int main(){a=a-3;a;} => 5
+char *x="hello"; int main(){*(x+2);} => 108
+char x[]="hello"; int main(){*(x+2);} => 108
+char x[6]="hello"; int main(){*(x+2);} => 108
+int a[]={0,1,2,3,4}; int main(){return a[4];} => 4
+int a[5]={0,1,2,3,4}; int main(){return a[4];} => 4
+int a[5]={0,1,2}; int main(){return a[4];} => 0
+int main(){int x=3; int a=x++; return a+x;} => 7
+int main(){int x=3; int a=++x; return a+x;} => 8
+int main(){int x=3; int a=x--; return a+x;} => 5
+int main(){int x=3; int a=--x; return a+x;} => 4
 OK
 ```
