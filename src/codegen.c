@@ -78,11 +78,11 @@ void gen(Node *node){
 			printf("	pop rax\n");
 			if(node->type.ty == CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
-				printf("	push rax\n");
+				printf("	movsx eax,al\n");
 			}else{
 				printf("	mov rax,[rax]\n");
-				printf("	push rax\n");
 			}
+			printf("	push rax\n");
 
 			// init formula
 			if(node->vector != NULL) gen(node->vector);
@@ -272,8 +272,14 @@ void gen(Node *node){
 		case ND_DEREF:
 			gen(node->rhs);
 			printf("	pop rax\n");
-			printf("	mov rax,[rax]\n");
+			if(node->type.ty == CHAR){
+				printf("	movzx eax,BYTE PTR [rax]\n");
+				printf("	movsx eax,al\n");
+			}else{
+				printf("	mov rax,[rax]\n");
+			}
 			printf("	push rax\n");
+
 			return;
 	}
 
@@ -287,10 +293,11 @@ void gen(Node *node){
 	printf("	pop rax\n");
 
 
-	const char reg_ax[4][4]={"rax","eax","al","al"};
-	const char reg_dx[4][4]={"rdx","edx","dl","dl"};
-	const char reg_di[4][4]={"rdi","edi","dil","dil"};
-	int reg_ty = node->type.ty;
+	const char reg_ax[4][4]={"eax","eax","rax","rax"};
+	const char reg_dx[4][4]={"edx","edx","rdx","rdx"};
+	const char reg_di[4][4]={"edi","edi","rdi","rdi"};
+	int reg_ty = (int)node->type.ty;
+
 	switch(node->kind){
 		case ND_ADD:
 			printf("	add %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);

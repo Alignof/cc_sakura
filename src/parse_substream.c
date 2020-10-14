@@ -177,7 +177,9 @@ Node *call_function(Node *node, Token *tok){
 	if(!(consume(")"))){
 		Node *now;
 		Node *prev = NULL;
-		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED || token->kind == TK_STR){
+		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED ||
+			token->kind == TK_SIZEOF || token->kind == TK_STR){
+
 			now = logical();
 			now->next = prev;
 			prev = now;
@@ -211,7 +213,6 @@ Node *array_index(Node *node, Node *index){
 	node->rhs = new_node(ND_MUL, index, pointer_size);
 
 	node = new_node(ND_DEREF, NULL, node);
-	node->type.ty = INT;
 
 	return node;
 }
