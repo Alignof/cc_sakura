@@ -19,7 +19,7 @@ void gen_lvar(Node *node){
 }
 
 void gen_arg(int arg_num, Node *tmp){
-	char reg[6][4]={"rdi", "rsi","rdx","rcx","r8","r9"};
+	const char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
 	gen(tmp);
 	printf("	pop rax\n");
@@ -286,61 +286,66 @@ void gen(Node *node){
 	printf("	pop rdi\n");
 	printf("	pop rax\n");
 
+
+	const char reg_ax[4][4]={"rax","eax","al","al"};
+	const char reg_dx[4][4]={"rdx","edx","dl","dl"};
+	const char reg_di[4][4]={"rdi","edi","dil","dil"};
+	int reg_ty = node->type.ty;
 	switch(node->kind){
 		case ND_ADD:
-			printf("	add rax,rdi\n");
+			printf("	add %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			break;
 		case ND_SUB:
-			printf("	sub rax,rdi\n");
+			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			break;
 		case ND_MUL:
-			printf("	imul rax,rdi\n");
+			printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			break;
 		case ND_DIV:
 			printf("	cqo\n");
-			printf("	idiv rax,rdi\n");
+			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			break;
 		case ND_MOD:
 			printf("	cqo\n");
-			printf("	idiv rax,rdi\n");
-			printf("	mov rax,rdx\n");
+			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	mov %s,%s\n", reg_ax[reg_ty], reg_dx[reg_ty]);
 			break;
 		case ND_GT:
-			printf("	cmp edi,eax\n");
+			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
 			printf("	setl al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_GE:
-			printf("	cmp edi,eax\n");
+			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
 			printf("	setle al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_LT:
-			printf("	cmp eax,edi\n");
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	setl al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_LE:
-			printf("	cmp eax,edi\n");
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	setle al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_EQ:
-			printf("	cmp eax,edi\n");
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	sete al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_NE:
-			printf("	cmp eax,edi\n");
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	setne al\n");
 			printf("	movzb rax,al\n");
 			break;
 		case ND_AND:
-			printf("	and eax,edi\n");
+			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	movzb rax,al\n");
 			break;
 		case ND_OR:
-			printf("	or eax,edi\n");
+			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	movzb rax,al\n");
 			break;
 	}
