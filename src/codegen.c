@@ -77,8 +77,8 @@ void gen(Node *node){
 
 			printf("	pop rax\n");
 			if(node->type.ty == CHAR){
-				printf("	movzx ecx,BYTE PTR [rax]\n");
-				printf("	push rcx\n");
+				printf("	movzx eax,BYTE PTR [rax]\n");
+				printf("	push rax\n");
 			}else{
 				printf("	mov rax,[rax]\n");
 				printf("	push rax\n");
