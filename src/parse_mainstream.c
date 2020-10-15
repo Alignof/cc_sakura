@@ -15,6 +15,14 @@ Node *primary(){
 		return node;
 	}
 
+	// character literal
+	if(consume("'")){
+		Node *node=new_node_num((int)*(token->str));
+		token=token->next;
+		expect("'");
+		return node;
+	}
+
 	// variable
 	Token *tok = consume_ident();
 	if(tok){

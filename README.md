@@ -133,5 +133,7 @@ int main(){int x=3; int a=x++; return a+x;} => 7
 int main(){int x=3; int a=++x; return a+x;} => 8
 int main(){int x=3; int a=x--; return a+x;} => 5
 int main(){int x=3; int a=--x; return a+x;} => 4
+int main(){return 'a';} => 97
+int main(){int flag; char *hello="hello"; if(hello[1] == 'e') flag=1; else flag=0; return flag;} => 1
 OK
 ```

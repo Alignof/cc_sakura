@@ -36,6 +36,7 @@ Node *incdec(Node *node, IncDecKind idtype){
 		new->rhs  = plmi_one;
 	}
 
+	new->type = node->type;
 	return new;
 }
 
@@ -176,7 +177,9 @@ Node *call_function(Node *node, Token *tok){
 	if(!(consume(")"))){
 		Node *now;
 		Node *prev = NULL;
-		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED || token->kind == TK_STR){
+		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED ||
+			token->kind == TK_SIZEOF || token->kind == TK_STR){
+
 			now = logical();
 			now->next = prev;
 			prev = now;
@@ -194,7 +197,7 @@ Node *call_function(Node *node, Token *tok){
 }
 
 TypeKind get_pointer_type(Type *given){
-	while(given->ty == PTR) given = given->ptr_to;
+	while(given->ptr_to != NULL) given = given->ptr_to;
 	return given->ty;
 }
 
@@ -210,7 +213,6 @@ Node *array_index(Node *node, Node *index){
 	node->rhs = new_node(ND_MUL, index, pointer_size);
 
 	node = new_node(ND_DEREF, NULL, node);
-	node->type.ty = INT;
 
 	return node;
 }
@@ -346,7 +348,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		newtype = newtype->ptr_to;
 	}
 
-	if(star_count == 0) newtype->ptr_to = calloc(1, sizeof(Type));
+	if(star_count == 0)
+		newtype->ptr_to = NULL;
 
 
 	// Is array
@@ -354,6 +357,10 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		int isize = -1;
 		node->val = -1;
 		node->kind = ND_LARRAY;
+
+		lvar->type.ptr_to = calloc(1, sizeof(Type));
+		lvar->type.ptr_to->ty = lvar->type.ty;
+		lvar->type.ty = ARRAY;
 
 		if(*(token->str)!=']'){
 			int asize = align_array_size(token->val, lvar->type.ptr_to->ty);
@@ -363,9 +370,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			token = token->next;
 		}
 
-		lvar->type.ptr_to = calloc(1, sizeof(Type));
-		lvar->type.ptr_to->ty = lvar->type.ty;
-		lvar->type.ty = ARRAY;
 		lvar->type.index_size = isize;
 
 		expect("]");

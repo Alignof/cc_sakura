@@ -24,16 +24,13 @@ typedef enum{
 }TokenKind;
 
 typedef enum{
+	// lhs <-- symbol --> rhs
 	ND_ADD, 	//  +
 	ND_SUB, 	//  -
 	ND_MUL, 	//  *
 	ND_DIV, 	//  /
 	ND_MOD, 	//  %
 	ND_GT, 		//  >
-	ND_PREID, 	//  ++a, --a
-	ND_POSTID, 	//  a++, a--
-	ND_ADDRESS, 	//  &a
-	ND_DEREF, 	//  *a
 	ND_GE, 		//  >=
 	ND_LT, 		//  <
 	ND_LE, 		//  <=
@@ -42,6 +39,16 @@ typedef enum{
 	ND_AND, 	//  &&
 	ND_OR, 		//  ||
 	ND_ASSIGN, 	//  =
+
+	// symbol --> rhs
+	ND_POSTID, 	//  a++, a--
+
+	// lhs <-- symbol
+	ND_PREID, 	//  ++a, --a
+	ND_ADDRESS, 	//  &a
+	ND_DEREF, 	//  *a
+
+	// other
 	ND_LVAR, 	//  local variable
 	ND_GVAR, 	//  global variable
 	ND_LARRAY, 	//  local array
@@ -61,8 +68,8 @@ typedef enum{
 }NodeKind;
 
 typedef enum{
-	INT,
 	CHAR,
+	INT,
 	PTR,
 	ARRAY,
 }TypeKind;

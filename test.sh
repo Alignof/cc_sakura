@@ -156,4 +156,7 @@ assert -cl 7 'int main(){int x=3; int a=x++; return a+x;}'
 assert -cl 8 'int main(){int x=3; int a=++x; return a+x;}'
 assert -cl 5 'int main(){int x=3; int a=x--; return a+x;}'
 assert -cl 4 'int main(){int x=3; int a=--x; return a+x;}'
+
+assert -cl 97 "int main(){return 'a';}"
+assert -cl 1 "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
 echo OK
