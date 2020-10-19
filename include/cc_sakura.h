@@ -72,6 +72,7 @@ typedef enum{
 	INT,
 	PTR,
 	ARRAY,
+	STRUCT,
 }TypeKind;
 
 typedef enum{

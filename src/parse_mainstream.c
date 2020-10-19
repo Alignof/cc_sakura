@@ -255,6 +255,7 @@ Node *expr(){
 		// check type
 		if(consume_reserved_word("int", TK_TYPE)) node->type.ty = INT;
 		else if(consume_reserved_word("char", TK_TYPE)) node->type.ty = CHAR;
+		else if(consume_reserved_word("struct", TK_TYPE)) node->type.ty = STRUCT;
 		
 		// count asterisk
 		while(token->kind == TK_RESERVED && *(token->str) == '*'){
