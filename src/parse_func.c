@@ -44,10 +44,11 @@ void error_at(char *loc, char *msg){
 
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
-	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-			strlen(op) != token->len||
-			memcmp(token->str, op, token->len))
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
+	    strlen(op) != token->len ||memcmp(token->str, op, token->len)){
 		return false;
+	}
+
 	token = token->next;
 	return true;
 }
@@ -64,8 +65,10 @@ int string_len(){
 
 bool consume_ret(){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
-		memcmp(token->str, "return", token->len))
+	    memcmp(token->str, "return", token->len)){
 		return false;
+	}
+
 	token = token->next;
 	return true;
 }
@@ -73,8 +76,9 @@ bool consume_ret(){
 bool consume_reserved_word(char *keyword, TokenKind kind){
 	if( token->kind != kind ||
 	    token->len != strlen(keyword) ||
-	    memcmp(token->str, keyword, token->len))
+	    memcmp(token->str, keyword, token->len)){
 		return false;
+	}
 
 	token = token->next;
 	return true;
@@ -82,19 +86,22 @@ bool consume_reserved_word(char *keyword, TokenKind kind){
 
 Token *consume_string(){
 	// judge whether token is a ident and token pointer
-	if(token->kind != TK_STR || !(isascii(*(token->str))))
+	if(token->kind != TK_STR || !(isascii(*(token->str)))){
 		return false;
+	}
 
 	Token *ret = token;
 	int counter = 0;
-	for(char *str = token->str;*str != '"';str++)
+	for(char *str = token->str;*str != '"';str++){
 		counter++;
+	}
 
 	token->len = counter;
 
 	//move next token 
-	for(int i = 0;i < counter;i++)
+	for(int i = 0;i < counter;i++){
 		token = token->next;
+	}
 
 	return ret;
 }
@@ -103,8 +110,9 @@ Token *consume_string(){
 Token *consume_ident(){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||
-		!(is_alnum(*(token->str))))
+	   !(is_alnum(*(token->str)))){
 		return NULL;
+	}
 
 	Token *ret = token;
 	//check variable length
@@ -112,8 +120,9 @@ Token *consume_ident(){
 	token->len = _len;
 
 	//move next token 
-	for(int i = 0;i < _len;i++)
+	for(int i = 0;i < _len;i++){
 		token = token->next;
+	}
 
 	return ret;
 }

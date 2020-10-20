@@ -17,8 +17,9 @@ int is_alnum(char c){
 
 int len_val(char *str){
 	int counter = 0;
-	for(;is_alnum(*str);str++)
+	for(;is_alnum(*str);str++){
 		counter++;
+	}
 
 	return counter;
 }
@@ -71,8 +72,9 @@ Token *new_token(TokenKind kind, Token *cur, char *str){
 }
 
 bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
-	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len]))
+	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len])){
 		return false;
+	}
 
 	*now = new_token(tk_kind, *now, *p);
 	(*now)->len = len;

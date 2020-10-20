@@ -127,21 +127,25 @@ Node *unary(){
 		return node;
 	}
 
-	if(consume("+"))
+	if(consume("+")){
 		//ignore +n
 		return primary();
+	}
 
-	if(consume("-"))
+	if(consume("-")){
 		//convert to 0-n
 		return new_node(ND_SUB, new_node_num(0), primary());
+	}
 
 	// increment
-	if(consume("++"))
+	if(consume("++")){
 		return incdec(primary(), PRE_INC);
+	}
 
 	// decrement
-	if(consume("--"))
+	if(consume("--")){
 		return incdec(primary(), PRE_DEC);
+	}
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  = > 4
@@ -238,8 +242,9 @@ Node *logical(){
 Node *assign(){
 	Node *node = logical();
 
-	if(consume("="))
+	if(consume("=")){
 		node = new_node(ND_ASSIGN, node, assign());
+	}
 
 	return node;
 }
@@ -253,8 +258,8 @@ Node *expr(){
 		node->kind = ND_LVAR;
 
 		// check type
-		if(consume_reserved_word("int", TK_TYPE)) node->type.ty = INT;
-		else if(consume_reserved_word("char", TK_TYPE)) node->type.ty = CHAR;
+		if(consume_reserved_word("int", TK_TYPE))	  node->type.ty = INT;
+		else if(consume_reserved_word("char", TK_TYPE))   node->type.ty = CHAR;
 		else if(consume_reserved_word("struct", TK_TYPE)) node->type.ty = STRUCT;
 		
 		// count asterisk
@@ -265,17 +270,19 @@ Node *expr(){
 
 		// variable declaration
 		Token *tok = consume_ident();
-		if(tok)
+		if(tok){
 			node = declare_local_variable(node, tok, star_count);
-		else
+		}else{
 			error_at(token->str, "not a variable.");
+		}
 
 		// initialize formula
 		if(consume("=")){
-			if(consume("{"))
+			if(consume("{")){
 				node->vector = array_block(node);
-			else
+			}else{
 				node->vector = init_formula(node, assign());
+			}
 		}
 	}else{
 		node = assign();
@@ -289,8 +296,9 @@ Node *stmt(){
 
 	if(consume_reserved_word("return", TK_RETURN)){
 		node = new_node(ND_RETURN, node, expr());
-		if(!consume(";"))
+		if(!consume(";")){
 			error_at(token->str, "not a ';' token.");
+		}
 
 	}else if(consume_reserved_word("if", TK_IF)){
 		node = new_node(ND_IF, node, NULL);
@@ -373,8 +381,9 @@ void function(Func *func){
 	int i = 0;
 
 	// while end of function block
-	while(!consume("}"))
+	while(!consume("}")){
 		func->code[i++] = stmt();
+	}
 
 	func->stack_size = alloc_size;
 	func->code[i] = NULL;
@@ -410,8 +419,9 @@ void program(){
 
 
 		// Is function?
-		if(token->kind != TK_IDENT ||!(is_alnum(*token->str)))
+		if(token->kind != TK_IDENT ||!(is_alnum(*token->str))){
 			error_at(token->str, "not a function.");
+		}
 
 		Token *def_name = consume_ident();
 
@@ -430,7 +440,7 @@ void program(){
 			consume("}");
 		// struct
 		}else if(consume("{")){
-			if(toplv_type != STRUCT){
+			if(toplv_type.ty != STRUCT){
 				error_at(token->str, "not a struct.");
 			}
 
@@ -442,13 +452,15 @@ void program(){
 
 			// initialize formula
 			if(consume("=")){
-				if(consume("{"))
+				if(consume("{")){
 					globals->init = array_block(init_gv);
-				else
+				}else{
 					globals->init = init_formula(init_gv, assign());
+				}
 			}else{
-				if(init_gv->kind == ND_GVAR)
+				if(init_gv->kind == ND_GVAR){
 					globals->init = init_formula(init_gv, new_node_num(0));
+				}
 			}
 
 			expect(";");

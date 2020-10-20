@@ -250,7 +250,7 @@ void gen(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_ARG:
-			tmp=node;
+			tmp = node;
 			while(tmp){
 				// generate arg as lvar
 				gen(tmp->next);

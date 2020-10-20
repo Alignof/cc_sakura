@@ -87,6 +87,7 @@ typedef struct Token Token;
 typedef struct Node  Node;
 typedef struct LVar  LVar;
 typedef struct GVar  GVar;
+typedef struct Struc Struc;
 typedef struct Func  Func;
 typedef struct Type  Type;
 typedef struct Str   Str;

@@ -19,10 +19,11 @@ Node *incdec(Node *node, IncDecKind idtype){
 	Node *plmi_one = calloc(1,sizeof(Node));
 
 	// increment or decrement
-	if(idtype == PRE_INC || idtype == POST_INC)
+	if(idtype == PRE_INC || idtype == POST_INC){
 		plmi_one = new_node(ND_ASSIGN, node, new_node(ND_ADD,node,new_node_num(1)));
-	else
+	}else{
 		plmi_one = new_node(ND_ASSIGN, node, new_node(ND_SUB,node,new_node_num(1)));
+	}
 
 	// pre
 	if(idtype == PRE_INC || idtype == PRE_DEC){
@@ -46,9 +47,11 @@ Node *init_formula(Node *node, Node *init_val){
 			if(node->type.ty == PTR){
 				node = new_node(ND_ASSIGN, node, init_val);
 			}else if(node->type.ty == ARRAY){
-				if(node->type.index_size == init_val->offset+1 || node->type.index_size == -1)
+				if(node->type.index_size == init_val->offset+1 || node->type.index_size == -1){
 					node = array_str(node, init_val);
-				else	error_at(token->str, "Invalid array size");
+				}else{
+					error_at(token->str, "Invalid array size");
+				}
 			}else{
 				error_at(token->str, "Invalid assign");
 			}
@@ -185,8 +188,7 @@ Node *call_function(Node *node, Token *tok){
 			prev = now;
 			ctr++;
 
-			if(!(consume(",")))
-				break;
+			if(!(consume(","))) break;
 		}
 		node->next = now;
 		node->val = ctr-1;
@@ -348,8 +350,9 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		newtype = newtype->ptr_to;
 	}
 
-	if(star_count == 0)
+	if(star_count == 0){
 		newtype->ptr_to = NULL;
+	}
 
 
 	// Is array
@@ -374,10 +377,11 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 		expect("]");
 	}else{
-		if(locals)
+		if(locals){
 			lvar->offset = (locals->offset)+8;
-		else
+		}else{
 			lvar->offset = 8;
+		}
 		alloc_size+=8;
 	}
 
