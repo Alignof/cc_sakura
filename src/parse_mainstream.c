@@ -398,6 +398,7 @@ void program(){
 		if(token->kind == TK_TYPE){
 			if(consume_reserved_word("int", TK_TYPE))	toplv_type.ty = INT;
 			else if(consume_reserved_word("char", TK_TYPE))  toplv_type.ty = CHAR;
+			else if(consume_reserved_word("struct", TK_TYPE))  toplv_type.ty = STRUCT;
 			else error_at(token->str, "not a function type token.");
 		}
 
@@ -427,7 +428,14 @@ void program(){
 			consume("{");
 			function(func_list[func_index++]);
 			consume("}");
+		// struct
+		}else if(consume("{")){
+			if(toplv_type != STRUCT){
+				error_at(token->str, "not a struct.");
+			}
 
+
+			consume("}");
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);

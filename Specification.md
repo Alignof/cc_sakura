@@ -211,7 +211,14 @@ struct of local variable
 | LVar \*next;		| chained list of Lvar		| (next Lvar chain)		|
 
 
-
-
+### Struc
+struct of structure
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int   len;		| name length 			| 
+| int   memsize;	| allocate memory size		| 
+| char  \*name;		| struct name			| 
+| Type  \*member;	| chained list of Member type	| 
+| Struc \*next;		| chained list of Struc		| 
 
 

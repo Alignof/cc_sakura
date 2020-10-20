@@ -104,7 +104,17 @@ struct Token{
 struct Type{
 	TypeKind ty;
 	Type *ptr_to;
+	int  member_offset;
 	size_t index_size;
+};
+
+// struct
+struct Struc{
+	int   len;
+	int   memsize;
+	char  *name;
+	Type  *member;
+	Struc *next;
 };
 
 // tree object
@@ -115,9 +125,9 @@ struct Node{
 	Node *next;
 	Node *vector;
 	Type type;
-	int val;
+	int  val;
 	char *str;
-	int offset;
+	int  offset;
 };
 
 // function
