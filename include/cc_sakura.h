@@ -172,15 +172,16 @@ struct LVar{
 
 
 // global variable
-extern int lvar_count;
-extern int alloc_size;
-extern char *user_input;
-extern char filename[100];
+extern int   lvar_count;
+extern int   alloc_size;
+extern char  *user_input;
+extern char  filename[100];
 extern Token *token;
-extern Func *func_list[100];
-extern LVar *locals;
-extern GVar *globals;
-extern Str *strings;
+extern Func  *func_list[100];
+extern LVar  *locals;
+extern GVar  *globals;
+extern Str   *strings;
+extern Struc *structs;
 
 // main.c
 char *read_file(char *path);
@@ -210,7 +211,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
-Str *find_string(Token *tok);
+Str  *find_string(Token *tok);
 
 // parse_util.c
 int type_size(TypeKind type);
@@ -218,7 +219,7 @@ int align_array_size(int isize, TypeKind array_type);
 Node *pointer_calc(Node *node, Type lhs_type, Type rhs_type);
 TypeKind get_pointer_type(Type *given);
 
-// parse_mainstream.c
+// syntax_tree.c
 void program();
 void function(Func *func);
 Node *stmt();
@@ -232,7 +233,7 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-// parse_substream.c
+// parse_part.c
 void get_argument(int func_index);
 Node *init_formula(Node *node, Node *init_val);
 Node *incdec(Node *node, IncDecKind idtype);
@@ -240,9 +241,11 @@ Node *array_block();
 Node *array_str(Node *arr, Node *init_val);
 Node *call_function(Node *node, Token *tok);
 Node *array_index(Node *node, Node *index);
+
+// declare.c
 Node *declare_global_variable();
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
-void declare_struct();
+void declare_struct(Struc *new_struc);
 
 // codegan.c
 extern int label_begin;

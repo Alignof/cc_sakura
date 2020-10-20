@@ -405,9 +405,9 @@ void program(){
 
 		// type of function return value
 		if(token->kind == TK_TYPE){
-			if(consume_reserved_word("int", TK_TYPE))	toplv_type.ty = INT;
-			else if(consume_reserved_word("char", TK_TYPE))  toplv_type.ty = CHAR;
-			else if(consume_reserved_word("struct", TK_TYPE))  toplv_type.ty = STRUCT;
+			if(consume_reserved_word("int", TK_TYPE))	  toplv_type.ty = INT;
+			else if(consume_reserved_word("char", TK_TYPE))   toplv_type.ty = CHAR;
+			else if(consume_reserved_word("struct", TK_TYPE)) toplv_type.ty = STRUCT;
 			else error_at(token->str, "not a function type token.");
 		}
 
@@ -444,7 +444,11 @@ void program(){
 				error_at(token->str, "not a struct.");
 			}
 
-			declare_struct();
+			Struc *new_struc = calloc(1,sizeof(Struc));
+			new_struc->len   = def_name->len;
+			new_struc->name  = (char *)calloc(def_name->len, sizeof(char));
+
+			declare_struct(new_struc);
 
 			consume("}");
 			expect(";");

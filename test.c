@@ -18,6 +18,10 @@ int main(){
 }
 */
 
+struct test{
+	int a;
+};
+
 int main(){
 	char *hello = "hello";
 
