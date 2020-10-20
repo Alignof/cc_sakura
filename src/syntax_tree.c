@@ -444,8 +444,10 @@ void program(){
 				error_at(token->str, "not a struct.");
 			}
 
+			declare_struct();
 
 			consume("}");
+			expect(";");
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);

@@ -18,18 +18,22 @@ char *read_file(char *path){
 	}
 
 	// get file size
-	if(fseek(fp, 0L, SEEK_END) == -1)
+	if(fseek(fp, 0L, SEEK_END) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
+	}
+
 	size_t size = ftell(fp);
 	
-	if(fseek(fp, 0L, SEEK_SET) == -1)
+	if(fseek(fp, 0L, SEEK_SET) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
+	}
 
 	buf = calloc(1, size+2);
 	fread(buf, size, 1, fp);
 
-	if(size == 0 || buf[size-1] != '\n')
+	if(size == 0 || buf[size-1] != '\n'){
 		buf[size++] = '\n';
+	}
 
 	buf[size] = '\0';
 	fclose(fp);
@@ -67,8 +71,9 @@ int main(int argc, char **argv){
 	// make syntax tree
 	program();
 
-	if(func_list == NULL)
+	if(func_list == NULL){
 		fprintf(stderr, "function is not found.");
+	}
 
 
 	// generate code

@@ -169,21 +169,9 @@ struct LVar{
 	LVar *next;
 }; 
 
-// main
-char *read_file(char *path);
-void get_code(int argc, char **argv);
 
-// tokenizer
-int len_val(char *str);
-int is_alnum(char c);
-bool issymbol(char *str,  bool *flag);
-bool isblock(char *str);
-bool at_eof();
-Token *tokenize(char *p);
-Token *new_token(TokenKind kind, Token *cur, char *str);
-bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
 
-// parse_func.c
+// global variable
 extern int lvar_count;
 extern int alloc_size;
 extern char *user_input;
@@ -194,15 +182,28 @@ extern LVar *locals;
 extern GVar *globals;
 extern Str *strings;
 
+// main.c
+char *read_file(char *path);
+void get_code(int argc, char **argv);
+
+// tokenizer.c
+int len_val(char *str);
+int is_alnum(char c);
+bool issymbol(char *str,  bool *flag);
+bool isblock(char *str);
+bool at_eof();
+Token *tokenize(char *p);
+Token *new_token(TokenKind kind, Token *cur, char *str);
+bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
+
+// parse_sys.c
 void error(char *loc, char *fmt,  ...);
 void error_at(char *loc, char *msg);
 bool consume(char *op);
 bool consume_ret();
 bool consume_reserved_word();
-int string_len();
 void expect(char *op);
 int expect_number();
-int type_size(TypeKind type);
 Token *consume_ident();
 Token *consume_string();
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
@@ -211,7 +212,13 @@ GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
 Str *find_string(Token *tok);
 
-// parse_stream.c
+// parse_util.c
+int type_size(TypeKind type);
+int align_array_size(int isize, TypeKind array_type);
+Node *pointer_calc(Node *node, Type lhs_type, Type rhs_type);
+TypeKind get_pointer_type(Type *given);
+
+// parse_mainstream.c
 void program();
 void function(Func *func);
 Node *stmt();
@@ -226,17 +233,16 @@ Node *unary();
 Node *primary();
 
 // parse_substream.c
-int align_array_size(int isize, TypeKind array_type);
 void get_argument(int func_index);
 Node *init_formula(Node *node, Node *init_val);
 Node *incdec(Node *node, IncDecKind idtype);
 Node *array_block();
 Node *array_str(Node *arr, Node *init_val);
-Node *pointer_calc(Node *node, Type lhs_type, Type rhs_type);
 Node *call_function(Node *node, Token *tok);
 Node *array_index(Node *node, Node *index);
 Node *declare_global_variable();
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
+void declare_struct();
 
 // codegan.c
 extern int label_begin;

@@ -201,19 +201,3 @@ Node *new_node_num(int val){
 	return node;
 }
 
-int type_size(TypeKind type){
-	switch(type){
-		case CHAR:
-			return 1;
-		case INT:
-			return 4;
-		case PTR:
-			return 8;
-		case ARRAY:
-			return 8;
-		default:
-			error_at(token->str, "unknown type");
-	}
-
-	return -1;
-}
