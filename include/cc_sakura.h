@@ -83,14 +83,15 @@ typedef enum{
 }IncDecKind;
 
 
-typedef struct Token Token;
-typedef struct Node  Node;
-typedef struct LVar  LVar;
-typedef struct GVar  GVar;
-typedef struct Struc Struc;
-typedef struct Func  Func;
-typedef struct Type  Type;
-typedef struct Str   Str;
+typedef struct Token  Token;
+typedef struct Node   Node;
+typedef struct LVar   LVar;
+typedef struct GVar   GVar;
+typedef struct Struc  Struc;
+typedef struct Member Member;
+typedef struct Func   Func;
+typedef struct Type   Type;
+typedef struct Str    Str;
 
 // code token
 struct Token{
@@ -105,17 +106,7 @@ struct Token{
 struct Type{
 	TypeKind ty;
 	Type *ptr_to;
-	int  member_offset;
 	size_t index_size;
-};
-
-// struct
-struct Struc{
-	int   len;
-	int   memsize;
-	char  *name;
-	Type  *member;
-	Struc *next;
 };
 
 // tree object
@@ -168,6 +159,24 @@ struct LVar{
 	Type type;
 	LVar *next;
 }; 
+
+// struct
+struct Struc{
+	int    len;
+	int    memsize;
+	char   *name;
+	Member *member;
+	Struc  *next;
+};
+
+// struct member
+struct Member{
+	int    len;
+	int    offset;
+	char   *name;
+	Type   type;
+	Member *next;
+};
 
 
 

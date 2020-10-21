@@ -2,10 +2,9 @@
 
 int alloc_size;
 Token *token;
-LVar *locals;
 Str *strings;
-// Func *func_list[100];
-
+//LVar *locals;
+// Func *func_list[100]; 
 Node *primary(){
 	if(consume("(")){
 		//jmp expr
@@ -446,11 +445,10 @@ void program(){
 
 			Struc *new_struc = calloc(1,sizeof(Struc));
 			new_struc->len   = def_name->len;
-			new_struc->name  = (char *)calloc(def_name->len, sizeof(char));
+			new_struc->name  = def_name->str;
 
 			declare_struct(new_struc);
 
-			consume("}");
 			expect(";");
 		// global variable
 		}else{

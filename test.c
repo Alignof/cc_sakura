@@ -19,7 +19,9 @@ int main(){
 */
 
 struct test{
-	int a;
+	char a;
+	int  b;
+	int  c;
 };
 
 int main(){

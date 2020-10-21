@@ -218,7 +218,16 @@ struct of structure
 | int   len;		| name length 			| 
 | int   memsize;	| allocate memory size		| 
 | char  \*name;		| struct name			| 
-| Type  \*member;	| chained list of Member type	| 
+| Member  \*member;	| chained list of Member	| 
 | Struc \*next;		| chained list of Struc		| 
 
 
+### Member
+struct of structure member
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int   len;		| name length 			| 
+| int offset;		| offset from head of struct	|                               |
+| char  \*name;		| member name			| 
+| Type type;		| member variable type		|                               |
+| Member  \*next;	| chained list of Member	|				|
