@@ -180,8 +180,8 @@ void declare_struct(Struc *new_struc){
 	
 	asize = (asize%8) ? asize/8*8+8 : asize;
 	new_struc->memsize = asize;
-	new_struc->next	   = new_struc;
 	new_struc->member  = memb_head;
+	new_struc->next	   = structs;
 	structs = new_struc;
 
 	return;
