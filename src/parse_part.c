@@ -5,6 +5,20 @@
 // LVar *locals;
 // Func *func_list[100];
 
+Node *dot(Node *node){
+	Node *new = calloc(1,sizeof(Node));
+	Token *memb_name = consume_ident();
+
+	return new;
+}
+
+Node *arrow(Node *node){
+	Node *new = calloc(1,sizeof(Node));
+	Token *memb_name = consume_ident();
+
+	return new;
+}
+
 Node *incdec(Node *node, IncDecKind idtype){
 	/*
 	 * a++;

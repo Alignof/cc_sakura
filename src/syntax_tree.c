@@ -56,12 +56,25 @@ Node *primary(){
 		}
 
 		// increment
-		if(consume("++"))
+		if(consume("++")){
 			node = incdec(node, POST_INC);
+		}
 
 		// decrement
-		if(consume("--"))
+		if(consume("--")){
 			node = incdec(node, POST_DEC);
+		}
+
+		// member variable
+		if(consume(".")){
+			node = dot(node);
+		}
+
+		// member variable(ptr)
+		if(consume("->")){
+			error_at(token->str, "unimplemented");
+			node = arrow(node, POST_DEC);
+		}
 
 		return node;
 	}

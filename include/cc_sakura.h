@@ -246,6 +246,8 @@ Node *primary();
 
 // parse_part.c
 void get_argument(int func_index);
+Node *dot(Node *node);
+Node *arrow(Node *node);
 Node *init_formula(Node *node, Node *init_val);
 Node *incdec(Node *node, IncDecKind idtype);
 Node *array_block();

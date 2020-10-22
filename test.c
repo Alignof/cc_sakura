@@ -7,5 +7,5 @@ struct test{
 int main(){
 	struct test xanadu;
 
-	return 0;
+	return xanadu.a;
 }
