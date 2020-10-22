@@ -105,8 +105,9 @@ struct Token{
 // type of variable
 struct Type{
 	TypeKind ty;
-	Type *ptr_to;
-	size_t index_size;
+	Type	 *ptr_to;
+	Member   *member;
+	size_t   index_size;
 };
 
 // tree object
