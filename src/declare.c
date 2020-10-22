@@ -77,7 +77,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->next = locals;
 	lvar->name = tok->str;
 	lvar->len = tok->len;
-	lvar->type.ty = node->type.ty;
+	lvar->type = node->type;
 
 	// add type list
 	newtype = &(lvar->type);
