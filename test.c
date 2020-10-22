@@ -1,3 +1,4 @@
+/*
 struct test{
 	char a;
 	int  b;
@@ -9,3 +10,5 @@ int main(){
 
 	return xanadu.a;
 }
+*/
+int a[10]; int main(){a[5];}

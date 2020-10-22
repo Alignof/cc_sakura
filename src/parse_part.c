@@ -57,10 +57,10 @@ Node *incdec(Node *node, IncDecKind idtype){
 Node *init_formula(Node *node, Node *init_val){
 	switch(init_val->kind){
 		case ND_STR:
-			if(node->type.ty == PTR){
+			if(node->type->ty == PTR){
 				node = new_node(ND_ASSIGN, node, init_val);
-			}else if(node->type.ty == ARRAY){
-				if(node->type.index_size == init_val->offset+1 || node->type.index_size == -1){
+			}else if(node->type->ty == ARRAY){
+				if(node->type->index_size == init_val->offset+1 || node->type->index_size == -1){
 					node = array_str(node, init_val);
 				}else{
 					error_at(token->str, "Invalid array size");
@@ -79,7 +79,7 @@ Node *init_formula(Node *node, Node *init_val){
 
 Node *array_str(Node *arr, Node *init_val){
 	int ctr	  = 0;
-	int isize = arr->type.index_size;
+	int isize = arr->type->index_size;
 	Node *head;
 	Node *src;
 	Node *dst = calloc(1, sizeof(Node));
@@ -109,14 +109,14 @@ Node *array_str(Node *arr, Node *init_val){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type.ptr_to->ty);
+			int asize = align_array_size(ctr, arr->type->ptr_to->ty);
 			alloc_size+=asize;
 			arr->offset = ((locals)?(locals->offset):0) + asize;
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
-			locals->type.index_size = ctr;
+			locals->type->index_size = ctr;
 		}else{
-			globals->memsize = align_array_size(ctr, arr->type.ptr_to->ty);
+			globals->memsize = align_array_size(ctr, arr->type->ptr_to->ty);
 		}
 	}
 
@@ -125,7 +125,7 @@ Node *array_str(Node *arr, Node *init_val){
 
 Node *array_block(Node *arr){
 	int ctr = 0;
-	int isize = arr->type.index_size;
+	int isize = arr->type->index_size;
 	Node *src;
 	Node *dst = calloc(1, sizeof(Node));
 	Node *head;
@@ -153,21 +153,21 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type.ptr_to->ty);
+			int asize = align_array_size(ctr, arr->type->ptr_to->ty);
 			alloc_size+=asize;
 			arr->offset = ((locals)?(locals->offset):0) + asize;
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
-			locals->type.index_size = ctr;
+			locals->type->index_size = ctr;
 		}else{
-			globals->memsize = align_array_size(ctr, arr->type.ptr_to->ty);
+			globals->memsize = align_array_size(ctr, arr->type->ptr_to->ty);
 		}
 	// too many
-	}else if(arr->type.index_size < ctr){
+	}else if(arr->type->index_size < ctr){
 		error_at(token->str, "Invalid array size");
 	// too little
-	}else if(arr->type.index_size > ctr){
-		while(ctr != arr->type.index_size){
+	}else if(arr->type->index_size > ctr){
+		while(ctr != arr->type->index_size){
 			src = array_index(clone, new_node_num(ctr));
 			dst->next = new_node(ND_ASSIGN, src, new_node_num(0));
 			dst = dst->next;
@@ -219,7 +219,8 @@ Node *array_index(Node *node, Node *index){
 
 	pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
-	pointer_size->val = type_size(get_pointer_type(node->lhs->type.ptr_to));
+	pointer_size->val  = type_size(get_pointer_type(node->lhs->type->ptr_to));
+	pointer_size->type = calloc(1, sizeof(Type));
 	node->rhs = new_node(ND_MUL, index, pointer_size);
 
 	node = new_node(ND_DEREF, NULL, node);

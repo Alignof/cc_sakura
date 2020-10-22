@@ -28,21 +28,22 @@ TypeKind get_pointer_type(Type *given){
 	return given->ty;
 }
 
-Node *pointer_calc(Node *node, Type lhs_type, Type rhs_type){
+Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	int ptrtype;
 
 
-	node->type.ty = PTR;
+	node->type->ty = PTR;
 	Node *pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
+	pointer_size->type = calloc(1, sizeof(Type));
 
 
-	if(type_size(lhs_type.ty) == 8 && lhs_type.ptr_to!=NULL){
-		ptrtype = lhs_type.ptr_to->ty;
+	if(type_size(lhs_type->ty) == 8 && lhs_type->ptr_to!=NULL){
+		ptrtype = lhs_type->ptr_to->ty;
 		pointer_size->val = type_size(ptrtype);
 		node->rhs = new_node(ND_MUL, node->rhs, pointer_size);
-	}else if(type_size(rhs_type.ty) == 8 && rhs_type.ptr_to!=NULL){
-		ptrtype = rhs_type.ptr_to->ty;
+	}else if(type_size(rhs_type->ty) == 8 && rhs_type->ptr_to!=NULL){
+		ptrtype = rhs_type->ptr_to->ty;
 		pointer_size->val = type_size(ptrtype);
 		node->lhs = new_node(ND_MUL, node->lhs, pointer_size);
 	}

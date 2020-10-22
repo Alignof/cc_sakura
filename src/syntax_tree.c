@@ -29,17 +29,18 @@ Node *primary(){
 
 		LVar *lvar = find_lvar(tok);
 		if(lvar){
-			node->kind = (lvar->type.ty == ARRAY)? ND_LARRAY : ND_LVAR;
+			node->kind = (lvar->type->ty == ARRAY)? ND_LARRAY : ND_LVAR;
 			node->offset = lvar->offset;
 			node->type = lvar->type;
 		// call function
 		}else if(*(token->str) == '('){
+			node->type = calloc(1, sizeof(Type));
 			node = call_function(node, tok);
 		}else{
 			GVar *gvar = find_gvar(tok);
 			if(gvar){
 				// global variable exist
-				node->kind = (gvar->type.ty == ARRAY)? ND_GARRAY : ND_GVAR;
+				node->kind = (gvar->type->ty == ARRAY)? ND_GARRAY : ND_GVAR;
 				node->type = gvar->type;
 				node->str = tok->str;
 				node->val = tok->len;
@@ -73,7 +74,7 @@ Node *primary(){
 		// member variable(ptr)
 		if(consume("->")){
 			error_at(token->str, "unimplemented");
-			node = arrow(node, POST_DEC);
+			node = arrow(node);
 		}
 
 		return node;
@@ -89,17 +90,17 @@ Node *unary(){
 
 	if(consume("*")){
 		node = new_node(ND_DEREF, new_node_num(0), unary());
-		rhs_ptr_to = node->rhs->type.ptr_to;
+		rhs_ptr_to = node->rhs->type->ptr_to;
 
 		if(rhs_ptr_to == NULL || type_size(rhs_ptr_to->ty) == 8)
-			node->type.ty = PTR;
+			node->type->ty = PTR;
 
 		return node;
 	}
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, NULL, unary());
-		node->type.ty = PTR;
+		node->type->ty = PTR;
 
 		return node;
 	}
@@ -108,7 +109,7 @@ Node *unary(){
 		consume("\"");
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_STR;
-		node->type.ty = PTR;
+		node->type->ty = PTR;
 
 		Token *tok = consume_string();
 		Str *fstr = find_string(tok);
@@ -163,7 +164,7 @@ Node *unary(){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 		node = new_node(ND_NUM, node, unary());
-		node->val = type_size(node->rhs->type.ty);
+		node->val = type_size(node->rhs->type->ty);
 
 		return node;
 	}
@@ -266,20 +267,21 @@ Node *expr(){
 	Node *node;
 
 	if(token->kind == TK_TYPE){
-		node = calloc(1, sizeof(Node));
+		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
+		node->type = calloc(1, sizeof(Type));
 
 		// check type
 		if(consume_reserved_word("int", TK_TYPE)){
-			node->type.ty = INT;
+			node->type->ty = INT;
 		}else if(consume_reserved_word("char", TK_TYPE)){
-			node->type.ty = CHAR;
+			node->type->ty = CHAR;
 		}else if(consume_reserved_word("struct", TK_TYPE)){
 			Token *tok   = consume_ident();
 			Struc *found = find_struc(tok);
 			node->val         = found->memsize;
-			node->type.member = found->member;
-			node->type.ty     = STRUCT;
+			node->type->member = found->member;
+			node->type->ty     = STRUCT;
 		}
 		
 		// count asterisk
@@ -412,8 +414,7 @@ void function(Func *func){
 void program(){
 	int func_index = 0;
 	int star_count;
-	Type toplv_type;
-	toplv_type = (Type){0};
+	Type *toplv_type = calloc(1,sizeof(Type));
 
 	while(!at_eof()){
 		// reset lvar list
@@ -425,9 +426,9 @@ void program(){
 
 		// type of function return value
 		if(token->kind == TK_TYPE){
-			if(consume_reserved_word("int", TK_TYPE))	  toplv_type.ty = INT;
-			else if(consume_reserved_word("char", TK_TYPE))   toplv_type.ty = CHAR;
-			else if(consume_reserved_word("struct", TK_TYPE)) toplv_type.ty = STRUCT;
+			if(consume_reserved_word("int", TK_TYPE))	  toplv_type->ty = INT;
+			else if(consume_reserved_word("char", TK_TYPE))   toplv_type->ty = CHAR;
+			else if(consume_reserved_word("struct", TK_TYPE)) toplv_type->ty = STRUCT;
 			else error_at(token->str, "not a function type token.");
 		}
 
@@ -460,7 +461,7 @@ void program(){
 			consume("}");
 		// struct
 		}else if(consume("{")){
-			if(toplv_type.ty != STRUCT){
+			if(toplv_type->ty != STRUCT){
 				error_at(token->str, "not a struct.");
 			}
 

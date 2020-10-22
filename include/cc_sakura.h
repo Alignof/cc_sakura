@@ -117,7 +117,7 @@ struct Node{
 	Node *rhs;
 	Node *next;
 	Node *vector;
-	Type type;
+	Type *type;
 	int  val;
 	char *str;
 	int  offset;
@@ -128,7 +128,7 @@ struct Func{
 	//int argc;
 	int stack_size;
 	char *name;
-	Type type;
+	Type *type;
 	Node *args;
 	Node *code[100];
 	Func *next;
@@ -147,7 +147,7 @@ struct GVar{
 	int len;
 	int memsize;
 	char *name;
-	Type type;
+	Type *type;
 	GVar *next;
 	Node *init;
 };
@@ -157,7 +157,7 @@ struct LVar{
 	int len;
 	int offset;
 	char *name;
-	Type type;
+	Type *type;
 	LVar *next;
 }; 
 
@@ -175,7 +175,7 @@ struct Member{
 	int    len;
 	int    offset;
 	char   *name;
-	Type   type;
+	Type   *type;
 	Member *next;
 };
 
@@ -227,7 +227,7 @@ Struc *find_struc(Token *tok);
 // parse_util.c
 int type_size(TypeKind type);
 int align_array_size(int isize, TypeKind array_type);
-Node *pointer_calc(Node *node, Type lhs_type, Type rhs_type);
+Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type);
 TypeKind get_pointer_type(Type *given);
 
 // syntax_tree.c

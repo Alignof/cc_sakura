@@ -186,18 +186,19 @@ Struc *find_struc(Token *tok){
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));
+	node->type = calloc(1, sizeof(Type));
 	node->kind = kind;
 	node->lhs  = lhs;
 	node->rhs  = rhs;
 
 	if(kind == ND_ADD || kind == ND_SUB){
-		if(type_size(lhs->type.ty) == 8 || type_size(rhs->type.ty) == 8){
+		if(type_size(lhs->type->ty) == 8 || type_size(rhs->type->ty) == 8){
 			node = pointer_calc(node, lhs->type, rhs->type);
 		}
 	}
 
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		node->type.ty = (lhs->type.ty > rhs->type.ty)? lhs->type.ty : rhs->type.ty;
+		node->type->ty = (lhs->type->ty > rhs->type->ty)? lhs->type->ty : rhs->type->ty;
 	}
 
 	return node;
@@ -207,8 +208,9 @@ Node *new_node_num(int val){
 	//create new node(number)
 	Node *node = calloc(1, sizeof(Node));
 	node->kind = ND_NUM;
-	node->val = val;
-	node->type.ty = INT;
+	node->val  = val;
+	node->type = calloc(1, sizeof(Type));
+	node->type->ty = INT;
 	return node;
 }
 
