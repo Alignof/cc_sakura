@@ -222,6 +222,7 @@ Node *new_node_num(int val);
 GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
 Str  *find_string(Token *tok);
+Struc *find_struc(Token *tok);
 
 // parse_util.c
 int type_size(TypeKind type);

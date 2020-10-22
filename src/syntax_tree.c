@@ -262,7 +262,11 @@ Node *expr(){
 		}else if(consume_reserved_word("char", TK_TYPE)){
 			node->type.ty = CHAR;
 		}else if(consume_reserved_word("struct", TK_TYPE)){
-			node->type.ty = STRUCT;
+			Token *tok   = consume_ident();
+			Struc *found = find_struc(tok);
+			node->val         = found->memsize;
+			node->type.member = found->member;
+			node->type.ty     = STRUCT;
 		}
 		
 		// count asterisk

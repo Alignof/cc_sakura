@@ -149,8 +149,9 @@ int expect_number(){
 GVar *find_gvar(Token *tok){
 	//while var not equal NULL
 	for (GVar *var = globals;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
+		}
 	}
 	return NULL;
 }
@@ -158,20 +159,30 @@ GVar *find_gvar(Token *tok){
 LVar *find_lvar(Token *tok){
 	//while var not equal NULL
 	for (LVar *var = locals;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
+		}
 	}
 	return NULL;
 }
 
 Str *find_string(Token *tok){
 	for (Str *var = strings;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str, var->str, var->len))
+		if(var->len == tok->len && !memcmp(tok->str, var->str, var->len)){
 			return var;
+		}
 	}
 	return NULL;
 }
 
+Struc *find_struc(Token *tok){
+	for (Struc *var = structs;var;var = var->next){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
+		}
+	}
+	return NULL;
+}
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));
