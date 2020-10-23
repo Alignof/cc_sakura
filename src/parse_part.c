@@ -10,7 +10,7 @@ Node *dot(Node *node){
 	// (lvar <- node -> dot) <- node -> dot
 	Node *new = new_node(ND_DOT, node, NULL);
 	Token* memb_name  = consume_ident();
-	Member* memb_list = node->type->member;
+	Member* memb_list = (node->kind == ND_ADDRESS) ? node->rhs->type->member : node->type->member;
 
 	while(memb_list){
 		if(memb_list->len == memb_name->len && !memcmp(memb_name->str, memb_list->name, memb_name->len)){

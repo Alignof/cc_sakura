@@ -30,6 +30,7 @@ void gen_struc(Node *node){
 	printf("	pop rdi\n");
 	printf("	pop rax\n");
 	printf("	add rax,rdi\n");
+	printf("	push rax\n");
 }
 
 void gen_arg(int arg_num, Node *tmp){
@@ -160,6 +161,7 @@ void gen(Node *node){
 			return;
 		case ND_DOT:
 			gen_struc(node);
+			printf("	pop rax\n");
 			printf("	push [rax]\n");
 			return;
 		case ND_IF:
