@@ -6,6 +6,7 @@ struct test{
 
 int main(){
 	struct test xanadu;
+	xanadu.a = 3;
 
 	return xanadu.a;
 }

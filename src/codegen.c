@@ -10,12 +10,26 @@ void gen_gvar(Node *node){
 }
 
 void gen_lvar(Node *node){
-	if(node->kind!=ND_LVAR && node->kind!=ND_LARRAY && node->kind!=ND_CALL_FUNC)
+	if(node->kind != ND_LVAR && node->kind != ND_LARRAY && node->kind != ND_CALL_FUNC){
 		error_at(token->str,"not a variable");
+	}
 
 	printf("	mov rax,rbp\n");
 	printf("	sub rax,%d\n", node->offset);
 	printf("	push rax\n");
+}
+
+void gen_struc(Node *node){
+	if(node->kind != ND_DOT && node->kind != ND_ARROW){
+		error_at(token->str,"not a struct");
+	}
+
+	gen(node->lhs);
+	gen(node->rhs);
+
+	printf("	pop rdi\n");
+	printf("	pop rax\n");
+	printf("	add rax,rdi\n");
 }
 
 void gen_arg(int arg_num, Node *tmp){
@@ -115,11 +129,14 @@ void gen(Node *node){
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
-			if(node->lhs->kind == ND_DEREF)	    gen(node->lhs->rhs);
-			else if(node->lhs->kind == ND_GVAR)   gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_GARRAY) gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_LVAR)   gen_lvar(node->lhs);
-			else if(node->lhs->kind == ND_LARRAY) gen_lvar(node->lhs);
+			/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
+			//else if(node->lhs->type->ty == STRUCT) gen_struc(node);
+			else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
+			else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
+			else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
+			else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
+			else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
+			else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
 
 			gen(node->rhs);
 
@@ -140,6 +157,10 @@ void gen(Node *node){
 				printf("	push rdi\n");
 			}
 
+			return;
+		case ND_DOT:
+			gen_struc(node);
+			printf("	push [rax]\n");
 			return;
 		case ND_IF:
 			printf("	push rax\n");

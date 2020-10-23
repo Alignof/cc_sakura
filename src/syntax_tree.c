@@ -69,6 +69,9 @@ Node *primary(){
 		// member variable
 		while(check(".") || check("->")){
 			if(consume(".")){
+				if(node->kind == ND_LVAR){
+					node = new_node(ND_ADDRESS, NULL, node);
+				}
 				node = dot(node);
 			}
 
@@ -90,7 +93,7 @@ Node *unary(){
 	Type *rhs_ptr_to;
 
 	if(consume("*")){
-		node = new_node(ND_DEREF, new_node_num(0), unary());
+		node = new_node(ND_DEREF, NULL, unary());
 		rhs_ptr_to = node->rhs->type->ptr_to;
 
 		if(rhs_ptr_to == NULL || type_size(rhs_ptr_to->ty) == 8)
