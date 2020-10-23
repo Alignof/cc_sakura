@@ -11,4 +11,4 @@ int main(){
 	return xanadu.a;
 }
 */
-int a[10]; int main(){a[5];}
+int main(){char *x; x="hello"; x[1];}

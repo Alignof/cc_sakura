@@ -42,8 +42,8 @@ Node *primary(){
 				// global variable exist
 				node->kind = (gvar->type->ty == ARRAY)? ND_GARRAY : ND_GVAR;
 				node->type = gvar->type;
-				node->str = tok->str;
-				node->val = tok->len;
+				node->str  = tok->str;
+				node->val  = tok->len;
 			}else{
 				// variable does not exist.
 				error_at(token->str, "this variable is not declaration");
@@ -109,6 +109,7 @@ Node *unary(){
 		consume("\"");
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_STR;
+		node->type = calloc(1, sizeof(Type));
 		node->type->ty = PTR;
 
 		Token *tok = consume_string();
@@ -414,7 +415,7 @@ void function(Func *func){
 void program(){
 	int func_index = 0;
 	int star_count;
-	Type *toplv_type = calloc(1,sizeof(Type));
+	Type *toplv_type;
 
 	while(!at_eof()){
 		// reset lvar list
@@ -423,6 +424,8 @@ void program(){
 		alloc_size = 0;
 		star_count = 0;
 		func_list[func_index] = (Func *)malloc(sizeof(Func));
+
+		toplv_type = calloc(1,sizeof(Type));
 
 		// type of function return value
 		if(token->kind == TK_TYPE){
