@@ -42,10 +42,20 @@ void error_at(char *loc, char *msg){
 	exit(1);
 }
 
+bool check(char *op){
+	// judge whether op is a symbol and return judge result
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+		return false;
+	}
+
+	return true;
+}
+
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    strlen(op) != token->len ||memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 

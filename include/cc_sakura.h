@@ -42,6 +42,8 @@ typedef enum{
 
 	// symbol --> rhs
 	ND_POSTID, 	//  a++, a--
+	ND_DOT,		//  struc.member
+	ND_ARROW,	//  struc_ptr->member
 
 	// lhs <-- symbol
 	ND_PREID, 	//  ++a, --a
@@ -210,6 +212,7 @@ bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_ki
 // parse_sys.c
 void error(char *loc, char *fmt,  ...);
 void error_at(char *loc, char *msg);
+bool check(char *op);
 bool consume(char *op);
 bool consume_ret();
 bool consume_reserved_word();

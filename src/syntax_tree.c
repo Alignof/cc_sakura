@@ -33,7 +33,7 @@ Node *primary(){
 			node->offset = lvar->offset;
 			node->type = lvar->type;
 		// call function
-		}else if(*(token->str) == '('){
+		}else if(check("(")){
 			node->type = calloc(1, sizeof(Type));
 			node = call_function(node, tok);
 		}else{
@@ -67,14 +67,15 @@ Node *primary(){
 		}
 
 		// member variable
-		if(consume(".")){
-			node = dot(node);
-		}
+		while(check(".") || check("->")){
+			if(consume(".")){
+				node = dot(node);
+			}
 
-		// member variable(ptr)
-		if(consume("->")){
-			error_at(token->str, "unimplemented");
-			node = arrow(node);
+			if(consume("->")){
+				error_at(token->str, "unimplemented");
+				node = arrow(node);
+			}
 		}
 
 		return node;

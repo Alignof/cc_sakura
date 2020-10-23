@@ -1,4 +1,3 @@
-/*
 struct test{
 	char a;
 	int  b;
@@ -10,5 +9,3 @@ int main(){
 
 	return xanadu.a;
 }
-*/
-int main(){char *x; x="hello"; x[1];}

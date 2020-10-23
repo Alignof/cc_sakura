@@ -39,7 +39,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 		node->val = -1;
 		node->kind = ND_GARRAY;
 
-		if(*(token->str)!=']'){
+		if(!check("]")){
 			// body
 			isize = token->val;
 			gvar->memsize = align_array_size(token->val, gvar->type->ptr_to->ty);
@@ -101,7 +101,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		lvar->type->ptr_to->ty = lvar->type->ty;
 		lvar->type->ty = ARRAY;
 
-		if(*(token->str)!=']'){
+		//if(*(token->str)!=']'){
+		if(!check("]")){
 			int asize = align_array_size(token->val, lvar->type->ptr_to->ty);
 			alloc_size+=asize;
 			lvar->offset = ((locals) ? (locals->offset) :0) + asize;
@@ -142,6 +143,7 @@ void declare_struct(Struc *new_struc){
 		}
 
 		new_memb = calloc(1,sizeof(Member));
+		new_memb->type = calloc(1,sizeof(Type));
 
 		// check type
 		if(consume_reserved_word("int", TK_TYPE))	  new_memb->type->ty = INT;

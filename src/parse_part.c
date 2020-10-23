@@ -6,6 +6,7 @@
 // Func *func_list[100];
 
 Node *dot(Node *node){
+	// struc.aaa.bbb.ccc;
 	Node *new = calloc(1,sizeof(Node));
 	Token *memb_name = consume_ident();
 
@@ -13,6 +14,7 @@ Node *dot(Node *node){
 }
 
 Node *arrow(Node *node){
+	// struc->aaa->bbb->ccc;
 	Node *new = calloc(1,sizeof(Node));
 	Token *memb_name = consume_ident();
 
