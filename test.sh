@@ -159,4 +159,6 @@ assert -cl 4 'int main(){int x=3; int a=--x; return a+x;}'
 
 assert -cl 97 "int main(){return 'a';}"
 assert -cl 1 "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
+
+assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
 echo OK
