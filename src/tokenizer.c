@@ -27,7 +27,7 @@ int len_val(char *str){
 bool issymbol(char *str,  bool *flag){
 	int i;
 	int size;
-	char single_symbol[] = "+-*/%&()'<>=,;[]";
+	char single_symbol[] = "+-*/%&()'<>=,;.[]";
 	char multi_symbol[] = "<>&|+-";
 	char multi_eq[] = "<=>!";
 	
@@ -49,7 +49,7 @@ bool issymbol(char *str,  bool *flag){
 		}
 	}
 
-	//Is single symbol? (+,-,*,/,%,<,>,')
+	//Is single symbol? (+,-,*,/,%,<,>,',.)
 	size = sizeof(single_symbol)/sizeof(char);
 	for(i = 0;i < size;i++){
 		if(*str == single_symbol[i]){

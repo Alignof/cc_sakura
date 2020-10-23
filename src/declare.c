@@ -9,7 +9,7 @@ Struc *structs;
 // Func *func_list[100];
 
 
-Node *declare_global_variable(int star_count, Token* def_name, Type toplv_type){
+Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type){
 	// if not token -> error
 	if(!def_name) error_at(token->str, "not a variable.");
 
@@ -19,12 +19,11 @@ Node *declare_global_variable(int star_count, Token* def_name, Type toplv_type){
 	GVar *gvar = calloc(1, sizeof(GVar));
 	gvar->next = globals;
 	gvar->name = def_name->str;
-	gvar->len = def_name->len;
+	gvar->len  = def_name->len;
 	gvar->type = toplv_type;
 
 	// add type list
-	Type *newtype;
-	newtype = &(gvar->type);
+	Type *newtype = gvar->type;
 	for(int i = 0;i<star_count;i++){
 		newtype->ptr_to = calloc(1, sizeof(Type));
 		newtype->ptr_to->ty = newtype->ty;
@@ -43,17 +42,17 @@ Node *declare_global_variable(int star_count, Token* def_name, Type toplv_type){
 		if(*(token->str)!=']'){
 			// body
 			isize = token->val;
-			gvar->memsize = align_array_size(token->val, gvar->type.ptr_to->ty);
+			gvar->memsize = align_array_size(token->val, gvar->type->ptr_to->ty);
 			token = token->next;
 		}
 
-		gvar->type.ptr_to = calloc(1, sizeof(Type));
-		gvar->type.ptr_to->ty = gvar->type.ty;
-		gvar->type.index_size = isize;
-		gvar->type.ty = ARRAY;
+		gvar->type->ptr_to = calloc(1, sizeof(Type));
+		gvar->type->ptr_to->ty = gvar->type->ty;
+		gvar->type->index_size = isize;
+		gvar->type->ty = ARRAY;
 		expect("]");
 	}else{
-		gvar->memsize = type_size(gvar->type.ty);
+		gvar->memsize = type_size(gvar->type->ty);
 	}
 
 	// globals == new lvar
@@ -68,7 +67,6 @@ Node *declare_global_variable(int star_count, Token* def_name, Type toplv_type){
 
 Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	int i;
-	Type *newtype;
 
 	LVar *lvar = find_lvar(tok);
 	if(lvar) error_at(token->str, "this variable has already existed.");
@@ -76,11 +74,11 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar = calloc(1, sizeof(LVar));
 	lvar->next = locals;
 	lvar->name = tok->str;
-	lvar->len = tok->len;
-	lvar->type.ty = node->type.ty;
+	lvar->len  = tok->len;
+	lvar->type = node->type;
 
 	// add type list
-	newtype = &(lvar->type);
+	Type *newtype = lvar->type;
 	for(i = 0;i<star_count;i++){
 		newtype->ptr_to = calloc(1, sizeof(Type));
 		newtype->ptr_to->ty = newtype->ty;
@@ -99,19 +97,19 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		node->val = -1;
 		node->kind = ND_LARRAY;
 
-		lvar->type.ptr_to = calloc(1, sizeof(Type));
-		lvar->type.ptr_to->ty = lvar->type.ty;
-		lvar->type.ty = ARRAY;
+		lvar->type->ptr_to = calloc(1, sizeof(Type));
+		lvar->type->ptr_to->ty = lvar->type->ty;
+		lvar->type->ty = ARRAY;
 
 		if(*(token->str)!=']'){
-			int asize = align_array_size(token->val, lvar->type.ptr_to->ty);
+			int asize = align_array_size(token->val, lvar->type->ptr_to->ty);
 			alloc_size+=asize;
 			lvar->offset = ((locals) ? (locals->offset) :0) + asize;
 			isize = token->val;
 			token = token->next;
 		}
 
-		lvar->type.index_size = isize;
+		lvar->type->index_size = isize;
 
 		expect("]");
 	}else{
@@ -146,9 +144,9 @@ void declare_struct(Struc *new_struc){
 		new_memb = calloc(1,sizeof(Member));
 
 		// check type
-		if(consume_reserved_word("int", TK_TYPE))	  new_memb->type.ty = INT;
-		else if(consume_reserved_word("char", TK_TYPE))   new_memb->type.ty = CHAR;
-		else if(consume_reserved_word("struct", TK_TYPE)) new_memb->type.ty = STRUCT;
+		if(consume_reserved_word("int", TK_TYPE))	  new_memb->type->ty = INT;
+		else if(consume_reserved_word("char", TK_TYPE))   new_memb->type->ty = CHAR;
+		else if(consume_reserved_word("struct", TK_TYPE)) new_memb->type->ty = STRUCT;
 
 		// count asterisk
 		while(token->kind == TK_RESERVED && *(token->str) == '*'){
@@ -157,7 +155,7 @@ void declare_struct(Struc *new_struc){
 		}
 
 		// add type list
-		Type *newtype = &(new_memb->type);
+		Type *newtype = new_memb->type;
 		for(int i = 0;i < star_count;i++){
 			newtype->ptr_to	    = calloc(1, sizeof(Type));
 			newtype->ptr_to->ty = newtype->ty;
@@ -168,7 +166,7 @@ void declare_struct(Struc *new_struc){
 		Token *def_name  = consume_ident();
 		new_memb->name   = def_name->str;
 		new_memb->len    = def_name->len;
-		new_memb->offset = ((memb_head)? memb_head->offset : 0) + type_size(new_memb->type.ty);
+		new_memb->offset = ((memb_head)? memb_head->offset : 0) + type_size(new_memb->type->ty);
 		asize += new_memb->offset;
 
 		new_memb->next = memb_head;

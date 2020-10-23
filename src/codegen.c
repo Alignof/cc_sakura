@@ -76,7 +76,7 @@ void gen(Node *node){
 			gen_lvar(node);
 
 			printf("	pop rax\n");
-			if(node->type.ty == CHAR){
+			if(node->type->ty == CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
 				printf("	movsx eax,al\n");
 			}else{
@@ -123,7 +123,7 @@ void gen(Node *node){
 
 			gen(node->rhs);
 
-			if(node->lhs->type.ty == CHAR){
+			if(node->lhs->type->ty == CHAR){
 				printf("	pop rcx\n");
 				printf("	pop rax\n");
 				printf("	mov [rax],cl\n");
@@ -132,7 +132,7 @@ void gen(Node *node){
 				printf("	pop rdi\n");
 				printf("	pop rax\n");
 
-				if(node->lhs->type.ty == INT)
+				if(node->lhs->type->ty == INT)
 					printf("	mov [rax],edi\n");
 				else
 					printf("	mov [rax],rdi\n");
@@ -272,7 +272,7 @@ void gen(Node *node){
 		case ND_DEREF:
 			gen(node->rhs);
 			printf("	pop rax\n");
-			if(node->type.ty == CHAR){
+			if(node->type->ty == CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
 				printf("	movsx eax,al\n");
 			}else{
@@ -296,7 +296,7 @@ void gen(Node *node){
 	const char reg_ax[4][4]={"eax","eax","rax","rax"};
 	const char reg_dx[4][4]={"edx","edx","rdx","rdx"};
 	const char reg_di[4][4]={"edi","edi","rdi","rdi"};
-	int reg_ty = (int)node->type.ty;
+	int reg_ty = (int)node->type->ty;
 
 	switch(node->kind){
 		case ND_ADD:

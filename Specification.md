@@ -161,6 +161,7 @@ struct of type of variable kind.
 | :--			| :--				| :--				|
 | TypeKind ty		| type of variable(INT,CHAR...)	| ARRAY				|
 | Type \*ptr\_to	| next chained list		| (next Type chain)		|
+| Member  \*member;	| chained list of Member	| NULL				|
 | size\_t index\_size	| sizo of array index		| 5				|
 
 
