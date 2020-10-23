@@ -1,12 +1,29 @@
 struct test{
-	char a;
-	int  b;
-	int  c;
+	char momone;
+	char kinako;
+	char shion;
+	char aoi;
+	char suigyoku;
+	char syuka;
 };
 
 int main(){
+	int sum = 0;
 	struct test xanadu;
-	xanadu.a = 3;
+	xanadu.momone	= 1;
+	xanadu.kinako	= 2;
+	xanadu.shion	= 3;
+	xanadu.aoi	= 4;
+	xanadu.suigyoku	= 5;
+	xanadu.syuka	= 6;
 
-	return xanadu.a;
+	sum = sum + xanadu.momone;
+	sum = sum + xanadu.kinako;
+	sum = sum + xanadu.shion;
+	sum = sum + xanadu.aoi;
+	sum = sum + xanadu.suigyoku;
+	sum = sum + xanadu.syuka;
+
+	// expect 21
+	return sum;
 }
