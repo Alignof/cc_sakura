@@ -10,6 +10,8 @@ int type_size(TypeKind type){
 			return 8;
 		case ARRAY:
 			return 8;
+		case STRUCT:
+			return 8;
 		default:
 			error_at(token->str, "unknown type");
 	}

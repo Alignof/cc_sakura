@@ -160,6 +160,7 @@ void gen(Node *node){
 
 			return;
 		case ND_DOT:
+		case ND_ARROW:
 			gen_struc(node);
 			printf("	pop rax\n");
 			printf("	push [rax]\n");

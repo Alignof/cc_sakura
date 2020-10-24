@@ -1,3 +1,5 @@
+/*
+
 struct test{
 	char momone;
 	char kinako;
@@ -10,6 +12,9 @@ struct test{
 int main(){
 	int sum = 0;
 	struct test xanadu;
+	struct test *ptr;
+	ptr = &xanadu;
+
 	xanadu.momone	= 1;
 	xanadu.kinako	= 2;
 	xanadu.shion	= 3;
@@ -17,13 +22,32 @@ int main(){
 	xanadu.suigyoku	= 5;
 	xanadu.syuka	= 6;
 
-	sum = sum + xanadu.momone;
-	sum = sum + xanadu.kinako;
-	sum = sum + xanadu.shion;
-	sum = sum + xanadu.aoi;
-	sum = sum + xanadu.suigyoku;
-	sum = sum + xanadu.syuka;
+
+	sum = sum + ptr->momone;
+	sum = sum + ptr->kinako;
+	sum = sum + ptr->shion;
+	sum = sum + ptr->aoi;
+	sum = sum + ptr->suigyoku;
+	sum = sum + ptr->syuka;
 
 	// expect 21
 	return sum;
+}
+*/
+
+struct test{
+	int a;
+	int b;
+};
+
+int main(){
+	struct test x;
+	struct test *y;
+	struct test **z;
+
+	y=&x;
+	z=&y;
+	(*z)->a=2;
+	(*z)->b=3;
+	return (*z)->a + (*z)->b;
 }

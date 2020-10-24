@@ -202,7 +202,7 @@ void get_code(int argc, char **argv);
 // tokenizer.c
 int len_val(char *str);
 int is_alnum(char c);
-bool issymbol(char *str,  bool *flag);
+bool issymbol(char *str,  bool *single_flag);
 bool isblock(char *str);
 bool at_eof();
 Token *tokenize(char *p);

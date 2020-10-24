@@ -148,8 +148,9 @@ void expect(char *op){
 
 int expect_number(){
 	// judge whether token is a number and move the pointer to the next and return value
-	if(token->kind != TK_NUM)
+	if(token->kind != TK_NUM){
 		error_at(token->str, "not a number");
+	}
 
 	int val = token->val;
 	token = token->next;

@@ -76,7 +76,7 @@ Node *primary(){
 			}
 
 			if(consume("->")){
-				error_at(token->str, "unimplemented");
+				//error_at(token->str, "unimplemented");
 				node = arrow(node);
 			}
 		}

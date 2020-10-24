@@ -24,27 +24,37 @@ int len_val(char *str){
 	return counter;
 }
 
-bool issymbol(char *str,  bool *flag){
+bool issymbol(char *str,  bool *single_flag){
 	int i;
 	int size;
 	char single_symbol[] = "+-*/%&()'<>=,;.[]";
-	char multi_symbol[] = "<>&|+-";
-	char multi_eq[] = "<=>!";
+	char repeat_symbol[] = "<>&|+-";
+	char multi_symbol[]  = "->";
+	char multi_eq[]      = "<=>!";
 	
 	//Is multi equal? (<=,==,!=,>=)
 	size = sizeof(multi_eq)/sizeof(char);
 	for(i = 0;i < size;i++){
 		if((*str == multi_eq[i]) && (*(str+1) == '=')){
-			*flag = false;
+			*single_flag = false;
 			return true;
 		}
 	}
 	
-	//Is multi symbol? (<<,>>,&&,||,++,--)
-	size = sizeof(multi_symbol)/sizeof(char);
+	//Is repeat symbol? (<<,>>,&&,||,++,--)
+	size = sizeof(repeat_symbol)/sizeof(char);
 	for(i = 0;i < size;i++){
-		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i]){
-			*flag = false;
+		if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
+			*single_flag = false;
+			return true;
+		}
+	}
+
+	//Is multi symbol? (->)
+	size = sizeof(multi_symbol)/sizeof(char)/2;
+	for(i = 0;i < size;i += 2){
+		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
+			*single_flag = false;
 			return true;
 		}
 	}
@@ -53,7 +63,7 @@ bool issymbol(char *str,  bool *flag){
 	size = sizeof(single_symbol)/sizeof(char);
 	for(i = 0;i < size;i++){
 		if(*str == single_symbol[i]){
-			*flag = true;
+			*single_flag = true;
 			return true;
 		}
 	}
