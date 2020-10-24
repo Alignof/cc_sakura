@@ -161,6 +161,7 @@ struct of type of variable kind.
 | :--			| :--				| :--				|
 | TypeKind ty		| type of variable(INT,CHAR...)	| ARRAY				|
 | Type \*ptr\_to	| next chained list		| (next Type chain)		|
+| Member  \*member;	| chained list of Member	| NULL				|
 | size\_t index\_size	| sizo of array index		| 5				|
 
 
@@ -211,7 +212,23 @@ struct of local variable
 | LVar \*next;		| chained list of Lvar		| (next Lvar chain)		|
 
 
+### Struc
+struct of structure
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int   len;		| name length 			| 
+| int   memsize;	| allocate memory size		| 
+| char  \*name;		| struct name			| 
+| Member  \*member;	| chained list of Member	| 
+| Struc \*next;		| chained list of Struc		| 
 
 
-
-
+### Member
+struct of structure member
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int   len;		| name length 			| 
+| int offset;		| offset from head of struct	|                               |
+| char  \*name;		| member name			| 
+| Type type;		| member variable type		|                               |
+| Member  \*next;	| chained list of Member	|				|

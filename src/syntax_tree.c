@@ -2,11 +2,11 @@
 
 int alloc_size;
 Token *token;
-LVar *locals;
 Str *strings;
-// Func *func_list[100];
+//LVar *locals;
+// Func *func_list[100]; 
 
-Node *primary(){
+Node *data(){
 	if(consume("(")){
 		//jmp expr
 		Node *node = expr();
@@ -30,39 +30,26 @@ Node *primary(){
 
 		LVar *lvar = find_lvar(tok);
 		if(lvar){
-			node->kind = (lvar->type.ty == ARRAY)? ND_LARRAY : ND_LVAR;
+			node->kind = (lvar->type->ty == ARRAY)? ND_LARRAY : ND_LVAR;
 			node->offset = lvar->offset;
 			node->type = lvar->type;
 		// call function
-		}else if(*(token->str) == '('){
+		}else if(check("(")){
+			node->type = calloc(1, sizeof(Type));
 			node = call_function(node, tok);
 		}else{
 			GVar *gvar = find_gvar(tok);
 			if(gvar){
 				// global variable exist
-				node->kind = (gvar->type.ty == ARRAY)? ND_GARRAY : ND_GVAR;
+				node->kind = (gvar->type->ty == ARRAY)? ND_GARRAY : ND_GVAR;
 				node->type = gvar->type;
-				node->str = tok->str;
-				node->val = tok->len;
+				node->str  = tok->str;
+				node->val  = tok->len;
 			}else{
 				// variable does not exist.
 				error_at(token->str, "this variable is not declaration");
 			}
 		}
-
-		// Is array index
-		if(consume("[")){
-			node = array_index(node, mul());
-			expect("]");
-		}
-
-		// increment
-		if(consume("++"))
-			node = incdec(node, POST_INC);
-
-		// decrement
-		if(consume("--"))
-			node = incdec(node, POST_DEC);
 
 		return node;
 	}
@@ -71,23 +58,63 @@ Node *primary(){
 	return new_node_num(expect_number());
 }
 
+Node *primary(){
+	Node *node = data();
+
+	// Is array index
+	if(consume("[")){
+		node = array_index(node, mul());
+		expect("]");
+	}
+
+	// increment
+	if(consume("++")){
+		node = incdec(node, POST_INC);
+	}
+
+	// decrement
+	if(consume("--")){
+		node = incdec(node, POST_DEC);
+	}
+
+	// member variable
+	while(check(".") || check("->")){
+		if(consume(".")){
+			if(node->kind == ND_LVAR){
+				node = new_node(ND_ADDRESS, NULL, node);
+			}
+			node = dot(node);
+		}
+
+		if(consume("->")){
+			//error_at(token->str, "unimplemented");
+			node = arrow(node);
+		}
+	}
+
+	return node;
+}
+
 Node *unary(){
 	Node *node=NULL;
 	Type *rhs_ptr_to;
 
 	if(consume("*")){
-		node = new_node(ND_DEREF, new_node_num(0), unary());
-		rhs_ptr_to = node->rhs->type.ptr_to;
+		node = new_node(ND_DEREF, NULL, unary());
+		/*
+		rhs_ptr_to = node->rhs->type->ptr_to;
 
 		if(rhs_ptr_to == NULL || type_size(rhs_ptr_to->ty) == 8)
-			node->type.ty = PTR;
+			node->type->ty = PTR;
+		*/
+		node->type = node->rhs->type->ptr_to;
 
 		return node;
 	}
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, NULL, unary());
-		node->type.ty = PTR;
+		node->type->ty = PTR;
 
 		return node;
 	}
@@ -96,7 +123,8 @@ Node *unary(){
 		consume("\"");
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_STR;
-		node->type.ty = PTR;
+		node->type = calloc(1, sizeof(Type));
+		node->type->ty = PTR;
 
 		Token *tok = consume_string();
 		Str *fstr = find_string(tok);
@@ -127,27 +155,31 @@ Node *unary(){
 		return node;
 	}
 
-	if(consume("+"))
+	if(consume("+")){
 		//ignore +n
 		return primary();
+	}
 
-	if(consume("-"))
+	if(consume("-")){
 		//convert to 0-n
 		return new_node(ND_SUB, new_node_num(0), primary());
+	}
 
 	// increment
-	if(consume("++"))
+	if(consume("++")){
 		return incdec(primary(), PRE_INC);
+	}
 
 	// decrement
-	if(consume("--"))
+	if(consume("--")){
 		return incdec(primary(), PRE_DEC);
+	}
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 		node = new_node(ND_NUM, node, unary());
-		node->val = type_size(node->rhs->type.ty);
+		node->val = type_size(node->rhs->type->ty);
 
 		return node;
 	}
@@ -238,8 +270,9 @@ Node *logical(){
 Node *assign(){
 	Node *node = logical();
 
-	if(consume("="))
+	if(consume("=")){
 		node = new_node(ND_ASSIGN, node, assign());
+	}
 
 	return node;
 }
@@ -249,12 +282,22 @@ Node *expr(){
 	Node *node;
 
 	if(token->kind == TK_TYPE){
-		node = calloc(1, sizeof(Node));
+		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
+		node->type = calloc(1, sizeof(Type));
 
 		// check type
-		if(consume_reserved_word("int", TK_TYPE)) node->type.ty = INT;
-		else if(consume_reserved_word("char", TK_TYPE)) node->type.ty = CHAR;
+		if(consume_reserved_word("int", TK_TYPE)){
+			node->type->ty = INT;
+		}else if(consume_reserved_word("char", TK_TYPE)){
+			node->type->ty = CHAR;
+		}else if(consume_reserved_word("struct", TK_TYPE)){
+			Token *tok   = consume_ident();
+			Struc *found = find_struc(tok);
+			node->val         = found->memsize;
+			node->type->member = found->member;
+			node->type->ty     = STRUCT;
+		}
 		
 		// count asterisk
 		while(token->kind == TK_RESERVED && *(token->str) == '*'){
@@ -264,17 +307,19 @@ Node *expr(){
 
 		// variable declaration
 		Token *tok = consume_ident();
-		if(tok)
+		if(tok){
 			node = declare_local_variable(node, tok, star_count);
-		else
+		}else{
 			error_at(token->str, "not a variable.");
+		}
 
 		// initialize formula
 		if(consume("=")){
-			if(consume("{"))
+			if(consume("{")){
 				node->vector = array_block(node);
-			else
+			}else{
 				node->vector = init_formula(node, assign());
+			}
 		}
 	}else{
 		node = assign();
@@ -288,8 +333,9 @@ Node *stmt(){
 
 	if(consume_reserved_word("return", TK_RETURN)){
 		node = new_node(ND_RETURN, node, expr());
-		if(!consume(";"))
+		if(!consume(";")){
 			error_at(token->str, "not a ';' token.");
+		}
 
 	}else if(consume_reserved_word("if", TK_IF)){
 		node = new_node(ND_IF, node, NULL);
@@ -372,8 +418,9 @@ void function(Func *func){
 	int i = 0;
 
 	// while end of function block
-	while(!consume("}"))
+	while(!consume("}")){
 		func->code[i++] = stmt();
+	}
 
 	func->stack_size = alloc_size;
 	func->code[i] = NULL;
@@ -382,8 +429,7 @@ void function(Func *func){
 void program(){
 	int func_index = 0;
 	int star_count;
-	Type toplv_type;
-	toplv_type = (Type){0};
+	Type *toplv_type;
 
 	while(!at_eof()){
 		// reset lvar list
@@ -393,10 +439,13 @@ void program(){
 		star_count = 0;
 		func_list[func_index] = (Func *)malloc(sizeof(Func));
 
+		toplv_type = calloc(1,sizeof(Type));
+
 		// type of function return value
 		if(token->kind == TK_TYPE){
-			if(consume_reserved_word("int", TK_TYPE))	toplv_type.ty = INT;
-			else if(consume_reserved_word("char", TK_TYPE))  toplv_type.ty = CHAR;
+			if(consume_reserved_word("int", TK_TYPE))	  toplv_type->ty = INT;
+			else if(consume_reserved_word("char", TK_TYPE))   toplv_type->ty = CHAR;
+			else if(consume_reserved_word("struct", TK_TYPE)) toplv_type->ty = STRUCT;
 			else error_at(token->str, "not a function type token.");
 		}
 
@@ -408,8 +457,9 @@ void program(){
 
 
 		// Is function?
-		if(token->kind != TK_IDENT ||!(is_alnum(*token->str)))
+		if(token->kind != TK_IDENT ||!(is_alnum(*token->str))){
 			error_at(token->str, "not a function.");
+		}
 
 		Token *def_name = consume_ident();
 
@@ -426,20 +476,34 @@ void program(){
 			consume("{");
 			function(func_list[func_index++]);
 			consume("}");
+		// struct
+		}else if(consume("{")){
+			if(toplv_type->ty != STRUCT){
+				error_at(token->str, "not a struct.");
+			}
 
+			Struc *new_struc = calloc(1,sizeof(Struc));
+			new_struc->len   = def_name->len;
+			new_struc->name  = def_name->str;
+
+			declare_struct(new_struc);
+
+			expect(";");
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
 
 			// initialize formula
 			if(consume("=")){
-				if(consume("{"))
+				if(consume("{")){
 					globals->init = array_block(init_gv);
-				else
+				}else{
 					globals->init = init_formula(init_gv, assign());
+				}
 			}else{
-				if(init_gv->kind == ND_GVAR)
+				if(init_gv->kind == ND_GVAR){
 					globals->init = init_formula(init_gv, new_node_num(0));
+				}
 			}
 
 			expect(";");

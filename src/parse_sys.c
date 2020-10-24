@@ -42,12 +42,23 @@ void error_at(char *loc, char *msg){
 	exit(1);
 }
 
+bool check(char *op){
+	// judge whether op is a symbol and return judge result
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+		return false;
+	}
+
+	return true;
+}
+
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
-	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-			strlen(op) != token->len||
-			memcmp(token->str, op, token->len))
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
+	}
+
 	token = token->next;
 	return true;
 }
@@ -64,8 +75,10 @@ int string_len(){
 
 bool consume_ret(){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
-		memcmp(token->str, "return", token->len))
+	    memcmp(token->str, "return", token->len)){
 		return false;
+	}
+
 	token = token->next;
 	return true;
 }
@@ -73,8 +86,9 @@ bool consume_ret(){
 bool consume_reserved_word(char *keyword, TokenKind kind){
 	if( token->kind != kind ||
 	    token->len != strlen(keyword) ||
-	    memcmp(token->str, keyword, token->len))
+	    memcmp(token->str, keyword, token->len)){
 		return false;
+	}
 
 	token = token->next;
 	return true;
@@ -82,19 +96,22 @@ bool consume_reserved_word(char *keyword, TokenKind kind){
 
 Token *consume_string(){
 	// judge whether token is a ident and token pointer
-	if(token->kind != TK_STR || !(isascii(*(token->str))))
+	if(token->kind != TK_STR || !(isascii(*(token->str)))){
 		return false;
+	}
 
 	Token *ret = token;
 	int counter = 0;
-	for(char *str = token->str;*str != '"';str++)
+	for(char *str = token->str;*str != '"';str++){
 		counter++;
+	}
 
 	token->len = counter;
 
 	//move next token 
-	for(int i = 0;i < counter;i++)
+	for(int i = 0;i < counter;i++){
 		token = token->next;
+	}
 
 	return ret;
 }
@@ -103,8 +120,9 @@ Token *consume_string(){
 Token *consume_ident(){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||
-		!(is_alnum(*(token->str))))
+	   !(is_alnum(*(token->str)))){
 		return NULL;
+	}
 
 	Token *ret = token;
 	//check variable length
@@ -112,8 +130,9 @@ Token *consume_ident(){
 	token->len = _len;
 
 	//move next token 
-	for(int i = 0;i < _len;i++)
+	for(int i = 0;i < _len;i++){
 		token = token->next;
+	}
 
 	return ret;
 }
@@ -129,8 +148,9 @@ void expect(char *op){
 
 int expect_number(){
 	// judge whether token is a number and move the pointer to the next and return value
-	if(token->kind != TK_NUM)
+	if(token->kind != TK_NUM){
 		error_at(token->str, "not a number");
+	}
 
 	int val = token->val;
 	token = token->next;
@@ -140,8 +160,9 @@ int expect_number(){
 GVar *find_gvar(Token *tok){
 	//while var not equal NULL
 	for (GVar *var = globals;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
+		}
 	}
 	return NULL;
 }
@@ -149,16 +170,27 @@ GVar *find_gvar(Token *tok){
 LVar *find_lvar(Token *tok){
 	//while var not equal NULL
 	for (LVar *var = locals;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
+		}
 	}
 	return NULL;
 }
 
 Str *find_string(Token *tok){
 	for (Str *var = strings;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str, var->str, var->len))
+		if(var->len == tok->len && !memcmp(tok->str, var->str, var->len)){
 			return var;
+		}
+	}
+	return NULL;
+}
+
+Struc *find_struc(Token *tok){
+	for (Struc *var = structs;var;var = var->next){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
+		}
 	}
 	return NULL;
 }
@@ -166,18 +198,20 @@ Str *find_string(Token *tok){
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));
+	node->type = calloc(1, sizeof(Type));
 	node->kind = kind;
 	node->lhs  = lhs;
 	node->rhs  = rhs;
 
 	if(kind == ND_ADD || kind == ND_SUB){
-		if(type_size(lhs->type.ty) == 8 || type_size(rhs->type.ty) == 8){
+		if(type_size(lhs->type->ty) == 8 || type_size(rhs->type->ty) == 8){
 			node = pointer_calc(node, lhs->type, rhs->type);
 		}
 	}
 
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		node->type.ty = (lhs->type.ty > rhs->type.ty)? lhs->type.ty : rhs->type.ty;
+		//node->type->ty = (lhs->type->ty > rhs->type->ty)? lhs->type->ty : rhs->type->ty;
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}
 
 	return node;
@@ -187,24 +221,9 @@ Node *new_node_num(int val){
 	//create new node(number)
 	Node *node = calloc(1, sizeof(Node));
 	node->kind = ND_NUM;
-	node->val = val;
-	node->type.ty = INT;
+	node->val  = val;
+	node->type = calloc(1, sizeof(Type));
+	node->type->ty = INT;
 	return node;
 }
 
-int type_size(TypeKind type){
-	switch(type){
-		case CHAR:
-			return 1;
-		case INT:
-			return 4;
-		case PTR:
-			return 8;
-		case ARRAY:
-			return 8;
-		default:
-			error_at(token->str, "unknown type");
-	}
-
-	return -1;
-}

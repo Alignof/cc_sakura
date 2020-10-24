@@ -10,11 +10,26 @@ void gen_gvar(Node *node){
 }
 
 void gen_lvar(Node *node){
-	if(node->kind!=ND_LVAR && node->kind!=ND_LARRAY && node->kind!=ND_CALL_FUNC)
+	if(node->kind != ND_LVAR && node->kind != ND_LARRAY && node->kind != ND_CALL_FUNC){
 		error_at(token->str,"not a variable");
+	}
 
 	printf("	mov rax,rbp\n");
 	printf("	sub rax,%d\n", node->offset);
+	printf("	push rax\n");
+}
+
+void gen_struc(Node *node){
+	if(node->kind != ND_DOT && node->kind != ND_ARROW){
+		error_at(token->str,"not a struct");
+	}
+
+	gen(node->lhs);
+	gen(node->rhs);
+
+	printf("	pop rdi\n");
+	printf("	pop rax\n");
+	printf("	add rax,rdi\n");
 	printf("	push rax\n");
 }
 
@@ -76,7 +91,7 @@ void gen(Node *node){
 			gen_lvar(node);
 
 			printf("	pop rax\n");
-			if(node->type.ty == CHAR){
+			if(node->type->ty == CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
 				printf("	movsx eax,al\n");
 			}else{
@@ -115,15 +130,19 @@ void gen(Node *node){
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
-			if(node->lhs->kind == ND_DEREF)	    gen(node->lhs->rhs);
-			else if(node->lhs->kind == ND_GVAR)   gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_GARRAY) gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_LVAR)   gen_lvar(node->lhs);
-			else if(node->lhs->kind == ND_LARRAY) gen_lvar(node->lhs);
+			
+			/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
+			//else if(node->lhs->type->ty == STRUCT) gen_struc(node);
+			else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
+			else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
+			else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
+			else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
+			else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
+			else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
 
 			gen(node->rhs);
 
-			if(node->lhs->type.ty == CHAR){
+			if(node->lhs->type->ty == CHAR){
 				printf("	pop rcx\n");
 				printf("	pop rax\n");
 				printf("	mov [rax],cl\n");
@@ -132,7 +151,7 @@ void gen(Node *node){
 				printf("	pop rdi\n");
 				printf("	pop rax\n");
 
-				if(node->lhs->type.ty == INT)
+				if(node->lhs->type->ty == INT)
 					printf("	mov [rax],edi\n");
 				else
 					printf("	mov [rax],rdi\n");
@@ -140,6 +159,12 @@ void gen(Node *node){
 				printf("	push rdi\n");
 			}
 
+			return;
+		case ND_DOT:
+		case ND_ARROW:
+			gen_struc(node);
+			printf("	pop rax\n");
+			printf("	push [rax]\n");
 			return;
 		case ND_IF:
 			printf("	push rax\n");
@@ -250,7 +275,7 @@ void gen(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_ARG:
-			tmp=node;
+			tmp = node;
 			while(tmp){
 				// generate arg as lvar
 				gen(tmp->next);
@@ -272,7 +297,7 @@ void gen(Node *node){
 		case ND_DEREF:
 			gen(node->rhs);
 			printf("	pop rax\n");
-			if(node->type.ty == CHAR){
+			if(node->type->ty == CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
 				printf("	movsx eax,al\n");
 			}else{
@@ -296,7 +321,7 @@ void gen(Node *node){
 	const char reg_ax[4][4]={"eax","eax","rax","rax"};
 	const char reg_dx[4][4]={"edx","edx","rdx","rdx"};
 	const char reg_di[4][4]={"edi","edi","rdi","rdi"};
-	int reg_ty = (int)node->type.ty;
+	int reg_ty = (int)node->type->ty;
 
 	switch(node->kind){
 		case ND_ADD:

@@ -17,42 +17,53 @@ int is_alnum(char c){
 
 int len_val(char *str){
 	int counter = 0;
-	for(;is_alnum(*str);str++)
+	for(;is_alnum(*str);str++){
 		counter++;
+	}
 
 	return counter;
 }
 
-bool issymbol(char *str,  bool *flag){
+bool issymbol(char *str,  bool *single_flag){
 	int i;
 	int size;
-	char single_symbol[] = "+-*/%&()'<>=,;[]";
-	char multi_symbol[] = "<>&|+-";
-	char multi_eq[] = "<=>!";
+	char single_symbol[] = "+-*/%&()'<>=,;.[]";
+	char repeat_symbol[] = "<>&|+-";
+	char multi_symbol[]  = "->";
+	char multi_eq[]      = "<=>!";
 	
 	//Is multi equal? (<=,==,!=,>=)
 	size = sizeof(multi_eq)/sizeof(char);
 	for(i = 0;i < size;i++){
 		if((*str == multi_eq[i]) && (*(str+1) == '=')){
-			*flag = false;
+			*single_flag = false;
 			return true;
 		}
 	}
 	
-	//Is multi symbol? (<<,>>,&&,||,++,--)
-	size = sizeof(multi_symbol)/sizeof(char);
+	//Is repeat symbol? (<<,>>,&&,||,++,--)
+	size = sizeof(repeat_symbol)/sizeof(char);
 	for(i = 0;i < size;i++){
-		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i]){
-			*flag = false;
+		if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
+			*single_flag = false;
 			return true;
 		}
 	}
 
-	//Is single symbol? (+,-,*,/,%,<,>,')
+	//Is multi symbol? (->)
+	size = sizeof(multi_symbol)/sizeof(char)/2;
+	for(i = 0;i < size;i += 2){
+		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
+			*single_flag = false;
+			return true;
+		}
+	}
+
+	//Is single symbol? (+,-,*,/,%,<,>,',.)
 	size = sizeof(single_symbol)/sizeof(char);
 	for(i = 0;i < size;i++){
 		if(*str == single_symbol[i]){
-			*flag = true;
+			*single_flag = true;
 			return true;
 		}
 	}
@@ -71,8 +82,9 @@ Token *new_token(TokenKind kind, Token *cur, char *str){
 }
 
 bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
-	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len]))
+	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len])){
 		return false;
+	}
 
 	*now = new_token(tk_kind, *now, *p);
 	(*now)->len = len;
@@ -121,6 +133,7 @@ Token *tokenize(char *p){
 
 		if(consume_reserved(&p, "int",	  3, &now, TK_TYPE))	continue;
 		if(consume_reserved(&p, "char",   4, &now, TK_TYPE))	continue;
+		if(consume_reserved(&p, "struct", 6, &now, TK_TYPE))    continue;
 		if(consume_reserved(&p, "if",	  2, &now, TK_IF))	continue;
 		if(consume_reserved(&p, "else",	  4, &now, TK_ELSE))	continue;
 		if(consume_reserved(&p, "for",	  3, &now, TK_FOR))	continue;
