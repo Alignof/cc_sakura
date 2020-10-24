@@ -42,6 +42,8 @@ typedef enum{
 
 	// symbol --> rhs
 	ND_POSTID, 	//  a++, a--
+	ND_DOT,		//  struc.member
+	ND_ARROW,	//  struc_ptr->member
 
 	// lhs <-- symbol
 	ND_PREID, 	//  ++a, --a
@@ -200,7 +202,7 @@ void get_code(int argc, char **argv);
 // tokenizer.c
 int len_val(char *str);
 int is_alnum(char c);
-bool issymbol(char *str,  bool *flag);
+bool issymbol(char *str,  bool *single_flag);
 bool isblock(char *str);
 bool at_eof();
 Token *tokenize(char *p);
@@ -210,6 +212,7 @@ bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_ki
 // parse_sys.c
 void error(char *loc, char *fmt,  ...);
 void error_at(char *loc, char *msg);
+bool check(char *op);
 bool consume(char *op);
 bool consume_ret();
 bool consume_reserved_word();
@@ -243,6 +246,7 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+Node *data();
 
 // parse_part.c
 void get_argument(int func_index);
@@ -267,6 +271,7 @@ extern int label_else;
 void gen(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
+void gen_struc(Node *node);
 void expand_next(Node *node);
 void expand_vector(Node *node);
 

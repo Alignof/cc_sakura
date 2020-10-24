@@ -42,10 +42,20 @@ void error_at(char *loc, char *msg){
 	exit(1);
 }
 
+bool check(char *op){
+	// judge whether op is a symbol and return judge result
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+		return false;
+	}
+
+	return true;
+}
+
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    strlen(op) != token->len ||memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -138,8 +148,9 @@ void expect(char *op){
 
 int expect_number(){
 	// judge whether token is a number and move the pointer to the next and return value
-	if(token->kind != TK_NUM)
+	if(token->kind != TK_NUM){
 		error_at(token->str, "not a number");
+	}
 
 	int val = token->val;
 	token = token->next;
@@ -183,6 +194,7 @@ Struc *find_struc(Token *tok){
 	}
 	return NULL;
 }
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));
@@ -198,7 +210,8 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	}
 
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		node->type->ty = (lhs->type->ty > rhs->type->ty)? lhs->type->ty : rhs->type->ty;
+		//node->type->ty = (lhs->type->ty > rhs->type->ty)? lhs->type->ty : rhs->type->ty;
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}
 
 	return node;
