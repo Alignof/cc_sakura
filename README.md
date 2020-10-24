@@ -136,5 +136,8 @@ int main(){int x=3; int a=--x; return a+x;} => 4
 int main(){return 'a';} => 97
 int main(){int flag; char *hello="hello"; if(hello[1] == 'e') flag=1; else flag=0; return flag;} => 1
 struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;} => 5
+struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;} => 5
+struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a=2; y->b=3; return y->a + y->b;} => 5
+struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;} => 5
 OK
 ```
