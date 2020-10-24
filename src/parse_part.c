@@ -27,7 +27,7 @@ Node *dot(Node *node){
 Node *arrow(Node *node){
 	// struc->aaa->bbb->ccc;
 	// (lvar <- node -> dot) <- node -> dot
-	Node *new = new_node(ND_DOT, node, NULL);
+	Node *new = new_node(ND_ARROW, node, NULL);
 	Token* memb_name  = consume_ident();
 	Member* memb_list = (node->kind == ND_ADDRESS) ? node->rhs->type->member : node->type->member;
 

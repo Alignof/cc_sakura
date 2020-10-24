@@ -194,6 +194,7 @@ Struc *find_struc(Token *tok){
 	}
 	return NULL;
 }
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));
@@ -209,7 +210,8 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	}
 
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		node->type->ty = (lhs->type->ty > rhs->type->ty)? lhs->type->ty : rhs->type->ty;
+		//node->type->ty = (lhs->type->ty > rhs->type->ty)? lhs->type->ty : rhs->type->ty;
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}
 
 	return node;

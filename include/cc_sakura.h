@@ -246,6 +246,7 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+Node *data();
 
 // parse_part.c
 void get_argument(int func_index);

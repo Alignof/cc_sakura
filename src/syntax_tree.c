@@ -5,7 +5,8 @@ Token *token;
 Str *strings;
 //LVar *locals;
 // Func *func_list[100]; 
-Node *primary(){
+
+Node *data(){
 	if(consume("(")){
 		//jmp expr
 		Node *node = expr();
@@ -50,42 +51,48 @@ Node *primary(){
 			}
 		}
 
-		// Is array index
-		if(consume("[")){
-			node = array_index(node, mul());
-			expect("]");
-		}
-
-		// increment
-		if(consume("++")){
-			node = incdec(node, POST_INC);
-		}
-
-		// decrement
-		if(consume("--")){
-			node = incdec(node, POST_DEC);
-		}
-
-		// member variable
-		while(check(".") || check("->")){
-			if(consume(".")){
-				if(node->kind == ND_LVAR){
-					node = new_node(ND_ADDRESS, NULL, node);
-				}
-				node = dot(node);
-			}
-
-			if(consume("->")){
-				//error_at(token->str, "unimplemented");
-				node = arrow(node);
-			}
-		}
-
 		return node;
 	}
 
 	// return new num node
 	return new_node_num(expect_number());
+}
+
+Node *primary(){
+	Node *node = data();
+
+	// Is array index
+	if(consume("[")){
+		node = array_index(node, mul());
+		expect("]");
+	}
+
+	// increment
+	if(consume("++")){
+		node = incdec(node, POST_INC);
+	}
+
+	// decrement
+	if(consume("--")){
+		node = incdec(node, POST_DEC);
+	}
+
+	// member variable
+	while(check(".") || check("->")){
+		if(consume(".")){
+			if(node->kind == ND_LVAR){
+				node = new_node(ND_ADDRESS, NULL, node);
+			}
+			node = dot(node);
+		}
+
+		if(consume("->")){
+			//error_at(token->str, "unimplemented");
+			node = arrow(node);
+		}
+	}
+
+	return node;
 }
 
 Node *unary(){
@@ -94,10 +101,13 @@ Node *unary(){
 
 	if(consume("*")){
 		node = new_node(ND_DEREF, NULL, unary());
+		/*
 		rhs_ptr_to = node->rhs->type->ptr_to;
 
 		if(rhs_ptr_to == NULL || type_size(rhs_ptr_to->ty) == 8)
 			node->type->ty = PTR;
+		*/
+		node->type = node->rhs->type->ptr_to;
 
 		return node;
 	}

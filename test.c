@@ -33,7 +33,6 @@ int main(){
 	// expect 21
 	return sum;
 }
-*/
 
 struct test{
 	int a;
@@ -51,3 +50,6 @@ int main(){
 	(*z)->b=3;
 	return (*z)->a + (*z)->b;
 }
+*/
+
+int main(){int a[4]; *a=1; *(a+1)=2; return *(a+1);}

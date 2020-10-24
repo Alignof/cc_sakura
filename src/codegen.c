@@ -130,6 +130,7 @@ void gen(Node *node){
 			return;
 		case ND_ASSIGN:
 			// gen_lvar(variable) = gen(expr)
+			
 			/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
 			//else if(node->lhs->type->ty == STRUCT) gen_struc(node);
 			else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);

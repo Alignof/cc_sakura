@@ -38,6 +38,7 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	Node *pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
 	pointer_size->type = calloc(1, sizeof(Type));
+	pointer_size->type->ty = INT;
 
 
 	if(type_size(lhs_type->ty) == 8 && lhs_type->ptr_to!=NULL){
