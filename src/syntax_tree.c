@@ -83,12 +83,13 @@ Node *primary(){
 			if(node->kind == ND_LVAR){
 				node = new_node(ND_ADDRESS, NULL, node);
 			}
-			node = dot(node);
+			//node = dot(node);
+			node = dot_arrow(ND_DOT, node);
 		}
 
 		if(consume("->")){
-			//error_at(token->str, "unimplemented");
-			node = arrow(node);
+			//node = arrow(node);
+			node = dot_arrow(ND_ARROW, node);
 		}
 	}
 
