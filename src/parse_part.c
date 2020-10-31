@@ -5,6 +5,12 @@
 // LVar *locals;
 // Func *func_list[100];
 
+Node *multi_assign(TypeKind type, Node *src, Node *dst){
+	Node *calc = new_node(type, src, dst);
+	Node *new  = new_node(ND_ASSIGN, src, calc);
+	return new;
+}
+
 Node *dot(Node *node){
 	// struc.aaa.bbb.ccc;
 	// (lvar <- node -> dot) <- node -> dot

@@ -25,6 +25,40 @@ int main(){
 	return 0;
 }
 ```
+### struct
+```c
+struct test{ char momone;
+	char kinako;
+	char shion;
+	char aoi;
+	char suigyoku;
+	char syuka;
+};
+
+int main(){
+	int sum = 0;
+	struct test xanadu;
+	struct test *ptr;
+	ptr = &xanadu;
+
+	xanadu.momone	= 1;
+	xanadu.kinako	= 2;
+	xanadu.shion	= 3;
+	xanadu.aoi	= 4;
+	xanadu.suigyoku	= 5;
+	xanadu.syuka	= 6;
+
+	sum += ptr->momone;
+	sum += ptr->kinako;
+	sum += ptr->shion;
+	sum += ptr->aoi;
+	sum += ptr->suigyoku;
+	sum += ptr->syuka;
+
+	// expect 21
+	return sum;
+}
+```
 
 ### testcode  
 ```c
