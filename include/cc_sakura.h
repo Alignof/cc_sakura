@@ -250,8 +250,10 @@ Node *data();
 
 // parse_part.c
 void get_argument(int func_index);
-Node *dot(Node *node);
-Node *arrow(Node *node);
+Node *multi_assign(TypeKind type, Node *src, Node *dst);
+Node *dot_arrow(TypeKind type, Node *node);
+//Node *dot(Node *node);
+//Node *arrow(Node *node);
 Node *init_formula(Node *node, Node *init_val);
 Node *incdec(Node *node, IncDecKind idtype);
 Node *array_block();

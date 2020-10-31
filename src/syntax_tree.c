@@ -83,12 +83,13 @@ Node *primary(){
 			if(node->kind == ND_LVAR){
 				node = new_node(ND_ADDRESS, NULL, node);
 			}
-			node = dot(node);
+			//node = dot(node);
+			node = dot_arrow(ND_DOT, node);
 		}
 
 		if(consume("->")){
-			//error_at(token->str, "unimplemented");
-			node = arrow(node);
+			//node = arrow(node);
+			node = dot_arrow(ND_ARROW, node);
 		}
 	}
 
@@ -97,16 +98,9 @@ Node *primary(){
 
 Node *unary(){
 	Node *node=NULL;
-	Type *rhs_ptr_to;
 
 	if(consume("*")){
 		node = new_node(ND_DEREF, NULL, unary());
-		/*
-		rhs_ptr_to = node->rhs->type->ptr_to;
-
-		if(rhs_ptr_to == NULL || type_size(rhs_ptr_to->ty) == 8)
-			node->type->ty = PTR;
-		*/
 		node->type = node->rhs->type->ptr_to;
 
 		return node;
@@ -272,6 +266,14 @@ Node *assign(){
 
 	if(consume("=")){
 		node = new_node(ND_ASSIGN, node, assign());
+	}else if(consume("+=")){
+		node = multi_assign(ND_ADD, node, assign());
+	}else if(consume("-=")){
+		node = multi_assign(ND_SUB, node, assign());
+	}else if(consume("*=")){
+		node = multi_assign(ND_MUL, node, assign());
+	}else if(consume("/=")){
+		node = multi_assign(ND_DIV, node, assign());
 	}
 
 	return node;
@@ -294,7 +296,7 @@ Node *expr(){
 		}else if(consume_reserved_word("struct", TK_TYPE)){
 			Token *tok   = consume_ident();
 			Struc *found = find_struc(tok);
-			node->val         = found->memsize;
+			node->val          = found->memsize;
 			node->type->member = found->member;
 			node->type->ty     = STRUCT;
 		}

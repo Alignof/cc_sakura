@@ -30,7 +30,7 @@ bool issymbol(char *str,  bool *single_flag){
 	char single_symbol[] = "+-*/%&()'<>=,;.[]";
 	char repeat_symbol[] = "<>&|+-";
 	char multi_symbol[]  = "->";
-	char multi_eq[]      = "<=>!";
+	char multi_eq[]      = "<=>!+*-/";
 	
 	//Is multi equal? (<=,==,!=,>=)
 	size = sizeof(multi_eq)/sizeof(char);

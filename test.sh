@@ -157,6 +157,17 @@ assert -cl 8 'int main(){int x=3; int a=++x; return a+x;}'
 assert -cl 5 'int main(){int x=3; int a=x--; return a+x;}'
 assert -cl 4 'int main(){int x=3; int a=--x; return a+x;}'
 
+assert -cl 7 'int main(){int x=4; int y=3; x+=y; return x;}'
+assert -cl 1 'int main(){int x=4; int y=3; x-=y; return x;}'
+assert -cl 9 'int main(){int x=3; int y=3; x*=y; return x;}'
+assert -cl 4 'int main(){int x=12; int y=3; x/=y; return x;}'
+
+assert -cl 97 "int main(){return 'a';}"
+assert -cl 1 "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
+
+assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
+assert -cl 5 "struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
+
 assert -cl 97 "int main(){return 'a';}"
 assert -cl 1 "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
 
