@@ -11,6 +11,33 @@ Node *multi_assign(TypeKind type, Node *src, Node *dst){
 	return new;
 }
 
+Node *dot_arrow(TypeKind type, Node *node){
+	// struc.aaa.bbb.ccc;
+	// struc->aaa->bbb->ccc;
+	// (lvar <- node -> dot) <- node -> dot
+	Node *new = new_node(type, node, NULL);
+	Token *memb_name  = consume_ident();
+	Member* memb_list;
+
+	if(node->kind == ND_ADDRESS || node->kind == ND_DEREF){
+		memb_list = node->rhs->type->member;
+	}else{
+		memb_list = node->type->member;
+	}
+
+	while(memb_list){
+		if(memb_list->len == memb_name->len && !memcmp(memb_name->str, memb_list->name, memb_name->len)){
+			new->rhs  = new_node_num(memb_list->offset);
+			new->type = memb_list->type;
+			break;
+		}
+		memb_list = memb_list->next;
+	}
+
+	return new;
+}
+
+/*
 Node *dot(Node *node){
 	// struc.aaa.bbb.ccc;
 	// (lvar <- node -> dot) <- node -> dot
@@ -60,6 +87,7 @@ Node *arrow(Node *node){
 
 	return new;
 }
+*/
 
 Node *incdec(Node *node, IncDecKind idtype){
 	/*
