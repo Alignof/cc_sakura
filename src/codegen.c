@@ -132,7 +132,6 @@ void gen(Node *node){
 			// gen_lvar(variable) = gen(expr)
 			
 			/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
-			//else if(node->lhs->type->ty == STRUCT) gen_struc(node);
 			else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
 			else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
 			else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
@@ -151,10 +150,11 @@ void gen(Node *node){
 				printf("	pop rdi\n");
 				printf("	pop rax\n");
 
-				if(node->lhs->type->ty == INT)
+				if(node->lhs->type->ty == INT){
 					printf("	mov [rax],edi\n");
-				else
+				}else{
 					printf("	mov [rax],rdi\n");
+				}
 
 				printf("	push rdi\n");
 			}

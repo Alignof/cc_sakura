@@ -319,8 +319,9 @@ void get_argument(int func_index){
 
 			arg_counter++;
 
-			if(!(consume(",")))
+			if(!(consume(","))){
 				break;
+			}
 		}
 		args_ptr = NULL;
 		func_list[func_index]->args->val = arg_counter-1;

@@ -140,9 +140,10 @@ Token *consume_ident(){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-			strlen(op) != token->len||
-			memcmp(token->str, op, token->len))
+	    strlen(op) != token->len||
+	    memcmp(token->str, op, token->len)){
 		error_at(token->str, "not a charctor.");
+	}
 	token = token->next;
 }
 
