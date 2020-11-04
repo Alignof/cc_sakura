@@ -162,9 +162,18 @@ void gen(Node *node){
 
 			return;
 		case ND_COMPOUND:
+			// push
 			gen_assign_lhs(node);
 			gen(node->rhs);
 
+			// calc
+			printf("	pop rdi\n");  // rhs
+			printf("	pop rax\n");  // lhs
+			/*	calculation	*/
+			printf("	push rax\n"); // lhs
+			printf("	push rdi\n"); // rhs+lhs
+
+			// assign
 			if(node->lhs->type->ty == CHAR){
 				printf("	pop rcx\n");
 				printf("	pop rax\n");
