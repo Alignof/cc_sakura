@@ -251,7 +251,7 @@ Node *data();
 
 // parse_part.c
 void get_argument(int func_index);
-Node *compound_assign(TypeKind type, Node *src, Node *dst);
+Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(TypeKind type, Node *node);
 //Node *dot(Node *node);
 //Node *arrow(Node *node);

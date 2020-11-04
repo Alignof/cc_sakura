@@ -5,9 +5,9 @@
 // LVar *locals;
 // Func *func_list[100];
 
-Node *compound_assign(TypeKind type, Node *src, Node *dst){
-	Node *calc = new_node(type, src, dst);
-	Node *new  = new_node(ND_COMPOUND, src, calc);
+Node *compound_assign(TypeKind type, Node *dst, Node *src){
+	Node *calc = new_node(type, dst, src);
+	Node *new  = new_node(ND_COMPOUND, dst, calc);
 	return new;
 }
 
