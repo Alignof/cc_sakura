@@ -41,6 +41,16 @@ void gen_arg(int arg_num, Node *tmp){
 	printf("	mov %s,rax\n", reg[arg_num]);
 }
 
+void gen_assign_lhs(Node *node){
+	/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
+	else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
+	else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
+	else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
+	else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
+	else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
+	else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
+}
+
 void expand_next(Node *node){
 	while(node){
 		gen(node);
@@ -129,14 +139,7 @@ void gen(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_ASSIGN:
-			/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
-			else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
-			else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
-			else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
-			else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
-
+			gen_assign_lhs(node);
 			gen(node->rhs);
 
 			if(node->lhs->type->ty == CHAR){
@@ -159,14 +162,7 @@ void gen(Node *node){
 
 			return;
 		case ND_COMPOUND:
-			/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
-			else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
-			else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
-			else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
-			else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
-
+			gen_assign_lhs(node);
 			gen(node->rhs);
 
 			if(node->lhs->type->ty == CHAR){
