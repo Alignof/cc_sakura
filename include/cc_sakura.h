@@ -39,6 +39,7 @@ typedef enum{
 	ND_AND, 	//  &&
 	ND_OR, 		//  ||
 	ND_ASSIGN, 	//  =
+	ND_COMPOUND, 	//  +=, -=, *=, /=
 
 	// symbol --> rhs
 	ND_POSTID, 	//  a++, a--
@@ -250,7 +251,7 @@ Node *data();
 
 // parse_part.c
 void get_argument(int func_index);
-Node *multi_assign(TypeKind type, Node *src, Node *dst);
+Node *compound_assign(TypeKind type, Node *src, Node *dst);
 Node *dot_arrow(TypeKind type, Node *node);
 //Node *dot(Node *node);
 //Node *arrow(Node *node);

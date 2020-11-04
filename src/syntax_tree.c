@@ -265,13 +265,13 @@ Node *assign(){
 	if(consume("=")){
 		node = new_node(ND_ASSIGN, node, assign());
 	}else if(consume("+=")){
-		node = multi_assign(ND_ADD, node, assign());
+		node = compound_assign(ND_ADD, node, assign());
 	}else if(consume("-=")){
-		node = multi_assign(ND_SUB, node, assign());
+		node = compound_assign(ND_SUB, node, assign());
 	}else if(consume("*=")){
-		node = multi_assign(ND_MUL, node, assign());
+		node = compound_assign(ND_MUL, node, assign());
 	}else if(consume("/=")){
-		node = multi_assign(ND_DIV, node, assign());
+		node = compound_assign(ND_DIV, node, assign());
 	}
 
 	return node;

@@ -129,8 +129,36 @@ void gen(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_ASSIGN:
-			// gen_lvar(variable) = gen(expr)
-			
+			/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
+			else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
+			else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
+			else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
+			else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
+			else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
+			else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
+
+			gen(node->rhs);
+
+			if(node->lhs->type->ty == CHAR){
+				printf("	pop rcx\n");
+				printf("	pop rax\n");
+				printf("	mov [rax],cl\n");
+				printf("	push rcx\n");
+			}else{
+				printf("	pop rdi\n");
+				printf("	pop rax\n");
+
+				if(node->lhs->type->ty == INT){
+					printf("	mov [rax],edi\n");
+				}else{
+					printf("	mov [rax],rdi\n");
+				}
+
+				printf("	push rdi\n");
+			}
+
+			return;
+		case ND_COMPOUND:
 			/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
 			else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
 			else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
