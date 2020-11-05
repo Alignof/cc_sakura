@@ -229,11 +229,11 @@ void gen(Node *node){
 			// calc
 			printf("	pop rdi\n");  // rhs
 			printf("	pop rax\n");  // lhs
-			printf("	push rax\n"); // stash lhs
+			printf("	push rax\n"); // Evacuation lhs
 			printf("	mov rax,[rax]\n"); // deref lhs
 
 			gen_calc(node->rhs);
-			printf("	push rax\n"); // rhs+lhs
+			printf("	push rax\n"); // rhs op lhs
 
 			// assign
 			printf("	pop rdi\n"); // src
