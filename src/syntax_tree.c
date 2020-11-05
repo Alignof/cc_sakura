@@ -471,15 +471,7 @@ void program(){
 			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 			
 			// add type list
-			Type *newtype = func_list[func_index]->type;
-			for(int i = 0;i<star_count;i++){
-				newtype->ptr_to = calloc(1, sizeof(Type));
-				newtype->ptr_to->ty = newtype->ty;
-				newtype->ty = PTR;
-				newtype = newtype->ptr_to;
-			}
-
-			if(star_count == 0) newtype->ptr_to = calloc(1, sizeof(Type));
+			insert_type_list(func_list[func_index]->type, star_count);
 
 			// get arguments
 			get_argument(func_index);

@@ -11,6 +11,7 @@ int main(){
 	int x=3;
 
 	*f(&x) += 4;
-
+	
+	// 21
 	return global + x;
 }

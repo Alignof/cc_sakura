@@ -265,6 +265,7 @@ Node *call_function(Node *node, Token *tok);
 Node *array_index(Node *node, Node *index);
 
 // declare.c
+void insert_type_list(Type *newtype, int star_count);
 Node *declare_global_variable();
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
