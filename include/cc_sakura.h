@@ -6,6 +6,7 @@
 #include <string.h>
 #include <errno.h>
 
+#define FUNC_NUM 100
 
 typedef enum{
 	TK_TYPE,
@@ -39,6 +40,7 @@ typedef enum{
 	ND_AND, 	//  &&
 	ND_OR, 		//  ||
 	ND_ASSIGN, 	//  =
+	ND_COMPOUND, 	//  +=, -=, *=, /=
 
 	// symbol --> rhs
 	ND_POSTID, 	//  a++, a--
@@ -222,6 +224,7 @@ Token *consume_ident();
 Token *consume_string();
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Func *find_func(Token *tok);
 GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
 Str  *find_string(Token *tok);
@@ -250,7 +253,7 @@ Node *data();
 
 // parse_part.c
 void get_argument(int func_index);
-Node *multi_assign(TypeKind type, Node *src, Node *dst);
+Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(TypeKind type, Node *node);
 //Node *dot(Node *node);
 //Node *arrow(Node *node);
@@ -262,6 +265,7 @@ Node *call_function(Node *node, Token *tok);
 Node *array_index(Node *node, Node *index);
 
 // declare.c
+void insert_type_list(Type *newtype, int star_count);
 Node *declare_global_variable();
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
@@ -271,9 +275,11 @@ extern int label_begin;
 extern int label_end;
 extern int label_else;
 void gen(Node *node);
+void gen_calc(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
 void gen_struc(Node *node);
+void gen_assign_lhs(Node *node);
 void expand_next(Node *node);
 void expand_vector(Node *node);
 

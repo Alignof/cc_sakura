@@ -33,10 +33,6 @@ syntax tree node kind.
 | ND\_MUL	| multiple symbol		| *			|
 | ND\_DIV	| divite symbol			| /			|
 | ND\_MOD	| modulo symbol			| %			|
-| ND\_INC	| increment			| ++			|
-| ND\_DEC	| decrement			| --			|
-| ND\_ADDRESS	| get address			| &a			|
-| ND\_DEREF	| dereference			| \*a			|
 | ND\_GT	| greater than			| >			|
 | ND\_GE	| greater than equal		| >=			|
 | ND\_LT	| less than			| <			|
@@ -46,6 +42,12 @@ syntax tree node kind.
 | ND\_AND	| and				| &&			|
 | ND\_OR	| or				| \|\|			|
 | ND\_ASSIGN	| assign			| =			|
+| ND\_POSTID	| post increment/decrement	| a++, a--		|
+| ND\_DOT	| direct member selection	| struc.member		|
+| ND\_ARROW	| direct member selection	| struc.member		|
+| ND\_PREID	| pre increment/decrement	| ++a, --a		|
+| ND\_ADDRESS	| get address			| &a			|
+| ND\_DEREF	| dereference			| \*a			|
 | ND\_LVAR	| local variable 		| (local variable)	|
 | ND\_GVAR	| global variable		| (global variable)	|
 | ND\_LARRAY	| local array 			| (local array)		|
@@ -73,10 +75,11 @@ type of variable kind.
 | INT		| int				| 32 (4byte)			|
 | PTR		| int \*, char \*...		| 64 (8byte)			|
 | ARRAY		| int a[], char a[]...		| 8 \* size (n byte)		|
+| STRUC		| struct struc{int a; int b;};	| 8 \* sum size (n byte)	|
 
 
 ## structs
-Token, Node, LVar, GVar, Func, Type, Str...
+Token, Node, LVar, GVar, Func, Struc, Member, Type, Str...
 
 ### Token
 struct of parsed token.

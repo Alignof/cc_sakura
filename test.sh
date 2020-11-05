@@ -161,12 +161,8 @@ assert -cl 7 'int main(){int x=4; int y=3; x+=y; return x;}'
 assert -cl 1 'int main(){int x=4; int y=3; x-=y; return x;}'
 assert -cl 9 'int main(){int x=3; int y=3; x*=y; return x;}'
 assert -cl 4 'int main(){int x=12; int y=3; x/=y; return x;}'
-
-assert -cl 97 "int main(){return 'a';}"
-assert -cl 1 "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
-
-assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
-assert -cl 5 "struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
+assert -cl 6 'int main(){int i; int x[4]={0,1,2,3}; int y[4]={0,1,2,3}; int *p=x; int *q=y; for(i=0;i<4;i++){*(p++)+=*(q++);} return x[3];}'
+assert -cl 21 'int global = 7; int *f(int *x){*x += 4; global += 3; return x;} int main(){int x=3; *f(&x) += 4; return global + x;}'
 
 assert -cl 97 "int main(){return 'a';}"
 assert -cl 1 "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
@@ -175,5 +171,8 @@ assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3
 assert -cl 5 "struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
 assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a=2; y->b=3; return y->a + y->b;}"
 assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;}"
+
+
+
 
 echo OK

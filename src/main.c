@@ -5,7 +5,7 @@ int label_end;
 int label_else;
 char *user_input;
 char filename[100];
-Func *func_list[100];
+Func *func_list[FUNC_NUM];
 
 char *read_file(char *path){
 	FILE *fp;

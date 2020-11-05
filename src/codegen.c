@@ -4,6 +4,26 @@
 // int label_end;
 // int label_else;
 
+void expand_next(Node *node){
+	while(node){
+		gen(node);
+		printf("	pop rax\n");
+		node=node->next;
+	}
+	printf("	push rax\n");
+	return;
+}
+
+void expand_vector(Node *node){
+	while(node){
+		gen(node);
+		printf("	pop rax\n");
+		node=node->vector;
+	}
+	return;
+}
+
+
 void gen_gvar(Node *node){
 	printf("	lea rax,  _%.*s[rip]\n", node->val, node->str);
 	printf("	push rax\n");
@@ -41,24 +61,80 @@ void gen_arg(int arg_num, Node *tmp){
 	printf("	mov %s,rax\n", reg[arg_num]);
 }
 
-void expand_next(Node *node){
-	while(node){
-		gen(node);
-		printf("	pop rax\n");
-		node=node->next;
-	}
-		
-	printf("	push rax\n");
-	return;
+void gen_assign_lhs(Node *node){
+	/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
+	else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
+	else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
+	else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
+	else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
+	else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
+	else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
 }
 
-void expand_vector(Node *node){
-	while(node){
-		gen(node);
-		printf("	pop rax\n");
-		node=node->vector;
+void gen_calc(Node *node){
+	const char reg_ax[4][4]={"eax","eax","rax","rax"};
+	const char reg_dx[4][4]={"edx","edx","rdx","rdx"};
+	const char reg_di[4][4]={"edi","edi","rdi","rdi"};
+	int reg_ty = (int)node->type->ty;
+
+	switch(node->kind){
+		case ND_ADD:
+			printf("	add %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			break;
+		case ND_SUB:
+			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			break;
+		case ND_MUL:
+			printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			break;
+		case ND_DIV:
+			printf("	cqo\n");
+			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			break;
+		case ND_MOD:
+			printf("	cqo\n");
+			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	mov %s,%s\n", reg_ax[reg_ty], reg_dx[reg_ty]);
+			break;
+		case ND_GT:
+			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
+			printf("	setl al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_GE:
+			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
+			printf("	setle al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_LT:
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	setl al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_LE:
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	setle al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_EQ:
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	sete al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_NE:
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	setne al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_AND:
+			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	movzb rax,al\n");
+			break;
+		case ND_OR:
+			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	movzb rax,al\n");
+			break;
 	}
-	return;
 }
 
 void gen(Node *node){
@@ -129,35 +205,48 @@ void gen(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_ASSIGN:
-			// gen_lvar(variable) = gen(expr)
-			
-			/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
-			//else if(node->lhs->type->ty == STRUCT) gen_struc(node);
-			else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
-			else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
-			else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
-			else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
-			else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
-
+			gen_assign_lhs(node);
 			gen(node->rhs);
 
+			printf("	pop rdi\n");
+			printf("	pop rax\n");
 			if(node->lhs->type->ty == CHAR){
-				printf("	pop rcx\n");
-				printf("	pop rax\n");
-				printf("	mov [rax],cl\n");
-				printf("	push rcx\n");
+				printf("	mov [rax],dil\n");
+			}else if(node->lhs->type->ty == INT){
+				printf("	mov [rax],edi\n");
 			}else{
-				printf("	pop rdi\n");
-				printf("	pop rax\n");
-
-				if(node->lhs->type->ty == INT)
-					printf("	mov [rax],edi\n");
-				else
-					printf("	mov [rax],rdi\n");
-
-				printf("	push rdi\n");
+				printf("	mov [rax],rdi\n");
 			}
+
+			printf("	push rdi\n");
+
+			return;
+		case ND_COMPOUND:
+			// push
+			gen_assign_lhs(node); // push lhs
+			gen(node->rhs->rhs);  // push rhs
+
+			// calc
+			printf("	pop rdi\n");  // rhs
+			printf("	pop rax\n");  // lhs
+			printf("	push rax\n"); // Evacuation lhs
+			printf("	mov rax,[rax]\n"); // deref lhs
+
+			gen_calc(node->rhs);
+			printf("	push rax\n"); // rhs op lhs
+
+			// assign
+			printf("	pop rdi\n"); // src
+			printf("	pop rax\n"); // dst
+			if(node->lhs->type->ty == CHAR){
+				printf("	mov [rax],dil\n");
+			}else if(node->lhs->type->ty == INT){
+				printf("	mov [rax],edi\n");
+			}else{
+				printf("	mov [rax],rdi\n");
+			}
+
+			printf("	push rdi\n");
 
 			return;
 		case ND_DOT:
@@ -309,79 +398,17 @@ void gen(Node *node){
 	}
 
 
-	//check left hand side
+	// check left hand side
 	gen(node->lhs);
-	//check right hand side
+	// check right hand side
 	gen(node->rhs);
 
+	// pop two value
 	printf("	pop rdi\n");
 	printf("	pop rax\n");
-
-
-	const char reg_ax[4][4]={"eax","eax","rax","rax"};
-	const char reg_dx[4][4]={"edx","edx","rdx","rdx"};
-	const char reg_di[4][4]={"edi","edi","rdi","rdi"};
-	int reg_ty = (int)node->type->ty;
-
-	switch(node->kind){
-		case ND_ADD:
-			printf("	add %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			break;
-		case ND_SUB:
-			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			break;
-		case ND_MUL:
-			printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			break;
-		case ND_DIV:
-			printf("	cqo\n");
-			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			break;
-		case ND_MOD:
-			printf("	cqo\n");
-			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	mov %s,%s\n", reg_ax[reg_ty], reg_dx[reg_ty]);
-			break;
-		case ND_GT:
-			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
-			printf("	setl al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_GE:
-			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
-			printf("	setle al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_LT:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	setl al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_LE:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	setle al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_EQ:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	sete al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_NE:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	setne al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_AND:
-			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	movzb rax,al\n");
-			break;
-		case ND_OR:
-			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	movzb rax,al\n");
-			break;
-	}
-
+	// calculation lhs and rhs
+	gen_calc(node);
+	// push result
 	printf("	push rax\n");
 }
 

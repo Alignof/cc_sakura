@@ -8,6 +8,16 @@ Struc *structs;
 // LVar *locals;
 // Func *func_list[100];
 
+void insert_type_list(Type *newtype, int star_count){
+	for(int i = 0;i<star_count;i++){
+		newtype->ptr_to = calloc(1, sizeof(Type));
+		newtype->ptr_to->ty = newtype->ty;
+		newtype->ty = PTR;
+		newtype = newtype->ptr_to;
+	}
+
+	if(star_count == 0) newtype->ptr_to = calloc(1, sizeof(Type));
+}
 
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type){
 	// if not token -> error
@@ -23,15 +33,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->type = toplv_type;
 
 	// add type list
-	Type *newtype = gvar->type;
-	for(int i = 0;i<star_count;i++){
-		newtype->ptr_to = calloc(1, sizeof(Type));
-		newtype->ptr_to->ty = newtype->ty;
-		newtype->ty = PTR;
-		newtype = newtype->ptr_to;
-	}
-
-	if(star_count == 0) newtype->ptr_to = calloc(1, sizeof(Type));
+	insert_type_list(gvar->type, star_count);
 
 	// Is array
 	if(consume("[")){
@@ -78,18 +80,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->type = node->type;
 
 	// add type list
-	Type *newtype = lvar->type;
-	for(i = 0;i<star_count;i++){
-		newtype->ptr_to = calloc(1, sizeof(Type));
-		newtype->ptr_to->ty = newtype->ty;
-		newtype->ty = PTR;
-		newtype = newtype->ptr_to;
-	}
-
-	if(star_count == 0){
-		newtype->ptr_to = NULL;
-	}
-
+	insert_type_list(lvar->type, star_count);
 
 	// Is array
 	if(consume("[")){
@@ -157,13 +148,7 @@ void declare_struct(Struc *new_struc){
 		}
 
 		// add type list
-		Type *newtype = new_memb->type;
-		for(int i = 0;i < star_count;i++){
-			newtype->ptr_to	    = calloc(1, sizeof(Type));
-			newtype->ptr_to->ty = newtype->ty;
-			newtype->ty         = PTR;
-			newtype = newtype->ptr_to;
-		}
+		insert_type_list(new_memb->type, star_count);
 
 		Token *def_name  = consume_ident();
 		new_memb->name   = def_name->str;
