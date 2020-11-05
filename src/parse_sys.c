@@ -140,9 +140,10 @@ Token *consume_ident(){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-			strlen(op) != token->len||
-			memcmp(token->str, op, token->len))
+	    strlen(op) != token->len||
+	    memcmp(token->str, op, token->len)){
 		error_at(token->str, "not a charctor.");
+	}
 	token = token->next;
 }
 
@@ -155,6 +156,15 @@ int expect_number(){
 	int val = token->val;
 	token = token->next;
 	return val;
+}
+
+Func *find_func(Token *tok){
+	for (int i = 0;i < FUNC_NUM;i++){
+		if(!memcmp(tok->str, func_list[i]->name, tok->len)){
+			return func_list[i];
+		}
+	}
+	return NULL;
 }
 
 GVar *find_gvar(Token *tok){

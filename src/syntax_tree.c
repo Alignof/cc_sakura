@@ -35,7 +35,8 @@ Node *data(){
 			node->type = lvar->type;
 		// call function
 		}else if(check("(")){
-			node->type = calloc(1, sizeof(Type));
+			Func *called = find_func(tok);
+			node->type = called->type;
 			node = call_function(node, tok);
 		}else{
 			GVar *gvar = find_gvar(tok);
@@ -265,13 +266,13 @@ Node *assign(){
 	if(consume("=")){
 		node = new_node(ND_ASSIGN, node, assign());
 	}else if(consume("+=")){
-		node = multi_assign(ND_ADD, node, assign());
+		node = compound_assign(ND_ADD, node, assign());
 	}else if(consume("-=")){
-		node = multi_assign(ND_SUB, node, assign());
+		node = compound_assign(ND_SUB, node, assign());
 	}else if(consume("*=")){
-		node = multi_assign(ND_MUL, node, assign());
+		node = compound_assign(ND_MUL, node, assign());
 	}else if(consume("/=")){
-		node = multi_assign(ND_DIV, node, assign());
+		node = compound_assign(ND_DIV, node, assign());
 	}
 
 	return node;
@@ -469,6 +470,9 @@ void program(){
 			func_list[func_index]->name = (char *)calloc(def_name->len, sizeof(char));
 			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 			
+			// add type list
+			insert_type_list(func_list[func_index]->type, star_count);
+
 			// get arguments
 			get_argument(func_index);
 

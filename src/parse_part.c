@@ -5,9 +5,9 @@
 // LVar *locals;
 // Func *func_list[100];
 
-Node *multi_assign(TypeKind type, Node *src, Node *dst){
-	Node *calc = new_node(type, src, dst);
-	Node *new  = new_node(ND_ASSIGN, src, calc);
+Node *compound_assign(TypeKind type, Node *dst, Node *src){
+	Node *calc = new_node(type, dst, src);
+	Node *new  = new_node(ND_COMPOUND, dst, calc);
 	return new;
 }
 
@@ -319,8 +319,9 @@ void get_argument(int func_index){
 
 			arg_counter++;
 
-			if(!(consume(",")))
+			if(!(consume(","))){
 				break;
+			}
 		}
 		args_ptr = NULL;
 		func_list[func_index]->args->val = arg_counter-1;
