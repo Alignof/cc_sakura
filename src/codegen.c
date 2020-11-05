@@ -142,23 +142,17 @@ void gen(Node *node){
 			gen_assign_lhs(node);
 			gen(node->rhs);
 
+			printf("	pop rdi\n");
+			printf("	pop rax\n");
 			if(node->lhs->type->ty == CHAR){
-				printf("	pop rcx\n");
-				printf("	pop rax\n");
-				printf("	mov [rax],cl\n");
-				printf("	push rcx\n");
+				printf("	mov [rax],dil\n");
+			}else if(node->lhs->type->ty == INT){
+				printf("	mov [rax],edi\n");
 			}else{
-				printf("	pop rdi\n");
-				printf("	pop rax\n");
-
-				if(node->lhs->type->ty == INT){
-					printf("	mov [rax],edi\n");
-				}else{
-					printf("	mov [rax],rdi\n");
-				}
-
-				printf("	push rdi\n");
+				printf("	mov [rax],rdi\n");
 			}
+
+			printf("	push rdi\n");
 
 			return;
 		case ND_COMPOUND:
@@ -174,23 +168,17 @@ void gen(Node *node){
 			printf("	push rdi\n"); // rhs+lhs
 
 			// assign
+			printf("	pop rdi\n");
+			printf("	pop rax\n");
 			if(node->lhs->type->ty == CHAR){
-				printf("	pop rcx\n");
-				printf("	pop rax\n");
-				printf("	mov [rax],cl\n");
-				printf("	push rcx\n");
+				printf("	mov [rax],dil\n");
+			}else if(node->lhs->type->ty == INT){
+				printf("	mov [rax],edi\n");
 			}else{
-				printf("	pop rdi\n");
-				printf("	pop rax\n");
-
-				if(node->lhs->type->ty == INT){
-					printf("	mov [rax],edi\n");
-				}else{
-					printf("	mov [rax],rdi\n");
-				}
-
-				printf("	push rdi\n");
+				printf("	mov [rax],rdi\n");
 			}
+
+			printf("	push rdi\n");
 
 			return;
 		case ND_DOT:
