@@ -1,13 +1,16 @@
+int global = 7;
+
+int *f(int *x){
+	*x += 4;
+	global += 3;
+
+	return x;
+}
+
 int main(){
-	int i;
-	int x[4] = {0,1,2,3};
-	int y[4] = {0,1,2,3};
-	int *p   = x;
-	int *q   = y;
+	int x=3;
 
-	for(i=0;i<4;i++){
-		*(p++) += *(q++);
-	}
+	*f(&x) += 4;
 
-	return x[3];
+	return global + x;
 }

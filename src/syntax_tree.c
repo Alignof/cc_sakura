@@ -35,7 +35,8 @@ Node *data(){
 			node->type = lvar->type;
 		// call function
 		}else if(check("(")){
-			node->type = calloc(1, sizeof(Type));
+			Func *called = find_func(tok);
+			node->type = called->type;
 			node = call_function(node, tok);
 		}else{
 			GVar *gvar = find_gvar(tok);
@@ -469,6 +470,17 @@ void program(){
 			func_list[func_index]->name = (char *)calloc(def_name->len, sizeof(char));
 			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 			
+			// add type list
+			Type *newtype = func_list[func_index]->type;
+			for(int i = 0;i<star_count;i++){
+				newtype->ptr_to = calloc(1, sizeof(Type));
+				newtype->ptr_to->ty = newtype->ty;
+				newtype->ty = PTR;
+				newtype = newtype->ptr_to;
+			}
+
+			if(star_count == 0) newtype->ptr_to = calloc(1, sizeof(Type));
+
 			// get arguments
 			get_argument(func_index);
 

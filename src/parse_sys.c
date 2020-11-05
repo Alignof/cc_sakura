@@ -158,6 +158,15 @@ int expect_number(){
 	return val;
 }
 
+Func *find_func(Token *tok){
+	for (int i = 0;i < FUNC_NUM;i++){
+		if(!memcmp(tok->str, func_list[i]->name, tok->len)){
+			return func_list[i];
+		}
+	}
+	return NULL;
+}
+
 GVar *find_gvar(Token *tok){
 	//while var not equal NULL
 	for (GVar *var = globals;var;var = var->next){

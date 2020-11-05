@@ -6,6 +6,7 @@
 #include <string.h>
 #include <errno.h>
 
+#define FUNC_NUM 100
 
 typedef enum{
 	TK_TYPE,
@@ -223,6 +224,7 @@ Token *consume_ident();
 Token *consume_string();
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Func *find_func(Token *tok);
 GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
 Str  *find_string(Token *tok);
