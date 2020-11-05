@@ -223,19 +223,21 @@ void gen(Node *node){
 			return;
 		case ND_COMPOUND:
 			// push
-			gen_assign_lhs(node);
-			gen(node->rhs);
+			gen_assign_lhs(node); // push lhs
+			gen(node->rhs->rhs);  // push rhs
 
 			// calc
 			printf("	pop rdi\n");  // rhs
 			printf("	pop rax\n");  // lhs
-			/*	calculation	*/
-			printf("	push rax\n"); // lhs
-			printf("	push rdi\n"); // rhs+lhs
+			printf("	push rax\n"); // stash lhs
+			printf("	mov rax,[rax]\n"); // deref lhs
+
+			gen_calc(node->rhs);
+			printf("	push rax\n"); // rhs+lhs
 
 			// assign
-			printf("	pop rdi\n");
-			printf("	pop rax\n");
+			printf("	pop rdi\n"); // src
+			printf("	pop rax\n"); // dst
 			if(node->lhs->type->ty == CHAR){
 				printf("	mov [rax],dil\n");
 			}else if(node->lhs->type->ty == INT){

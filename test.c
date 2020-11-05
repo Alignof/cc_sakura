@@ -1,3 +1,4 @@
+/*
 int main(){
 	int i;
 	int x[4] = {0,1,2,3};
@@ -10,4 +11,12 @@ int main(){
 	}
 
 	return x[3];
+}
+*/
+int main(){
+	int a = 3;
+	int b = 4;
+
+	a += b;
+	return a;
 }
