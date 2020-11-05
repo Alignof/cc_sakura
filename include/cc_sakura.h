@@ -272,6 +272,7 @@ extern int label_begin;
 extern int label_end;
 extern int label_else;
 void gen(Node *node);
+void gen_calc(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
 void gen_struc(Node *node);
