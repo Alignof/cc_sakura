@@ -8,10 +8,10 @@ int *f(int *x){
 }
 
 int main(){
-	 int x=3;
+	 int x = 3;
 
-	 (*f(&x))++;
+	 x = (*f(&x))++;
 
-	// 18
+	// 12
 	return global + x;
 }
