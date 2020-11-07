@@ -83,27 +83,29 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	insert_type_list(lvar->type, star_count);
 
 	// Is array
-	if(consume("[")){
+	if(check("[")){
+		Type *newtype;
+		int asize = 0;
 		int isize = -1;
-		node->val = -1;
 		node->kind = ND_LARRAY;
+		while(consume("[")){
+			newtype = calloc(1, sizeof(Type));
+			newtype->ty     = ARRAY;
+			newtype->ptr_to = lvar->type;
+			lvar->type      = newtype;
 
-		lvar->type->ptr_to = calloc(1, sizeof(Type));
-		lvar->type->ptr_to->ty = lvar->type->ty;
-		lvar->type->ty = ARRAY;
+			if(!check("]")){
+				isize = token->val;
+				asize = align_array_size(isize, lvar->type->ptr_to->ty);
+				alloc_size+=asize;
+				lvar->offset = ((locals) ? (locals->offset) :0) + asize;
+				token = token->next;
+			}
 
-		//if(*(token->str)!=']'){
-		if(!check("]")){
-			int asize = align_array_size(token->val, lvar->type->ptr_to->ty);
-			alloc_size+=asize;
-			lvar->offset = ((locals) ? (locals->offset) :0) + asize;
-			isize = token->val;
-			token = token->next;
+			lvar->type->index_size = isize;
+
+			expect("]");
 		}
-
-		lvar->type->index_size = isize;
-
-		expect("]");
 	}else{
 		if(locals){
 			lvar->offset = (locals->offset)+8;

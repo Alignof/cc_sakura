@@ -1,17 +1,5 @@
-int global = 7;
-
-int *f(int *x){
-	 *x += 1;
-	 global += 1;
-
-	 return x;
-}
-
 int main(){
-	 int x = 3;
+	int x[10][10];
 
-	 x = (*f(&x))++;
-
-	// 12
-	return global + x;
+	return x[0][0];
 }
