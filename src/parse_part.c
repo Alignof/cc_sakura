@@ -37,58 +37,6 @@ Node *dot_arrow(TypeKind type, Node *node){
 	return new;
 }
 
-/*
-Node *dot(Node *node){
-	// struc.aaa.bbb.ccc;
-	// (lvar <- node -> dot) <- node -> dot
-	Node *new = new_node(ND_DOT, node, NULL);
-	Token* memb_name  = consume_ident();
-	Member* memb_list;
-
-	if(node->kind == ND_ADDRESS || node->kind == ND_DEREF){
-		memb_list = node->rhs->type->member;
-	}else{
-		memb_list = node->type->member;
-	}
-
-	while(memb_list){
-		if(memb_list->len == memb_name->len && !memcmp(memb_name->str, memb_list->name, memb_name->len)){
-			new->rhs  = new_node_num(memb_list->offset);
-			new->type = memb_list->type;
-			break;
-		}
-		memb_list = memb_list->next;
-	}
-
-	return new;
-}
-
-Node *arrow(Node *node){
-	// struc->aaa->bbb->ccc;
-	// (lvar <- node -> dot) <- node -> dot
-	Node *new = new_node(ND_ARROW, node, NULL);
-	Token* memb_name  = consume_ident();
-	Member* memb_list;
-
-	if(node->kind == ND_ADDRESS || node->kind == ND_DEREF){
-		memb_list = node->rhs->type->member;
-	}else{
-		memb_list = node->type->member;
-	}
-
-	while(memb_list){
-		if(memb_list->len == memb_name->len && !memcmp(memb_name->str, memb_list->name, memb_name->len)){
-			new->rhs  = new_node_num(memb_list->offset);
-			new->type = memb_list->type;
-			break;
-		}
-		memb_list = memb_list->next;
-	}
-
-	return new;
-}
-*/
-
 Node *incdec(Node *node, IncDecKind idtype){
 	/*
 	 * a++;
@@ -247,7 +195,6 @@ Node *array_block(Node *arr){
 		}
 	}
 
-
 	return head;
 }
 
@@ -311,9 +258,9 @@ void get_argument(int func_index){
 		while(token->kind == TK_NUM || token->kind == TK_TYPE){
 			*args_ptr = (Node *)calloc(1, sizeof(Node));
 			(*args_ptr)->kind = ND_ARG;
-			(*args_ptr)->val = arg_counter;
+			(*args_ptr)->val  = arg_counter;
 			(*args_ptr)->next = expr();
-			(*args_ptr)->rhs = next;
+			(*args_ptr)->rhs  = next;
 			// go to next
 			next = *args_ptr;
 

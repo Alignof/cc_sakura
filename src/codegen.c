@@ -11,7 +11,6 @@ void expand_next(Node *node){
 		node=node->next;
 	}
 	printf("	push rax\n");
-	return;
 }
 
 void expand_vector(Node *node){
@@ -20,7 +19,6 @@ void expand_vector(Node *node){
 		printf("	pop rax\n");
 		node=node->vector;
 	}
-	return;
 }
 
 
