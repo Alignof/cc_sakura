@@ -199,14 +199,13 @@ void gen(Node *node){
 		case ND_POSTID:
 			// push
 			gen_assign_lhs(node); // push lhs
-
-			printf("	push rax\n"); // push lhs
 			gen(node->rhs->rhs->rhs);          // push rhs
 			
 			// calc
-			printf("	pop rdi\n");  // rhs
-			printf("	pop rax\n");  // lhs
-			printf("	push rax\n"); // Evacuation lhs
+			printf("	pop rdi\n");    // rhs
+			printf("	pop rax\n");    // lhs
+			printf("	push [rax]\n"); // Evacuation lhs data
+			printf("	push rax\n");   // Evacuation lhs address
 			printf("	mov rax,[rax]\n"); // deref lhs
 
 			gen_calc(node->rhs->rhs);

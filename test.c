@@ -1,8 +1,8 @@
 int global = 7;
 
 int *f(int *x){
-	 *x += 4;
-	 global += 3;
+	 *x += 1;
+	 global += 1;
 
 	 return x;
 }
