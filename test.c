@@ -1,14 +1,31 @@
+/*
+int global = 7;
+
+int *f(int *x){
+	 *x += 4;
+	 global += 3;
+
+	 return x;
+}
+
+int main(){
+	 int x=3;
+
+	 (*f(&x))++;
+
+	// 18
+	return global + x;
+}
+*/
+
 int main(){
 	int i;
-	int j;
-	int x[10][10];
+	int x[4] = {0,1,2,3};
+	int y[4] = {0,1,2,3};
+	int *p   = x;
+	int *q   = y;
 
-	for(i=1;i<=10;i++){
-		for(j=1;j<=10;j++){
-			x[i][j]=i*j;
-		}
-	}
+	p += 3;
 
-	return x[3][2];
-	
+	return *p;
 }
