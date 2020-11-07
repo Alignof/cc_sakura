@@ -69,6 +69,7 @@ void gen_assign_lhs(Node *node){
 	else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
 	else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
 	else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
+	else //error();
 }
 
 void gen_calc(Node *node){
@@ -198,9 +199,32 @@ void gen(Node *node){
 			gen(node->lhs);
 			return;
 		case ND_POSTID:
-			gen(node->lhs);
-			gen(node->rhs);
-			printf("	pop rax\n");
+			// push
+			gen(node->lhs);		      // push lhs
+
+			printf("	push rax\n"); // push lhs
+			gen(node->rhs->rhs);          // push rhs
+			
+			// calc
+			printf("	pop rdi\n");  // rhs
+			printf("	pop rax\n");  // lhs
+			printf("	push rax\n"); // Evacuation lhs
+			printf("	mov rax,[rax]\n"); // deref lhs
+
+			gen_calc(node->rhs->rhs);
+			printf("	push rax\n"); // rhs op lhs
+
+			// assign
+			printf("	pop rdi\n"); // src
+			printf("	pop rax\n"); // dst
+			if(node->lhs->type->ty == CHAR){
+				printf("	mov [rax],dil\n");
+			}else if(node->lhs->type->ty == INT){
+				printf("	mov [rax],edi\n");
+			}else{
+				printf("	mov [rax],rdi\n");
+			}
+
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n", node->val);
