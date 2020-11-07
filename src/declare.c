@@ -16,13 +16,14 @@ void insert_type_list(Type *newtype, int star_count){
 		newtype = newtype->ptr_to;
 	}
 
-	if(star_count == 0) newtype->ptr_to = calloc(1, sizeof(Type));
+	// if(star_count == 0) newtype->ptr_to = calloc(1, sizeof(Type));
 }
 
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type){
 	// if not token -> error
 	if(!def_name) error_at(token->str, "not a variable.");
 
+	Type *newtype;
 	Node *node = calloc(1, sizeof(Node));
 	node->kind = ND_GVAR;
 
@@ -41,6 +42,10 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 		node->val  = -1;
 		node->kind = ND_GARRAY;
 
+		newtype = calloc(1, sizeof(Type));
+		newtype->ty     = ARRAY;
+		newtype->ptr_to = gvar->type;
+		gvar->type      = newtype;
 		if(!check("]")){
 			// body
 			isize = token->val;
