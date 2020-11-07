@@ -68,8 +68,6 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 }
 
 Node *declare_local_variable(Node *node, Token *tok, int star_count){
-	int i;
-
 	LVar *lvar = find_lvar(tok);
 	if(lvar) error_at(token->str, "this variable has already existed.");
 
@@ -96,7 +94,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 			if(!check("]")){
 				isize = token->val;
-				asize = align_array_size(isize, lvar->type->ptr_to->ty);
+				//asize = align_array_size(isize, lvar->type->ptr_to->ty);
+				asize = align_array_size(isize, get_pointer_type(lvar->type));
 				alloc_size+=asize;
 				lvar->offset = ((locals) ? (locals->offset) :0) + asize;
 				token = token->next;

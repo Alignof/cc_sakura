@@ -236,7 +236,8 @@ Node *array_index(Node *node, Node *index){
 
 	pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
-	pointer_size->val  = type_size(get_pointer_type(node->lhs->type->ptr_to));
+	//pointer_size->val  = type_size(get_pointer_type(node->lhs->type->ptr_to));
+	pointer_size->val  = type_size(get_pointer_type(node->lhs->type));
 	pointer_size->type = calloc(1, sizeof(Type));
 	node->rhs = new_node(ND_MUL, index, pointer_size);
 
