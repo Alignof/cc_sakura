@@ -37,8 +37,8 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 
 	// Is array
 	if(consume("[")){
-		int isize = -1;
-		node->val = -1;
+		int isize  = -1;
+		node->val  = -1;
 		node->kind = ND_GARRAY;
 
 		if(!check("]")){
@@ -168,6 +168,4 @@ void declare_struct(Struc *new_struc){
 	new_struc->member  = memb_head;
 	new_struc->next	   = structs;
 	structs = new_struc;
-
-	return;
 }

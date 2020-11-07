@@ -11,7 +11,6 @@ void expand_next(Node *node){
 		node=node->next;
 	}
 	printf("	push rax\n");
-	return;
 }
 
 void expand_vector(Node *node){
@@ -20,7 +19,6 @@ void expand_vector(Node *node){
 		printf("	pop rax\n");
 		node=node->vector;
 	}
-	return;
 }
 
 
@@ -41,7 +39,7 @@ void gen_lvar(Node *node){
 
 void gen_struc(Node *node){
 	if(node->kind != ND_DOT && node->kind != ND_ARROW){
-		error_at(token->str,"not a struct");
+		error_at(token->str, "not a struct");
 	}
 
 	gen(node->lhs);
@@ -69,6 +67,7 @@ void gen_assign_lhs(Node *node){
 	else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
 	else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
 	else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
+	else error_at(token->str, "can not assign");
 }
 
 void gen_calc(Node *node){
@@ -191,14 +190,38 @@ void gen(Node *node){
 			if(node->vector != NULL) expand_next(node->vector);
 			return;
 		case ND_PREID:
+			//gen(node->lhs);
+			//printf("	pop rax\n");
+
+			// ++p -> p += 1
 			gen(node->lhs);
-			printf("	pop rax\n");
-			gen(node->rhs);
 			return;
 		case ND_POSTID:
-			gen(node->lhs);
-			gen(node->rhs);
-			printf("	pop rax\n");
+			// push
+			gen_assign_lhs(node); // push lhs
+			gen(node->rhs->rhs->rhs);          // push rhs
+			
+			// calc
+			printf("	pop rdi\n");    // rhs
+			printf("	pop rax\n");    // lhs
+			printf("	push [rax]\n"); // Evacuation lhs data
+			printf("	push rax\n");   // Evacuation lhs address
+			printf("	mov rax,[rax]\n"); // deref lhs
+
+			gen_calc(node->rhs->rhs);
+			printf("	push rax\n"); // rhs op lhs
+
+			// assign
+			printf("	pop rdi\n"); // src
+			printf("	pop rax\n"); // dst
+			if(node->lhs->type->ty == CHAR){
+				printf("	mov [rax],dil\n");
+			}else if(node->lhs->type->ty == INT){
+				printf("	mov [rax],edi\n");
+			}else{
+				printf("	mov [rax],rdi\n");
+			}
+
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n", node->val);

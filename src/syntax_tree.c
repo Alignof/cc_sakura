@@ -30,9 +30,9 @@ Node *data(){
 
 		LVar *lvar = find_lvar(tok);
 		if(lvar){
-			node->kind = (lvar->type->ty == ARRAY)? ND_LARRAY : ND_LVAR;
+			node->kind   = (lvar->type->ty == ARRAY)? ND_LARRAY : ND_LVAR;
 			node->offset = lvar->offset;
-			node->type = lvar->type;
+			node->type   = lvar->type;
 		// call function
 		}else if(check("(")){
 			Func *called = find_func(tok);
@@ -337,7 +337,6 @@ Node *stmt(){
 		if(!consume(";")){
 			error_at(token->str, "not a ';' token.");
 		}
-
 	}else if(consume_reserved_word("if", TK_IF)){
 		node = new_node(ND_IF, node, NULL);
 		if(consume("(")){
@@ -354,8 +353,8 @@ Node *stmt(){
 		if(consume_reserved_word("else", TK_ELSE)){
 			// if()~ <-else-> expr
 			Node *else_block = new_node(ND_ELSE, node, stmt());
-			else_block->lhs = node->rhs;
-			node->rhs = else_block;
+			else_block->lhs  = node->rhs;
+			node->rhs  = else_block;
 			node->kind = ND_IFELSE;
 		}
 	}else if(consume_reserved_word("for", TK_FOR)){
@@ -370,8 +369,8 @@ Node *stmt(){
 			//check end of caret
 			expect(")");
 
-			// +----------------------+
-			// +-> (init->cond->calc) +<-for->expr
+			// +-----------------------+
+			// +-> (init->cond->calc)  +<-for->expr
 			node->rhs = stmt();
 			node->lhs = init;
 			node->lhs->vector = cond;
