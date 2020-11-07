@@ -191,9 +191,11 @@ void gen(Node *node){
 			if(node->vector != NULL) expand_next(node->vector);
 			return;
 		case ND_PREID:
+			//gen(node->lhs);
+			//printf("	pop rax\n");
+
+			// ++p -> p += 1
 			gen(node->lhs);
-			printf("	pop rax\n");
-			gen(node->rhs);
 			return;
 		case ND_POSTID:
 			gen(node->lhs);

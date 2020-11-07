@@ -103,9 +103,11 @@ Node *incdec(Node *node, IncDecKind idtype){
 
 	// increment or decrement
 	if(idtype == PRE_INC || idtype == POST_INC){
-		plmi_one = new_node(ND_ASSIGN, node, new_node(ND_ADD,node,new_node_num(1)));
+		//plmi_one = new_node(ND_ASSIGN, node, new_node(ND_ADD,node,new_node_num(1)));
+		plmi_one = new_node(ND_COMPOUND, node, new_node(ND_ADD,node,new_node_num(1)));
 	}else{
-		plmi_one = new_node(ND_ASSIGN, node, new_node(ND_SUB,node,new_node_num(1)));
+		//plmi_one = new_node(ND_ASSIGN, node, new_node(ND_SUB,node,new_node_num(1)));
+		plmi_one = new_node(ND_COMPOUND, node, new_node(ND_SUB,node,new_node_num(1)));
 	}
 
 	// pre
