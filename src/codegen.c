@@ -39,7 +39,7 @@ void gen_lvar(Node *node){
 
 void gen_struc(Node *node){
 	if(node->kind != ND_DOT && node->kind != ND_ARROW){
-		error_at(token->str,"not a struct");
+		error_at(token->str, "not a struct");
 	}
 
 	gen(node->lhs);
@@ -67,7 +67,7 @@ void gen_assign_lhs(Node *node){
 	else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
 	else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
 	else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
-	else //error();
+	else error_at(token->str, "can not assign");
 }
 
 void gen_calc(Node *node){
@@ -198,10 +198,10 @@ void gen(Node *node){
 			return;
 		case ND_POSTID:
 			// push
-			gen(node->lhs);		      // push lhs
+			gen_assign_lhs(node); // push lhs
 
 			printf("	push rax\n"); // push lhs
-			gen(node->rhs->rhs);          // push rhs
+			gen(node->rhs->rhs->rhs);          // push rhs
 			
 			// calc
 			printf("	pop rdi\n");  // rhs

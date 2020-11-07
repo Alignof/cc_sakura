@@ -1,4 +1,3 @@
-/*
 int global = 7;
 
 int *f(int *x){
@@ -15,17 +14,4 @@ int main(){
 
 	// 18
 	return global + x;
-}
-*/
-
-int main(){
-	int i;
-	int x[4] = {0,1,2,3};
-	int y[4] = {0,1,2,3};
-	int *p   = x;
-	int *q   = y;
-
-	p += 3;
-
-	return *p;
 }
