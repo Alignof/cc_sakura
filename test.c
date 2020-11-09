@@ -1,6 +1,5 @@
 int main(){
-	//int x[10][10];
-	char hello[] = "hello";
+	int x[10][10];
 
-	return *(hello+2);
+	return x[0][0];
 }

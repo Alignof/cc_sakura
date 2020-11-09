@@ -64,7 +64,6 @@ Node *primary(){
 
 	// Is array index
 	if(consume("[")){
-		//Node *index_num = mul();
 		node = array_index(node, mul());
 		expect("]");
 	}

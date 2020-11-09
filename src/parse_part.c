@@ -229,8 +229,6 @@ Node *call_function(Node *node, Token *tok){
 }
 
 Node *array_index(Node *node, Node *index){
-	Node *pointer_size;
-
 	// a[1] == *(a+1)
 	node = new_node(ND_ADD, node, index);
 	node = new_node(ND_DEREF, NULL, node);

@@ -96,17 +96,22 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			lvar->type      = newtype;
 
 			if(!check("]")){
-				isize = token->val;
-				asize = align_array_size(isize, get_pointer_type(lvar->type));
-				alloc_size+=asize;
-				lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
+				if(isize == -1){
+					isize = token->val;
+				}else{
+					isize *= token->val;
+				}
+
 				token = token->next;
 			}
 
-			lvar->type->index_size = isize;
-
 			expect("]");
 		}
+
+		asize = align_array_size(isize, get_pointer_type(lvar->type));
+		alloc_size += asize;
+		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
+		lvar->type->index_size = isize;
 	}else{
 		if(locals){
 			lvar->offset = (locals->offset)+8;
