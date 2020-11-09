@@ -1,12 +1,6 @@
-/*
 int main(){
-	int x[10][10];
+	//int x[10][10];
+	char hello[] = "hello";
 
-	return x[0][0];
-}
-*/
-
-int x[10];
-int main(){
-	return x[0];
+	return *(hello+2);
 }

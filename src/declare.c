@@ -15,8 +15,6 @@ void insert_type_list(Type *newtype, int star_count){
 		newtype->ty = PTR;
 		newtype = newtype->ptr_to;
 	}
-
-	// if(star_count == 0) newtype->ptr_to = calloc(1, sizeof(Type));
 }
 
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type){
@@ -99,10 +97,9 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 			if(!check("]")){
 				isize = token->val;
-				//asize = align_array_size(isize, lvar->type->ptr_to->ty);
 				asize = align_array_size(isize, get_pointer_type(lvar->type));
 				alloc_size+=asize;
-				lvar->offset = ((locals) ? (locals->offset) :0) + asize;
+				lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 				token = token->next;
 			}
 
