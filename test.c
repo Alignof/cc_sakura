@@ -1,5 +1,7 @@
 int main(){
 	int x[10][10];
 
-	return x[0][0];
+	x[0][3] = 13;
+
+	return x[0][3];
 }

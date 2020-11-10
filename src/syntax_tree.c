@@ -63,7 +63,7 @@ Node *primary(){
 	Node *node = data();
 
 	// Is array index
-	if(consume("[")){
+	while(consume("[")){
 		node = array_index(node, mul());
 		expect("]");
 	}
@@ -99,8 +99,15 @@ Node *unary(){
 	Node *node=NULL;
 
 	if(consume("*")){
-		node = new_node(ND_DEREF, NULL, unary());
-		node->type = node->rhs->type->ptr_to;
+		Node *deref_ptr = unary();
+
+		// check pointer type
+		if(deref_ptr->type->ptr_to == NULL || deref_ptr->type->ptr_to->ty != ARRAY){
+			node = new_node(ND_DEREF, NULL, deref_ptr);
+		// ignore pointer of array
+		}else{
+			node = deref_ptr;
+		}
 
 		return node;
 	}

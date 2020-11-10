@@ -219,6 +219,10 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		}
 	}
 
+	if(kind == ND_DEREF){
+		node->type = node->rhs->type->ptr_to;
+	}
+
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
 		//node->type->ty = (lhs->type->ty > rhs->type->ty)? lhs->type->ty : rhs->type->ty;
 		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
