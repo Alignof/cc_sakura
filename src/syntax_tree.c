@@ -99,15 +99,7 @@ Node *unary(){
 	Node *node=NULL;
 
 	if(consume("*")){
-		Node *deref_ptr = unary();
-
-		// check pointer type
-		if(deref_ptr->type->ptr_to == NULL || deref_ptr->type->ptr_to->ty != ARRAY){
-			node = new_node(ND_DEREF, NULL, deref_ptr);
-		// ignore pointer of array
-		}else{
-			node = deref_ptr;
-		}
+		node = new_node(ND_DEREF, NULL, unary());
 
 		return node;
 	}
