@@ -35,27 +35,29 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	insert_type_list(gvar->type, star_count);
 
 	// Is array
-	if(consume("[")){
+	if(check("[")){
 		int isize  = -1;
 		node->val  = -1;
 		node->kind = ND_GARRAY;
+		while(consume("[")){
+			if(!check("]")){
+				// body
+				if(isize == -1){
+					isize = token->val;
+				}else{
+					isize *= token->val;
+				}
+				token = token->next;
+			}
 
-		newtype = calloc(1, sizeof(Type));
-		newtype->ty     = ARRAY;
-		newtype->ptr_to = gvar->type;
-		gvar->type      = newtype;
-		if(!check("]")){
-			// body
-			isize = token->val;
-			gvar->memsize = align_array_size(token->val, gvar->type->ptr_to->ty);
-			token = token->next;
+			newtype = calloc(1, sizeof(Type));
+			newtype->ty         = ARRAY;
+			newtype->ptr_to     = gvar->type;
+			newtype->index_size = isize;
+			gvar->type = newtype;
+			expect("]");
 		}
-
-		gvar->type->ptr_to = calloc(1, sizeof(Type));
-		gvar->type->ptr_to->ty = gvar->type->ty;
-		gvar->type->index_size = isize;
-		gvar->type->ty = ARRAY;
-		expect("]");
+		gvar->memsize = align_array_size(isize, gvar->type->ptr_to->ty);
 	}else{
 		gvar->memsize = type_size(gvar->type->ty);
 	}
