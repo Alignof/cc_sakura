@@ -220,7 +220,12 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	}
 
 	if(kind == ND_DEREF){
-		node->type = node->rhs->type->ptr_to;
+		if(rhs->type->ptr_to == NULL || rhs->type->ptr_to->ty != ARRAY){
+			node->type = node->rhs->type->ptr_to;
+		}else{
+			rhs->type = rhs->type->ptr_to;
+			return rhs;
+		}
 	}
 
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
