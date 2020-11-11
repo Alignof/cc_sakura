@@ -36,7 +36,10 @@ Node *data(){
 		// call function
 		}else if(check("(")){
 			Func *called = find_func(tok);
-			node->type = called->type;
+			if(called){
+				node->type = called->type;
+			}
+
 			node = call_function(node, tok);
 		}else{
 			GVar *gvar = find_gvar(tok);
@@ -171,7 +174,7 @@ Node *unary(){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 		node = new_node(ND_NUM, node, unary());
-		node->val = type_size(node->rhs->type->ty);
+		node->val = type_size(node->rhs->type);
 
 		return node;
 	}

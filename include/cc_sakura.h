@@ -111,7 +111,7 @@ struct Type{
 	TypeKind ty;
 	Type	 *ptr_to;
 	Member   *member;
-	size_t   index_size;
+	int      index_size;
 };
 
 // tree object
@@ -231,10 +231,10 @@ Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok);
 
 // parse_util.c
-int type_size(TypeKind type);
-int align_array_size(int isize, TypeKind array_type);
+int type_size(Type *type);
+int align_array_size(int isize, Type *array_type);
 Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type);
-TypeKind get_pointer_type(Type *given);
+Type *get_pointer_type(Type *given);
 
 // syntax_tree.c
 void program();
@@ -271,9 +271,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
 
 // codegan.c
-extern int label_begin;
-extern int label_end;
-extern int label_else;
+extern int label_num;
+extern int label_depth;
 void gen(Node *node);
 void gen_calc(Node *node);
 void gen_lvar(Node *node);
