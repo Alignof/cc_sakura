@@ -143,6 +143,8 @@ assert -cl 4 'int main(){int a[]={0,1,2,3,4}; return a[4];}'
 assert -cl 4 'int main(){int a[5]={0,1,2,3,4}; return a[4];}'
 assert -cl 0 'int main(){int a[5]={0,1,2}; return a[4];}'
 assert -cl 4 'int add(int x,int y){return x+y;} int main(){int a[5]={0,1,2,add(1,3),4}; return a[3];}'
+assert -cl 72 'int main(){int i; int k; int x[10][10]; for(i=1;i<=9;i++){ for(k=1;k<=9;k++){ x[k][i]=i*k; }} return x[8][9];}'
+assert -cl 72 'int x[10][10]; int main(){int i; int k; for(i=1;i<=9;i++){ for(k=1;k<=9;k++){ x[k][i]=i*k; }} return x[8][9];}'
 
 assert -cl 5  "int a=8; int main(){a=a-3;a;}"
 assert -cl 108 'char *x="hello"; int main(){*(x+2);}'
