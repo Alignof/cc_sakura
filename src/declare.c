@@ -53,7 +53,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			newtype = calloc(1, sizeof(Type));
 			newtype->ty         = ARRAY;
 			newtype->ptr_to     = gvar->type;
-			newtype->index_size = isize;
+			newtype->index_size = token->val;
 			gvar->type = newtype;
 			expect("]");
 		}

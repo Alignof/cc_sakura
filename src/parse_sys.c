@@ -223,6 +223,8 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		if(rhs->type->ptr_to == NULL || rhs->type->ptr_to->ty != ARRAY){
 			node->type = node->rhs->type->ptr_to;
 		}else{
+			free(node->type);
+			free(node);
 			rhs->type = rhs->type->ptr_to;
 			return rhs;
 		}

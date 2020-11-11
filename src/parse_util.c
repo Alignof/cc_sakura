@@ -9,7 +9,23 @@ int type_size(Type *type){
 		case PTR:
 			return 8;
 		case ARRAY:
-			return 8;
+			if(type->ptr_to->ty == ARRAY){
+				int array_size = 1;
+				type = type->ptr_to;
+				while(type){
+					if(type->ty == ARRAY){
+						array_size *= type->index_size;
+					}else{
+						array_size *= type_size(type);
+					}
+
+					type = type->ptr_to;
+				}
+
+				return array_size;
+			}else{
+				return 8;
+			}
 		case STRUCT:
 			return 8;
 		default:
