@@ -91,25 +91,28 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	// Is array
 	if(check("[")){
 		Type *newtype;
+		int index_num;
 		int asize = 0;
 		int isize = -1;
 		node->kind = ND_LARRAY;
 		while(consume("[")){
-			newtype = calloc(1, sizeof(Type));
-			newtype->ty         = ARRAY;
-			newtype->ptr_to     = lvar->type;
-			newtype->index_size = token->val;
-			lvar->type      = newtype;
-
+			index_num = -1;
 			if(!check("]")){
 				if(isize == -1){
 					isize = token->val;
 				}else{
 					isize *= token->val;
 				}
-
-				token = token->next;
+				
+				index_num = token->val;
+				token     = token->next;
 			}
+
+			newtype = calloc(1, sizeof(Type));
+			newtype->ty         = ARRAY;
+			newtype->ptr_to     = lvar->type;
+			newtype->index_size = index_num;
+			lvar->type = newtype;
 
 			expect("]");
 		}
