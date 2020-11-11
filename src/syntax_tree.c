@@ -174,7 +174,7 @@ Node *unary(){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 		node = new_node(ND_NUM, node, unary());
-		node->val = type_size(node->rhs->type->ty);
+		node->val = type_size(node->rhs->type);
 
 		return node;
 	}

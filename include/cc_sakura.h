@@ -231,10 +231,10 @@ Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok);
 
 // parse_util.c
-int type_size(TypeKind type);
-int align_array_size(int isize, TypeKind array_type);
+int type_size(Type *type);
+int align_array_size(int isize, Type *array_type);
 Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type);
-TypeKind get_pointer_type(Type *given);
+Type *get_pointer_type(Type *given);
 
 // syntax_tree.c
 void program();

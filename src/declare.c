@@ -57,9 +57,9 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			gvar->type = newtype;
 			expect("]");
 		}
-		gvar->memsize = align_array_size(isize, gvar->type->ptr_to->ty);
+		gvar->memsize = align_array_size(isize, gvar->type->ptr_to);
 	}else{
-		gvar->memsize = type_size(gvar->type->ty);
+		gvar->memsize = type_size(gvar->type);
 	}
 
 	// globals == new lvar
@@ -163,7 +163,7 @@ void declare_struct(Struc *new_struc){
 		Token *def_name  = consume_ident();
 		new_memb->name   = def_name->str;
 		new_memb->len    = def_name->len;
-		new_memb->offset = ((memb_head)? memb_head->offset : 0) + type_size(new_memb->type->ty);
+		new_memb->offset = ((memb_head)? memb_head->offset : 0) + type_size(new_memb->type);
 		asize += new_memb->offset;
 
 		new_memb->next = memb_head;
