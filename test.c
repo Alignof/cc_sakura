@@ -3,6 +3,7 @@ int main(){
 	int k;
 	int x[10][10];
 
+/*
 	for(i=1;i<=9;i++){
 		for(k=1;k<=9;k++){
 			x[k][i] = i*k;
@@ -15,5 +16,7 @@ int main(){
 		}
 		printf("\n");
 	}
+*/
+	x[2][3] = 13;
 	return x[2][3];
 }
