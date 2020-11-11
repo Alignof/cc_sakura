@@ -285,7 +285,6 @@ void gen(Node *node){
 			printf("	cmp rax,0\n");
 			printf("	je .Lend%03d\n", label_num);
 			printf("	pop rax\n");
-			label_num++;
 			gen(node->rhs);
 
 			printf(".Lend%03d:\n", label_num);

@@ -36,7 +36,10 @@ Node *data(){
 		// call function
 		}else if(check("(")){
 			Func *called = find_func(tok);
-			node->type = called->type;
+			if(called){
+				node->type = called->type;
+			}
+
 			node = call_function(node, tok);
 		}else{
 			GVar *gvar = find_gvar(tok);

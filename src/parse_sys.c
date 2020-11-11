@@ -159,7 +159,7 @@ int expect_number(){
 }
 
 Func *find_func(Token *tok){
-	for (int i = 0;i < FUNC_NUM;i++){
+	for (int i = 0;func_list[i] && i < FUNC_NUM;i++){
 		if(!memcmp(tok->str, func_list[i]->name, tok->len)){
 			return func_list[i];
 		}

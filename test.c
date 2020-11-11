@@ -3,22 +3,18 @@ int main(){
 	int k;
 	int x[10][10];
 
-/*
 	for(i=1;i<=9;i++){
 		for(k=1;k<=9;k++){
-			x[i][k] = i*k;
+			x[k][i] = i*k;
 		}
-	}
-*/
-	i = 1;
-	while(i<=9){
-		k=1;
-		while(k<=9){
-			x[i][k] = i*k;
-			k++;
-		}
-		i++;
 	}
 
-	return x[9][7];
+	for(i=1;i<=9;i++){
+		for(k=1;k<=9;k++){
+			printf("%2d ",x[k][i]);
+		}
+		printf("\n");
+	}
+
+	return 0;
 }
