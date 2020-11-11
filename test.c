@@ -9,14 +9,8 @@ int main(){
 		}
 	}
 
-	for(i=1;i<=9;i++){
-		for(k=1;k<=9;k++){
-			printf("%2d ",x[k][i]);
-		}
-		printf("\n");
-	}
 
-	return 0;
+
+	return x[8][9];
 }
-
 

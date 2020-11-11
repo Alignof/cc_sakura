@@ -106,6 +106,10 @@ assert -cl 8  "int main(){int x; sizeof(&x);}"
 assert -cl 4  "int main(){int x; sizeof(x+2);}"
 assert -cl 8  "int main(){int *x; sizeof(x+2);}"
 assert -cl 8  "int main(){int *x; sizeof((x));}"
+assert -cl 4  "int main(){char x[4]; sizeof((x));}"
+assert -cl 16 "int main(){int x[4]; sizeof((x));}"
+assert -cl 64 "int main(){int x[4][4]; sizeof((x));}"
+assert -cl 16 "int main(){int x[4][4]; sizeof((x[0]));}"
 
 assert -cl 1  "int main(){int a[4]; *a=1; return *a;}"
 assert -cl 1  "int main(){int a[4]; *a=1; *a=1; return *a;}"
@@ -145,6 +149,8 @@ assert -cl 0 'int main(){int a[5]={0,1,2}; return a[4];}'
 assert -cl 4 'int add(int x,int y){return x+y;} int main(){int a[5]={0,1,2,add(1,3),4}; return a[3];}'
 assert -cl 72 'int main(){int i; int k; int x[10][10]; for(i=1;i<=9;i++){ for(k=1;k<=9;k++){ x[k][i]=i*k; }} return x[8][9];}'
 assert -cl 72 'int x[10][10]; int main(){int i; int k; for(i=1;i<=9;i++){ for(k=1;k<=9;k++){ x[k][i]=i*k; }} return x[8][9];}'
+assert -cl 5 "int main(){int x[2][3]; int *y; x[1][2]=5; y=x[1]; y[2];}"
+assert -cl 8 "int main(){int x[2][3]; int *y; int *z; x[1][1]=5; x[1][2]=3; y=x[1]; z=y; return *(y+1) + z[2];}"
 
 assert -cl 5  "int a=8; int main(){a=a-3;a;}"
 assert -cl 108 'char *x="hello"; int main(){*(x+2);}'
@@ -176,7 +182,6 @@ assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3
 assert -cl 5 "struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
 assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a=2; y->b=3; return y->a + y->b;}"
 assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;}"
-
 
 
 
