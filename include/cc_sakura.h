@@ -111,7 +111,7 @@ struct Type{
 	TypeKind ty;
 	Type	 *ptr_to;
 	Member   *member;
-	size_t   index_size;
+	int      index_size;
 };
 
 // tree object
