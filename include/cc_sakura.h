@@ -271,9 +271,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
 
 // codegan.c
-extern int label_begin;
-extern int label_end;
-extern int label_else;
+extern int label_num;
+extern int label_depth;
 void gen(Node *node);
 void gen_calc(Node *node);
 void gen_lvar(Node *node);
