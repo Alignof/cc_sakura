@@ -1,17 +1,16 @@
-int global = 7;
-
-int *f(int *x){
-	 *x += 1;
-	 global += 1;
-
-	 return x;
-}
-
 int main(){
-	 int x = 3;
+	int i;
+	int k;
+	int x[10][10];
 
-	 x = (*f(&x))++;
+	for(i=1;i<=9;i++){
+		for(k=1;k<=9;k++){
+			x[k][i] = i*k;
+		}
+	}
 
-	// 12
-	return global + x;
+
+
+	return x[8][9];
 }
+

@@ -51,10 +51,8 @@ Node *incdec(Node *node, IncDecKind idtype){
 
 	// increment or decrement
 	if(idtype == PRE_INC || idtype == POST_INC){
-		//plmi_one = new_node(ND_ASSIGN, node, new_node(ND_ADD,node,new_node_num(1)));
 		plmi_one = new_node(ND_COMPOUND, node, new_node(ND_ADD,node,new_node_num(1)));
 	}else{
-		//plmi_one = new_node(ND_ASSIGN, node, new_node(ND_SUB,node,new_node_num(1)));
 		plmi_one = new_node(ND_COMPOUND, node, new_node(ND_SUB,node,new_node_num(1)));
 	}
 
@@ -129,14 +127,14 @@ Node *array_str(Node *arr, Node *init_val){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type->ptr_to->ty);
+			int asize = align_array_size(ctr, arr->type->ptr_to);
 			alloc_size+=asize;
 			arr->offset = ((locals)?(locals->offset):0) + asize;
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 		}else{
-			globals->memsize = align_array_size(ctr, arr->type->ptr_to->ty);
+			globals->memsize = align_array_size(ctr, arr->type->ptr_to);
 		}
 	}
 
@@ -173,14 +171,14 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type->ptr_to->ty);
+			int asize = align_array_size(ctr, arr->type->ptr_to);
 			alloc_size+=asize;
 			arr->offset = ((locals)?(locals->offset):0) + asize;
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 		}else{
-			globals->memsize = align_array_size(ctr, arr->type->ptr_to->ty);
+			globals->memsize = align_array_size(ctr, arr->type->ptr_to);
 		}
 	// too many
 	}else if(arr->type->index_size < ctr){
@@ -231,17 +229,8 @@ Node *call_function(Node *node, Token *tok){
 }
 
 Node *array_index(Node *node, Node *index){
-	Node *pointer_size;
-
 	// a[1] == *(a+1)
 	node = new_node(ND_ADD, node, index);
-
-	pointer_size = calloc(1, sizeof(Node));
-	pointer_size->kind = ND_NUM;
-	pointer_size->val  = type_size(get_pointer_type(node->lhs->type->ptr_to));
-	pointer_size->type = calloc(1, sizeof(Type));
-	node->rhs = new_node(ND_MUL, index, pointer_size);
-
 	node = new_node(ND_DEREF, NULL, node);
 
 	return node;

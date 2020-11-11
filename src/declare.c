@@ -15,14 +15,14 @@ void insert_type_list(Type *newtype, int star_count){
 		newtype->ty = PTR;
 		newtype = newtype->ptr_to;
 	}
-
-	if(star_count == 0) newtype->ptr_to = calloc(1, sizeof(Type));
 }
 
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type){
 	// if not token -> error
 	if(!def_name) error_at(token->str, "not a variable.");
 
+	int index_num;
+	Type *newtype;
 	Node *node = calloc(1, sizeof(Node));
 	node->kind = ND_GVAR;
 
@@ -36,25 +36,33 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	insert_type_list(gvar->type, star_count);
 
 	// Is array
-	if(consume("[")){
+	if(check("[")){
 		int isize  = -1;
 		node->val  = -1;
 		node->kind = ND_GARRAY;
+		while(consume("[")){
+			index_num = -1;
+			if(!check("]")){
+				// body
+				if(isize == -1){
+					isize = token->val;
+				}else{
+					isize *= token->val;
+				}
+				index_num = token->val;
+				token = token->next;
+			}
 
-		if(!check("]")){
-			// body
-			isize = token->val;
-			gvar->memsize = align_array_size(token->val, gvar->type->ptr_to->ty);
-			token = token->next;
+			newtype = calloc(1, sizeof(Type));
+			newtype->ty         = ARRAY;
+			newtype->ptr_to     = gvar->type;
+			newtype->index_size = index_num;
+			gvar->type = newtype;
+			expect("]");
 		}
-
-		gvar->type->ptr_to = calloc(1, sizeof(Type));
-		gvar->type->ptr_to->ty = gvar->type->ty;
-		gvar->type->index_size = isize;
-		gvar->type->ty = ARRAY;
-		expect("]");
+		gvar->memsize = align_array_size(isize, gvar->type->ptr_to);
 	}else{
-		gvar->memsize = type_size(gvar->type->ty);
+		gvar->memsize = type_size(gvar->type);
 	}
 
 	// globals == new lvar
@@ -68,11 +76,10 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 }
 
 Node *declare_local_variable(Node *node, Token *tok, int star_count){
-	int i;
-
 	LVar *lvar = find_lvar(tok);
 	if(lvar) error_at(token->str, "this variable has already existed.");
 
+	int index_num;
 	lvar = calloc(1, sizeof(LVar));
 	lvar->next = locals;
 	lvar->name = tok->str;
@@ -83,27 +90,37 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	insert_type_list(lvar->type, star_count);
 
 	// Is array
-	if(consume("[")){
+	if(check("[")){
+		Type *newtype;
+		int index_num;
+		int asize = 0;
 		int isize = -1;
-		node->val = -1;
 		node->kind = ND_LARRAY;
+		while(consume("[")){
+			index_num = -1;
+			if(!check("]")){
+				if(isize == -1){
+					isize = token->val;
+				}else{
+					isize *= token->val;
+				}
+				
+				index_num = token->val;
+				token     = token->next;
+			}
 
-		lvar->type->ptr_to = calloc(1, sizeof(Type));
-		lvar->type->ptr_to->ty = lvar->type->ty;
-		lvar->type->ty = ARRAY;
+			newtype = calloc(1, sizeof(Type));
+			newtype->ty         = ARRAY;
+			newtype->ptr_to     = lvar->type;
+			newtype->index_size = index_num;
+			lvar->type = newtype;
 
-		//if(*(token->str)!=']'){
-		if(!check("]")){
-			int asize = align_array_size(token->val, lvar->type->ptr_to->ty);
-			alloc_size+=asize;
-			lvar->offset = ((locals) ? (locals->offset) :0) + asize;
-			isize = token->val;
-			token = token->next;
+			expect("]");
 		}
 
-		lvar->type->index_size = isize;
-
-		expect("]");
+		asize = align_array_size(isize, get_pointer_type(lvar->type));
+		alloc_size += asize;
+		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
 		if(locals){
 			lvar->offset = (locals->offset)+8;
@@ -153,7 +170,7 @@ void declare_struct(Struc *new_struc){
 		Token *def_name  = consume_ident();
 		new_memb->name   = def_name->str;
 		new_memb->len    = def_name->len;
-		new_memb->offset = ((memb_head)? memb_head->offset : 0) + type_size(new_memb->type->ty);
+		new_memb->offset = ((memb_head)? memb_head->offset : 0) + type_size(new_memb->type);
 		asize += new_memb->offset;
 
 		new_memb->next = memb_head;

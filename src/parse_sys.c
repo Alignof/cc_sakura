@@ -159,7 +159,7 @@ int expect_number(){
 }
 
 Func *find_func(Token *tok){
-	for (int i = 0;i < FUNC_NUM;i++){
+	for (int i = 0;func_list[i] && i < FUNC_NUM;i++){
 		if(!memcmp(tok->str, func_list[i]->name, tok->len)){
 			return func_list[i];
 		}
@@ -214,13 +214,24 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	node->rhs  = rhs;
 
 	if(kind == ND_ADD || kind == ND_SUB){
-		if(type_size(lhs->type->ty) == 8 || type_size(rhs->type->ty) == 8){
+		//if(type_size(lhs->type) >= 8 || type_size(rhs->type) >= 8){
+		if(lhs->type->ty >= PTR  ||  rhs->type->ty >= PTR){
 			node = pointer_calc(node, lhs->type, rhs->type);
 		}
 	}
 
+	if(kind == ND_DEREF){
+		if(rhs->type->ptr_to == NULL || rhs->type->ptr_to->ty != ARRAY){
+			node->type = node->rhs->type->ptr_to;
+		}else{
+			free(node->type);
+			free(node);
+			rhs->type = rhs->type->ptr_to;
+			return rhs;
+		}
+	}
+
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		//node->type->ty = (lhs->type->ty > rhs->type->ty)? lhs->type->ty : rhs->type->ty;
 		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}
 

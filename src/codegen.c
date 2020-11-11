@@ -1,8 +1,7 @@
 #include "cc_sakura.h"
 
-// int label_begin;
-// int label_end;
-// int label_else;
+// int label_num;
+// int label_ctr;
 
 void expand_next(Node *node){
 	while(node){
@@ -139,9 +138,6 @@ void gen_calc(Node *node){
 void gen(Node *node){
 	Node *tmp;
 	int arg=0;
-	int lbegin=label_begin;
-	int lend=label_end;
-	int lelse=label_else;
 
 	switch(node->kind){
 		case ND_RETURN:
@@ -279,50 +275,57 @@ void gen(Node *node){
 			printf("	push [rax]\n");
 			return;
 		case ND_IF:
+			label_num++;
+			label_depth++;
+
 			printf("	push rax\n");
 			gen(node->lhs);
 
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lend%03d\n", lend);
+			printf("	je .Lend%03d\n", label_num);
 			printf("	pop rax\n");
-			label_end++;
 			gen(node->rhs);
 
-			printf(".Lend%03d:\n", lend);
+			printf(".Lend%03d:\n", label_num);
+			label_num--;
 			return;
 		case ND_IFELSE:
+			label_num++;
+			label_depth++;
+
 			// condition
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lelse%03d\n", lelse);
-			label_else++;
+			printf("	je .Lelse%03d\n", label_num);
 
 			// expr in if
 			gen(node->rhs->lhs);
-			printf("	jmp .Lend%03d\n", lend);
-			printf(".Lelse%03d:\n", lelse);
-			label_end++;
+			printf("	jmp .Lend%03d\n", label_num);
+			printf(".Lelse%03d:\n", label_num);
 
 			// expr in else
 			gen(node->rhs->rhs);
-			printf(".Lend%03d:\n", lend);
+			printf(".Lend%03d:\n", label_num);
 
+			label_num--;
 			return;
 		case ND_FOR:
+			label_num++;
+			label_depth++;
+
 			// adjust rsp
 			printf("	push rax\n");
 
 			gen(node->lhs);
 			// condition
-			printf(".Lbegin%03d:\n", lbegin);
+			printf(".Lbegin%03d:\n", label_num);
 			gen(node->lhs->vector);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			// if cond true then loop end.
-			printf("	je .Lend%03d\n", lend);
-			label_end++;
+			// if cond true then jump to  loop end.
+			printf("	je .Lend%03d\n", label_num);
 
 			// else expression
 			gen(node->rhs);
@@ -330,34 +333,36 @@ void gen(Node *node){
 			printf("	pop rax\n");
 
 			// continue
-			printf("	jmp .Lbegin%03d\n", lend);
-			printf(".Lend%03d:\n", lbegin);
+			printf("	jmp .Lbegin%03d\n", label_num);
+			printf(".Lend%03d:\n", label_num);
 			printf("	push rax\n");
-			label_begin++;
 
+			label_num--;
 			return;
 		case ND_WHILE:
+			label_num++;
+			label_depth++;
+
 			// adjust rsp
 			printf("	push rax\n");
 
 			// condition
-			printf(".Lbegin%03d:\n", lbegin);
+			printf(".Lbegin%03d:\n", label_num);
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// if cond true then loop end.
-			printf("	je .Lend%03d\n", lend);
-			label_end++;
+			printf("	je .Lend%03d\n", label_num);
 
 			// else expression
 			gen(node->rhs);
 
 			// continue
-			printf("	jmp .Lbegin%03d\n", lend);
-			printf(".Lend%03d:\n", lbegin);
+			printf("	jmp .Lbegin%03d\n", label_num);
+			printf(".Lend%03d:\n", label_num);
 			printf("	push rax\n");
-			label_begin++;
 
+			label_num--;
 			return;
 		case ND_BLOCK:
 			expand_vector(node->vector);
