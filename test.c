@@ -1,3 +1,4 @@
+/*
 int main(){
 	int i;
 	int k;
@@ -13,4 +14,7 @@ int main(){
 
 	return x[8][9];
 }
+*/
+
+int main(){int x[2][3][4]; int **y; int **z; x[1][1][1]=5; x[1][2][3]=3; y=x[1]; z=y; return *(y+1)[1] + (z[2]+3);}
 
