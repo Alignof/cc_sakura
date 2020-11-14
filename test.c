@@ -16,5 +16,5 @@ int main(){
 }
 */
 
-int main(){int x[2][3][4]; int **y; int **z; x[1][1][1]=5; x[1][2][3]=3; y=x[1]; z=y; return *(y+1)[1] + (z[2]+3);}
+struct test{int a; int b; int c[10];}; int main(){struct test x; x.a=1; x.b=2; x.c[0]=3; x.c[2]=4; return x.a + x.b + x.c[0] + x.c[2];}
 

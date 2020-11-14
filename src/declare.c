@@ -79,7 +79,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	LVar *lvar = find_lvar(tok);
 	if(lvar) error_at(token->str, "this variable has already existed.");
 
-	int index_num;
 	lvar = calloc(1, sizeof(LVar));
 	lvar->next = locals;
 	lvar->name = tok->str;
@@ -167,9 +166,33 @@ void declare_struct(Struc *new_struc){
 		// add type list
 		insert_type_list(new_memb->type, star_count);
 
+		// add member name
 		Token *def_name  = consume_ident();
 		new_memb->name   = def_name->str;
 		new_memb->len    = def_name->len;
+
+		// Is array index
+		int isize = -1;
+		int index_num;
+		while(consume("[")){
+			Type *newtype;
+			if(isize == -1){
+				isize = token->val;
+			}else{
+				isize *= token->val;
+			}
+			index_num = token->val;
+			token = token->next;
+
+			newtype = calloc(1, sizeof(Type));
+			newtype->ty         = ARRAY;
+			newtype->ptr_to     = new_memb->type;
+			newtype->index_size = index_num;
+			new_memb->type = newtype;
+
+			expect("]");
+		}
+
 		new_memb->offset = ((memb_head)? memb_head->offset : 0) + type_size(new_memb->type);
 		asize += new_memb->offset;
 
