@@ -152,6 +152,10 @@ int main(){int x; sizeof(&x);} => 8
 int main(){int x; sizeof(x+2);} => 4
 int main(){int *x; sizeof(x+2);} => 8
 int main(){int *x; sizeof((x));} => 8
+int main(){char x[4]; sizeof((x));} => 4
+int main(){int x[4]; sizeof((x));} => 16
+int main(){int x[4][4]; sizeof((x));} => 64
+int main(){int x[4][4]; sizeof((x[0]));} => 16
 int main(){int a[4]; *a=1; return *a;} => 1
 int main(){int a[4]; *a=1; *a=1; return *a;} => 1
 int main(){int a[4]; *a=1; *(a+1)=2; return *(a+1);} => 2
@@ -183,6 +187,11 @@ int main(){int a[]={0,1,2,3,4}; return a[4];} => 4
 int main(){int a[5]={0,1,2,3,4}; return a[4];} => 4
 int main(){int a[5]={0,1,2}; return a[4];} => 0
 int add(int x,int y){return x+y;} int main(){int a[5]={0,1,2,add(1,3),4}; return a[3];} => 4
+int main(){int i; int k; int x[10][10]; for(i=1;i<=9;i++){ for(k=1;k<=9;k++){ x[k][i]=i*k; }} return x[8][9];} => 72
+int x[10][10]; int main(){int i; int k; for(i=1;i<=9;i++){ for(k=1;k<=9;k++){ x[k][i]=i*k; }} return x[8][9];} => 72
+int main(){int x[2][3]; int *y; x[1][2]=5; y=x[1]; y[2];} => 5
+int main(){int x[2][3]; int *y; int *z; x[1][1]=5; x[1][2]=3; y=x[1]; z=y; return *(y+1) + z[2];} => 8
+int main(){int x[2][3][4]; x[1][1][1]=5; x[1][2][3]=3; return x[1][1][1] + x[1][2][3];} => 8
 int a=8; int main(){a=a-3;a;} => 5
 char *x="hello"; int main(){*(x+2);} => 108
 char x[]="hello"; int main(){*(x+2);} => 108
@@ -194,6 +203,9 @@ int main(){int x=3; int a=x++; return a+x;} => 7
 int main(){int x=3; int a=++x; return a+x;} => 8
 int main(){int x=3; int a=x--; return a+x;} => 5
 int main(){int x=3; int a=--x; return a+x;} => 4
+int main(){int x[4]={0,1,2,3}; int *p; int *q; p=x; q=p++; return *q;} => 0
+int main(){int x[4]={0,1,2,3}; int *p; int *q; p=x; q=++p; return *q;} => 1
+int global = 7; int *f(int *x){*x += 1; global += 1; return x;} int main(){int x=3; x = (*f(&x))++; return global + x;} => 12
 int main(){int x=4; int y=3; x+=y; return x;} => 7
 int main(){int x=4; int y=3; x-=y; return x;} => 1
 int main(){int x=3; int y=3; x*=y; return x;} => 9
