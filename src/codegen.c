@@ -272,7 +272,7 @@ void gen(Node *node){
 			return;
 		case ND_IF:
 			label_num++;
-			label_depth++;
+			total_depth++;
 
 			printf("	push rax\n");
 			gen(node->lhs);
@@ -288,7 +288,7 @@ void gen(Node *node){
 			return;
 		case ND_IFELSE:
 			label_num++;
-			label_depth++;
+			total_depth++;
 
 			// condition
 			gen(node->lhs);
@@ -316,7 +316,7 @@ void gen(Node *node){
 
 			// condition
 			label_num++;
-			label_depth++;
+			total_depth++;
 
 			printf(".Lbegin%03d:\n", label_num);
 			gen(node->lhs->vector);
@@ -339,7 +339,7 @@ void gen(Node *node){
 			return;
 		case ND_WHILE:
 			label_num++;
-			label_depth++;
+			total_depth++;
 
 			// adjust rsp
 			printf("	push rax\n");
