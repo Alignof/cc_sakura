@@ -195,7 +195,7 @@ void declare_struct(Struc *new_struc){
 		}
 
 		// align member offset
-		int size_of_type = type_size(new_memb->type);
+		int size_of_type = (new_memb->type->ty == ARRAY) ? 8 : type_size(new_memb->type);
 		int padding      = 0;
 		if(memb_head){
 			int prev_tail    = (memb_head) ? (memb_head->offset + type_size(memb_head->type)) : 0;
