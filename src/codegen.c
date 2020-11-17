@@ -363,9 +363,10 @@ void gen(Node *node){
 			label_num--;
 			return;
 		case ND_BREAK:
-			printf("	pop rax\n");
-		case ND_BLOCK:
 			printf("	jmp .Lend%03d\n", label_num);
+			return;
+		case ND_BLOCK:
+			expand_vector(node->vector);
 			return;
 		case ND_CALL_FUNC:
 			tmp=node->next;
