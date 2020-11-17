@@ -17,4 +17,6 @@ int main(){
 	printf("address of i3 is %p\n", &(mydata.i3));
 
 	printf("address of mydata is %p\n", &mydata);
+
+	return 0;
 }
