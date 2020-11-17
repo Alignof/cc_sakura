@@ -412,7 +412,7 @@ void gen(Node *node){
 
 			return;
 		case ND_ADDRESS:
-			gen_lvar(node->rhs);
+			gen_assign_lhs(node->rhs);
 			return;
 		case ND_DEREF:
 			gen(node->rhs);
