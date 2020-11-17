@@ -202,7 +202,7 @@ void declare_struct(Struc *new_struc){
 			padding          = (prev_tail%size_of_type) ? (size_of_type - (prev_tail%size_of_type)) : 0;
 			new_memb->offset = prev_tail + padding;
 		}else{
-			new_memb->offset = size_of_type;
+			new_memb->offset = 0;
 		}
 		asize += size_of_type + padding;
 

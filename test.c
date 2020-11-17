@@ -1,33 +1,22 @@
-/*
-int main(){
-	int i;
-	int k;
-	int x[10][10];
-
-	for(i=1;i<=9;i++){
-		for(k=1;k<=9;k++){
-			x[k][i] = i*k;
-		}
-	}
-
-
-
-	return x[8][9];
-}
-*/
-
 struct test{
-	int a;
-	int b;
-	int c[5];
+	int  i1;
+	char c1;
+	int  i2;
+	char c2;
+	char c3;
+	int  i3;
 };
 
 int main(){
-	struct test x;
+	struct test mydata;
+	printf("address of i1 is %p\n", &(mydata.i1));
+	printf("address of c1 is %p\n", &(mydata.c1));
+	printf("address of i2 is %p\n", &(mydata.i2));
+	printf("address of c2 is %p\n", &(mydata.c2));
+	printf("address of c3 is %p\n", &(mydata.c3));
+	printf("address of i3 is %p\n", &(mydata.i3));
 
-	x.a=1;
-	x.b=2;
-	x.c[0]=3;
-	x.c[2]=4;
-	return x.a + x.b + x.c[0] + x.c[2];
+	printf("address of mydata is %p\n", &mydata);
+
+	return 0;
 }
