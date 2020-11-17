@@ -199,8 +199,8 @@ void declare_struct(Struc *new_struc){
 		int padding      = 0;
 		if(memb_head){
 			int prev_tail    = (memb_head) ? (memb_head->offset + type_size(memb_head->type)) : 0;
+			padding          = (prev_tail%size_of_type) ? (size_of_type - (prev_tail%size_of_type)) : 0;
 			new_memb->offset = prev_tail + padding;
-			asize = (asize%8) ? asize/8*8+8 : asize;
 		}else{
 			new_memb->offset = size_of_type;
 		}
