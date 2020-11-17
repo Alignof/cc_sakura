@@ -83,6 +83,7 @@ Node *primary(){
 
 	// member variable
 	while(check(".") || check("->")){
+		// dot
 		if(consume(".")){
 			if(node->kind == ND_LVAR){
 				node = new_node(ND_ADDRESS, NULL, node);
@@ -90,8 +91,15 @@ Node *primary(){
 			node = dot_arrow(ND_DOT, node);
 		}
 
+		// arrow
 		if(consume("->")){
 			node = dot_arrow(ND_ARROW, node);
+		}
+
+		// array index
+		while(consume("[")){
+			node = array_index(node, mul());
+			expect("]");
 		}
 	}
 

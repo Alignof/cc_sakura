@@ -58,14 +58,14 @@ void gen_arg(int arg_num, Node *tmp){
 	printf("	mov %s,rax\n", reg[arg_num]);
 }
 
-void gen_assign_lhs(Node *node){
-	/**/ if(node->lhs->kind == ND_DEREF)   gen(node->lhs->rhs);
-	else if(node->lhs->kind == ND_DOT)     gen_struc(node->lhs);
-	else if(node->lhs->kind == ND_ARROW)   gen_struc(node->lhs);
-	else if(node->lhs->kind == ND_GVAR)    gen_gvar(node->lhs);
-	else if(node->lhs->kind == ND_GARRAY)  gen_gvar(node->lhs);
-	else if(node->lhs->kind == ND_LVAR)    gen_lvar(node->lhs);
-	else if(node->lhs->kind == ND_LARRAY)  gen_lvar(node->lhs);
+void gen_address(Node *node){
+	/**/ if(node->kind == ND_DEREF)   gen(node->rhs);
+	else if(node->kind == ND_DOT)     gen_struc(node);
+	else if(node->kind == ND_ARROW)   gen_struc(node);
+	else if(node->kind == ND_GVAR)    gen_gvar(node);
+	else if(node->kind == ND_GARRAY)  gen_gvar(node);
+	else if(node->kind == ND_LVAR)    gen_lvar(node);
+	else if(node->kind == ND_LARRAY)  gen_lvar(node);
 	else error_at(token->str, "can not assign");
 }
 
@@ -194,7 +194,7 @@ void gen(Node *node){
 			return;
 		case ND_POSTID:
 			// push
-			gen_assign_lhs(node); // push lhs
+			gen_address(node->lhs); // push lhs
 			gen(node->rhs->rhs->rhs);          // push rhs
 			
 			// calc
@@ -224,7 +224,7 @@ void gen(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_ASSIGN:
-			gen_assign_lhs(node);
+			gen_address(node->lhs);
 			gen(node->rhs);
 
 			printf("	pop rdi\n");
@@ -242,7 +242,7 @@ void gen(Node *node){
 			return;
 		case ND_COMPOUND:
 			// push
-			gen_assign_lhs(node); // push lhs
+			gen_address(node->lhs); // push lhs
 			gen(node->rhs->rhs);  // push rhs
 
 			// calc
@@ -271,8 +271,11 @@ void gen(Node *node){
 		case ND_DOT:
 		case ND_ARROW:
 			gen_struc(node);
-			printf("	pop rax\n");
-			printf("	push [rax]\n");
+			// if it's an array, ignore the deref
+			if(node->type->ty != ARRAY){
+				printf("	pop rax\n");
+				printf("	push [rax]\n");
+			}
 			return;
 		case ND_IF:
 			label_num++;
@@ -409,7 +412,7 @@ void gen(Node *node){
 
 			return;
 		case ND_ADDRESS:
-			gen_lvar(node->rhs);
+			gen_address(node->rhs);
 			return;
 		case ND_DEREF:
 			gen(node->rhs);

@@ -278,7 +278,7 @@ void gen_calc(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
 void gen_struc(Node *node);
-void gen_assign_lhs(Node *node);
+void gen_address(Node *node);
 void expand_next(Node *node);
 void expand_vector(Node *node);
 
