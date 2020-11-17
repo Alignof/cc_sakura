@@ -174,8 +174,8 @@ void declare_struct(Struc *new_struc){
 		// Is array index
 		int isize = -1;
 		int index_num;
+		Type *newtype;
 		while(consume("[")){
-			Type *newtype;
 			if(isize == -1){
 				isize = token->val;
 			}else{
@@ -193,8 +193,9 @@ void declare_struct(Struc *new_struc){
 			expect("]");
 		}
 
-		new_memb->offset = ((memb_head)? memb_head->offset : 0) + type_size(new_memb->type);
-		asize += new_memb->offset;
+		int size_of_type = type_size(new_memb->type);
+		new_memb->offset = ((memb_head)? memb_head->offset : 0) + size_of_type;
+		asize += size_of_type;
 
 		new_memb->next = memb_head;
 		memb_head      = new_memb;
@@ -206,6 +207,6 @@ void declare_struct(Struc *new_struc){
 	asize = (asize%8) ? asize/8*8+8 : asize;
 	new_struc->memsize = asize;
 	new_struc->member  = memb_head;
-	new_struc->next	   = structs;
+	new_struc->next    = structs;
 	structs = new_struc;
 }
