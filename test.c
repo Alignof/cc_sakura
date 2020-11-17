@@ -21,7 +21,10 @@ struct test{
 	int b;
 	int c[10];
 };
-int main(){struct test x;
+
+int main(){
+	struct test x;
+
 	// x.a=1;
 	// x.b=2;
 	// x.c[0]=3;

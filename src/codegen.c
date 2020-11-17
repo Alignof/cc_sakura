@@ -271,8 +271,11 @@ void gen(Node *node){
 		case ND_DOT:
 		case ND_ARROW:
 			gen_struc(node);
-			printf("	pop rax\n");
-			printf("	push [rax]\n");
+			// if it's an array, ignore the deref
+			if(node->type->ty != ARRAY){
+				printf("	pop rax\n");
+				printf("	push [rax]\n");
+			}
 			return;
 		case ND_IF:
 			label_num++;
