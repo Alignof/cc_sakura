@@ -20,6 +20,7 @@ typedef enum{
 	TK_SIZEOF,
 	TK_BLOCK,
 	TK_STR,
+	TK_BREAK,
 	TK_RETURN,
 	TK_EOF,
 }TokenKind;
@@ -68,6 +69,7 @@ typedef enum{
 	ND_ARG, 	//  function argument;
 	ND_CALL_FUNC, 	//  func();
 	ND_RETURN, 	//  return
+	ND_BREAK, 	//  break
 	ND_TYPE, 	//  int, double, char...
 }NodeKind;
 

@@ -140,13 +140,6 @@ void gen(Node *node){
 	int arg=0;
 
 	switch(node->kind){
-		case ND_RETURN:
-			gen(node->rhs);
-			printf("	pop rax\n");
-			printf("	mov rsp,rbp\n");
-			printf("	pop rbp\n");
-			printf("	ret\n");
-			return;
 		case ND_NUM:
 			printf("	push %d\n", node->val);
 			return;
@@ -315,14 +308,16 @@ void gen(Node *node){
 			label_num--;
 			return;
 		case ND_FOR:
-			label_num++;
-			label_depth++;
-
 			// adjust rsp
 			printf("	push rax\n");
 
+			// init
 			gen(node->lhs);
+
 			// condition
+			label_num++;
+			label_depth++;
+
 			printf(".Lbegin%03d:\n", label_num);
 			gen(node->lhs->vector);
 			printf("	pop rax\n");
@@ -367,8 +362,10 @@ void gen(Node *node){
 
 			label_num--;
 			return;
+		case ND_BREAK:
+			printf("	pop rax\n");
 		case ND_BLOCK:
-			expand_vector(node->vector);
+			printf("	jmp .Lend%03d\n", label_num);
 			return;
 		case ND_CALL_FUNC:
 			tmp=node->next;
@@ -425,6 +422,13 @@ void gen(Node *node){
 			}
 			printf("	push rax\n");
 
+			return;
+		case ND_RETURN:
+			gen(node->rhs);
+			printf("	pop rax\n");
+			printf("	mov rsp,rbp\n");
+			printf("	pop rbp\n");
+			printf("	ret\n");
 			return;
 	}
 

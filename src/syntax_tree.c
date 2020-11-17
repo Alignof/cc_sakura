@@ -332,6 +332,10 @@ Node *expr(){
 				node->vector = init_formula(node, assign());
 			}
 		}
+	}else if(consume_reserved_word("break", TK_BREAK)){
+		node	   = calloc(1, sizeof(Node));
+		node->type = calloc(1, sizeof(Type));
+		node->kind = ND_BREAK;
 	}else{
 		node = assign();
 	}
