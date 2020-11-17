@@ -194,9 +194,17 @@ void declare_struct(Struc *new_struc){
 			expect("]");
 		}
 
+		// align member offset
 		int size_of_type = type_size(new_memb->type);
-		new_memb->offset = ((memb_head)? memb_head->offset : 0) + size_of_type;
-		asize += size_of_type;
+		int padding      = 0;
+		if(memb_head){
+			int prev_tail    = (memb_head) ? (memb_head->offset + type_size(memb_head->type)) : 0;
+			new_memb->offset = prev_tail + padding;
+			asize = (asize%8) ? asize/8*8+8 : asize;
+		}else{
+			new_memb->offset = size_of_type;
+		}
+		asize += size_of_type + padding;
 
 		new_memb->next = memb_head;
 		memb_head      = new_memb;

@@ -19,7 +19,7 @@ int main(){
 struct test{
 	int a;
 	int b;
-	int c[10];
+	int c[5];
 };
 
 int main(){
@@ -30,8 +30,13 @@ int main(){
 	// x.c[0]=3;
 	// return x.a + x.b + x.c[0] + x.c[2];
 
-	x.c[2]=4;
+	x.a    = 1;
+	x.b    = 2;
+	x.c[0] = 3;
+	x.c[1] = 4;
+	x.c[2] = 5;
+	x.c[3] = 6;
+	x.c[4] = 7;
 
 	return x.c[2];
 }
-
