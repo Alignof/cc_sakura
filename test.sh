@@ -80,6 +80,7 @@ assert -cl 10 "int main(){int a; a=10;while(a<0) a=a-1;a;}"
 
 assert -cl 10 "int main(){int a; int i; a=0; for(i=0;i<10;i=i+1) a=a+1;a;}"
 assert -cl 64 "int main(){int a; int i; a=1; for(i=0;i<6;i=i+1) a=a*2;a;}"
+assert -cl 5 "int main(){int i; for(i=0;i<10;i++){if(i==5) break;} return i;}"
 
 assert -cl 2  "int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;}"
 assert -cl 13 "int main(){int a;int b;int c; a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;}"
