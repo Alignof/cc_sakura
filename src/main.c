@@ -1,6 +1,7 @@
 #include "cc_sakura.h"
 
-int label_num;
+int label_loop;
+int label_ifelse;
 int total_depth;
 char *user_input;
 char filename[100];
@@ -93,8 +94,9 @@ int main(int argc, char **argv){
 		printf("	.string \"%.*s\"\n", var->len, var->str);
 	}
 
-	label_num   = 0;
-	total_depth = 0;
+	label_loop   = 0;
+	label_ifelse = 0;
+	total_depth  = 0;
 
 	//generate assembly at first expr
 	for(i = 0;func_list[i];i++){
@@ -126,7 +128,7 @@ int main(int argc, char **argv){
 			gen(func_list[i]->code[j]);
 			printf("\n	pop rax\n");
 
-			label_num += total_depth;
+			label_loop += total_depth;
 		}
 
 		// epiroge
