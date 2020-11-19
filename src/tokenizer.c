@@ -131,16 +131,17 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		if(consume_reserved(&p, "int",	  3, &now, TK_TYPE))	continue;
-		if(consume_reserved(&p, "char",   4, &now, TK_TYPE))	continue;
-		if(consume_reserved(&p, "struct", 6, &now, TK_TYPE))    continue;
-		if(consume_reserved(&p, "if",	  2, &now, TK_IF))	continue;
-		if(consume_reserved(&p, "else",	  4, &now, TK_ELSE))	continue;
-		if(consume_reserved(&p, "for",	  3, &now, TK_FOR))	continue;
-		if(consume_reserved(&p, "while",  5, &now, TK_WHILE))   continue;
-		if(consume_reserved(&p, "break",  5, &now, TK_BREAK))   continue;
-		if(consume_reserved(&p, "sizeof", 6, &now, TK_SIZEOF))  continue;
-		if(consume_reserved(&p, "return", 6, &now, TK_RETURN))  continue;
+		if(consume_reserved(&p, "int",	    3, &now, TK_TYPE))	 continue;
+		if(consume_reserved(&p, "char",     4, &now, TK_TYPE))	 continue;
+		if(consume_reserved(&p, "struct",   6, &now, TK_TYPE))   continue;
+		if(consume_reserved(&p, "if",	    2, &now, TK_IF))	 continue;
+		if(consume_reserved(&p, "else",	    4, &now, TK_ELSE))	 continue;
+		if(consume_reserved(&p, "for",	    3, &now, TK_FOR))	 continue;
+		if(consume_reserved(&p, "while",    5, &now, TK_WHILE))  continue;
+		if(consume_reserved(&p, "break",    5, &now, TK_BREAK))  continue;
+		if(consume_reserved(&p, "continue", 8, &now, TK_CONTINUE))  continue;
+		if(consume_reserved(&p, "sizeof",   6, &now, TK_SIZEOF)) continue;
+		if(consume_reserved(&p, "return",   6, &now, TK_RETURN)) continue;
 
 		//Is block? '{' or '}'
 		if(isblock(p)){

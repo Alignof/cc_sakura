@@ -364,6 +364,9 @@ void gen(Node *node){
 
 			label_loop--;
 			return;
+		case ND_CONTINUE:
+			printf("	jmp .LloopBegin%03d\n", label_loop);
+			return;
 		case ND_BREAK:
 			printf("	jmp .LloopEnd%03d\n", label_loop);
 			return;

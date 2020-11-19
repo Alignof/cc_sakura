@@ -21,6 +21,7 @@ typedef enum{
 	TK_BLOCK,
 	TK_STR,
 	TK_BREAK,
+	TK_CONTINUE,
 	TK_RETURN,
 	TK_EOF,
 }TokenKind;
@@ -70,6 +71,7 @@ typedef enum{
 	ND_CALL_FUNC, 	//  func();
 	ND_RETURN, 	//  return
 	ND_BREAK, 	//  break
+	ND_CONTINUE, 	//  continue
 	ND_TYPE, 	//  int, double, char...
 }NodeKind;
 
