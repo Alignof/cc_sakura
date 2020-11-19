@@ -1,7 +1,7 @@
 #include "cc_sakura.h"
 
 // int label_loop;
-// int label_ifelse;
+// int label_if;
 // int label_ctr;
 
 void expand_next(Node *node){
@@ -272,7 +272,7 @@ void gen(Node *node){
 			}
 			return;
 		case ND_IF:
-			label_ifelse++;
+			label_if++;
 			total_depth++;
 
 			printf("	push rax\n");
@@ -280,33 +280,33 @@ void gen(Node *node){
 
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .LifEnd%03d\n", label_ifelse);
+			printf("	je .LifEnd%03d\n", label_if);
 			printf("	pop rax\n");
 			gen(node->rhs);
 
-			printf(".LifEnd%03d:\n", label_ifelse);
-			label_ifelse--;
+			printf(".LifEnd%03d:\n", label_if);
+			label_if--;
 			return;
 		case ND_IFELSE:
-			label_ifelse++;
+			label_if++;
 			total_depth++;
 
 			// condition
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lelse%03d\n", label_ifelse);
+			printf("	je .Lelse%03d\n", label_if);
 
 			// expr in if
 			gen(node->rhs->lhs);
-			printf("	jmp .LifEnd%03d\n", label_ifelse);
-			printf(".Lelse%03d:\n", label_ifelse);
+			printf("	jmp .LifEnd%03d\n", label_if);
+			printf(".Lelse%03d:\n", label_if);
 
 			// expr in else
 			gen(node->rhs->rhs);
-			printf(".LifEnd%03d:\n", label_ifelse);
+			printf(".LifEnd%03d:\n", label_if);
 
-			label_ifelse--;
+			label_if--;
 			return;
 		case ND_FOR:
 			// adjust rsp

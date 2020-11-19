@@ -1,7 +1,7 @@
 #include "cc_sakura.h"
 
 int label_loop;
-int label_ifelse;
+int label_if;
 int total_depth;
 char *user_input;
 char filename[100];
@@ -95,7 +95,7 @@ int main(int argc, char **argv){
 	}
 
 	label_loop   = 0;
-	label_ifelse = 0;
+	label_if = 0;
 	total_depth  = 0;
 
 	//generate assembly at first expr
