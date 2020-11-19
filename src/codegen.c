@@ -316,10 +316,10 @@ void gen(Node *node){
 			// init
 			gen(node->lhs);
 
-			// condition
 			label_loop++;
 			loop_depth++;
 
+			// condition
 			printf(".LloopBegin%03d:\n", label_loop);
 			gen(node->lhs->vector);
 			printf("	pop rax\n");
@@ -327,8 +327,11 @@ void gen(Node *node){
 			// if cond true then jump to  loop end.
 			printf("	je .LloopEnd%03d\n", label_loop);
 
-			// else expression
+			// gen block
 			gen(node->rhs);
+
+			// gen update expression
+			printf(".LloopCont%03d:\n", label_loop);
 			gen(node->lhs->vector->vector);
 			printf("	pop rax\n");
 
@@ -358,6 +361,7 @@ void gen(Node *node){
 			gen(node->rhs);
 
 			// continue
+			printf(".LloopCont%03d:\n", label_loop);
 			printf("	jmp .LloopBegin%03d\n", label_loop);
 			printf(".LloopEnd%03d:\n", label_loop);
 			printf("	push rax\n");
@@ -365,7 +369,7 @@ void gen(Node *node){
 			label_loop--;
 			return;
 		case ND_CONTINUE:
-			printf("	jmp .LloopBegin%03d\n", label_loop);
+			printf("	jmp .LloopCont%03d\n", label_loop);
 			return;
 		case ND_BREAK:
 			printf("	jmp .LloopEnd%03d\n", label_loop);

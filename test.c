@@ -1,16 +1,17 @@
 int main(){
 	int i;
-	int x[10];
-	for(i=0;i<10;i++){
-		if(i == 5){
-			x[i]=13;
-			continue;
-		}
+	int k;
+	int x=0;
 
-		x[i]=i;
+	for(i=0;i<10;i++){
+		for(k=0;k<10;k++){
+			if(k==5){
+				break;
+			}
+			x++;
+		}
 	}
 
-	return x[5];
+	return x;
 }
-
 

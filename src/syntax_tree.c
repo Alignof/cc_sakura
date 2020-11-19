@@ -386,7 +386,7 @@ Node *stmt(){
 			expect(")");
 
 			// +-----------------------+
-			// +-> (init->cond->calc)  +<-for->expr
+			// +-> (init->cond->loop)  +<-for->expr
 			node->rhs = stmt();
 			node->lhs = init;
 			node->lhs->vector = cond;
