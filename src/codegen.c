@@ -1,8 +1,9 @@
 #include "cc_sakura.h"
 
-// int label_loop;
 // int label_if;
-// int label_ctr;
+// int if_depth;
+// int label_loop;
+// int loop_depth;
 
 void expand_next(Node *node){
 	while(node){
@@ -273,7 +274,7 @@ void gen(Node *node){
 			return;
 		case ND_IF:
 			label_if++;
-			total_depth++;
+			if_depth++;
 
 			printf("	push rax\n");
 			gen(node->lhs);
@@ -289,7 +290,7 @@ void gen(Node *node){
 			return;
 		case ND_IFELSE:
 			label_if++;
-			total_depth++;
+			if_depth++;
 
 			// condition
 			gen(node->lhs);
@@ -317,7 +318,7 @@ void gen(Node *node){
 
 			// condition
 			label_loop++;
-			total_depth++;
+			loop_depth++;
 
 			printf(".LloopBegin%03d:\n", label_loop);
 			gen(node->lhs->vector);
@@ -340,7 +341,7 @@ void gen(Node *node){
 			return;
 		case ND_WHILE:
 			label_loop++;
-			total_depth++;
+			loop_depth++;
 
 			// adjust rsp
 			printf("	push rax\n");
@@ -358,7 +359,7 @@ void gen(Node *node){
 
 			// continue
 			printf("	jmp .LloopBegin%03d\n", label_loop);
-			printf(".Lloopend%03d:\n", label_loop);
+			printf(".LloopEnd%03d:\n", label_loop);
 			printf("	push rax\n");
 
 			label_loop--;

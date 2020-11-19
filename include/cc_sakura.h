@@ -275,7 +275,8 @@ void declare_struct(Struc *new_struc);
 // codegan.c
 extern int label_if;
 extern int label_loop;
-extern int total_depth;
+extern int if_depth;
+extern int loop_depth;
 void gen(Node *node);
 void gen_calc(Node *node);
 void gen_lvar(Node *node);
