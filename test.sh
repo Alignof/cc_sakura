@@ -168,29 +168,31 @@ assert -cl 4 'int a[]={0,1,2,3,4}; int main(){return a[4];}'
 assert -cl 4 'int a[5]={0,1,2,3,4}; int main(){return a[4];}'
 assert -cl 0 'int a[5]={0,1,2}; int main(){return a[4];}'
 
-assert -cl 7 'int main(){int x=3; int a=x++; return a+x;}'
-assert -cl 8 'int main(){int x=3; int a=++x; return a+x;}'
-assert -cl 5 'int main(){int x=3; int a=x--; return a+x;}'
-assert -cl 4 'int main(){int x=3; int a=--x; return a+x;}'
-assert -cl 0 'int main(){int x[4]={0,1,2,3}; int *p; int *q; p=x; q=p++; return *q;}'
-assert -cl 1 'int main(){int x[4]={0,1,2,3}; int *p; int *q; p=x; q=++p; return *q;}'
+assert -cl 7  'int main(){int x=3; int a=x++; return a+x;}'
+assert -cl 8  'int main(){int x=3; int a=++x; return a+x;}'
+assert -cl 5  'int main(){int x=3; int a=x--; return a+x;}'
+assert -cl 4  'int main(){int x=3; int a=--x; return a+x;}'
+assert -cl 0  'int main(){int x[4]={0,1,2,3}; int *p; int *q; p=x; q=p++; return *q;}'
+assert -cl 1  'int main(){int x[4]={0,1,2,3}; int *p; int *q; p=x; q=++p; return *q;}'
 assert -cl 12 'int global = 7; int *f(int *x){*x += 1; global += 1; return x;} int main(){int x=3; x = (*f(&x))++; return global + x;}'
 
-assert -cl 7 'int main(){int x=4; int y=3; x+=y; return x;}'
-assert -cl 1 'int main(){int x=4; int y=3; x-=y; return x;}'
-assert -cl 9 'int main(){int x=3; int y=3; x*=y; return x;}'
-assert -cl 4 'int main(){int x=12; int y=3; x/=y; return x;}'
-assert -cl 6 'int main(){int i; int x[4]={0,1,2,3}; int y[4]={0,1,2,3}; int *p=x; int *q=y; for(i=0;i<4;i++){*(p++)+=*(q++);} return x[3];}'
+assert -cl 7  'int main(){int x=4; int y=3; x+=y; return x;}'
+assert -cl 1  'int main(){int x=4; int y=3; x-=y; return x;}'
+assert -cl 9  'int main(){int x=3; int y=3; x*=y; return x;}'
+assert -cl 4  'int main(){int x=12; int y=3; x/=y; return x;}'
+assert -cl 6  'int main(){int i; int x[4]={0,1,2,3}; int y[4]={0,1,2,3}; int *p=x; int *q=y; for(i=0;i<4;i++){*(p++)+=*(q++);} return x[3];}'
 assert -cl 21 'int global = 7; int *f(int *x){*x += 4; global += 3; return x;} int main(){int x=3; *f(&x) += 4; return global + x;}'
 
 assert -cl 97 "int main(){return 'a';}"
-assert -cl 1 "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
+assert -cl 1  "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
 
-assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
-assert -cl 5 "struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
-assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a=2; y->b=3; return y->a + y->b;}"
-assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;}"
+assert -cl 5  "struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
+assert -cl 5  "struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}"
+assert -cl 5  "struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a=2; y->b=3; return y->a + y->b;}"
+assert -cl 5  "struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;}"
 assert -cl 10 "struct test{int a; int b; int c[10];}; int main(){struct test x; x.a=1; x.b=2; x.c[0]=3; x.c[2]=4; return x.a + x.b + x.c[0] + x.c[2];}"
+assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb col;}; int main(){struct point test; test.col.r = 2; test.col.g = 3; test.col.b = 4; return test.col.r + test.col.g + test.col.b;}"
+assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb col;}; int main(){struct point test; test.col.r=2; test.col.b=3; test.col.g=4; return test.col.r + test.col.b + test.col.g;}"
 
 
 echo OK
