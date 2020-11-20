@@ -176,8 +176,10 @@ Token *tokenize(char *p){
 
 		//Is valiable?
 		if(is_alnum(*p)){
-			now = new_token(TK_IDENT, now, p++);
-			now->len = 1;
+			while(is_alnum(*p)){
+				now = new_token(TK_IDENT, now, p++);
+				now->len = 1;
+			}
 			continue;
 		}
 
