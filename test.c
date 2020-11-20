@@ -7,16 +7,16 @@ struct rgb{
 struct point{ 
 	int x;
 	int y;
-	struct rgb col;
+	struct rgb *col;
 };
 
 int main(){
 	struct point test;
 
-	test.col.r = 2;
-	test.col.g = 3;
-	test.col.b = 4;
+	test.col->r = 2;
+	test.col->g = 3;
+	test.col->b = 4;
 
 	// expect 9
-	return test.col.r + test.col.g + test.col.b;
+	return test.col->r + test.col->g + test.col->b;
 }

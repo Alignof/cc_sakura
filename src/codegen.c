@@ -267,7 +267,7 @@ void gen(Node *node){
 		case ND_ARROW:
 			gen_struc(node);
 			// if it's an array, ignore the deref
-			if(node->type->ty != ARRAY){
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				printf("	pop rax\n");
 				printf("	push [rax]\n");
 			}
