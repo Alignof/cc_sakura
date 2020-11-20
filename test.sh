@@ -13,7 +13,7 @@ assert() {
 
 	gcc -c tmp.s 
 	gcc -o tmp -static tmp.s 
-	#gcc -o tmp tmp.s
+
 	./tmp
 	actual="$?"
 
@@ -191,8 +191,7 @@ assert -cl 5  "struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b
 assert -cl 5  "struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a=2; y->b=3; return y->a + y->b;}"
 assert -cl 5  "struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;}"
 assert -cl 10 "struct test{int a; int b; int c[10];}; int main(){struct test x; x.a=1; x.b=2; x.c[0]=3; x.c[2]=4; return x.a + x.b + x.c[0] + x.c[2];}"
-assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb col;}; int main(){struct point test; test.col.r = 2; test.col.g = 3; test.col.b = 4; return test.col.r + test.col.g + test.col.b;}"
-assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb col;}; int main(){struct point test; test.col.r=2; test.col.b=3; test.col.g=4; return test.col.r + test.col.b + test.col.g;}"
+assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb col;}; int main(){struct point test; test.col.r=2; test.col.g=3; test.col.b=4; return test.col.r + test.col.g + test.col.b;}"
 
 
 echo OK

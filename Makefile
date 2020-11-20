@@ -23,7 +23,7 @@ test: $(TARGET)
 	./test.sh
 
 file_test: $(TARGET)
-	$(TARGET) test.c > tmp.s && gcc tmp.s -o tmp
+	$(TARGET) test.c > tmp.s && gcc -static tmp.s -o tmp
 	./tmp || echo $$?
 
 clean:
