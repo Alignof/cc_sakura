@@ -1,17 +1,21 @@
+struct rgb{
+	int red;
+	int green;
+	int blue;
+};
+
+struct test{ 
+	int x;
+	int y;
+	struct rgb color;
+};
+
 int main(){
-	int i;
-	int k;
-	int x=0;
+	struct test point;
 
-	for(i=0;i<10;i++){
-		for(k=0;k<10;k++){
-			if(k==5){
-				break;
-			}
-			x++;
-		}
-	}
+	test.x = 2;
+	test.y = 3;
 
-	return x;
+	// expect 5
+	return test.x + test.y;
 }
-

@@ -153,10 +153,23 @@ void declare_struct(Struc *new_struc){
 		new_memb = calloc(1,sizeof(Member));
 		new_memb->type = calloc(1,sizeof(Type));
 
+		//if(consume_reserved_word("int", TK_TYPE))	  new_memb->type->ty = INT;
+		//else if(consume_reserved_word("char", TK_TYPE))   new_memb->type->ty = CHAR;
+		//else if(consume_reserved_word("struct", TK_TYPE)) new_memb->type->ty = STRUCT;
+
 		// check type
-		if(consume_reserved_word("int", TK_TYPE))	  new_memb->type->ty = INT;
-		else if(consume_reserved_word("char", TK_TYPE))   new_memb->type->ty = CHAR;
-		else if(consume_reserved_word("struct", TK_TYPE)) new_memb->type->ty = STRUCT;
+		if(consume_reserved_word("int", TK_TYPE)){
+			new_memb->type->ty = INT;
+		}else if(consume_reserved_word("char", TK_TYPE)){
+			new_memb->type->ty = CHAR;
+		}else if(consume_reserved_word("struct", TK_TYPE)){
+			Token *tok   = consume_ident();
+			Struc *found = find_struc(tok);
+			//new_memb->val          = found->memsize;
+			new_memb->type->member = found->member;
+			new_memb->type->ty     = STRUCT;
+		}
+
 
 		// count asterisk
 		while(token->kind == TK_RESERVED && *(token->str) == '*'){
