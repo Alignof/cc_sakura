@@ -80,6 +80,13 @@ assert -cl 10 "int main(){int a; a=10;while(a<0) a=a-1;a;}"
 
 assert -cl 10 "int main(){int a; int i; a=0; for(i=0;i<10;i=i+1) a=a+1;a;}"
 assert -cl 64 "int main(){int a; int i; a=1; for(i=0;i<6;i=i+1) a=a*2;a;}"
+assert -cl 5  "int main(){int i; for(i=0;i<10;i++){if(i==5) break;} return i;}"
+assert -cl 5  "int main(){int i=0; while(i<10){if(i==5){break;}i++;} return i;}"
+assert -cl 16 "int main(){int i; int x[10];for(i=0;i<10;i++){if(i == 5){x[i]=13;continue;}x[i]=i;} return x[5]+x[3];}"
+assert -cl 16 "int main(){int i=-1; int x[10]; while(i<10){i++;if(i == 5){x[i]=13;continue;}x[i]=i;} return x[5]+x[3];}"
+assert -cl 50 "int main(){int i; int k; int x=0; for(i=0;i<10;i++){for(k=0;k<10;k++){if(k==5){break;} x++;}} return x;}"
+
+
 
 assert -cl 2  "int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;}"
 assert -cl 13 "int main(){int a;int b;int c; a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;}"
@@ -184,7 +191,6 @@ assert -cl 5 "struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=
 assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a=2; y->b=3; return y->a + y->b;}"
 assert -cl 5 "struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;}"
 assert -cl 10 "struct test{int a; int b; int c[10];}; int main(){struct test x; x.a=1; x.b=2; x.c[0]=3; x.c[2]=4; return x.a + x.b + x.c[0] + x.c[2];}"
-
 
 
 echo OK

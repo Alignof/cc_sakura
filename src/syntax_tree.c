@@ -332,6 +332,12 @@ Node *expr(){
 				node->vector = init_formula(node, assign());
 			}
 		}
+	}else if(consume_reserved_word("break", TK_BREAK)){
+		node	   = calloc(1, sizeof(Node));
+		node->kind = ND_BREAK;
+	}else if(consume_reserved_word("continue", TK_CONTINUE)){
+		node	   = calloc(1, sizeof(Node));
+		node->kind = ND_CONTINUE;
 	}else{
 		node = assign();
 	}
@@ -380,7 +386,7 @@ Node *stmt(){
 			expect(")");
 
 			// +-----------------------+
-			// +-> (init->cond->calc)  +<-for->expr
+			// +-> (init->cond->loop)  +<-for->expr
 			node->rhs = stmt();
 			node->lhs = init;
 			node->lhs->vector = cond;

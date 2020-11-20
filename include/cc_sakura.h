@@ -20,6 +20,8 @@ typedef enum{
 	TK_SIZEOF,
 	TK_BLOCK,
 	TK_STR,
+	TK_BREAK,
+	TK_CONTINUE,
 	TK_RETURN,
 	TK_EOF,
 }TokenKind;
@@ -68,6 +70,8 @@ typedef enum{
 	ND_ARG, 	//  function argument;
 	ND_CALL_FUNC, 	//  func();
 	ND_RETURN, 	//  return
+	ND_BREAK, 	//  break
+	ND_CONTINUE, 	//  continue
 	ND_TYPE, 	//  int, double, char...
 }NodeKind;
 
@@ -271,8 +275,10 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
 
 // codegan.c
-extern int label_num;
-extern int label_depth;
+extern int label_if;
+extern int label_loop;
+extern int if_depth;
+extern int loop_depth;
 void gen(Node *node);
 void gen_calc(Node *node);
 void gen_lvar(Node *node);
