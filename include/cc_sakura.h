@@ -182,6 +182,7 @@ struct Struc{
 struct Member{
 	int    len;
 	int    offset;
+	int    memsize;
 	char   *name;
 	Type   *type;
 	Member *next;

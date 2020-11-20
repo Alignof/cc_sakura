@@ -20,6 +20,8 @@ parsed tokens kind.
 | TK\_SIZEOF	| sizeof			| sizeof		| 
 | TK\_BLOCK	| code block			| {}			|
 | TK\_STR	| string			| "hello"		|
+| TK\_BREAK	| break				| break 		|
+| TK\_CONTINUE	| continue			| continue		|
 | TK\_RETURN	| return			| return		|
 | TK\_EOF	| end of file			|			|
 
@@ -41,7 +43,8 @@ syntax tree node kind.
 | ND\_NE	| not equal			| !=			|
 | ND\_AND	| and				| &&			|
 | ND\_OR	| or				| \|\|			|
-| ND\_ASSIGN	| assign			| =			|
+| ND\_ASSIGN	| assignment			| =			|
+| ND\_COMPOUND	| compound assignment		| +=, -=, \*=, /=	|
 | ND\_POSTID	| post increment/decrement	| a++, a--		|
 | ND\_DOT	| direct member selection	| struc.member		|
 | ND\_ARROW	| direct member selection	| struc.member		|
@@ -63,6 +66,8 @@ syntax tree node kind.
 | ND\_ARG	| function argument		| function argument   	|
 | ND\_CALL\_FUNC| function call			| func();		|
 | ND\_RETURN	| return			| return		|
+| ND\_BREAK	| break loop			| break 		|
+| ND\_CONTINUE	| jump to the top of loop	| continue		|
 | ND\_TYPE	| type of variable		| int, double, char...	|
 
 
@@ -77,6 +82,15 @@ type of variable kind.
 | ARRAY		| int a[], char a[]...		| 8 \* size (n byte)		|
 | STRUC		| struct struc{int a; int b;};	| 8 \* sum size (n byte)	|
 
+### IncDeckind
+type of increment/decrement.
+
+| name		| description			| example		|
+| :--		| :--				| :--			|
+| PRE\_INC	| pre  increment		| ++p 			| 
+| PRE\_DEC	| post increment		| p++ 			| 
+| POST\_INC	| pre  decrement		| --p 			| 
+| POST\_DEC	| post decrement		| p-- 			| 
 
 ## structs
 Token, Node, LVar, GVar, Func, Struc, Member, Type, Str...
@@ -219,19 +233,20 @@ struct of local variable
 struct of structure
 | type/name		| description			| example			|
 | :--			| :--				| :--				|
-| int   len;		| name length 			| 
-| int   memsize;	| allocate memory size		| 
-| char  \*name;		| struct name			| 
-| Member  \*member;	| chained list of Member	| 
-| Struc \*next;		| chained list of Struc		| 
+| int   len;		| name length 			|				|
+| int   memsize;	| allocate memory size		|				|
+| char  \*name;		| struct name			|				|
+| Member  \*member;	| chained list of Member	|				|
+| Struc \*next;		| chained list of Struc		|				|
 
 
 ### Member
 struct of structure member
 | type/name		| description			| example			|
 | :--			| :--				| :--				|
-| int   len;		| name length 			| 
+| int   len;		| name length 			|				|
 | int offset;		| offset from head of struct	|                               |
-| char  \*name;		| member name			| 
+| int   memsize;	| allocate memory size		|				|
+| char  \*name;		| member name			|				|
 | Type type;		| member variable type		|                               |
 | Member  \*next;	| chained list of Member	|				|

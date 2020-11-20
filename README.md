@@ -1,5 +1,5 @@
-# cc_sakura
-[![Build Status](https://travis-ci.org/Takana-Norimasa/cc_sakura.svg?branch=master)](https://travis-ci.org/Takana-Norimasa/cc_sakura)  
+# cc\_sakura
+![C/C++ CI](https://github.com/Takana-Norimasa/cc_sakura/workflows/C/C++%20CI/badge.svg)
 C Compiler Sakura  
 [https://www.sigbus.info/compilerbook](https://www.sigbus.info/compilerbook)を見ながら勉強していく。
 
@@ -224,5 +224,8 @@ struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a 
 struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a=2; y->b=3; return y->a + y->b;} => 5
 struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;} => 5
 struct test{int a; int b; int c[10];}; int main(){struct test x; x.a=1; x.b=2; x.c[0]=3; x.c[2]=4; return x.a + x.b + x.c[0] + x.c[2];} => 10
+struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb col;}; int main(){struct point test; test.col.r=2; test.col.g=3; test.col.b=4; return test.col.r + test.col.g + test.col.b;} => 9
+struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; test.col->r=2; test.col->g=3; test.col->b=4; return test.col->r + test.col->g + test.col->b;} => 9
+struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; struct point *ptr; ptr=&test; ptr->col->r=2; ptr->col->g=3; ptr->col->b=4; return ptr->col->r + ptr->col->g + ptr->col->b;} => 9
 OK
 ```
