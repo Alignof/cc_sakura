@@ -272,8 +272,21 @@ Node *logical(){
 	}
 }
 
-Node *assign(){
+Node *ternary(){
 	Node *node = logical();
+	if(consume("?")){
+		//                          cond  if true
+		node = new_node(ND_TERNARY, node, ternary());
+		expect(":");
+		//             if false
+		node->vector = ternary();
+	}
+
+	return node;
+}
+
+Node *assign(){
+	Node *node = ternary();
 
 	if(consume("=")){
 		node = new_node(ND_ASSIGN, node, assign());

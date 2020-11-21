@@ -61,6 +61,7 @@ typedef enum{
 	ND_GARRAY, 	//  global array
 	ND_STR, 	//  "string"
 	ND_NUM, 	//  integer
+	ND_TERNARY,	//  cond ? if_true : if_false
 	ND_IF, 		//  if
 	ND_ELSE, 	//  else
 	ND_IFELSE, 	//  if-else
@@ -251,6 +252,7 @@ Node *expr();
 Node *assign();
 Node *relational();
 Node *logical();
+Node *ternary();
 Node *equelity();
 Node *add();
 Node *mul();

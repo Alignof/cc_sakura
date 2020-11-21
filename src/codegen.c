@@ -272,6 +272,27 @@ void gen(Node *node){
 				printf("	push [rax]\n");
 			}
 			return;
+		case ND_TERNARY:
+			label_if++;
+			if_depth++;
+
+			// condition
+			gen(node->lhs);
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			printf("	je .Lelse%03d\n", label_if);
+
+			// true
+			gen(node->rhs);
+			printf("	jmp .LifEnd%03d\n", label_if);
+			printf(".Lelse%03d:\n", label_if);
+
+			// false
+			gen(node->vector);
+			printf(".LifEnd%03d:\n", label_if);
+
+			label_if--;
+			return;
 		case ND_IF:
 			label_if++;
 			if_depth++;

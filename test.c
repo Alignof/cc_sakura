@@ -23,4 +23,11 @@ int main(){
 }
 */
 
-struct test{int a; int b; int c[10];}; int main(){struct test x; x.a=1; x.b=2; x.c[0]=3; x.c[2]=4; return x.a + x.b + x.c[0] + x.c[2];}
+int main(){
+	int x;
+	int y=1;
+
+	x = y==2 ? 2 : 3;
+
+	return x;
+}
