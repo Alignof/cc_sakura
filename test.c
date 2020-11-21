@@ -1,4 +1,3 @@
-/*
 struct rgb{
 	int red;
 	int green;
@@ -8,27 +7,21 @@ struct rgb{
 struct point{ 
 	int x;
 	int y;
-	struct rgb *color;
+	struct rgb color;
+	int dummy;
 };
 
 int main(){
 	struct point test;
 
-	test.col->red   = 2;
-	test.col->green = 3;
-	test.col->blue  = 4;
+	printf("address of test.x		is %p\n", &(test.x));
+	printf("address of test.y		is %p\n", &(test.y));
+	printf("address of test.color		is %p\n", &(test.color));
+	printf("address of test.dummy		is %p\n", &(test.dummy));
+	printf("address of test.color.red	is %p\n", &(test.color.red));
+	printf("address of test.color.green	is %p\n", &(test.color.green));
+	printf("address of test.color.blue	is %p\n", &(test.color.blue));
 
-	// expect 9
-	return test.color->red + test.color->green + test.color->blue;
+	return 0;
 }
-*/
 
-int main(){
-	int x;
-	int y=2;
-	int z=5;
-
-	x = (y==2)  ? ((z==4) ? 8 : 4) : 3;
-
-	return x;
-}

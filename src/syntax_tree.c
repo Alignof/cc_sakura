@@ -117,8 +117,9 @@ Node *unary(){
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, NULL, unary());
-		node->type->ty   = PTR;
-		node->type->size = type_size(node->type);
+		node->type->ty    = PTR;
+		node->type->size  = type_size(node->type);
+		node->type->align = type_align(node->type);
 
 		return node;
 	}
@@ -183,7 +184,6 @@ Node *unary(){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 		node = new_node(ND_NUM, node, unary());
-		//node->val = type_size(node->rhs->type);
 		node->val = node->rhs->type->size;
 
 		return node;
@@ -324,7 +324,8 @@ Node *expr(){
 			node->type->member = found->member;
 			node->type->ty     = STRUCT;
 		}
-		node->type->size = type_size(node->type);
+		node->type->size  = type_size(node->type);
+		node->type->align = type_align(node->type);
 		
 		// count asterisk
 		while(token->kind == TK_RESERVED && *(token->str) == '*'){

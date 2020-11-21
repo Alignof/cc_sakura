@@ -38,7 +38,7 @@ int type_align(Type *type){
 			while(memb_list){
 				align_num = type_align(memb_list->type);
 				if(max < align_num){
-					max = align_num
+					max = align_num;
 				}
 				memb_list = memb_list->next;
 			}
@@ -69,8 +69,9 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	Node *pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
 	pointer_size->type = calloc(1, sizeof(Type));
-	pointer_size->type->ty   = INT;
-	pointer_size->type->size = type_size(pointer_size->type);
+	pointer_size->type->ty    = INT;
+	pointer_size->type->size  = type_size(pointer_size->type);
+	pointer_size->type->align = type_align(pointer_size->type);
 
 
 	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to!=NULL){
