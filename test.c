@@ -25,9 +25,10 @@ int main(){
 
 int main(){
 	int x;
-	int y=1;
+	int y=2;
+	int z=5;
 
-	x = y==2 ? 2 : 3;
+	x = (y==2)  ? ((z==4) ? 8 : 4) : 3;
 
 	return x;
 }

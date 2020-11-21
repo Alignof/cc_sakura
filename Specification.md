@@ -57,6 +57,7 @@ syntax tree node kind.
 | ND\_GARRAY	| global array			| (global array)	|
 | ND\_STR	| string			| "string"		|
 | ND\_NUM	| number			| 0, 255, -1...		|
+| ND\_TERNARY	| ternary operator		| (cond)? true : false	|
 | ND\_IF	| if     			| if			|
 | ND\_ELSE	| else   			| else			|
 | ND\_IFELSE	| if-else			| if-else		|
@@ -129,6 +130,8 @@ struct of syntax tree node.
 | ND\_GARRAY		| chain list of initialize formula -> (next) 	|
 | ND\_FOR		| exit conditions -> code or block code		|
 | ND\_BLOCK		| chain of block code 				|
+| ND\_TERNARY		| else expression 				|
+
 
 
 

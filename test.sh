@@ -92,6 +92,7 @@ assert -cl 2  "int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a
 assert -cl 13 "int main(){int a;int b;int c; a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;}"
 assert -cl 2 "int main(){int x; int y=1; x =(y==1)?2:3; return x;}"
 assert -cl 3 "int main(){int x; int y=1; x =(y==5)?2:3; return x;}"
+assert -cl 4 "int main(){int x; int y=2; int z=5; x=(y==2) ? ((z==4)?8:4) : 3; return x;}"
 
 
 
