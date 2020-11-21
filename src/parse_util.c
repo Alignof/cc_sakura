@@ -19,6 +19,37 @@ int type_size(Type *type){
 	return -1;
 }
 
+int type_align(Type *type){
+	int max=0;
+	int align_num;
+	Member *memb_list;
+
+	switch(type->ty){
+		case CHAR:
+			return 1;
+		case INT:
+			return 4;
+		case PTR:
+			return 8;
+		case ARRAY:
+			return type_align(type->ptr_to);
+		case STRUCT:
+			memb_list = type->member;
+			while(memb_list){
+				align_num = type_align(memb_list->type);
+				if(max < align_num){
+					max = align_num
+				}
+				memb_list = memb_list->next;
+			}
+			return max;
+		default:
+			error_at(token->str, "unknown type");
+	}
+
+	return -1;
+}
+
 int align_array_size(int isize, Type *array_type){
 	int array_size = array_type->size;
 	return (array_size%8) ? array_size/8*8+8 : array_size;

@@ -240,6 +240,7 @@ Struc *find_struc(Token *tok);
 
 // parse_util.c
 int type_size(Type *type);
+int type_align(Type *type);
 int align_array_size(int isize, Type *array_type);
 Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type);
 Type *get_pointer_type(Type *given);
