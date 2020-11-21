@@ -13,8 +13,9 @@ Type *insert_type_list(Type *prev, int star_count){
 	if(star_count){
 		for(int i = 0;i<star_count;i++){
 			newtype = calloc(1, sizeof(Type));
-			newtype->ty   = PTR;
-			newtype->size = type_size(newtype);
+			newtype->ty     = PTR;
+			newtype->size   = type_size(newtype);
+			newtype->align  = type_align(newtype);
 			newtype->ptr_to = prev;
 			prev = newtype;
 		}
@@ -40,6 +41,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->len  = def_name->len;
 	gvar->type = toplv_type;
 	gvar->type->size = type_size(toplv_type);
+	gvar->type->align = type_align(toplv_type);
 
 	// add type list
 	gvar->type = insert_type_list(gvar->type, star_count);
@@ -63,16 +65,17 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			}
 
 			newtype = calloc(1, sizeof(Type));
-			newtype->ty         = ARRAY;
-			newtype->ptr_to     = gvar->type;
-			newtype->index_size = index_num;
-			newtype->size       = type_size(newtype);
+			newtype->ty          = ARRAY;
+			newtype->ptr_to      = gvar->type;
+			newtype->index_size  = index_num;
+			newtype->size        = type_size(newtype);
+			newtype->align       = type_align(newtype);
 			gvar->type = newtype;
 			expect("]");
 		}
 		gvar->memsize = align_array_size(isize, gvar->type);
 	}else{
-		gvar->memsize = type_size(gvar->type);
+		gvar->memsize  = type_size(gvar->type);
 	}
 
 	// globals == new lvar
@@ -119,11 +122,11 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			}
 
 			newtype = calloc(1, sizeof(Type));
-			newtype->ty         = ARRAY;
-			newtype->ptr_to     = lvar->type;
-			newtype->index_size = index_num;
-			newtype->size       = type_size(newtype);
-			//newtype->align      = 0;
+			newtype->ty          = ARRAY;
+			newtype->ptr_to      = lvar->type;
+			newtype->index_size  = index_num;
+			newtype->size        = type_size(newtype);
+			newtype->align       = type_align(newtype);
 			lvar->type = newtype;
 
 			expect("]");
@@ -175,10 +178,12 @@ void declare_struct(Struc *new_struc){
 			Token *tok   = consume_ident();
 			Struc *found = find_struc(tok);
 			new_memb->memsize      = found->memsize;
+			new_memb->type->size   = found->memsize;
 			new_memb->type->member = found->member;
 			new_memb->type->ty     = STRUCT;
 		}
-		new_memb->type->size = type_size(new_memb->type);
+		new_memb->type->size  = type_size(new_memb->type);
+		new_memb->type->align = type_align(new_memb->type);
 
 
 		// count asterisk
@@ -212,7 +217,8 @@ void declare_struct(Struc *new_struc){
 			newtype->ty         = ARRAY;
 			newtype->ptr_to     = new_memb->type;
 			newtype->index_size = index_num;
-			newtype->size = type_size(newtype);
+			newtype->size  = type_size(newtype);
+			newtype->align = type_align(newtype);
 			new_memb->type = newtype;
 
 			expect("]");
@@ -225,13 +231,12 @@ void declare_struct(Struc *new_struc){
 		}else if (new_memb->type->ty == STRUCT){
 			size_of_type = new_memb->memsize;
 		}else{
-			//size_of_type = type_size(new_memb->type);
 			size_of_type = new_memb->type->size;
 		}
 
 		if(memb_head){
 			int prev_tail    = (memb_head) ? (memb_head->offset + memb_head->type->size) : 0;
-			padding          = (prev_tail%size_of_type) ? (size_of_type - (prev_tail%size_of_type)) : 0;
+			padding          = (prev_tail % new_memb->type->align) ? (new_memb->type->align - (prev_tail % new_memb->type->align)) : 0;
 			new_memb->offset = prev_tail + padding;
 		}else{
 			new_memb->offset = 0;

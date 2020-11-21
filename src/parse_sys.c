@@ -243,8 +243,9 @@ Node *new_node_num(int val){
 	node->kind = ND_NUM;
 	node->val  = val;
 	node->type = calloc(1, sizeof(Type));
-	node->type->ty   = INT;
-	node->type->size = type_size(node->type);
+	node->type->ty    = INT;
+	node->type->size  = type_size(node->type);
+	node->type->align = type_align(node->type);
 	return node;
 }
 

@@ -19,6 +19,37 @@ int type_size(Type *type){
 	return -1;
 }
 
+int type_align(Type *type){
+	int max=0;
+	int align_num;
+	Member *memb_list;
+
+	switch(type->ty){
+		case CHAR:
+			return 1;
+		case INT:
+			return 4;
+		case PTR:
+			return 8;
+		case ARRAY:
+			return type_align(type->ptr_to);
+		case STRUCT:
+			memb_list = type->member;
+			while(memb_list){
+				align_num = type_align(memb_list->type);
+				if(max < align_num){
+					max = align_num;
+				}
+				memb_list = memb_list->next;
+			}
+			return max;
+		default:
+			error_at(token->str, "unknown type");
+	}
+
+	return -1;
+}
+
 int align_array_size(int isize, Type *array_type){
 	int array_size = array_type->size;
 	return (array_size%8) ? array_size/8*8+8 : array_size;
@@ -38,8 +69,9 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	Node *pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
 	pointer_size->type = calloc(1, sizeof(Type));
-	pointer_size->type->ty   = INT;
-	pointer_size->type->size = type_size(pointer_size->type);
+	pointer_size->type->ty    = INT;
+	pointer_size->type->size  = type_size(pointer_size->type);
+	pointer_size->type->align = type_align(pointer_size->type);
 
 
 	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to!=NULL){
