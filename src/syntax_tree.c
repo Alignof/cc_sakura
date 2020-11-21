@@ -4,13 +4,13 @@ int alloc_size;
 Token *token;
 Str *strings;
 //LVar *locals;
-// Func *func_list[100]; 
+//Func *func_list[100]; 
 
 Node *data(){
 	if(consume("(")){
-		//jmp expr
+		// jmp expr
 		Node *node = expr();
-		//check end of caret
+		// check end of caret
 		expect(")");
 		return node;
 	}
@@ -117,7 +117,8 @@ Node *unary(){
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, NULL, unary());
-		node->type->ty = PTR;
+		node->type->ty   = PTR;
+		node->type->size = type_size(node->type);
 
 		return node;
 	}
@@ -182,7 +183,8 @@ Node *unary(){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 		node = new_node(ND_NUM, node, unary());
-		node->val = type_size(node->rhs->type);
+		//node->val = type_size(node->rhs->type);
+		node->val = node->rhs->type->size;
 
 		return node;
 	}
@@ -270,8 +272,21 @@ Node *logical(){
 	}
 }
 
-Node *assign(){
+Node *ternary(){
 	Node *node = logical();
+	if(consume("?")){
+		//                          cond  if true
+		node = new_node(ND_TERNARY, node, ternary());
+		expect(":");
+		//             if false
+		node->vector = ternary();
+	}
+
+	return node;
+}
+
+Node *assign(){
+	Node *node = ternary();
 
 	if(consume("=")){
 		node = new_node(ND_ASSIGN, node, assign());
@@ -305,10 +320,11 @@ Node *expr(){
 		}else if(consume_reserved_word("struct", TK_TYPE)){
 			Token *tok   = consume_ident();
 			Struc *found = find_struc(tok);
-			node->val          = found->memsize;
+			node->type->size   = found->memsize;
 			node->type->member = found->member;
 			node->type->ty     = STRUCT;
 		}
+		node->type->size = type_size(node->type);
 		
 		// count asterisk
 		while(token->kind == TK_RESERVED && *(token->str) == '*'){
@@ -459,10 +475,13 @@ void program(){
 
 		// type of function return value
 		if(token->kind == TK_TYPE){
-			if(consume_reserved_word("int", TK_TYPE))	  toplv_type->ty = INT;
-			else if(consume_reserved_word("char", TK_TYPE))   toplv_type->ty = CHAR;
-			else if(consume_reserved_word("struct", TK_TYPE)) toplv_type->ty = STRUCT;
-			else error_at(token->str, "not a function type token.");
+			if(consume_reserved_word("int", TK_TYPE)){
+				toplv_type->ty = INT;
+			}else if(consume_reserved_word("char", TK_TYPE)){
+				toplv_type->ty = CHAR;
+			}else if(consume_reserved_word("struct", TK_TYPE)){
+				toplv_type->ty = STRUCT;
+			}
 		}
 
 		// count asterisk
@@ -482,11 +501,11 @@ void program(){
 		// function
 		if(consume("(")){
 			func_list[func_index]->type = toplv_type;
-			func_list[func_index]->name = (char *)calloc(def_name->len, sizeof(char));
+			func_list[func_index]->name = calloc(def_name->len, sizeof(char));
 			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 			
 			// add type list
-			insert_type_list(func_list[func_index]->type, star_count);
+			func_list[func_index]->type = insert_type_list(func_list[func_index]->type, star_count);
 
 			// get arguments
 			get_argument(func_index);

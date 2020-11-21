@@ -61,6 +61,7 @@ typedef enum{
 	ND_GARRAY, 	//  global array
 	ND_STR, 	//  "string"
 	ND_NUM, 	//  integer
+	ND_TERNARY,	//  cond ? if_true : if_false
 	ND_IF, 		//  if
 	ND_ELSE, 	//  else
 	ND_IFELSE, 	//  if-else
@@ -115,6 +116,8 @@ struct Type{
 	TypeKind ty;
 	Type	 *ptr_to;
 	Member   *member;
+	int	 size;
+	int	 align;
 	int      index_size;
 };
 
@@ -249,6 +252,7 @@ Node *expr();
 Node *assign();
 Node *relational();
 Node *logical();
+Node *ternary();
 Node *equelity();
 Node *add();
 Node *mul();
@@ -259,9 +263,7 @@ Node *data();
 // parse_part.c
 void get_argument(int func_index);
 Node *compound_assign(TypeKind type, Node *dst, Node *src);
-Node *dot_arrow(TypeKind type, Node *node);
-//Node *dot(Node *node);
-//Node *arrow(Node *node);
+Node *dot_arrow(NodeKind type, Node *node);
 Node *init_formula(Node *node, Node *init_val);
 Node *incdec(Node *node, IncDecKind idtype);
 Node *array_block();
@@ -270,7 +272,7 @@ Node *call_function(Node *node, Token *tok);
 Node *array_index(Node *node, Node *index);
 
 // declare.c
-void insert_type_list(Type *newtype, int star_count);
+Type *insert_type_list(Type *prev, int star_count);
 Node *declare_global_variable();
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);

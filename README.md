@@ -140,6 +140,9 @@ int main(){int i=-1; int x[10]; while(i<10){i++;if(i == 5){x[i]=13;continue;}x[i
 int main(){int i; int k; int x=0; for(i=0;i<10;i++){for(k=0;k<10;k++){if(k==5){break;} x++;}} return x;} => 50
 int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;} => 2
 int main(){int a;int b;int c; a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;} => 13
+int main(){int x; int y=1; x =(y==1)?2:3; return x;} => 2
+int main(){int x; int y=1; x =(y==5)?2:3; return x;} => 3
+int main(){int x; int y=2; int z=5; x=(y==2) ? ((z==4)?8:4) : 3; return x;} => 4
 int func(){return 9;} int main(){int b; b=func();b;} => 9
 int func(){int a; a=9;return a;} int main(){int b; b=func();b;} => 9
 int func(){int a; a=9;return a;} int main(){int b;int c; b=3;c=func();b;} => 3

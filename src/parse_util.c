@@ -1,7 +1,6 @@
 #include "cc_sakura.h"
 
 int type_size(Type *type){
-	int array_size;
 	switch(type->ty){
 		case CHAR:
 			return 1;
@@ -10,20 +9,9 @@ int type_size(Type *type){
 		case PTR:
 			return 8;
 		case ARRAY:
-			array_size = 1;
-			while(type){
-				if(type->ty == ARRAY){
-					array_size *= type->index_size;
-				}else{
-					array_size *= type_size(type);
-				}
-
-				type = type->ptr_to;
-			}
-
-			return array_size;
+			return type->index_size * type_size(type->ptr_to);
 		case STRUCT:
-			return 8;
+			return type->size;
 		default:
 			error_at(token->str, "unknown type");
 	}
@@ -32,7 +20,7 @@ int type_size(Type *type){
 }
 
 int align_array_size(int isize, Type *array_type){
-	int array_size = isize*type_size(array_type);
+	int array_size = array_type->size;
 	return (array_size%8) ? array_size/8*8+8 : array_size;
 }
 
@@ -50,16 +38,17 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	Node *pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
 	pointer_size->type = calloc(1, sizeof(Type));
-	pointer_size->type->ty = INT;
+	pointer_size->type->ty   = INT;
+	pointer_size->type->size = type_size(pointer_size->type);
 
 
 	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to!=NULL){
 		ptrtype = lhs_type->ptr_to;
-		pointer_size->val = type_size(ptrtype);
+		pointer_size->val = ptrtype->size;
 		node->rhs = new_node(ND_MUL, node->rhs, pointer_size);
 	}else if(rhs_type->ty >= PTR  &&  rhs_type->ptr_to!=NULL){
 		ptrtype = rhs_type->ptr_to;
-		pointer_size->val = type_size(ptrtype);
+		pointer_size->val = ptrtype->size;
 		node->lhs = new_node(ND_MUL, node->lhs, pointer_size);
 	}
 

@@ -8,12 +8,20 @@ Struc *structs;
 // LVar *locals;
 // Func *func_list[100];
 
-void insert_type_list(Type *newtype, int star_count){
-	for(int i = 0;i<star_count;i++){
-		newtype->ptr_to = calloc(1, sizeof(Type));
-		newtype->ptr_to->ty = newtype->ty;
-		newtype->ty = PTR;
-		newtype = newtype->ptr_to;
+Type *insert_type_list(Type *prev, int star_count){
+	Type *newtype;
+	if(star_count){
+		for(int i = 0;i<star_count;i++){
+			newtype = calloc(1, sizeof(Type));
+			newtype->ty   = PTR;
+			newtype->size = type_size(newtype);
+			newtype->ptr_to = prev;
+			prev = newtype;
+		}
+		
+		return newtype;
+	}else{
+		return prev;
 	}
 }
 
@@ -31,9 +39,10 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->name = def_name->str;
 	gvar->len  = def_name->len;
 	gvar->type = toplv_type;
+	gvar->type->size = type_size(toplv_type);
 
 	// add type list
-	insert_type_list(gvar->type, star_count);
+	gvar->type = insert_type_list(gvar->type, star_count);
 
 	// Is array
 	if(check("[")){
@@ -57,10 +66,11 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			newtype->ty         = ARRAY;
 			newtype->ptr_to     = gvar->type;
 			newtype->index_size = index_num;
+			newtype->size       = type_size(newtype);
 			gvar->type = newtype;
 			expect("]");
 		}
-		gvar->memsize = align_array_size(isize, gvar->type->ptr_to);
+		gvar->memsize = align_array_size(isize, gvar->type);
 	}else{
 		gvar->memsize = type_size(gvar->type);
 	}
@@ -86,7 +96,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->type = node->type;
 
 	// add type list
-	insert_type_list(lvar->type, star_count);
+	lvar->type = insert_type_list(lvar->type, star_count);
 
 	// Is array
 	if(check("[")){
@@ -112,18 +122,20 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			newtype->ty         = ARRAY;
 			newtype->ptr_to     = lvar->type;
 			newtype->index_size = index_num;
+			newtype->size       = type_size(newtype);
+			//newtype->align      = 0;
 			lvar->type = newtype;
 
 			expect("]");
 		}
 
-		asize = align_array_size(isize, get_pointer_type(lvar->type));
+		asize = align_array_size(isize, lvar->type);
 		alloc_size += asize;
 		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
 		if(lvar->type->ty == STRUCT){
-			lvar->offset =  (locals) ? (locals->offset) + node->val : node->val;
-			alloc_size   += node->val;
+			lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
+			alloc_size   += lvar->type->size;
 		}else{
 			lvar->offset =  (locals) ? (locals->offset)+8 : 8;
 			alloc_size   += 8;
@@ -166,6 +178,7 @@ void declare_struct(Struc *new_struc){
 			new_memb->type->member = found->member;
 			new_memb->type->ty     = STRUCT;
 		}
+		new_memb->type->size = type_size(new_memb->type);
 
 
 		// count asterisk
@@ -175,7 +188,7 @@ void declare_struct(Struc *new_struc){
 		}
 
 		// add type list
-		insert_type_list(new_memb->type, star_count);
+		new_memb->type = insert_type_list(new_memb->type, star_count);
 
 		// add member name
 		Token *def_name  = consume_ident();
@@ -199,6 +212,7 @@ void declare_struct(Struc *new_struc){
 			newtype->ty         = ARRAY;
 			newtype->ptr_to     = new_memb->type;
 			newtype->index_size = index_num;
+			newtype->size = type_size(newtype);
 			new_memb->type = newtype;
 
 			expect("]");
@@ -211,11 +225,12 @@ void declare_struct(Struc *new_struc){
 		}else if (new_memb->type->ty == STRUCT){
 			size_of_type = new_memb->memsize;
 		}else{
-			size_of_type = type_size(new_memb->type);
+			//size_of_type = type_size(new_memb->type);
+			size_of_type = new_memb->type->size;
 		}
 
 		if(memb_head){
-			int prev_tail    = (memb_head) ? (memb_head->offset + type_size(memb_head->type)) : 0;
+			int prev_tail    = (memb_head) ? (memb_head->offset + memb_head->type->size) : 0;
 			padding          = (prev_tail%size_of_type) ? (size_of_type - (prev_tail%size_of_type)) : 0;
 			new_memb->offset = prev_tail + padding;
 		}else{

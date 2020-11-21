@@ -11,18 +11,29 @@ Node *compound_assign(TypeKind type, Node *dst, Node *src){
 	return new;
 }
 
-Node *dot_arrow(TypeKind type, Node *node){
+Node *dot_arrow(NodeKind type, Node *node){
 	// struc.aaa.bbb.ccc;
 	// struc->aaa->bbb->ccc;
 	// (lvar <- node -> dot) <- node -> dot
+	Type *struc_type;
 	Node *new = new_node(type, node, NULL);
 	Token *memb_name  = consume_ident();
-	Member* memb_list;
+	Member *memb_list;
 
-	if(node->kind == ND_ADDRESS || node->kind == ND_DEREF){
-		memb_list = node->rhs->type->member;
+	// get type of struct
+	if(node->kind == ND_ADDRESS){
+		struc_type = node->rhs->type;
+	}else if(node->kind == ND_DEREF){
+		struc_type = node->rhs->type->ptr_to;
 	}else{
-		memb_list = node->type->member;
+		struc_type = node->type;
+	}
+
+	// get member list
+	if(type == ND_DOT){
+		memb_list = struc_type->member;
+	}else{
+		memb_list = struc_type->ptr_to->member;
 	}
 
 	while(memb_list){
@@ -127,14 +138,14 @@ Node *array_str(Node *arr, Node *init_val){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type->ptr_to);
+			int asize = align_array_size(ctr, arr->type);
 			alloc_size+=asize;
 			arr->offset = ((locals)?(locals->offset):0) + asize;
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 		}else{
-			globals->memsize = align_array_size(ctr, arr->type->ptr_to);
+			globals->memsize = align_array_size(ctr, arr->type);
 		}
 	}
 
@@ -171,14 +182,14 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type->ptr_to);
+			int asize = align_array_size(ctr, arr->type);
 			alloc_size+=asize;
 			arr->offset = ((locals)?(locals->offset):0) + asize;
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 		}else{
-			globals->memsize = align_array_size(ctr, arr->type->ptr_to);
+			globals->memsize = align_array_size(ctr, arr->type);
 		}
 	// too many
 	}else if(arr->type->index_size < ctr){
