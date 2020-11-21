@@ -23,14 +23,4 @@ int main(){
 }
 */
 
-int main(){
-	int *p;
-	int a[4];
-
-	*a     = 1;
-	*(a+1) = 2;
-
-	p=a;
-
-	return *p + *(p+1);
-}
+struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a=2; y->b=3; return y->a + y->b;}

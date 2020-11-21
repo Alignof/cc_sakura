@@ -467,13 +467,8 @@ void program(){
 			}else if(consume_reserved_word("char", TK_TYPE)){
 				toplv_type->ty = CHAR;
 			}else if(consume_reserved_word("struct", TK_TYPE)){
-				Token *tok   = consume_ident();
-				Struc *found = find_struc(tok);
-				toplv_type->size   = found->memsize;
-				toplv_type->member = found->member;
-				toplv_type->ty     = STRUCT;
+				toplv_type->ty = STRUCT;
 			}
-			toplv_type->size = type_size(toplv_type);
 		}
 
 		// count asterisk

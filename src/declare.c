@@ -39,6 +39,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->name = def_name->str;
 	gvar->len  = def_name->len;
 	gvar->type = toplv_type;
+	gvar->type->size = type_size(toplv_type);
 
 	// add type list
 	gvar->type = insert_type_list(gvar->type, star_count);

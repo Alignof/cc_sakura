@@ -11,7 +11,7 @@ Node *compound_assign(TypeKind type, Node *dst, Node *src){
 	return new;
 }
 
-Node *dot_arrow(TypeKind type, Node *node){
+Node *dot_arrow(NodeKind type, Node *node){
 	// struc.aaa.bbb.ccc;
 	// struc->aaa->bbb->ccc;
 	// (lvar <- node -> dot) <- node -> dot
@@ -20,9 +20,17 @@ Node *dot_arrow(TypeKind type, Node *node){
 	Member* memb_list;
 
 	if(node->kind == ND_ADDRESS || node->kind == ND_DEREF){
-		memb_list = node->rhs->type->member;
+		if(type == ND_DOT){
+			memb_list = node->rhs->type->member;
+		}else{
+			memb_list = node->rhs->type->ptr_to->member;
+		}
 	}else{
-		memb_list = node->type->member;
+		if(type == ND_DOT){
+			memb_list = node->type->member;
+		}else{
+			memb_list = node->type->ptr_to->member;
+		}
 	}
 
 	while(memb_list){
