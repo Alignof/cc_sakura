@@ -15,22 +15,25 @@ Node *dot_arrow(NodeKind type, Node *node){
 	// struc.aaa.bbb.ccc;
 	// struc->aaa->bbb->ccc;
 	// (lvar <- node -> dot) <- node -> dot
+	Type *struc_type;
 	Node *new = new_node(type, node, NULL);
 	Token *memb_name  = consume_ident();
-	Member* memb_list;
+	Member *memb_list;
 
-	if(node->kind == ND_ADDRESS || node->kind == ND_DEREF){
-		if(type == ND_DOT){
-			memb_list = node->rhs->type->member;
-		}else{
-			memb_list = node->rhs->type->ptr_to->member;
-		}
+	// get type of struct
+	if(node->kind == ND_ADDRESS){
+		struc_type = node->rhs->type;
+	}else if(node->kind == ND_DEREF){
+		struc_type = node->rhs->type->ptr_to;
 	}else{
-		if(type == ND_DOT){
-			memb_list = node->type->member;
-		}else{
-			memb_list = node->type->ptr_to->member;
-		}
+		struc_type = node->type;
+	}
+
+	// get member list
+	if(type == ND_DOT){
+		memb_list = struc_type->member;
+	}else{
+		memb_list = struc_type->ptr_to->member;
 	}
 
 	while(memb_list){
