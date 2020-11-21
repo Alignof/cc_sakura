@@ -134,8 +134,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
 		if(lvar->type->ty == STRUCT){
-			lvar->offset =  (locals) ? (locals->offset) + node->val : node->val;
-			alloc_size   += node->val;
+			lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
+			alloc_size   += lvar->type->size;
 		}else{
 			lvar->offset =  (locals) ? (locals->offset)+8 : 8;
 			alloc_size   += 8;
