@@ -57,6 +57,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			newtype->ty         = ARRAY;
 			newtype->ptr_to     = gvar->type;
 			newtype->index_size = index_num;
+			newtype->size       = type_size(newtype);
 			gvar->type = newtype;
 			expect("]");
 		}
@@ -112,6 +113,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			newtype->ty         = ARRAY;
 			newtype->ptr_to     = lvar->type;
 			newtype->index_size = index_num;
+			newtype->size       = type_size(newtype);
+			//newtype->align      = 0;
 			lvar->type = newtype;
 
 			expect("]");
@@ -211,11 +214,12 @@ void declare_struct(Struc *new_struc){
 		}else if (new_memb->type->ty == STRUCT){
 			size_of_type = new_memb->memsize;
 		}else{
-			size_of_type = type_size(new_memb->type);
+			//size_of_type = type_size(new_memb->type);
+			size_of_type = new_memb->type->size;
 		}
 
 		if(memb_head){
-			int prev_tail    = (memb_head) ? (memb_head->offset + type_size(memb_head->type)) : 0;
+			int prev_tail    = (memb_head) ? (memb_head->offset + memb_head->type->size) : 0;
 			padding          = (prev_tail%size_of_type) ? (size_of_type - (prev_tail%size_of_type)) : 0;
 			new_memb->offset = prev_tail + padding;
 		}else{

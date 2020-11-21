@@ -1,22 +1,22 @@
 struct rgb{
-	int r;
-	int g;
-	int b;
+	int red;
+	int green;
+	int blue;
 };
 
 struct point{ 
 	int x;
 	int y;
-	struct rgb *col;
+	struct rgb *color;
 };
 
 int main(){
 	struct point test;
 
-	test.col->r = 2;
-	test.col->g = 3;
-	test.col->b = 4;
+	test.col->red   = 2;
+	test.col->green = 3;
+	test.col->blue  = 4;
 
 	// expect 9
-	return test.col->r + test.col->g + test.col->b;
+	return test.color->red + test.color->green + test.color->blue;
 }

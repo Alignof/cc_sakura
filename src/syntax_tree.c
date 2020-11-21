@@ -4,13 +4,13 @@ int alloc_size;
 Token *token;
 Str *strings;
 //LVar *locals;
-// Func *func_list[100]; 
+//Func *func_list[100]; 
 
 Node *data(){
 	if(consume("(")){
-		//jmp expr
+		// jmp expr
 		Node *node = expr();
-		//check end of caret
+		// check end of caret
 		expect(")");
 		return node;
 	}
@@ -182,7 +182,8 @@ Node *unary(){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 		node = new_node(ND_NUM, node, unary());
-		node->val = type_size(node->rhs->type);
+		//node->val = type_size(node->rhs->type);
+		node->val = node->rhs->type->size;
 
 		return node;
 	}
@@ -305,7 +306,7 @@ Node *expr(){
 		}else if(consume_reserved_word("struct", TK_TYPE)){
 			Token *tok   = consume_ident();
 			Struc *found = find_struc(tok);
-			node->val          = found->memsize;
+			node->type->size   = found->memsize;
 			node->type->member = found->member;
 			node->type->ty     = STRUCT;
 		}
@@ -482,7 +483,7 @@ void program(){
 		// function
 		if(consume("(")){
 			func_list[func_index]->type = toplv_type;
-			func_list[func_index]->name = (char *)calloc(def_name->len, sizeof(char));
+			func_list[func_index]->name = calloc(def_name->len, sizeof(char));
 			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 			
 			// add type list
