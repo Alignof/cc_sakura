@@ -1,7 +1,6 @@
 #include "cc_sakura.h"
 
 int type_size(Type *type){
-	int array_size;
 	switch(type->ty){
 		case CHAR:
 			return 1;
@@ -39,7 +38,8 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	Node *pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
 	pointer_size->type = calloc(1, sizeof(Type));
-	pointer_size->type->ty = INT;
+	pointer_size->type->ty   = INT;
+	pointer_size->type->size = type_size(pointer_size->type);
 
 
 	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to!=NULL){

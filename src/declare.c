@@ -8,12 +8,20 @@ Struc *structs;
 // LVar *locals;
 // Func *func_list[100];
 
-void insert_type_list(Type *newtype, int star_count){
-	for(int i = 0;i<star_count;i++){
-		newtype->ptr_to = calloc(1, sizeof(Type));
-		newtype->ptr_to->ty = newtype->ty;
-		newtype->ty = PTR;
-		newtype = newtype->ptr_to;
+Type *insert_type_list(Type *prev, int star_count){
+	Type *newtype;
+	if(star_count){
+		for(int i = 0;i<star_count;i++){
+			newtype = calloc(1, sizeof(Type));
+			newtype->ty   = PTR;
+			newtype->size = type_size(newtype);
+			newtype->ptr_to = prev;
+			prev = newtype;
+		}
+		
+		return newtype;
+	}else{
+		return prev;
 	}
 }
 
@@ -33,7 +41,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->type = toplv_type;
 
 	// add type list
-	insert_type_list(gvar->type, star_count);
+	gvar->type = insert_type_list(gvar->type, star_count);
 
 	// Is array
 	if(check("[")){
@@ -61,7 +69,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			gvar->type = newtype;
 			expect("]");
 		}
-		gvar->memsize = align_array_size(isize, gvar->type->ptr_to);
+		gvar->memsize = align_array_size(isize, gvar->type);
 	}else{
 		gvar->memsize = type_size(gvar->type);
 	}
@@ -87,7 +95,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->type = node->type;
 
 	// add type list
-	insert_type_list(lvar->type, star_count);
+	lvar->type = insert_type_list(lvar->type, star_count);
 
 	// Is array
 	if(check("[")){
@@ -120,7 +128,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			expect("]");
 		}
 
-		asize = align_array_size(isize, get_pointer_type(lvar->type));
+		asize = align_array_size(isize, lvar->type);
 		alloc_size += asize;
 		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
@@ -169,6 +177,7 @@ void declare_struct(Struc *new_struc){
 			new_memb->type->member = found->member;
 			new_memb->type->ty     = STRUCT;
 		}
+		new_memb->type->size = type_size(new_memb->type);
 
 
 		// count asterisk
@@ -178,7 +187,7 @@ void declare_struct(Struc *new_struc){
 		}
 
 		// add type list
-		insert_type_list(new_memb->type, star_count);
+		new_memb->type = insert_type_list(new_memb->type, star_count);
 
 		// add member name
 		Token *def_name  = consume_ident();
@@ -202,6 +211,7 @@ void declare_struct(Struc *new_struc){
 			newtype->ty         = ARRAY;
 			newtype->ptr_to     = new_memb->type;
 			newtype->index_size = index_num;
+			newtype->size = type_size(newtype);
 			new_memb->type = newtype;
 
 			expect("]");

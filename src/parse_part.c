@@ -127,14 +127,14 @@ Node *array_str(Node *arr, Node *init_val){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type->ptr_to);
+			int asize = align_array_size(ctr, arr->type);
 			alloc_size+=asize;
 			arr->offset = ((locals)?(locals->offset):0) + asize;
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 		}else{
-			globals->memsize = align_array_size(ctr, arr->type->ptr_to);
+			globals->memsize = align_array_size(ctr, arr->type);
 		}
 	}
 
@@ -171,14 +171,14 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type->ptr_to);
+			int asize = align_array_size(ctr, arr->type);
 			alloc_size+=asize;
 			arr->offset = ((locals)?(locals->offset):0) + asize;
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 		}else{
-			globals->memsize = align_array_size(ctr, arr->type->ptr_to);
+			globals->memsize = align_array_size(ctr, arr->type);
 		}
 	// too many
 	}else if(arr->type->index_size < ctr){

@@ -1,3 +1,4 @@
+/*
 struct rgb{
 	int red;
 	int green;
@@ -19,4 +20,17 @@ int main(){
 
 	// expect 9
 	return test.color->red + test.color->green + test.color->blue;
+}
+*/
+
+int main(){
+	int *p;
+	int a[4];
+
+	*a     = 1;
+	*(a+1) = 2;
+
+	p=a;
+
+	return *p + *(p+1);
 }
