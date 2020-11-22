@@ -372,9 +372,15 @@ Node *stmt(){
 		}
 	}else if(consume_reserved_word("if", TK_IF)){
 		/*
-		 *     (cond)<-if->expr
-		 *              | 
-		 * if(cond)<--else-->expr
+		 * =========== if =========== 
+		 *
+		 *     (cond)<--if-->expr
+		 *
+		 * ========= else if =========== 
+		 *
+		 *     (cond)<--if-----+
+		 *                     | 
+		 *        if(cond)<--else-->expr
 		 */
 		node = new_node(ND_IF, node, NULL);
 		if(consume("(")){
@@ -397,7 +403,7 @@ Node *stmt(){
 		}
 	}else if(consume_reserved_word("switch", TK_SWITCH)){
 		/*
-		 *  (cond)<-switch->default
+		 * (cond)<--switch-->default
 		 *             | 
 		 *             | (vector) 
 		 *             V 
@@ -421,50 +427,55 @@ Node *stmt(){
 			error_at(token->str, "expected ‘(’ before ‘{’ token");
 		}
 
-		Node *chain_case = calloc(1, sizeof(Node));
+		Node *chain_case = NULL;
 		expect("{");
 		while(token->kind == TK_CASE || token->kind == TK_DEFAULT){
 			if(consume_reserved_word("case", TK_CASE)){
-				chain_case->next = new_node(ND_CASE, logical(), NULL);
+				if(chain_case){
+					chain_case->next = new_node(ND_CASE, new_node(ND_EQ, node->lhs, logical()), NULL);
+					chain_case = chain_case->vector;
+				}else{
+					chain_case->next = new_node(ND_CASE, new_node(ND_EQ, node->lhs, logical()), NULL);
+					node->vector = chain_case;
+				}
 				expect(":");
-				Node *in_label = calloc(1, sizeof(Node));
+
+				Node *in_label = NULL;
 				while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
-					//Is first?
-					if(in_label->vector){
+					if(in_label){
 						in_label->vector = stmt();
 						in_label = in_label->vector;
 					}else{
 						in_label = stmt();
-						node->vector = in_label;
+						chain_case->rhs = in_label;
 					}
+
+					if(check("}")) break;
 				}
-				chain_case->rhs = in_label;
+
+				chain_case = chain_case->next;
 			}else if(consume_reserved_word("default", TK_DEFAULT)){
 				expect(":");
 				if(node->rhs == NULL){
-					node->rhs = new_node(ND_CASE, node, NULL);
-					Node *in_label = calloc(1, sizeof(Node));
+					Node *in_label = NULL;
 					while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
-						//Is first?
-						if(in_label->vector){
+						if(in_label){
 							in_label->vector = stmt();
 							in_label = in_label->vector;
 						}else{
 							in_label = stmt();
-							in_label->vector = in_label;
+							node->rhs = in_label;
 						}
+
+						if(check("}")) break;
 					}
-					chain_case->rhs = in_label;
 				}else{
 					error_at(token->str, "multiple default labels in one switch");
 				}
 			}else{
 				error_at(token->str, "statement will never be executed");
 			}
-
-			chain_case = chain_case->next;
 		}
-		node->vector = chain_case;
 		expect("}");
 	}else if(consume_reserved_word("for", TK_FOR)){
 		node = new_node(ND_FOR, node, NULL);
