@@ -139,6 +139,7 @@ void gen_calc(Node *node){
 
 void gen(Node *node){
 	Node *tmp;
+	Node *cases;
 	int arg=0;
 
 	switch(node->kind){
@@ -329,6 +330,37 @@ void gen(Node *node){
 			printf(".LifEnd%03d:\n", label_if);
 
 			label_if--;
+			return;
+		case ND_SWITCH:
+			cases = node->vector;
+			// case labels
+			while(cases){
+				gen(cases);
+				printf("	pop rax\n");
+				cases = cases->next;
+			}
+
+			// default label
+			if(node->lhs != NULL){
+				gen(node->lhs);
+			}
+			
+			return;
+		case ND_CASE:
+			//label_if++;
+			//if_depth++;
+
+			printf("	push rax\n");
+			gen(node->lhs);
+
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			printf("	je .LifEnd%03d\n", label_if);
+			printf("	pop rax\n");
+			expand_vector(node->rhs);
+
+			printf(".LifEnd%03d:\n", label_if);
+			//label_if--;
 			return;
 		case ND_FOR:
 			// adjust rsp
