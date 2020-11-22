@@ -1,11 +1,14 @@
 int main() {
-	int x=3;
-	switch(x){
+	int x;
+	int target = 0;
+	switch(target){
 		case 0:
-			x++;
+			x = 5;
 			break;
 		case 1:
-			x+=2;
+			x = 8;
 			break;
 	}
+
+	return x;
 }

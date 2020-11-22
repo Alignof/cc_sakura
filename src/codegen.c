@@ -182,9 +182,6 @@ void gen(Node *node){
 			if(node->vector != NULL) expand_next(node->vector);
 			return;
 		case ND_PREID:
-			//gen(node->lhs);
-			//printf("	pop rax\n");
-
 			// ++p -> p += 1
 			gen(node->lhs);
 			return;
@@ -332,6 +329,8 @@ void gen(Node *node){
 			label_if--;
 			return;
 		case ND_SWITCH:
+			label_loop++;
+			loop_depth++;
 			cases = node->vector;
 			// case labels
 			while(cases){
@@ -345,11 +344,14 @@ void gen(Node *node){
 				gen(node->lhs);
 			}
 			
+			printf(".LloopEnd%03d:\n", label_loop);
+			loop_depth--;
 			return;
 		case ND_CASE:
 			//label_if++;
 			//if_depth++;
 
+			// condition (target == case label)
 			printf("	push rax\n");
 			gen(node->lhs);
 
