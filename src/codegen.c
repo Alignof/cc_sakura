@@ -336,7 +336,7 @@ void gen(Node *node){
 			label_case = 0;
 
 			// gen cases condtion
-			cases = node->vector;
+			cases = node->rhs;
 			while(cases){
 				gen(cases->lhs);
 
@@ -347,14 +347,14 @@ void gen(Node *node){
 			}
 
 			// gen default condtion
-			if(node->rhs){
+			if(node->lhs){
 				printf("	jmp .LcaseBegin%03d\n", label_case);
 			}
 
 
 			label_case = 0;
 			// gen cases expr
-			cases = node->vector;
+			cases = node->rhs;
 			while(cases){
 				printf(".LcaseBegin%03d:\n", label_case++);
 				gen(cases);
@@ -362,9 +362,9 @@ void gen(Node *node){
 			}
 
 			// gen default expr
-			if(node->rhs){
+			if(node->lhs){
 				printf(".LcaseBegin%03d:\n", label_loop);
-				gen(node->rhs);
+				gen(node->lhs);
 			}else{
 				printf("	jmp .LloopEnd%03d\n", label_loop);
 			}

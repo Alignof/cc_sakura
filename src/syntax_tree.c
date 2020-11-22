@@ -403,26 +403,25 @@ Node *stmt(){
 		}
 	}else if(consume_reserved_word("switch", TK_SWITCH)){
 		/*
-		 * (cond)<--switch-->default
-		 *             | 
-		 *             | (vector) 
-		 *             V 
-		 * (cond)<---case--->in_lable(codes)
-		 *             |          | 
-		 *             |          | (vector: in_label)
-		 *	       |          +----->code->code->... 
-		 *             | 
-		 *             | (next: chain_case)
-		 *             +----->case->case->... 
+		 * default<--switch----+
+		 *                     | (rhs)
+		 *                     | 
+		 *         (cond)<---case--->in_lable(codes)
+		 *                     |          | 
+		 *                     |          | (vector: in_label)
+		 *                     |          +----->code->code->... 
+		 *                     | 
+		 *                     | (next: chain_case)
+		 *                     +----->case->case->... 
 		 */
+
+		Node *cond = NULL;
 		node = new_node(ND_SWITCH, node, NULL);
 		if(consume("(")){
 			//jmp expr
-			Node *cond = expr();
+			cond = expr();
 			//check end of caret
 			expect(")");
-
-			node->lhs = cond;
 		}else{
 			error_at(token->str, "expected ‘(’ before ‘{’ token");
 		}
@@ -432,11 +431,11 @@ Node *stmt(){
 		while(token->kind == TK_CASE || token->kind == TK_DEFAULT){
 			if(consume_reserved_word("case", TK_CASE)){
 				if(chain_case){
-					chain_case->vector = new_node(ND_CASE, new_node(ND_EQ, node->lhs, logical()), NULL);
+					chain_case->vector = new_node(ND_CASE, new_node(ND_EQ, cond, logical()), NULL);
 					chain_case         = chain_case->vector;
 				}else{
-					chain_case   = new_node(ND_CASE, new_node(ND_EQ, node->lhs, logical()), NULL);
-					node->vector = chain_case;
+					chain_case   = new_node(ND_CASE, new_node(ND_EQ, cond, logical()), NULL);
+					node->rhs    = chain_case;
 				}
 				expect(":");
 
@@ -454,7 +453,7 @@ Node *stmt(){
 				}
 			}else if(consume_reserved_word("default", TK_DEFAULT)){
 				expect(":");
-				if(node->rhs == NULL){
+				if(node->lhs == NULL){
 					Node *in_label = NULL;
 					while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
 						if(in_label){
@@ -462,7 +461,7 @@ Node *stmt(){
 							in_label = in_label->vector;
 						}else{
 							in_label = stmt();
-							node->rhs = in_label;
+							node->lhs = in_label;
 						}
 
 						if(check("}")) break;
