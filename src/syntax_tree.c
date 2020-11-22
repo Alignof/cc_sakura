@@ -371,6 +371,11 @@ Node *stmt(){
 			error_at(token->str, "not a ';' token.");
 		}
 	}else if(consume_reserved_word("if", TK_IF)){
+		/*
+		 *     (cond)<-if->expr
+		 *              | 
+		 * if(cond)<--else-->expr
+		 */
 		node = new_node(ND_IF, node, NULL);
 		if(consume("(")){
 			//jmp expr
@@ -390,6 +395,69 @@ Node *stmt(){
 			node->rhs  = else_block;
 			node->kind = ND_IFELSE;
 		}
+	}else if(consume_reserved_word("switch", TK_SWITCH)){
+		/*
+		 * (cond)<-switch->default
+		 *            | 
+		 *            +----->case->case->... (vector)
+		 */
+		node = new_node(ND_SWITCH, node, NULL);
+		if(consume("(")){
+			//jmp expr
+			Node *cond = expr();
+			//check end of caret
+			expect(")");
+
+			node->lhs = cond;
+		}else{
+			error_at(token->str, "expected ‘(’ before ‘{’ token");
+		}
+
+		Node *chain_case;
+		expect("{");
+		while(token->kind == TK_CASE || token->kind == TK_DEFAULT){
+			if(consume_reserved_word("case", TK_CASE)){
+				chain_case->next = new_node(ND_CASE, logical(), NULL);
+				expect(":");
+				Node *case_codes = calloc(1, sizeof(Node));
+				while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
+					//Is first?
+					if(case_codes->rhs){
+						case_codes->vector = stmt();
+						case_codes = case_codes->vector;
+					}else{
+						case_codes = stmt();
+						node->vector = case_codes;
+					}
+				}
+				chain_case->next->rhs = case_codes;
+			}else if(consume_reserved_word("default", TK_DEFAULT)){
+				expect(":");
+				if(node->rhs == NULL){
+					node->rhs = new_node(ND_CASE, node, NULL);
+					Node *case_codes = calloc(1, sizeof(Node));
+					while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
+						//Is first?
+						if(case_codes->rhs){
+							case_codes->vector = stmt();
+							case_codes = case_codes->vector;
+						}else{
+							case_codes = stmt();
+							node->vector = case_codes;
+						}
+					}
+					chain_case->next->rhs = case_codes;
+				}else{
+					error_at(token->str, "multiple default labels in one switch");
+				}
+			}else{
+				error_at(token->str, "statement will never be executed");
+			}
+
+			chain_case = chain_case->next;
+		}
+		node->rhs = chain_case;
+		expect("}");
 	}else if(consume_reserved_word("for", TK_FOR)){
 		node = new_node(ND_FOR, node, NULL);
 		if(consume("(")){
