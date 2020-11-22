@@ -455,13 +455,14 @@ Node *stmt(){
 				expect(":");
 				if(node->lhs == NULL){
 					Node *in_label = NULL;
+					node->lhs = new_node(ND_CASE, NULL, NULL);
 					while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
 						if(in_label){
 							in_label->vector = stmt();
 							in_label = in_label->vector;
 						}else{
-							in_label = stmt();
-							node->lhs = in_label;
+							in_label       = new_node(ND_CASE, NULL, stmt());
+							node->lhs->rhs = in_label;
 						}
 
 						if(check("}")) break;

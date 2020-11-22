@@ -363,7 +363,7 @@ void gen(Node *node){
 
 			// gen default expr
 			if(node->lhs){
-				printf(".LcaseBegin%03d:\n", label_loop);
+				printf(".LcaseBegin%03d:\n", label_case);
 				gen(node->lhs);
 			}else{
 				printf("	jmp .LloopEnd%03d\n", label_loop);

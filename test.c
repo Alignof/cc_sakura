@@ -1,9 +1,9 @@
 int main() {
-	int i=2;
+	int i;
 	int x=1;
 
 
-	for(i=0;i<3;i++){
+	for(i=0;i<4;i++){
 		switch(i){
 			case 0:
 				x = 2;
@@ -17,6 +17,9 @@ int main() {
 				x = 4;
 				printf("i == 2\n");
 				break;
+			default:
+				x = 10;
+				printf("default!\n");
 		}
 	}
 
