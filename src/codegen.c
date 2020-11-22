@@ -140,7 +140,7 @@ void gen_calc(Node *node){
 void gen(Node *node){
 	Node *tmp;
 	Node *cases;
-	int arg=0;
+	int arg = 0;
 
 	switch(node->kind){
 		case ND_NUM:
@@ -329,40 +329,8 @@ void gen(Node *node){
 			label_if--;
 			return;
 		case ND_SWITCH:
-			label_loop++;
-			loop_depth++;
-			cases = node->vector;
-			// case labels
-			while(cases){
-				gen(cases);
-				printf("	pop rax\n");
-				cases = cases->next;
-			}
-
-			// default label
-			if(node->lhs != NULL){
-				gen(node->lhs);
-			}
-			
-			printf(".LloopEnd%03d:\n", label_loop);
-			loop_depth--;
 			return;
 		case ND_CASE:
-			//label_if++;
-			//if_depth++;
-
-			// condition (target == case label)
-			printf("	push rax\n");
-			gen(node->lhs);
-
-			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			printf("	je .LifEnd%03d\n", label_if);
-			printf("	pop rax\n");
-			expand_vector(node->rhs);
-
-			printf(".LifEnd%03d:\n", label_if);
-			//label_if--;
 			return;
 		case ND_FOR:
 			// adjust rsp

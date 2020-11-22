@@ -432,8 +432,8 @@ Node *stmt(){
 		while(token->kind == TK_CASE || token->kind == TK_DEFAULT){
 			if(consume_reserved_word("case", TK_CASE)){
 				if(chain_case){
-					chain_case->next = new_node(ND_CASE, new_node(ND_EQ, node->lhs, logical()), NULL);
-					chain_case       = chain_case->vector;
+					chain_case->vector = new_node(ND_CASE, new_node(ND_EQ, node->lhs, logical()), NULL);
+					chain_case         = chain_case->vector;
 				}else{
 					chain_case   = new_node(ND_CASE, new_node(ND_EQ, node->lhs, logical()), NULL);
 					node->vector = chain_case;
@@ -452,8 +452,6 @@ Node *stmt(){
 
 					if(check("}")) break;
 				}
-
-				chain_case = chain_case->next;
 			}else if(consume_reserved_word("default", TK_DEFAULT)){
 				expect(":");
 				if(node->rhs == NULL){
