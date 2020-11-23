@@ -34,12 +34,12 @@ Type *parse_type(){
 	}
 
 	// add ptr
-	type = insert_type_list(type, star_count);
+	type = insert_ptr_type(type, star_count);
 
 	return type;
 }
 
-Type *insert_type_list(Type *prev, int star_count){
+Type *insert_ptr_type(Type *prev, int star_count){
 	Type *newtype;
 	if(star_count){
 		for(int i = 0;i<star_count;i++){
@@ -75,7 +75,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->type->align = type_align(toplv_type);
 
 	// add type list
-	gvar->type = insert_type_list(gvar->type, star_count);
+	gvar->type = insert_ptr_type(gvar->type, star_count);
 
 	// Is array
 	if(check("[")){
@@ -130,7 +130,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->type = node->type;
 
 	// add type list
-	//lvar->type = insert_type_list(lvar->type, star_count);
+	//lvar->type = insert_ptr_type(lvar->type, star_count);
 
 	// Is array
 	if(check("[")){

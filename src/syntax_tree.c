@@ -314,7 +314,6 @@ Node *expr(){
 		// parsing type
 		node->type = parse_type();
 
-
 		// variable declaration
 		Token *tok = consume_ident();
 		if(tok){
@@ -573,7 +572,7 @@ void program(){
 			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 			
 			// add type list
-			func_list[func_index]->type = insert_type_list(func_list[func_index]->type, star_count);
+			func_list[func_index]->type = insert_ptr_type(func_list[func_index]->type, star_count);
 
 			// get arguments
 			get_argument(func_index);

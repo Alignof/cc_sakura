@@ -279,7 +279,7 @@ Node *array_index(Node *node, Node *index);
 
 // declare.c
 Type *parse_type();
-Type *insert_type_list(Type *prev, int star_count);
+Type *insert_ptr_type(Type *prev, int star_count);
 Node *declare_global_variable();
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
