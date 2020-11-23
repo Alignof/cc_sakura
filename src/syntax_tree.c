@@ -183,7 +183,18 @@ Node *unary(){
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
-		node = new_node(ND_NUM, node, unary());
+
+		Node *target;
+		if(consume("(")){
+			if(token->kind == TK_TYPE){
+				target = unary();
+			}else{
+				target = unary();
+			}
+
+			expect(")");
+		}
+		node = new_node(ND_NUM, node, target);
 		node->val = node->rhs->type->size;
 
 		return node;
@@ -312,6 +323,7 @@ Node *expr(){
 		node->kind = ND_LVAR;
 		node->type = calloc(1, sizeof(Type));
 
+/*
 		// check type
 		if(consume_reserved_word("int", TK_TYPE)){
 			node->type->ty = INT;
@@ -332,6 +344,9 @@ Node *expr(){
 			star_count++;
 			token = token->next;
 		}
+*/
+		// parsing type
+		node->type = parse_type();
 
 		// variable declaration
 		Token *tok = consume_ident();

@@ -8,6 +8,34 @@ Struc *structs;
 // LVar *locals;
 // Func *func_list[100];
 
+Type *parse_type(Type *type){
+	// check type
+	if(consume_reserved_word("int", TK_TYPE)){
+		type->ty = INT;
+	}else if(consume_reserved_word("char", TK_TYPE)){
+		type->ty = CHAR;
+	}else if(consume_reserved_word("struct", TK_TYPE)){
+		Token *tok   = consume_ident();
+		Struc *found = find_struc(tok);
+		type->size   = found->memsize;
+		type->member = found->member;
+		type->ty     = STRUCT;
+	}
+	type->size  = type_size(node->type);
+	type->align = type_align(node->type);
+	
+	// count asterisk
+	while(token->kind == TK_RESERVED && *(token->str) == '*'){
+		star_count++;
+		token = token->next;
+	}
+
+	// add ptr
+	type = insert_type_list(lvar->type, star_count);
+
+	return *type;
+}
+
 Type *insert_type_list(Type *prev, int star_count){
 	Type *newtype;
 	if(star_count){
@@ -99,7 +127,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->type = node->type;
 
 	// add type list
-	lvar->type = insert_type_list(lvar->type, star_count);
+	//lvar->type = insert_type_list(lvar->type, star_count);
 
 	// Is array
 	if(check("[")){
@@ -169,6 +197,7 @@ void declare_struct(Struc *new_struc){
 		new_memb = calloc(1,sizeof(Member));
 		new_memb->type = calloc(1,sizeof(Type));
 
+/*
 		// check type
 		if(consume_reserved_word("int", TK_TYPE)){
 			new_memb->type->ty = INT;
@@ -194,6 +223,10 @@ void declare_struct(Struc *new_struc){
 
 		// add type list
 		new_memb->type = insert_type_list(new_memb->type, star_count);
+*/
+		// parse member type
+		new_memb->type    = parse_type();
+		new_memb->memsize = new_memb->type->size;
 
 		// add member name
 		Token *def_name  = consume_ident();
