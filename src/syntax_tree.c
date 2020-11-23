@@ -184,19 +184,8 @@ Node *unary(){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 
-		Node *target;
-		if(consume("(")){
-			if(token->kind == TK_TYPE){
-				target = unary();
-			}else{
-				target = unary();
-			}
-
-			expect(")");
-		}
-		node = new_node(ND_NUM, node, target);
+		node = new_node(ND_NUM, node, unary());
 		node->val = node->rhs->type->size;
-
 		return node;
 	}
 
@@ -321,32 +310,10 @@ Node *expr(){
 	if(token->kind == TK_TYPE){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
-		node->type = calloc(1, sizeof(Type));
 
-/*
-		// check type
-		if(consume_reserved_word("int", TK_TYPE)){
-			node->type->ty = INT;
-		}else if(consume_reserved_word("char", TK_TYPE)){
-			node->type->ty = CHAR;
-		}else if(consume_reserved_word("struct", TK_TYPE)){
-			Token *tok   = consume_ident();
-			Struc *found = find_struc(tok);
-			node->type->size   = found->memsize;
-			node->type->member = found->member;
-			node->type->ty     = STRUCT;
-		}
-		node->type->size  = type_size(node->type);
-		node->type->align = type_align(node->type);
-		
-		// count asterisk
-		while(token->kind == TK_RESERVED && *(token->str) == '*'){
-			star_count++;
-			token = token->next;
-		}
-*/
 		// parsing type
 		node->type = parse_type();
+
 
 		// variable declaration
 		Token *tok = consume_ident();
