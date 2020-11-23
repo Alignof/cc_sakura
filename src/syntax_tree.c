@@ -406,7 +406,7 @@ Node *stmt(){
 		 * default<--switch----+
 		 *                     | (rhs)
 		 *                     | 
-		 *         (cond)<---case--->in_lable(codes)
+		 *         (cond)<---case--->in_label(codes)
 		 *                     |          | 
 		 *                     |          | (vector: in_label)
 		 *                     |          +----->code->code->... 

@@ -15,6 +15,9 @@ parsed tokens kind.
 | TK\_NUM	| number			| 0, 255, -1...		|
 | TK\_IF	| if				| if			|
 | TK\_ELSE	| else				| else			|
+| TK\_SWITCH	| switch			| switch		|
+| TK\_CASE	| case				| case			|
+| TK\_DEFAULT	| default			| default		|
 | TK\_WHILE	| while				| while			| 
 | TK\_FOR	| for   			| for			|
 | TK\_SIZEOF	| sizeof			| sizeof		| 
@@ -61,6 +64,8 @@ syntax tree node kind.
 | ND\_IF	| if     			| if			|
 | ND\_ELSE	| else   			| else			|
 | ND\_IFELSE	| if-else			| if-else		|
+| ND\_SWITCH	| switch			| switch		|
+| ND\_CASE	| label case or default		| case:, default:	|
 | ND\_WHILE	| while  			| while			|
 | ND\_FOR	| for    			| for			|
 | ND\_BLOCK	| code block			| {}			|
@@ -130,6 +135,7 @@ struct of syntax tree node.
 | ND\_GARRAY		| chain list of initialize formula -> (next) 	|
 | ND\_FOR		| exit conditions -> code or block code		|
 | ND\_BLOCK		| chain of block code 				|
+| ND\_CASE		| chain of code in label			|
 | ND\_TERNARY		| else expression 				|
 
 
@@ -140,6 +146,7 @@ struct of syntax tree node.
 | :--			| :--					|
 | ND\_ASSIGN		| chain of initialize formula		|
 | ND\_CALL\_FUNC	| head of argument chained lists	|
+| ND\_CASE		| chain of case label			|
 | ND\_AND		| chain of arguments			|
 | ND\_OR		| chain of arguments			|
 | ND\_EQ		| chain of arguments			|
@@ -182,7 +189,9 @@ struct of type of variable kind.
 | TypeKind ty		| type of variable(INT,CHAR...)	| ARRAY				|
 | Type \*ptr\_to	| next chained list		| (next Type chain)		|
 | Member  \*member;	| chained list of Member	| NULL				|
-| size\_t index\_size	| sizo of array index		| 5				|
+| int index\_size	| size of array index		| 5				|
+| int size		| size of type			| 25				|
+| int align		| alignment			| 4				|
 
 
 
