@@ -63,7 +63,7 @@ bool consume(char *op){
 	return true;
 }
 
-int string_len(){
+int string_len(void){
 	int len = 0;
 	while(token->kind == TK_STR){
 		token = token->next;
@@ -73,7 +73,7 @@ int string_len(){
 	return len;
 }
 
-bool consume_ret(){
+bool consume_ret(void){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
 	    memcmp(token->str, "return", token->len)){
 		return false;
@@ -94,7 +94,7 @@ bool consume_reserved_word(char *keyword, TokenKind kind){
 	return true;
 }
 
-Token *consume_string(){
+Token *consume_string(void){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_STR || !(isascii(*(token->str)))){
 		return false;
@@ -117,7 +117,7 @@ Token *consume_string(){
 }
 
 
-Token *consume_ident(){
+Token *consume_ident(void){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||
 	   !(is_alnum(*(token->str)))){
@@ -147,7 +147,7 @@ void expect(char *op){
 	token = token->next;
 }
 
-int expect_number(){
+int expect_number(void){
 	// judge whether token is a number and move the pointer to the next and return value
 	if(token->kind != TK_NUM){
 		error_at(token->str, "not a number");

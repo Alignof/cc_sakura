@@ -8,7 +8,7 @@ Struc *structs;
 // LVar *locals;
 // Func *func_list[100];
 
-Type *parse_type(){
+Type *parse_type(void){
 	Type *type = calloc(1, sizeof(Type));
 	int star_count = 0;
 

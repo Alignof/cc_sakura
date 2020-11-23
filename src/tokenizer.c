@@ -4,7 +4,7 @@ bool isblock(char *str){
 	return (*str == '{') || (*str == '}');
 }
 
-bool at_eof(){
+bool at_eof(void){
 	return token->kind == TK_EOF;
 }
 

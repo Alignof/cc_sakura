@@ -6,7 +6,7 @@ Str *strings;
 //LVar *locals;
 //Func *func_list[100]; 
 
-Node *data(){
+Node *data(void){
 	if(consume("(")){
 		// jmp expr
 		Node *node = expr();
@@ -62,7 +62,7 @@ Node *data(){
 	return new_node_num(expect_number());
 }
 
-Node *primary(){
+Node *primary(void){
 	Node *node = data();
 
 	// Is array index
@@ -106,7 +106,7 @@ Node *primary(){
 	return node;
 }
 
-Node *unary(){
+Node *unary(void){
 	Node *node=NULL;
 
 	if(consume("*")){
@@ -192,7 +192,7 @@ Node *unary(){
 	return primary();
 }
 
-Node *mul(){
+Node *mul(void){
 	//jmp unary()
 	Node *node = unary();
 
@@ -211,7 +211,7 @@ Node *mul(){
 	}
 }
 
-Node *add(){
+Node *add(void){
 	//jmp mul()
 	Node *node = mul();
 
@@ -226,7 +226,7 @@ Node *add(){
 	}
 }
 
-Node *relational(){
+Node *relational(void){
 	Node *node = add();
 
 	for(;;){
@@ -245,7 +245,7 @@ Node *relational(){
 	}
 }
 
-Node *equelity(){
+Node *equelity(void){
 	Node *node = relational();
 
 	for(;;){
@@ -259,7 +259,7 @@ Node *equelity(){
 	}
 }
 
-Node *logical(){
+Node *logical(void){
 	Node *node = equelity();
 	for(;;){
 		if(consume("&&")){
@@ -272,7 +272,7 @@ Node *logical(){
 	}
 }
 
-Node *ternary(){
+Node *ternary(void){
 	Node *node = logical();
 	if(consume("?")){
 		//                          cond  if true
@@ -285,7 +285,7 @@ Node *ternary(){
 	return node;
 }
 
-Node *assign(){
+Node *assign(void){
 	Node *node = ternary();
 
 	if(consume("=")){
@@ -303,7 +303,7 @@ Node *assign(){
 	return node;
 }
 
-Node *expr(){
+Node *expr(void){
 	int star_count = 0;
 	Node *node;
 
@@ -343,7 +343,7 @@ Node *expr(){
 	return node;
 }
 
-Node *stmt(){
+Node *stmt(void){
 	Node *node = NULL;
 
 	if(consume_reserved_word("return", TK_RETURN)){
@@ -525,7 +525,7 @@ void function(Func *func){
 	func->code[i] = NULL;
 }
 
-void program(){
+void program(void){
 	int func_index = 0;
 	int star_count;
 	Type *toplv_type;
