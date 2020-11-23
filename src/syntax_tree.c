@@ -6,11 +6,9 @@ Str *strings;
 //LVar *locals;
 //Func *func_list[100]; 
 
-Node *data(){
+Node *data(void){
 	if(consume("(")){
-		// jmp expr
 		Node *node = expr();
-		// check end of caret
 		expect(")");
 		return node;
 	}
@@ -62,7 +60,7 @@ Node *data(){
 	return new_node_num(expect_number());
 }
 
-Node *primary(){
+Node *primary(void){
 	Node *node = data();
 
 	// Is array index
@@ -106,7 +104,7 @@ Node *primary(){
 	return node;
 }
 
-Node *unary(){
+Node *unary(void){
 	Node *node=NULL;
 
 	if(consume("*")){
@@ -183,8 +181,19 @@ Node *unary(){
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
-		node = new_node(ND_NUM, node, unary());
-		node->val = node->rhs->type->size;
+
+		if(consume("(")){
+			if(token->kind == TK_TYPE){
+				Type *target_type = parse_type();
+				node = new_node(ND_NUM, node, new_node_num(target_type->size));
+				node->val = target_type->size;
+			}else{
+				Node *target = expr();
+				node = new_node(ND_NUM, node, target);
+				node->val = node->rhs->type->size;
+			}
+			expect(")");
+		}
 
 		return node;
 	}
@@ -192,7 +201,7 @@ Node *unary(){
 	return primary();
 }
 
-Node *mul(){
+Node *mul(void){
 	//jmp unary()
 	Node *node = unary();
 
@@ -211,7 +220,7 @@ Node *mul(){
 	}
 }
 
-Node *add(){
+Node *add(void){
 	//jmp mul()
 	Node *node = mul();
 
@@ -226,7 +235,7 @@ Node *add(){
 	}
 }
 
-Node *relational(){
+Node *relational(void){
 	Node *node = add();
 
 	for(;;){
@@ -245,7 +254,7 @@ Node *relational(){
 	}
 }
 
-Node *equelity(){
+Node *equelity(void){
 	Node *node = relational();
 
 	for(;;){
@@ -259,7 +268,7 @@ Node *equelity(){
 	}
 }
 
-Node *logical(){
+Node *logical(void){
 	Node *node = equelity();
 	for(;;){
 		if(consume("&&")){
@@ -272,7 +281,7 @@ Node *logical(){
 	}
 }
 
-Node *ternary(){
+Node *ternary(void){
 	Node *node = logical();
 	if(consume("?")){
 		//                          cond  if true
@@ -285,7 +294,7 @@ Node *ternary(){
 	return node;
 }
 
-Node *assign(){
+Node *assign(void){
 	Node *node = ternary();
 
 	if(consume("=")){
@@ -303,35 +312,16 @@ Node *assign(){
 	return node;
 }
 
-Node *expr(){
+Node *expr(void){
 	int star_count = 0;
 	Node *node;
 
 	if(token->kind == TK_TYPE){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
-		node->type = calloc(1, sizeof(Type));
 
-		// check type
-		if(consume_reserved_word("int", TK_TYPE)){
-			node->type->ty = INT;
-		}else if(consume_reserved_word("char", TK_TYPE)){
-			node->type->ty = CHAR;
-		}else if(consume_reserved_word("struct", TK_TYPE)){
-			Token *tok   = consume_ident();
-			Struc *found = find_struc(tok);
-			node->type->size   = found->memsize;
-			node->type->member = found->member;
-			node->type->ty     = STRUCT;
-		}
-		node->type->size  = type_size(node->type);
-		node->type->align = type_align(node->type);
-		
-		// count asterisk
-		while(token->kind == TK_RESERVED && *(token->str) == '*'){
-			star_count++;
-			token = token->next;
-		}
+		// parsing type
+		node->type = parse_type();
 
 		// variable declaration
 		Token *tok = consume_ident();
@@ -362,7 +352,7 @@ Node *expr(){
 	return node;
 }
 
-Node *stmt(){
+Node *stmt(void){
 	Node *node = NULL;
 
 	if(consume_reserved_word("return", TK_RETURN)){
@@ -544,7 +534,7 @@ void function(Func *func){
 	func->code[i] = NULL;
 }
 
-void program(){
+void program(void){
 	int func_index = 0;
 	int star_count;
 	Type *toplv_type;
@@ -591,7 +581,7 @@ void program(){
 			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 			
 			// add type list
-			func_list[func_index]->type = insert_type_list(func_list[func_index]->type, star_count);
+			func_list[func_index]->type = insert_ptr_type(func_list[func_index]->type, star_count);
 
 			// get arguments
 			get_argument(func_index);

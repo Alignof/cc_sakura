@@ -8,7 +8,38 @@ Struc *structs;
 // LVar *locals;
 // Func *func_list[100];
 
-Type *insert_type_list(Type *prev, int star_count){
+Type *parse_type(void){
+	Type *type = calloc(1, sizeof(Type));
+	int star_count = 0;
+
+	// check type
+	if(consume_reserved_word("int", TK_TYPE)){
+		type->ty = INT;
+	}else if(consume_reserved_word("char", TK_TYPE)){
+		type->ty = CHAR;
+	}else if(consume_reserved_word("struct", TK_TYPE)){
+		Token *tok   = consume_ident();
+		Struc *found = find_struc(tok);
+		type->size   = found->memsize;
+		type->member = found->member;
+		type->ty     = STRUCT;
+	}
+	type->size  = type_size(type);
+	type->align = type_align(type);
+	
+	// count asterisk
+	while(token->kind == TK_RESERVED && *(token->str) == '*'){
+		star_count++;
+		token = token->next;
+	}
+
+	// add ptr
+	type = insert_ptr_type(type, star_count);
+
+	return type;
+}
+
+Type *insert_ptr_type(Type *prev, int star_count){
 	Type *newtype;
 	if(star_count){
 		for(int i = 0;i<star_count;i++){
@@ -44,7 +75,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->type->align = type_align(toplv_type);
 
 	// add type list
-	gvar->type = insert_type_list(gvar->type, star_count);
+	gvar->type = insert_ptr_type(gvar->type, star_count);
 
 	// Is array
 	if(check("[")){
@@ -99,7 +130,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->type = node->type;
 
 	// add type list
-	lvar->type = insert_type_list(lvar->type, star_count);
+	//lvar->type = insert_ptr_type(lvar->type, star_count);
 
 	// Is array
 	if(check("[")){
@@ -157,7 +188,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 void declare_struct(Struc *new_struc){
 	int size_of_type;
 	int asize	  = 0;
-	int star_count	  = 0;
 	Member *new_memb  = NULL;
 	Member *memb_head = NULL;
 
@@ -167,33 +197,10 @@ void declare_struct(Struc *new_struc){
 		}
 
 		new_memb = calloc(1,sizeof(Member));
-		new_memb->type = calloc(1,sizeof(Type));
 
-		// check type
-		if(consume_reserved_word("int", TK_TYPE)){
-			new_memb->type->ty = INT;
-		}else if(consume_reserved_word("char", TK_TYPE)){
-			new_memb->type->ty = CHAR;
-		}else if(consume_reserved_word("struct", TK_TYPE)){
-			Token *tok   = consume_ident();
-			Struc *found = find_struc(tok);
-			new_memb->memsize      = found->memsize;
-			new_memb->type->size   = found->memsize;
-			new_memb->type->member = found->member;
-			new_memb->type->ty     = STRUCT;
-		}
-		new_memb->type->size  = type_size(new_memb->type);
-		new_memb->type->align = type_align(new_memb->type);
-
-
-		// count asterisk
-		while(token->kind == TK_RESERVED && *(token->str) == '*'){
-			star_count++;
-			token = token->next;
-		}
-
-		// add type list
-		new_memb->type = insert_type_list(new_memb->type, star_count);
+		// parse member type
+		new_memb->type    = parse_type();
+		new_memb->memsize = new_memb->type->size;
 
 		// add member name
 		Token *def_name  = consume_ident();
