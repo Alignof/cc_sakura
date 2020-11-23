@@ -8,9 +8,7 @@ Str *strings;
 
 Node *data(void){
 	if(consume("(")){
-		// jmp expr
 		Node *node = expr();
-		// check end of caret
 		expect(")");
 		return node;
 	}
@@ -184,8 +182,19 @@ Node *unary(void){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 
-		node = new_node(ND_NUM, node, unary());
-		node->val = node->rhs->type->size;
+		if(consume("(")){
+			if(token->kind == TK_TYPE){
+				Type *target_type = parse_type();
+				node = new_node(ND_NUM, node, new_node_num(target_type->size));
+				node->val = target_type->size;
+			}else{
+				Node *target = expr();
+				node = new_node(ND_NUM, node, target);
+				node->val = node->rhs->type->size;
+			}
+			expect(")");
+		}
+
 		return node;
 	}
 
