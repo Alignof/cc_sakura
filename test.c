@@ -1,27 +1,22 @@
-struct rgb{
-	int red;
-	int green;
-	int blue;
-};
+int main() {
+	int i;
+	int x=1;
 
-struct point{ 
-	int x;
-	int y;
-	struct rgb color;
-	int dummy;
-};
+	for(i=0;i<4;i++){
+		switch(i){
+			case 0:
+				x = 2;
+				break;
+			case 1:
+				x = 3;
+				break;
+			case 2:
+				x = 4;
+				break;
+			default:
+				x = 10;
+		}
+	}
 
-int main(){
-	struct point test;
-
-	printf("address of test.x		is %p\n", &(test.x));
-	printf("address of test.y		is %p\n", &(test.y));
-	printf("address of test.color		is %p\n", &(test.color));
-	printf("address of test.dummy		is %p\n", &(test.dummy));
-	printf("address of test.color.red	is %p\n", &(test.color.red));
-	printf("address of test.color.green	is %p\n", &(test.color.green));
-	printf("address of test.color.blue	is %p\n", &(test.color.blue));
-
-	return 0;
+	return x;
 }
-

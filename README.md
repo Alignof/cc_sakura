@@ -1,5 +1,5 @@
 # cc\_sakura
-![C/C++ CI](https://github.com/Takana-Norimasa/cc_sakura/workflows/C/C++%20CI/badge.svg)
+![C/C++ CI](https://github.com/Takana-Norimasa/cc_sakura/workflows/C/C++%20CI/badge.svg)  
 C Compiler Sakura  
 [https://www.sigbus.info/compilerbook](https://www.sigbus.info/compilerbook)を見ながら勉強していく。
 
@@ -138,6 +138,10 @@ int main(){int i=0; while(i<10){if(i==5){break;}i++;} return i;} => 5
 int main(){int i; int x[10];for(i=0;i<10;i++){if(i == 5){x[i]=13;continue;}x[i]=i;} return x[5]+x[3];} => 16
 int main(){int i=-1; int x[10]; while(i<10){i++;if(i == 5){x[i]=13;continue;}x[i]=i;} return x[5]+x[3];} => 16
 int main(){int i; int k; int x=0; for(i=0;i<10;i++){for(k=0;k<10;k++){if(k==5){break;} x++;}} return x;} => 50
+int main() {int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;} => 3
+int main() {int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3; case 2:x=4;break; default:x=5;} return x;} => 4
+int main() {int i=8; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;} => 5
+int main() {int i; int x=1; for(i=0; i<4; i++){switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=10;}} return x;} => 10
 int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;} => 2
 int main(){int a;int b;int c; a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;} => 13
 int main(){int x; int y=1; x =(y==1)?2:3; return x;} => 2

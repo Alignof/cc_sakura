@@ -163,7 +163,7 @@ Node *array_block(Node *arr){
 	memcpy(clone, arr, sizeof(Node));
 	clone->kind = arr->kind;
 
-	while(token->kind!=TK_BLOCK){
+	while(token->kind != TK_BLOCK){
 		src = array_index(clone, new_node_num(ctr));
 		//Is first?
 		if(ctr == 0){

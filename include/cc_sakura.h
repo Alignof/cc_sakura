@@ -15,6 +15,9 @@ typedef enum{
 	TK_NUM,
 	TK_IF,
 	TK_ELSE,
+	TK_SWITCH,
+	TK_CASE,
+	TK_DEFAULT,
 	TK_WHILE,
 	TK_FOR,
 	TK_SIZEOF,
@@ -65,6 +68,8 @@ typedef enum{
 	ND_IF, 		//  if
 	ND_ELSE, 	//  else
 	ND_IFELSE, 	//  if-else
+	ND_SWITCH, 	//  switch
+	ND_CASE, 	//  case or default
 	ND_WHILE, 	//  while
 	ND_FOR, 	//  for
 	ND_BLOCK, 	//  {}
