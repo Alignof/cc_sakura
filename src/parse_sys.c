@@ -170,7 +170,7 @@ void label_register(Node *node, LabelKind kind){
 
 	new_label->kind  = kind;
 	new_label->id    = llid;
-	node->val	 = llid;
+	node->val        = llid;
 	labels_tail      = (labels_tail) ? labels_tail->next : labels_head;
 
 	llid++;

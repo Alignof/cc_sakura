@@ -347,7 +347,7 @@ void gen(Node *node){
 
 			// gen default condtion
 			if(node->lhs){
-				printf("	jmp .LcaseBegin%03d\n", cases->val);
+				printf("	jmp .LcaseBegin%03d\n", node->val);
 			}
 
 			// gen code block

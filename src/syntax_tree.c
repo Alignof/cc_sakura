@@ -431,10 +431,12 @@ Node *stmt(void){
 		while(lb){
 			if(lb->kind == LB_CASE){
 				if(cond_cases){
-					cond_cases->next = new_node(ND_EQ, cond, lb->cond);
-					cond_cases       = cond_cases->next;
+					cond_cases->next      = new_node(ND_EQ, cond, lb->cond);
+					cond_cases->next->val = lb->id;
+					cond_cases            = cond_cases->next;
 				}else{
 					cond_cases = new_node(ND_EQ, cond, lb->cond);
+					cond_cases->val  = lb->id;
 					node->next = cond_cases;
 				}
 			}else if(lb->kind == LB_DEFAULT){
