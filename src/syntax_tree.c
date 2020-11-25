@@ -524,7 +524,7 @@ Node *stmt(void){
 		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
 			//Is first?
-			if(block_code->rhs){
+			if(node->vector){
 				block_code->vector = stmt();
 				block_code = block_code->vector;
 			}else{
