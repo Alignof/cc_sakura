@@ -394,14 +394,14 @@ Node *stmt(void){
  
  	}else if(consume_reserved_word("switch", TK_SWITCH)){
  		/*
- 		 * default<--switch----+---------->block code
- 		 *                     | 
- 		 *                     | (next)
- 		 *                     | 
- 		 *         (cond)<---case
- 		 *                     | 
- 		 *                     | (next: chain_case)
- 		 *                     +----->case->case->... 
+ 		 * default<---switch----+---------->block code
+ 		 *               | 
+ 		 *               | (next)
+ 		 *               | 
+ 		 *   (cond)<---case->code
+ 		 *               | 
+ 		 *               | (next: chain_case)
+ 		 *               +----->case->case->... 
  		 */
  
  		Node *cond = NULL;
@@ -418,28 +418,6 @@ Node *stmt(void){
  		Node *chain_case = NULL;
  		expect("{");
  		while(token->kind == TK_CASE || token->kind == TK_DEFAULT){
- 			if(consume_reserved_word("case", TK_CASE)){
- 				if(chain_case){
- 					chain_case->vector = new_node(ND_CASE, new_node(ND_EQ, cond, logical()), NULL);
- 					chain_case         = chain_case->vector;
- 				}else{
- 					chain_case   = new_node(ND_CASE, new_node(ND_EQ, cond, logical()), NULL);
- 					node->rhs    = chain_case;
- 				}
- 				expect(":");
- 
- 				Node *in_label = NULL;
- 				while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
- 					if(in_label){
- 						in_label->vector = stmt();
- 						in_label = in_label->vector;
- 					}else{
- 						in_label = stmt();
- 						chain_case->rhs = in_label;
- 					}
- 
- 					if(check("}")) break;
- 				}
  			}else if(consume_reserved_word("default", TK_DEFAULT)){
  				expect(":");
  				if(node->lhs == NULL){
@@ -464,7 +442,22 @@ Node *stmt(void){
  			}
  		}
  		expect("}");
-
+	}else if(consume_reserved_word("case", TK_CASE)){
+		/*
+		 *  (cond) <--- case ---> code
+		 */
+		node = new_node(ND_CASE, logical(), NULL);
+		expect(":");
+		node->rhs = stmt();
+		//new_label(node, LB_CASE);
+	}else if(consume_reserved_word("default", TK_DEFAULT)){
+		/*
+		 *  (cond) <--- default ---> code
+		 */
+		node = new_node(ND_CASE, logical(), NULL);
+		expect(":");
+		node->rhs = stmt();
+		//new_label(node, LB_DEFAULT);
 // 
 // 	}else if(consume_reserved_word("switch", TK_SWITCH)){
 // 		/*
