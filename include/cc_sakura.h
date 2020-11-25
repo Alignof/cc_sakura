@@ -18,6 +18,7 @@ typedef enum{
 	TK_SWITCH,
 	TK_CASE,
 	TK_DEFAULT,
+	TK_DO,
 	TK_WHILE,
 	TK_FOR,
 	TK_SIZEOF,
@@ -71,6 +72,7 @@ typedef enum{
 	ND_SWITCH, 	//  switch
 	ND_CASE, 	//  case or default
 	ND_WHILE, 	//  while
+	ND_DOWHILE, 	//  do-while
 	ND_FOR, 	//  for
 	ND_BLOCK, 	//  {}
 	ND_ARG, 	//  function argument;
