@@ -354,6 +354,7 @@ void gen(Node *node){
 			gen(node->rhs);
 
 			printf(".LloopEnd%03d:\n", label_loop);
+			printf("	push rax\n");
 			label_loop--;
 			return;
 		case ND_CASE:
