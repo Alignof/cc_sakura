@@ -36,6 +36,9 @@ Node *data(void){
 			Func *called = find_func(tok);
 			if(called){
 				node->type = called->type;
+			}else{
+				node->type = calloc(1, sizeof(Type));
+				node->type->ty = INT;
 			}
 
 			node = call_function(node, tok);
@@ -405,7 +408,7 @@ Node *stmt(void){
  		 */
  
  		Node  *cond	 = NULL;
-		Label *tmp_label = labels;
+		Label *tmp_label = labels_tail;
 		Label *prev;
 
  		node = new_node(ND_SWITCH, node, NULL);
@@ -424,31 +427,34 @@ Node *stmt(void){
 		// register and remove case
 		Node *cond_cases;
 		prev = tmp_label;
-		Label *lb = tmp_label->next;
+		Label *lb = (tmp_label) ? prev->next : labels_head;
 		while(lb){
-			if(lb->kind != LB_LABEL){
-				if(lb->kind == LB_CASE){
-					if(cond_cases){
-						cond_cases->next = new_node(ND_EQ, cond, lb->cond);
-						cond_cases       = cond_cases->vector;
-					}else{
-						cond_cases = new_node(ND_EQ, cond, lb->cond);
-						node->next = cond_cases;
-					}
-				}else if(lb->kind == LB_DEFAULT){
-					if(node->lhs){
-						error_at(token->str, "multiple default labels in one switch");
-					}else{
-						node->lhs = new_node(ND_EQ, cond, lb->cond);
-					}
+			if(lb->kind == LB_CASE){
+				if(cond_cases){
+					cond_cases->next = new_node(ND_EQ, cond, lb->cond);
+					cond_cases       = cond_cases->vector;
+				}else{
+					cond_cases = new_node(ND_EQ, cond, lb->cond);
+					node->next = cond_cases;
 				}
+			}else if(lb->kind == LB_DEFAULT){
+				if(node->lhs){
+					error_at(token->str, "multiple default labels in one switch");
+				}else{
+					node->lhs = new_node(ND_EQ, cond, lb->cond);
+				}
+			}
 
+			// remove used case
+			if(prev){
 				prev->next = lb->next;
 				free(lb);
-				lb = prev->next;
-			}else{
+				lb   = prev->next;
 				prev = lb;
-				lb = lb->next;
+			// remove head
+			}else{
+				prev = NULL;
+				lb   = lb->next;
 			}
 		}
 	}else if(consume_reserved_word("case", TK_CASE)){
@@ -457,8 +463,8 @@ Node *stmt(void){
 		 */
 		node = new_node(ND_CASE, logical(), NULL);
 		expect(":");
-		node->rhs = stmt();
 		label_register(node, LB_CASE);
+		node->rhs = stmt();
 	}else if(consume_reserved_word("default", TK_DEFAULT)){
 		/*
 		 *  (cond) <--- default ---> code

@@ -226,7 +226,8 @@ extern LVar  *locals;
 extern GVar  *globals;
 extern Str   *strings;
 extern Struc *structs;
-extern Label *labels;
+extern Label *labels_head;
+extern Label *labels_tail;
 
 // main.c
 char *read_file(char *path);

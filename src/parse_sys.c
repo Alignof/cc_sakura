@@ -159,19 +159,29 @@ int expect_number(void){
 }
 
 void label_register(Node *node, LabelKind kind){
-	Label *new_label = calloc(1, sizeof(Label));
-	new_label->next  = labels;
-	new_label->kind  = kind;
-	new_label->id    = llid;
-	node->val        = llid;
+	if(labels_tail){
+		labels_tail->next	 = calloc(1, sizeof(Label));
+		labels_tail->next->kind  = kind;
+		labels_tail->next->id    = llid;
 
-	llid++;
+		if(node->kind == ND_CASE){
+			labels_tail->next->cond = node->lhs;
+		}
 
-	if(node->kind == ND_CASE){
-		new_label->cond = node->lhs;
+		labels_tail = labels_tail->next;
+	}else{
+		labels_head = calloc(1, sizeof(Label));
+		labels_head->kind  = kind;
+		labels_head->id    = llid;
+		labels_tail	   = labels_head;
+
+		if(node->kind == ND_CASE){
+			labels_tail->cond = node->lhs;
+		}
 	}
 
-	labels = new_label;
+	node->val = llid;
+	llid++;
 }
 
 Func *find_func(Token *tok){

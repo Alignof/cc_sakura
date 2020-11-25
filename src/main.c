@@ -8,7 +8,8 @@ int   loop_depth;
 char  *user_input;
 char  filename[100];
 Func  *func_list[FUNC_NUM];
-Label *labels;
+Label *labels_head;
+Label *labels_tail;
 
 char *read_file(char *path){
 	FILE *fp;
@@ -97,11 +98,13 @@ int main(int argc, char **argv){
 		printf("	.string \"%.*s\"\n", var->len, var->str);
 	}
 
-	llid       = 0;
-	label_loop = 0;
-	loop_depth = 0;
-	label_if   = 0;
-	if_depth   = 0;
+	llid        = 0;
+	label_loop  = 0;
+	loop_depth  = 0;
+	label_if    = 0;
+	if_depth    = 0;
+	labels_head = NULL;
+	labels_tail = NULL;
 
 	//generate assembly at first expr
 	for(i = 0;func_list[i];i++){
