@@ -162,6 +162,10 @@ void label_register(Node *node, LabelKind kind){
 	Label *new_label = calloc(1, sizeof(Label));
 	new_label->next  = labels;
 	new_label->kind  = kind;
+	new_label->id    = llid;
+	node->val        = llid;
+
+	llid++;
 
 	if(node->kind == ND_CASE){
 		new_label->cond = node->lhs;

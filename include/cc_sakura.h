@@ -187,7 +187,7 @@ struct LVar{
 
 // Labels
 struct Label{
-	int       label_id;
+	int       id;
 	Node      *cond;
 	Label     *next;
 	LabelKind kind;
