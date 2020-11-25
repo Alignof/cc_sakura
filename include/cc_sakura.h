@@ -215,6 +215,7 @@ struct Member{
 
 
 // global variable
+extern int   llid;
 extern int   lvar_count;
 extern int   alloc_size;
 extern char  *user_input;

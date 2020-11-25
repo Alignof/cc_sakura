@@ -463,7 +463,7 @@ Node *stmt(void){
 		/*
 		 *  (cond) <--- default ---> code
 		 */
-		node = new_node(ND_CASE, logical(), NULL);
+		node = new_node(ND_CASE, NULL, NULL);
 		expect(":");
 		node->rhs = stmt();
 		label_register(node, LB_DEFAULT);

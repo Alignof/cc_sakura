@@ -177,6 +177,7 @@ struct of syntax tree node.
 | ND\_STR		| string label				|
 | ND\_SIZEOF		| size of type				|
 | ND\_GVAR		| length of name			|
+| ND\_CASE		| label id				|
 | ND\_CALL\_FUNC	| number of argument 			|
 
 

@@ -333,17 +333,16 @@ void gen(Node *node){
 		case ND_SWITCH:
 			label_loop++;
 			loop_depth++;
-			label_case = 0;
 
 			// gen cases condtion
-			cases = node->rhs;
+			cases = node->vector;
 			while(cases){
-				gen(cases->lhs);
+				gen(cases);
 
 				printf("	pop rax\n");
 				printf("	cmp rax,0\n");
 				printf("	jne .LcaseBegin%03d\n", label_case++);
-				cases = cases->vector;
+				cases = cases->next;
 			}
 
 			// gen default condtion
@@ -351,7 +350,10 @@ void gen(Node *node){
 				printf("	jmp .LcaseBegin%03d\n", label_case);
 			}
 
+			// gen code block
+			gen(node->rhs);
 
+/*
 			label_case = 0;
 			// gen cases expr
 			cases = node->rhs;
@@ -368,16 +370,14 @@ void gen(Node *node){
 			}else{
 				printf("	jmp .LloopEnd%03d\n", label_loop);
 			}
+*/
 
 			printf(".LloopEnd%03d:\n", label_loop);
 			label_loop--;
 			return;
 		case ND_CASE:
-			in_case = node->rhs;
-			while(in_case){
-				gen(in_case);
-				in_case = in_case->vector;
-			}
+			printf(".LcaseBegin%03d:\n", node->val);
+			gen(node->rhs);
 			return;
 		case ND_FOR:
 			// adjust rsp
