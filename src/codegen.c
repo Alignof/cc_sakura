@@ -140,9 +140,7 @@ void gen_calc(Node *node){
 void gen(Node *node){
 	Node *tmp;
 	Node *cases;
-	Node *in_case;
 	int arg = 0;
-	int label_case;
 
 	switch(node->kind){
 		case ND_NUM:

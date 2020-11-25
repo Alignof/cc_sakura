@@ -407,9 +407,9 @@ Node *stmt(void){
  		 *               +----->case->case->... 
  		 */
  
- 		Node  *cond	 = NULL;
+ 		Node  *cond = NULL;
 		Label *before_switch = labels_tail;
-		Label *prev;
+		Label *prev = NULL;
 
  		node = new_node(ND_SWITCH, node, NULL);
  		if(consume("(")){
@@ -435,9 +435,9 @@ Node *stmt(void){
 					cond_cases->next->val = lb->id;
 					cond_cases            = cond_cases->next;
 				}else{
-					cond_cases = new_node(ND_EQ, cond, lb->cond);
-					cond_cases->val  = lb->id;
-					node->next = cond_cases;
+					cond_cases      = new_node(ND_EQ, cond, lb->cond);
+					cond_cases->val = lb->id;
+					node->next      = cond_cases;
 				}
 			}else if(lb->kind == LB_DEFAULT){
 				if(node->lhs){
@@ -451,13 +451,13 @@ Node *stmt(void){
 			// remove used case
 			if(prev){
 				prev->next = lb->next;
-				free(lb);
+				//free(lb);
 				lb   = prev->next;
 				prev = lb;
 			// remove head
 			}else{
 				prev = lb;
-				free(prev);
+				//free(prev);
 				lb   = lb->next;
 				prev = NULL;
 			}
