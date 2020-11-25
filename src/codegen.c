@@ -335,19 +335,19 @@ void gen(Node *node){
 			loop_depth++;
 
 			// gen cases condtion
-			cases = node->vector;
+			cases = node->next;
 			while(cases){
 				gen(cases);
 
 				printf("	pop rax\n");
 				printf("	cmp rax,0\n");
-				printf("	jne .LcaseBegin%03d\n", label_case++);
+				printf("	jne .LcaseBegin%03d\n", cases->val);
 				cases = cases->next;
 			}
 
 			// gen default condtion
 			if(node->lhs){
-				printf("	jmp .LcaseBegin%03d\n", label_case);
+				printf("	jmp .LcaseBegin%03d\n", cases->val);
 			}
 
 			// gen code block
