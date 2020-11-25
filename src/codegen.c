@@ -438,6 +438,32 @@ void gen(Node *node){
 
 			label_loop--;
 			return;
+		case ND_DOWHILE:
+			label_loop++;
+			loop_depth++;
+
+			// adjust rsp
+			printf("	push rax\n");
+
+			// codeblock
+			printf(".LloopBegin%03d:\n", label_loop);
+			gen(node->rhs);
+
+			// condition
+			gen(node->lhs);
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			// break loop
+			printf("	je .LloopEnd%03d\n", label_loop);
+
+			// continue
+			printf(".LloopCont%03d:\n", label_loop);
+			printf("	jmp .LloopBegin%03d\n", label_loop);
+			printf(".LloopEnd%03d:\n", label_loop);
+			printf("	push rax\n");
+
+			label_loop--;
+			return;
 		case ND_CONTINUE:
 			printf("	jmp .LloopCont%03d\n", label_loop);
 			return;

@@ -140,6 +140,7 @@ Token *tokenize(char *p){
 		if(consume_reserved(&p, "case",     4, &now, TK_CASE))	   continue;
 		if(consume_reserved(&p, "default",  7, &now, TK_DEFAULT))  continue;
 		if(consume_reserved(&p, "for",	    3, &now, TK_FOR))	   continue;
+		if(consume_reserved(&p, "do",	    2, &now, TK_DO))       continue;
 		if(consume_reserved(&p, "while",    5, &now, TK_WHILE))    continue;
 		if(consume_reserved(&p, "break",    5, &now, TK_BREAK))    continue;
 		if(consume_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;

@@ -484,6 +484,16 @@ Node *stmt(void){
 			node->lhs->vector = cond;
 			node->lhs->vector->vector = calc;
 		}
+	}else if(consume_reserved_word("do", TK_DO)){
+		// (cond)<-- do-while -->block
+		node = new_node(ND_DOWHILE, NULL, stmt());
+
+		consume_reserved_word("while", TK_WHILE);
+		if(consume("(")){
+			node->lhs = expr();
+			expect(")");
+		}
+		expect(";");
 	}else if(consume_reserved_word("while", TK_WHILE)){
 		node = new_node(ND_WHILE, node, NULL);
 		if(consume("(")){
