@@ -98,6 +98,11 @@ typedef enum{
 	POST_DEC,
 }IncDecKind;
 
+typedef enum{
+	LB_LABEL,
+	LB_CASE,
+	LB_DEFAULT,
+}LabelKind;
 
 typedef struct Token  Token;
 typedef struct Node   Node;
@@ -177,6 +182,13 @@ struct LVar{
 	char *name;
 	Type *type;
 	LVar *next;
+}; 
+
+// Labels
+struct Label{
+	int   label_id;
+	Node  *cond;
+	Label *next;
 }; 
 
 // struct
