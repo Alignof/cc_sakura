@@ -111,6 +111,7 @@ typedef struct GVar   GVar;
 typedef struct Struc  Struc;
 typedef struct Member Member;
 typedef struct Func   Func;
+typedef struct Label  Label;
 typedef struct Type   Type;
 typedef struct Str    Str;
 
@@ -224,6 +225,7 @@ extern LVar  *locals;
 extern GVar  *globals;
 extern Str   *strings;
 extern Struc *structs;
+extern Label *labels;
 
 // main.c
 char *read_file(char *path);
@@ -250,6 +252,7 @@ void expect(char *op);
 int expect_number(void);
 Token *consume_ident(void);
 Token *consume_string(void);
+void label_register(Node *node, LabelKind kind);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Func *find_func(Token *tok);

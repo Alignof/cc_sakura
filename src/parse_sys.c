@@ -158,6 +158,18 @@ int expect_number(void){
 	return val;
 }
 
+void label_register(Node *node, LabelKind kind){
+	Label *new_label = calloc(1, sizeof(Label));
+	new_label->next  = labels;
+	new_label->kind  = kind;
+
+	if(node->kind == ND_CASE){
+		new_label->cond = node->lhs;
+	}
+
+	labels = new_label;
+}
+
 Func *find_func(Token *tok){
 	for (int i = 0;func_list[i] && i < FUNC_NUM;i++){
 		if(!memcmp(tok->str, func_list[i]->name, tok->len)){

@@ -414,34 +414,9 @@ Node *stmt(void){
  		}else{
  			error_at(token->str, "expected ‘(’ before ‘{’ token");
  		}
+
+		node->rhs = stmt(); 
  
- 		Node *chain_case = NULL;
- 		expect("{");
- 		while(token->kind == TK_CASE || token->kind == TK_DEFAULT){
- 			}else if(consume_reserved_word("default", TK_DEFAULT)){
- 				expect(":");
- 				if(node->lhs == NULL){
- 					Node *in_label = NULL;
- 					node->lhs = new_node(ND_CASE, NULL, NULL);
- 					while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
- 						if(in_label){
- 							in_label->vector = stmt();
- 							in_label = in_label->vector;
- 						}else{
- 							in_label       = new_node(ND_CASE, NULL, stmt());
- 							node->lhs->rhs = in_label;
- 						}
- 
- 						if(check("}")) break;
- 					}
- 				}else{
- 					error_at(token->str, "multiple default labels in one switch");
- 				}
- 			}else{
- 				error_at(token->str, "statement will never be executed");
- 			}
- 		}
- 		expect("}");
 	}else if(consume_reserved_word("case", TK_CASE)){
 		/*
 		 *  (cond) <--- case ---> code
@@ -449,7 +424,7 @@ Node *stmt(void){
 		node = new_node(ND_CASE, logical(), NULL);
 		expect(":");
 		node->rhs = stmt();
-		//new_label(node, LB_CASE);
+		label_register(node, LB_CASE);
 	}else if(consume_reserved_word("default", TK_DEFAULT)){
 		/*
 		 *  (cond) <--- default ---> code
@@ -457,7 +432,7 @@ Node *stmt(void){
 		node = new_node(ND_CASE, logical(), NULL);
 		expect(":");
 		node->rhs = stmt();
-		//new_label(node, LB_DEFAULT);
+		label_register(node, LB_DEFAULT);
 // 
 // 	}else if(consume_reserved_word("switch", TK_SWITCH)){
 // 		/*
