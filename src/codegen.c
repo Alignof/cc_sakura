@@ -347,30 +347,11 @@ void gen(Node *node){
 
 			// gen default condtion
 			if(node->lhs){
-				printf("	jmp .LcaseBegin%03d\n", node->val);
+				printf("	jmp .LcaseBegin%03d\n", node->lhs->val);
 			}
 
 			// gen code block
 			gen(node->rhs);
-
-/*
-			label_case = 0;
-			// gen cases expr
-			cases = node->rhs;
-			while(cases){
-				printf(".LcaseBegin%03d:\n", label_case++);
-				gen(cases);
-				cases = cases->vector;
-			}
-
-			// gen default expr
-			if(node->lhs){
-				printf(".LcaseBegin%03d:\n", label_case);
-				gen(node->lhs);
-			}else{
-				printf("	jmp .LloopEnd%03d\n", label_loop);
-			}
-*/
 
 			printf(".LloopEnd%03d:\n", label_loop);
 			label_loop--;
