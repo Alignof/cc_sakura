@@ -159,25 +159,22 @@ int expect_number(void){
 }
 
 void label_register(Node *node, LabelKind kind){
-	if(labels_tail){
-		labels_tail->next	 = calloc(1, sizeof(Label));
-		labels_tail->next->kind  = kind;
-		labels_tail->next->id    = llid;
+	Label *new_label = (labels_tail) ? labels_tail->next : labels_head;
+	new_label = calloc(1, sizeof(Label));
+	new_label->kind  = kind;
+	new_label->id    = llid;
 
-		if(node->kind == ND_CASE){
-			labels_tail->next->cond = node->lhs;
-		}
+	if(kind == LB_CASE){
+		new_label->cond = node->lhs;
+	}else if(kind == LB_DEFAULT){
+		new_label->cond = node->rhs;
+	}
 
-		labels_tail = labels_tail->next;
+	if(labels_tail == NULL){
+		labels_tail = labels_head;
 	}else{
-		labels_head = calloc(1, sizeof(Label));
-		labels_head->kind  = kind;
-		labels_head->id    = llid;
-		labels_tail	   = labels_head;
+		labels_tail = labels_tail->next;
 
-		if(node->kind == ND_CASE){
-			labels_tail->cond = node->lhs;
-		}
 	}
 
 	node->val = llid;

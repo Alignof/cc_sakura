@@ -408,7 +408,7 @@ Node *stmt(void){
  		 */
  
  		Node  *cond	 = NULL;
-		Label *tmp_label = labels_tail;
+		Label *before_switch = labels_tail;
 		Label *prev;
 
  		node = new_node(ND_SWITCH, node, NULL);
@@ -426,13 +426,13 @@ Node *stmt(void){
 
 		// register and remove case
 		Node *cond_cases;
-		prev = tmp_label;
-		Label *lb = (tmp_label) ? prev->next : labels_head;
+		prev = before_switch;
+		Label *lb = (before_switch) ? prev->next : labels_head;
 		while(lb){
 			if(lb->kind == LB_CASE){
 				if(cond_cases){
 					cond_cases->next = new_node(ND_EQ, cond, lb->cond);
-					cond_cases       = cond_cases->vector;
+					cond_cases       = cond_cases->next;
 				}else{
 					cond_cases = new_node(ND_EQ, cond, lb->cond);
 					node->next = cond_cases;
@@ -441,7 +441,7 @@ Node *stmt(void){
 				if(node->lhs){
 					error_at(token->str, "multiple default labels in one switch");
 				}else{
-					node->lhs = new_node(ND_EQ, cond, lb->cond);
+					node->lhs = lb->cond;
 				}
 			}
 
@@ -453,8 +453,10 @@ Node *stmt(void){
 				prev = lb;
 			// remove head
 			}else{
-				prev = NULL;
+				prev = lb;
+				free(prev);
 				lb   = lb->next;
+				prev = NULL;
 			}
 		}
 	}else if(consume_reserved_word("case", TK_CASE)){
