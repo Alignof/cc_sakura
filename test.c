@@ -1,4 +1,3 @@
-/*
 int main(){
 	char *psz1 = calloc(100, sizeof(char));
 	char *psz2 = "abcdefghijklmnopqrstuvwxyz";
@@ -20,26 +19,4 @@ int main(){
 
 	printf("to	:%s\n", psz1);
 	printf("from	:%s\n", psz2);
-}
-*/
-
-int main() {
-	int i;
-	int x=1;
-	for(i=0;i<4;i++){
-		switch(i){
-			case 0:
-				x=2;
-				break;
-			case 1:
-				x=3;
-				break;
-			case 2:
-				x=4;
-				break;
-			default:
-				x=10;
-		}
-	}
-	return x;
 }
