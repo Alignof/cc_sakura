@@ -425,7 +425,7 @@ Node *stmt(void){
 		node->rhs = stmt(); 
 
 		// register and remove case
-		Node *cond_cases;
+		Node *cond_cases = NULL;
 		prev = before_switch;
 		Label *lb = (before_switch) ? prev->next : labels_head;
 		while(lb){
