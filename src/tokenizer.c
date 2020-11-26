@@ -27,7 +27,7 @@ int len_val(char *str){
 bool issymbol(char *str,  bool *single_flag){
 	int i;
 	int size;
-	char single_symbol[] = "+-*/%&()'<>=,;.[]?:";
+	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
 	char repeat_symbol[] = "<>&|+-";
 	char multi_symbol[]  = "->";
 	char multi_eq[]      = "<=>!+*-/";

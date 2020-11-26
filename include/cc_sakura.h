@@ -55,6 +55,7 @@ typedef enum{
 
 	// lhs <-- symbol
 	ND_PREID, 	//  ++a, --a
+	ND_NOT, 	//  !a
 	ND_ADDRESS, 	//  &a
 	ND_DEREF, 	//  *a
 
