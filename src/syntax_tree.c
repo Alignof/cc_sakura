@@ -113,6 +113,7 @@ Node *unary(void){
 	// logical not
 	if(consume("!")){
 		node = new_node(ND_NOT, NULL, logical());
+		return node;
 	}
 
 	if(consume("*")){
