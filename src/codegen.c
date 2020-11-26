@@ -494,6 +494,12 @@ void gen(Node *node){
 			}
 
 			return;
+		case ND_NOT:
+			gen(node->rhs);
+			printf("	pop rax\n");
+			printf("	not rax\n");
+			printf("	push rax\n");
+			return;
 		case ND_ADDRESS:
 			gen_address(node->rhs);
 			return;
