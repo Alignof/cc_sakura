@@ -1,12 +1,7 @@
 int main(){
 	int cond = 5;
-	int ret  = 3;
+	int ret  = 0;
 
-	if(!(cond == 5)){
-		ret = 5;
-	}else{
-		ret = 0;
-	}
 
-	return ret;
+	return !ret;
 }
