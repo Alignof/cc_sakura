@@ -131,10 +131,16 @@ int main(){12 == 12;} => 1
 int main(){12 == 11;} => 0
 int main(){12 != 13;} => 1
 int main(){12 != 12;} => 0
+int main(){!(12 == 11);} => 1
+int main(){!(12 != 12);} => 1
 int main(){1 && 1;} => 1
 int main(){1 && 0;} => 0
 int main(){0 || 0;} => 0
 int main(){1 || 0;} => 1
+int main(){!(1 && 1);} => 0
+int main(){!(1 && 0);} => 1
+int main(){!(0 || 0);} => 1
+int main(){!(1 || 0);} => 0
 int main(){5+3;6+2;} => 8
 int main(){int a;int b;a=3;b=2;a+b;} => 5
 int main(){int a_1;int b_2;a_1=3;b_2=2;a_1+b_2;} => 5
@@ -150,8 +156,11 @@ int main(){int a; a=1+2;if(3>2) a=10-3;a;} => 7
 int main(){int a; a=1+2;if(3<2) a=10-3;a;} => 3
 int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a<b) c=b-a;c;} => 1
 int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a>b) c=b-a;c;} => 5
+int main(){int a=0; return !a;} => 1
+int main(){int a=9; return !a;} => 0
 int main(){int a; if(2>3) a=3-2; else a=2+3;a;} => 5
 int main(){int a; if(2<3) a=3-2; else a=2+3;a;} => 1
+int main(){int a; if(!(2<3)) a=3-2; else a=2+3;a;} => 5
 int main(){int a; int b;int c; a=2;b=3;if(a>b) c=b-a/a; else c=a+b*b-a;c;} => 9
 int main(){int a; int b;int c; a=2;b=3;if(a<b) c=b-a/a; else c=a+b*b-a;c;} => 2
 int main(){int a; a=10;while(a>0) a=a-1;a;} => 0
@@ -193,6 +202,10 @@ int main(){char x[4]; sizeof((x));} => 4
 int main(){int x[4]; sizeof((x));} => 16
 int main(){int x[4][4]; sizeof((x));} => 64
 int main(){int x[4][4]; sizeof((x[0]));} => 16
+int main(){return sizeof(char);} => 1
+int main(){return sizeof(int);} => 4
+int main(){return sizeof(char *);} => 8
+int main(){return sizeof(int **);} => 8
 int main(){int a[4]; *a=1; return *a;} => 1
 int main(){int a[4]; *a=1; *a=1; return *a;} => 1
 int main(){int a[4]; *a=1; *(a+1)=2; return *(a+1);} => 2
