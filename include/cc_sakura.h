@@ -98,6 +98,11 @@ typedef enum{
 	POST_DEC,
 }IncDecKind;
 
+typedef enum{
+	LB_LABEL,
+	LB_CASE,
+	LB_DEFAULT,
+}LabelKind;
 
 typedef struct Token  Token;
 typedef struct Node   Node;
@@ -106,6 +111,7 @@ typedef struct GVar   GVar;
 typedef struct Struc  Struc;
 typedef struct Member Member;
 typedef struct Func   Func;
+typedef struct Label  Label;
 typedef struct Type   Type;
 typedef struct Str    Str;
 
@@ -179,6 +185,14 @@ struct LVar{
 	LVar *next;
 }; 
 
+// Labels
+struct Label{
+	int       id;
+	Node      *cond;
+	Label     *next;
+	LabelKind kind;
+}; 
+
 // struct
 struct Struc{
 	int    len;
@@ -201,6 +215,7 @@ struct Member{
 
 
 // global variable
+extern int   llid;
 extern int   lvar_count;
 extern int   alloc_size;
 extern char  *user_input;
@@ -211,6 +226,8 @@ extern LVar  *locals;
 extern GVar  *globals;
 extern Str   *strings;
 extern Struc *structs;
+extern Label *labels_head;
+extern Label *labels_tail;
 
 // main.c
 char *read_file(char *path);
@@ -237,6 +254,7 @@ void expect(char *op);
 int expect_number(void);
 Token *consume_ident(void);
 Token *consume_string(void);
+void label_register(Node *node, LabelKind kind);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Func *find_func(Token *tok);
