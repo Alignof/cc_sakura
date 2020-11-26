@@ -110,6 +110,11 @@ Node *primary(void){
 Node *unary(void){
 	Node *node=NULL;
 
+	// logical not
+	if(consume("!")){
+		node = new_node(ND_NOT, NULL, logical());
+	}
+
 	if(consume("*")){
 		node = new_node(ND_DEREF, NULL, unary());
 
