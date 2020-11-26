@@ -140,9 +140,7 @@ void gen_calc(Node *node){
 void gen(Node *node){
 	Node *tmp;
 	Node *cases;
-	Node *in_case;
 	int arg = 0;
-	int label_case;
 
 	switch(node->kind){
 		case ND_NUM:
@@ -333,51 +331,33 @@ void gen(Node *node){
 		case ND_SWITCH:
 			label_loop++;
 			loop_depth++;
-			label_case = 0;
 
 			// gen cases condtion
-			cases = node->rhs;
+			cases = node->next;
 			while(cases){
-				gen(cases->lhs);
+				gen(cases);
 
 				printf("	pop rax\n");
 				printf("	cmp rax,0\n");
-				printf("	jne .LcaseBegin%03d\n", label_case++);
-				cases = cases->vector;
+				printf("	jne .LcaseBegin%03d\n", cases->val);
+				cases = cases->next;
 			}
 
 			// gen default condtion
 			if(node->lhs){
-				printf("	jmp .LcaseBegin%03d\n", label_case);
+				printf("	jmp .LcaseBegin%03d\n", node->lhs->val);
 			}
 
-
-			label_case = 0;
-			// gen cases expr
-			cases = node->rhs;
-			while(cases){
-				printf(".LcaseBegin%03d:\n", label_case++);
-				gen(cases);
-				cases = cases->vector;
-			}
-
-			// gen default expr
-			if(node->lhs){
-				printf(".LcaseBegin%03d:\n", label_case);
-				gen(node->lhs);
-			}else{
-				printf("	jmp .LloopEnd%03d\n", label_loop);
-			}
+			// gen code block
+			gen(node->rhs);
 
 			printf(".LloopEnd%03d:\n", label_loop);
+			printf("	push rax\n");
 			label_loop--;
 			return;
 		case ND_CASE:
-			in_case = node->rhs;
-			while(in_case){
-				gen(in_case);
-				in_case = in_case->vector;
-			}
+			printf(".LcaseBegin%03d:\n", node->val);
+			gen(node->rhs);
 			return;
 		case ND_FOR:
 			// adjust rsp
@@ -438,6 +418,32 @@ void gen(Node *node){
 
 			label_loop--;
 			return;
+		case ND_DOWHILE:
+			label_loop++;
+			loop_depth++;
+
+			// adjust rsp
+			printf("	push rax\n");
+
+			// codeblock
+			printf(".LloopBegin%03d:\n", label_loop);
+			gen(node->rhs);
+
+			// condition
+			gen(node->lhs);
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			// break loop
+			printf("	je .LloopEnd%03d\n", label_loop);
+
+			// continue
+			printf(".LloopCont%03d:\n", label_loop);
+			printf("	jmp .LloopBegin%03d\n", label_loop);
+			printf(".LloopEnd%03d:\n", label_loop);
+			printf("	push rax\n");
+
+			label_loop--;
+			return;
 		case ND_CONTINUE:
 			printf("	jmp .LloopCont%03d\n", label_loop);
 			return;
@@ -487,6 +493,12 @@ void gen(Node *node){
 				printf("	pop rax\n");
 			}
 
+			return;
+		case ND_NOT:
+			gen(node->rhs);
+			printf("	pop rax\n");
+			printf("	not rax\n");
+			printf("	push rax\n");
 			return;
 		case ND_ADDRESS:
 			gen_address(node->rhs);

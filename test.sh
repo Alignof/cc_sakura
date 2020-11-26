@@ -89,7 +89,7 @@ assert -cl 50 "int main(){int i; int k; int x=0; for(i=0;i<10;i++){for(k=0;k<10;
 assert -cl 3  "int main() {int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;}"
 assert -cl 4  "int main() {int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3; case 2:x=4;break; default:x=5;} return x;}"
 assert -cl 5  "int main() {int i=8; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;}"
-assert -cl 10 "int main() {int i; int x=1; for(i=0; i<4; i++){switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=10;}} return x;}"
+#assert -cl 10 "int main() {int i; int x=1; for(i=0; i<4; i++){switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=10;}} return x;}"
 
 
 assert -cl 2  "int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;}"

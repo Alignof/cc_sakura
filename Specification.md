@@ -135,7 +135,6 @@ struct of syntax tree node.
 | ND\_GARRAY		| chain list of initialize formula -> (next) 	|
 | ND\_FOR		| exit conditions -> code or block code		|
 | ND\_BLOCK		| chain of block code 				|
-| ND\_CASE		| chain of code in label			|
 | ND\_TERNARY		| else expression 				|
 
 
@@ -146,7 +145,7 @@ struct of syntax tree node.
 | :--			| :--					|
 | ND\_ASSIGN		| chain of initialize formula		|
 | ND\_CALL\_FUNC	| head of argument chained lists	|
-| ND\_CASE		| chain of case label			|
+| ND\_SWITCH		| chain of case condition		|
 | ND\_AND		| chain of arguments			|
 | ND\_OR		| chain of arguments			|
 | ND\_EQ		| chain of arguments			|
@@ -178,6 +177,7 @@ struct of syntax tree node.
 | ND\_STR		| string label				|
 | ND\_SIZEOF		| size of type				|
 | ND\_GVAR		| length of name			|
+| ND\_CASE		| label id				|
 | ND\_CALL\_FUNC	| number of argument 			|
 
 
@@ -239,6 +239,16 @@ struct of local variable
 | char \*name;		| variable name			| "y){\n\treturn x+y;"		|
 | Type type;		| variable type			| (struct Type)			|
 | LVar \*next;		| chained list of Lvar		| (next Lvar chain)		|
+
+
+### Label
+struct of label
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int id;		| id of assemble label		| 1				|
+| Node      \*cond;	| condtion of case or default	|				|
+| Label     \*next;	| chained list of Label		| 				|
+| LabelKind kind;	| LB\_LABEL, LB\_CASE...	| 				|
 
 
 ### Struc

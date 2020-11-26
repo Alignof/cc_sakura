@@ -36,6 +36,9 @@ Node *data(void){
 			Func *called = find_func(tok);
 			if(called){
 				node->type = called->type;
+			}else{
+				node->type = calloc(1, sizeof(Type));
+				node->type->ty = INT;
 			}
 
 			node = call_function(node, tok);
@@ -106,6 +109,12 @@ Node *primary(void){
 
 Node *unary(void){
 	Node *node=NULL;
+
+	// logical not
+	if(consume("!")){
+		node = new_node(ND_NOT, NULL, logical());
+		return node;
+	}
 
 	if(consume("*")){
 		node = new_node(ND_DEREF, NULL, unary());
@@ -391,80 +400,90 @@ Node *stmt(void){
 			node->rhs  = else_block;
 			node->kind = ND_IFELSE;
 		}
-	}else if(consume_reserved_word("switch", TK_SWITCH)){
-		/*
-		 * default<--switch----+
-		 *                     | (rhs)
-		 *                     | 
-		 *         (cond)<---case--->in_label(codes)
-		 *                     |          | 
-		 *                     |          | (vector: in_label)
-		 *                     |          +----->code->code->... 
-		 *                     | 
-		 *                     | (next: chain_case)
-		 *                     +----->case->case->... 
-		 */
+ 
+ 	}else if(consume_reserved_word("switch", TK_SWITCH)){
+ 		/*
+ 		 * default<---switch--->block code
+ 		 *               | 
+ 		 *               | (next)
+ 		 *               | 
+ 		 *   (cond)<---case->code
+ 		 *               | 
+ 		 *               | (next: chain_case)
+ 		 *               +----->case->case->... 
+ 		 */
+ 
+ 		Node  *cond = NULL;
+		Label *before_switch = labels_tail;
+		Label *prev = NULL;
 
-		Node *cond = NULL;
-		node = new_node(ND_SWITCH, node, NULL);
-		if(consume("(")){
-			//jmp expr
-			cond = expr();
-			//check end of caret
-			expect(")");
-		}else{
-			error_at(token->str, "expected ‘(’ before ‘{’ token");
-		}
+ 		node = new_node(ND_SWITCH, node, NULL);
+ 		if(consume("(")){
+ 			//jmp expr
+ 			cond = expr();
+ 			//check end of caret
+ 			expect(")");
+ 		}else{
+ 			error_at(token->str, "expected ‘(’ before ‘{’ token");
+ 		}
 
-		Node *chain_case = NULL;
-		expect("{");
-		while(token->kind == TK_CASE || token->kind == TK_DEFAULT){
-			if(consume_reserved_word("case", TK_CASE)){
-				if(chain_case){
-					chain_case->vector = new_node(ND_CASE, new_node(ND_EQ, cond, logical()), NULL);
-					chain_case         = chain_case->vector;
+		// get code block 
+		node->rhs = stmt(); 
+
+		// register and remove case
+		Node *cond_cases = NULL;
+		prev = before_switch;
+		Label *lb = (before_switch) ? prev->next : labels_head;
+		while(lb){
+			if(lb->kind == LB_CASE){
+				if(cond_cases){
+					cond_cases->next      = new_node(ND_EQ, cond, lb->cond);
+					cond_cases->next->val = lb->id;
+					cond_cases            = cond_cases->next;
 				}else{
-					chain_case   = new_node(ND_CASE, new_node(ND_EQ, cond, logical()), NULL);
-					node->rhs    = chain_case;
+					cond_cases      = new_node(ND_EQ, cond, lb->cond);
+					cond_cases->val = lb->id;
+					node->next      = cond_cases;
 				}
-				expect(":");
-
-				Node *in_label = NULL;
-				while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
-					if(in_label){
-						in_label->vector = stmt();
-						in_label = in_label->vector;
-					}else{
-						in_label = stmt();
-						chain_case->rhs = in_label;
-					}
-
-					if(check("}")) break;
-				}
-			}else if(consume_reserved_word("default", TK_DEFAULT)){
-				expect(":");
-				if(node->lhs == NULL){
-					Node *in_label = NULL;
-					node->lhs = new_node(ND_CASE, NULL, NULL);
-					while(token->kind != TK_CASE && token->kind != TK_DEFAULT){
-						if(in_label){
-							in_label->vector = stmt();
-							in_label = in_label->vector;
-						}else{
-							in_label       = new_node(ND_CASE, NULL, stmt());
-							node->lhs->rhs = in_label;
-						}
-
-						if(check("}")) break;
-					}
-				}else{
+			}else if(lb->kind == LB_DEFAULT){
+				if(node->lhs){
 					error_at(token->str, "multiple default labels in one switch");
+				}else{
+					node->lhs      = lb->cond;
+					node->lhs->val = lb->id;
 				}
+			}
+
+			// remove used case
+			if(prev){
+				prev->next = lb->next;
+				//free(lb);
+				lb   = prev->next;
+				prev = lb;
+			// remove head
 			}else{
-				error_at(token->str, "statement will never be executed");
+				prev = lb;
+				//free(prev);
+				lb   = lb->next;
+				prev = NULL;
 			}
 		}
-		expect("}");
+	}else if(consume_reserved_word("case", TK_CASE)){
+		/*
+		 *  (cond) <--- case ---> code
+		 */
+		node = new_node(ND_CASE, logical(), NULL);
+		expect(":");
+		label_register(node, LB_CASE);
+		node->rhs = stmt();
+	}else if(consume_reserved_word("default", TK_DEFAULT)){
+		/*
+		 *  (cond) <--- default ---> code
+		 */
+		node = new_node(ND_CASE, NULL, NULL);
+		expect(":");
+		node->rhs = stmt();
+		label_register(node, LB_DEFAULT);
 	}else if(consume_reserved_word("for", TK_FOR)){
 		node = new_node(ND_FOR, node, NULL);
 		if(consume("(")){
@@ -484,6 +503,16 @@ Node *stmt(void){
 			node->lhs->vector = cond;
 			node->lhs->vector->vector = calc;
 		}
+	}else if(consume_reserved_word("do", TK_DO)){
+		// (cond)<-- do-while -->block
+		node = new_node(ND_DOWHILE, NULL, stmt());
+
+		consume_reserved_word("while", TK_WHILE);
+		if(consume("(")){
+			node->lhs = expr();
+			expect(")");
+		}
+		expect(";");
 	}else if(consume_reserved_word("while", TK_WHILE)){
 		node = new_node(ND_WHILE, node, NULL);
 		if(consume("(")){
@@ -502,7 +531,7 @@ Node *stmt(void){
 		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
 			//Is first?
-			if(block_code->rhs){
+			if(node->vector){
 				block_code->vector = stmt();
 				block_code = block_code->vector;
 			}else{
