@@ -1,6 +1,6 @@
 #include "cc_sakura.h"
 
-LVar *locals;
+LVar  *locals;
 GVar  *globals;
 Struc *structs;
 // int alloc_size;
