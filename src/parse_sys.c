@@ -230,6 +230,15 @@ Struc *find_struc(Token *tok){
 	return NULL;
 }
 
+Enum *find_enum(Token *tok){
+	for (Enum *var = enumrations;var;var = var->next){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
+		}
+	}
+	return NULL;
+}
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));

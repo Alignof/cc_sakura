@@ -634,9 +634,9 @@ void program(void){
 				new_enum->len   = def_name->len;
 				new_enum->name  = def_name->str;
 
-				//declare_enum(new_enum);
+				declare_enum(new_enum);
 			}else{
-				error_at(token->str, "not a struct.");
+				error_at(token->str, "unknown type");
 			}
 
 

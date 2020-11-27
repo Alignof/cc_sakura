@@ -298,5 +298,5 @@ void declare_enum(Enum *new_enum){
 
 	new_enum->member = memb_head;
 	new_enum->next   = enumrations;
-	enumrations = new_enum;
+	enumrations      = new_enum;
 }
