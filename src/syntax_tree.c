@@ -621,17 +621,24 @@ void program(void){
 			consume("{");
 			function(func_list[func_index++]);
 			consume("}");
-		// struct
+		// struct or enum
 		}else if(consume("{")){
-			if(toplv_type->ty != STRUCT){
+			if(toplv_type->ty == STRUCT){
+				Struc *new_struc = calloc(1,sizeof(Struc));
+				new_struc->len   = def_name->len;
+				new_struc->name  = def_name->str;
+
+				declare_struct(new_struc);
+			}else if(toplv_type->ty == ENUM){
+				Enum *new_enum = calloc(1,sizeof(Enum));
+				new_enum->len   = def_name->len;
+				new_enum->name  = def_name->str;
+
+				//declare_enum(new_enum);
+			}else{
 				error_at(token->str, "not a struct.");
 			}
 
-			Struc *new_struc = calloc(1,sizeof(Struc));
-			new_struc->len   = def_name->len;
-			new_struc->name  = def_name->str;
-
-			declare_struct(new_struc);
 
 			expect(";");
 		// global variable

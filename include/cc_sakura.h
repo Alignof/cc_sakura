@@ -111,6 +111,7 @@ typedef struct Node   Node;
 typedef struct LVar   LVar;
 typedef struct GVar   GVar;
 typedef struct Struc  Struc;
+typedef struct Enum   Enum;
 typedef struct Member Member;
 typedef struct Func   Func;
 typedef struct Label  Label;
@@ -204,7 +205,15 @@ struct Struc{
 	Struc  *next;
 };
 
-// struct member
+// enum
+struct Enum{
+	int    len;
+	char   *name;
+	Member *member;
+	Enum  *next;
+};
+
+// (struct|enum) member
 struct Member{
 	int    len;
 	int    offset;
