@@ -72,6 +72,7 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
+	//                        char  int   ptr  array
 	const char reg_ax[4][4]={"eax","eax","rax","rax"};
 	const char reg_dx[4][4]={"edx","edx","rdx","rdx"};
 	const char reg_di[4][4]={"edi","edi","rdi","rdi"};

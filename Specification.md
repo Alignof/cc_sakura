@@ -87,6 +87,7 @@ type of variable kind.
 | PTR		| int \*, char \*...		| 64 (8byte)			|
 | ARRAY		| int a[], char a[]...		| 8 \* size (n byte)		|
 | STRUC		| struct struc{int a; int b;};	| 8 \* sum size (n byte)	|
+| ENUM		| enum week{Sun,Mon,Tue,};	| expanded at compile time	|
 
 ### IncDeckind
 type of increment/decrement.

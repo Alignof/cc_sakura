@@ -3,6 +3,7 @@
 LVar  *locals;
 GVar  *globals;
 Struc *structs;
+Enum  *enumrations;
 // int alloc_size;
 // Token *token;
 // LVar *locals;
