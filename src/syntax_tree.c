@@ -539,6 +539,9 @@ Node *stmt(void){
 		}
 	}else if(consume("{")){
 		node = new_node(ND_BLOCK, node, NULL);
+		Lvar  *stashed_lvar  = locals;
+		Enum  *stashed_enum  = enumrations;
+		Struc *stashed_struc = structs;
 
 		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
@@ -551,6 +554,8 @@ Node *stmt(void){
 				node->vector = block_code;
 			}
 		}
+		
+		revert_scope(stashed_lvar, stashed_enum, stashed_struc);
 		expect("}");
 	}else{
 		node = expr();

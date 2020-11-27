@@ -267,6 +267,34 @@ Member *is_exist_enumerator(Token *tok){
 	return NULL;
 }
 
+void revert_scope(Lvar *st_lvar, Enum *st_enum, Struc *st_struc){
+	LVar *prev_lvar;
+	while(st_lvar != locals){
+		free(st_lvar->type);
+		free(prev_lvar);
+		
+		prev_lvar = st_lvar;
+		st_lvar   = st_lvar->next;
+	}
+
+	Enum *prev_enum;
+	while(st_enum != locals){
+		free(st_enum->type);
+		free(prev_enum);
+		
+		prev_enum = st_enum;
+		st_enum   = st_enum->next;
+	}
+
+	Struc *prev_struc;
+	while(st_struc != locals){
+		free(st_struc->type);
+		free(prev_struc);
+		
+		prev_struc = st_struc;
+		st_struc   = st_struc->next;
+	}
+}
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
