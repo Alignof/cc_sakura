@@ -253,7 +253,7 @@ Member *find_enumrator(Token *tok){
 Member *is_exist_enumerator(Token *tok){
 	int is_local = 1;
 	for (Enum *en = enumrations;en;en = en->next){
-		if(en == enumrations_global) is_local = 0;
+		if(en == outside_enum) is_local = 0;
 		for (Member *var = en->member;var;var = var->next){
 			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 				if(is_local){
@@ -267,34 +267,34 @@ Member *is_exist_enumerator(Token *tok){
 	return NULL;
 }
 
-void revert_scope(LVar *st_lvar, Enum *st_enum, Struc *st_struc){
+void revert_scope(){
 	LVar *prev_lvar;
-	while(st_lvar != locals){
-		free(st_lvar->type);
+	while(locals != outside_lvar){
+		free(locals->type);
 		free(prev_lvar);
 		
-		prev_lvar = st_lvar;
-		st_lvar   = st_lvar->next;
+		prev_lvar = locals;
+		locals    = locals->next;
 	}
 
 	Struc *prev_struc;
-	while(st_struc != locals){
-		for (Member *var = st_struc->member;var;var = var->next){
+	while(structs != outside_struct){
+		for (Member *var = structs->member;var;var = var->next){
 			free(var);
 		}
 		free(prev_struc);
 		
-		prev_struc = st_struc;
-		st_struc   = st_struc->next;
+		prev_struc = structs;
+		structs    = structs->next;
 	}
 
 	Enum *prev_enum;
-	while(st_enum != locals){
-		free(st_enum->member);
+	while(enumrations != outside_enum){
+		free(enumrations->member);
 		free(prev_enum);
 		
-		prev_enum = st_enum;
-		st_enum   = st_enum->next;
+		prev_enum   = enumrations;
+		enumrations = enumrations->next;
 	}
 }
 

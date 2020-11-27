@@ -539,9 +539,9 @@ Node *stmt(void){
 		}
 	}else if(consume("{")){
 		node = new_node(ND_BLOCK, node, NULL);
-		LVar  *stashed_lvar  = locals;
-		Enum  *stashed_enum  = enumrations;
-		Struc *stashed_struc = structs;
+		outside_lvar   = locals;
+		outside_enum   = enumrations;
+		outside_struct = structs;
 
 		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
@@ -555,7 +555,7 @@ Node *stmt(void){
 			}
 		}
 		
-		revert_scope(stashed_lvar, stashed_enum, stashed_struc);
+		revert_scope();
 		expect("}");
 	}else{
 		node = expr();
@@ -657,7 +657,6 @@ void program(void){
 			}
 
 			expect(";");
-			enumrations_global = enumrations;
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);

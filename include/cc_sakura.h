@@ -242,7 +242,7 @@ extern Label *labels_head;
 extern Label *labels_tail;
 extern LVar  *outside_lvar;
 extern Struc *outside_struct;
-extern Enum  *outside_enumration;
+extern Enum  *outside_enum;
 
 // main.c
 char *read_file(char *path);
@@ -280,7 +280,7 @@ Struc *find_struc(Token *tok);
 Enum *find_enum(Token *tok);
 Member *find_enumrator(Token *tok);
 Member *is_exist_enumerator(Token *tok);
-void revert_scope(LVar *st_lvar, Enum *st_enum, Struc *st_struc);
+void revert_scope();
 
 // parse_util.c
 int type_size(Type *type);
