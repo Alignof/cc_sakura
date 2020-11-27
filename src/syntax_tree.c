@@ -337,6 +337,11 @@ Node *expr(void){
 		// parsing type
 		node->type = parse_type();
 
+		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
+		if(check(";")){
+			return node;
+		}
+
 		// variable declaration
 		Token *tok = consume_ident();
 		if(tok){

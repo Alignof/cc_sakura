@@ -219,5 +219,12 @@ assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; stru
 assert -cl 2  "enum Color{Red, Green, Blue}; int main(){return Blue;}"
 assert -cl 2  "enum Color{Red, Green, Blue}; int main(){enum Color test; test=Blue; return test;}"
 assert -cl 17 "enum Color{Red, Green, Blue}; int main(){int Blue = 17; return Blue;}"
+assert -cl 2  "int main(){enum Color{Red, Green, Blue}; return Blue;}"
+assert -cl 2  "int main(){enum Color{Red, Green, Blue}; enum Color test; test=Blue; return test;}"
+assert -cl 1  "int main(){enum Color{Red, Green, Blue}; enum Color test=Green; int result=13; switch(test){case Red:result=0;break; case Green:result=1;break; case Blue:result=2;break;} return result;}"
+assert -cl 2  "int main(){enum Color{Red, Green, Blue} test=Blue; int result=13; switch(test){case Red:result=0;break; case Green:result=1;break; case Blue:result=2;break;} return result;}"
+
+
+
 
 echo OK

@@ -1,7 +1,18 @@
 int main(){
-	enum Color{Red, Green, Blue};
-	//enum Color test;
-	//test = Blue;
-	//return test;
-	return Green;
+	enum Color{Red, Green, Blue} test = Green;
+	int  result = 13;
+
+	switch(test){
+		case Red:
+			result = 0;
+			break;
+		case Green:
+			result = 1;
+			break;
+		case Blue:
+			result = 2;
+			break;
+	}
+
+	return result;
 }

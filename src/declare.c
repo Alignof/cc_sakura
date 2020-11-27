@@ -39,7 +39,6 @@ Type *parse_type(void){
 				new_enum->name = tok->str;
 
 				declare_enum(new_enum);
-				expect(";");
 			}else{
 				error_at(token->str, "does not exist such struct");
 			}
