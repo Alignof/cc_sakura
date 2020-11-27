@@ -51,8 +51,13 @@ Node *data(void){
 				node->str  = tok->str;
 				node->val  = tok->len;
 			}else{
+				Member *rator = find_enumrator(tok);
+				if(rator){
+					node = new_node_num(rator->offset);
 				// variable does not exist.
-				error_at(token->str, "this variable is not declaration");
+				}else{
+					error_at(token->str, "this variable is not declaration");
+				}
 			}
 		}
 
@@ -335,6 +340,8 @@ Node *expr(void){
 		// variable declaration
 		Token *tok = consume_ident();
 		if(tok){
+			// Is enumerator already exist
+			is_exist_enumerator(tok);
 			node = declare_local_variable(node, tok, star_count);
 		}else{
 			error_at(token->str, "not a variable.");

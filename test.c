@@ -1,5 +1,9 @@
-enum Day{Sun, Mon, Tue, Wed, Thu, Fri, Sat,};
+enum Color{Red, Green, Blue,};
 int main(){
-	int Tue = 17;
-	return Tue;
+/*
+	enum Color test;
+	test = Blue;
+	return test;
+*/
+	return Blue;
 }

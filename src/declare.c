@@ -131,9 +131,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->len  = tok->len;
 	lvar->type = node->type;
 
-	// add type list
-	//lvar->type = insert_ptr_type(lvar->type, star_count);
-
 	// Is array
 	if(check("[")){
 		Type *newtype;

@@ -277,6 +277,7 @@ Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok);
 Enum *find_enum(Token *tok);
 Member *find_enumrator(Token *tok);
+Member *is_exist_enumerator(Token *tok);
 
 // parse_util.c
 int type_size(Type *type);
