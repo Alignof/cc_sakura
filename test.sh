@@ -224,8 +224,9 @@ assert -cl 2  "int main(){enum Color{Red, Green, Blue}; enum Color test; test=Bl
 assert -cl 1  "int main(){enum Color{Red, Green, Blue}; enum Color test=Green; int result=13; switch(test){case Red:result=0;break; case Green:result=1;break; case Blue:result=2;break;} return result;}"
 assert -cl 2  "int main(){enum Color{Red, Green, Blue} test=Blue; int result=13; switch(test){case Red:result=0;break; case Green:result=1;break; case Blue:result=2;break;} return result;}"
 
-assert -cl 3  "int main(){int x=0; int y=1; int z=2; if(x == 0){int y=4;} return y+z;}"
-assert -cl 3  "int main(){int x=0; int z=2; if(x == 0){int y=4;} int y=1; return y+z;}"
+assert -cl 3  "int main(){int x=0; int y=1; int z=2; if(x == 0){int y=4;}else{int y=11;} return y+z;}"
+assert -cl 3  "int main(){int x=0; int z=2; if(x == 0){int y=4;}else{int y=11;} int y=1; return y+z;}"
+assert -cl 7  "int main(){int x=0; int z=2; if(x == 0){if(z==2){int x=2; int y=4; z=x+y;}} int y=1; return y+z;}"
 
 
 
