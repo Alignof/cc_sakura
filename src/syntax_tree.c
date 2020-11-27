@@ -22,11 +22,12 @@ Node *data(void){
 	}
 
 	// variable
+	int INSIDE_FUNC = 0;
 	Token *tok = consume_ident();
 	if(tok){
 		Node *node = calloc(1, sizeof(Node));
 
-		LVar *lvar = find_lvar(tok);
+		LVar *lvar = find_lvar(tok, INSIDE_FUNC);
 		if(lvar){
 			node->kind   = (lvar->type->ty == ARRAY)? ND_LARRAY : ND_LVAR;
 			node->offset = lvar->offset;
@@ -51,7 +52,7 @@ Node *data(void){
 				node->str  = tok->str;
 				node->val  = tok->len;
 			}else{
-				Member *rator = find_enumerator(tok);
+				Member *rator = find_enumerator(tok, INSIDE_FUNC);
 				if(rator){
 					node = new_node_num(rator->offset);
 				// variable does not exist.

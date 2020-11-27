@@ -274,11 +274,11 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Func *find_func(Token *tok);
 GVar *find_gvar(Token *tok);
-LVar *find_lvar(Token *tok);
+LVar *find_lvar(Token *tok, int find_range);
 Str  *find_string(Token *tok);
-Struc *find_struc(Token *tok);
-Enum *find_enum(Token *tok);
-Member *find_enumerator(Token *tok);
+Struc *find_struc(Token *tok, int find_range);
+Enum *find_enum(Token *tok, int find_range);
+Member *find_enumerator(Token *tok, int find_range);
 Member *exist_enumerator(Token *tok);
 void revert_scope();
 
