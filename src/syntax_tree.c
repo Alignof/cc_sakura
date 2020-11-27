@@ -556,7 +556,9 @@ Node *stmt(void){
 			}
 		}
 		
-		revert_scope();
+		locals       = outside_lvar; 
+		enumerations = outside_enum; 
+		structs      = outside_struct; 
 		expect("}");
 	}else{
 		node = expr();

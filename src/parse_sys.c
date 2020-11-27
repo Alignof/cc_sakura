@@ -284,37 +284,6 @@ Member *exist_enumerator(Token *tok){
 	return NULL;
 }
 
-void revert_scope(){
-	LVar *prev_lvar;
-	while(locals != outside_lvar){
-		free(locals->type);
-		free(prev_lvar);
-		
-		prev_lvar = locals;
-		locals    = locals->next;
-	}
-
-	Struc *prev_struc;
-	while(structs != outside_struct){
-		for (Member *var = structs->member;var;var = var->next){
-			free(var);
-		}
-		free(prev_struc);
-		
-		prev_struc = structs;
-		structs    = structs->next;
-	}
-
-	Enum *prev_enum;
-	while(enumerations != outside_enum){
-		free(enumerations->member);
-		free(prev_enum);
-		
-		prev_enum    = enumerations;
-		enumerations = enumerations->next;
-	}
-}
-
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));
