@@ -315,6 +315,7 @@ Type *insert_ptr_type(Type *prev, int star_count);
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type);
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
+void declare_enum(Enum *new_enum);
 
 // codegan.c
 extern int label_if;

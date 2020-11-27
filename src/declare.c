@@ -72,7 +72,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->name = def_name->str;
 	gvar->len  = def_name->len;
 	gvar->type = toplv_type;
-	gvar->type->size = type_size(toplv_type);
+	gvar->type->size  = type_size(toplv_type);
 	gvar->type->align = type_align(toplv_type);
 
 	// add type list
@@ -263,4 +263,40 @@ void declare_struct(Struc *new_struc){
 	new_struc->member  = memb_head;
 	new_struc->next    = structs;
 	structs = new_struc;
+}
+
+void declare_enum(Enum *new_enum){
+	int counter = 0;
+	Member *new_memb  = NULL;
+	Member *memb_head = NULL;
+
+	while(1){
+		new_memb = calloc(1,sizeof(Member));
+
+		// add member name
+		Token *def_name  = consume_ident();
+		new_memb->name   = def_name->str;
+		new_memb->len    = def_name->len;
+
+		if(consume("=")){
+			if(token->kind != TK_NUM){
+				error_at(token->str, "enumerator value is not an integer constant");
+			}
+			counter = token->val;
+			token   = token->next;
+		}else{
+			counter++;
+		}
+
+		new_memb->offset = counter;
+		new_memb->next   = memb_head;
+		memb_head        = new_memb;
+
+		expect(",");
+		if(consume("}")) break;
+	}
+
+	new_enum->member = memb_head;
+	new_enum->next   = enumrations;
+	enumrations = new_enum;
 }
