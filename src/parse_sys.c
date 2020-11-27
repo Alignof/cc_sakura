@@ -250,7 +250,7 @@ Member *find_enumerator(Token *tok){
 	return NULL;
 }
 
-Member *is_exist_enumerator(Token *tok){
+Member *exist_enumerator(Token *tok){
 	int is_local = 1;
 	for (Enum *en = enumerations;en;en = en->next){
 		if(en == outside_enum) is_local = 0;

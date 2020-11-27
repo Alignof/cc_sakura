@@ -346,7 +346,7 @@ Node *expr(void){
 		Token *tok = consume_ident();
 		if(tok){
 			// Is enumerator already exist
-			is_exist_enumerator(tok);
+			exist_enumerator(tok);
 			node = declare_local_variable(node, tok, star_count);
 		}else{
 			error_at(token->str, "not a variable.");

@@ -279,7 +279,7 @@ Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok);
 Enum *find_enum(Token *tok);
 Member *find_enumerator(Token *tok);
-Member *is_exist_enumerator(Token *tok);
+Member *exist_enumerator(Token *tok);
 void revert_scope();
 
 // parse_util.c
