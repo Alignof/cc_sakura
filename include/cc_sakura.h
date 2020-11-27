@@ -274,6 +274,8 @@ GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
 Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok);
+Enum *find_enum(Token *tok);
+Member *find_enumrator(Token *tok);
 
 // parse_util.c
 int type_size(Type *type);

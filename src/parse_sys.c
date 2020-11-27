@@ -239,6 +239,17 @@ Enum *find_enum(Token *tok){
 	return NULL;
 }
 
+Member *find_enumrator(Token *tok){
+	for (Enum *en = enumrations;en;en = en->next){
+		for (Member *var = en->member;var;var = var->next){
+			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+				return var;
+			}
+		}
+	}
+	return NULL;
+}
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));

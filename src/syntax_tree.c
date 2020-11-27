@@ -51,8 +51,13 @@ Node *data(void){
 				node->str  = tok->str;
 				node->val  = tok->len;
 			}else{
+				Member *rator = find_enumrator(tok);
+				if(rator){
+					node = new_node_num(rator->offset);
 				// variable does not exist.
-				error_at(token->str, "this variable is not declaration");
+				}else{
+					error_at(token->str, "this variable is not declaration");
+				}
 			}
 		}
 
@@ -631,14 +636,13 @@ void program(void){
 				declare_struct(new_struc);
 			}else if(toplv_type->ty == ENUM){
 				Enum *new_enum = calloc(1,sizeof(Enum));
-				new_enum->len   = def_name->len;
-				new_enum->name  = def_name->str;
+				new_enum->len  = def_name->len;
+				new_enum->name = def_name->str;
 
 				declare_enum(new_enum);
 			}else{
-				error_at(token->str, "unknown type");
+				error_at(token->str, "invalid type");
 			}
-
 
 			expect(";");
 		// global variable
