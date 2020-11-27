@@ -20,6 +20,7 @@ void expand_vector(Node *node){
 		printf("	pop rax\n");
 		node=node->vector;
 	}
+	printf("	push rax\n");
 }
 
 

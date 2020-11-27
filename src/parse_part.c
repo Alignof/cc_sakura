@@ -109,9 +109,9 @@ Node *init_formula(Node *node, Node *init_val){
 Node *array_str(Node *arr, Node *init_val){
 	int ctr	  = 0;
 	int isize = arr->type->index_size;
-	Node *head;
 	Node *src;
-	Node *dst = calloc(1, sizeof(Node));
+	Node *dst  = calloc(1, sizeof(Node));
+	Node *node = new_node(ND_BLOCK, node, NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
 	memcpy(clone, arr, sizeof(Node));
@@ -122,17 +122,17 @@ Node *array_str(Node *arr, Node *init_val){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
-			head = dst;
+			node->vector = dst;
 		}else{
-			dst->next = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
-			dst = dst->next;
+			dst->vector = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
+			dst = dst->vector;
 		}
 		ctr++;
 	}
 
 	// '\0'
-	dst->next = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->offset)), new_node_num('\0'));
-	dst = dst->next;
+	dst->vector = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->offset)), new_node_num('\0'));
+	dst = dst->vector;
 	ctr++;
 
 	// ommitted
@@ -149,7 +149,7 @@ Node *array_str(Node *arr, Node *init_val){
 		}
 	}
 
-	return head;
+	return node;
 }
 
 Node *array_block(Node *arr){
@@ -157,7 +157,7 @@ Node *array_block(Node *arr){
 	int isize = arr->type->index_size;
 	Node *src;
 	Node *dst = calloc(1, sizeof(Node));
-	Node *head;
+	Node *node = new_node(ND_BLOCK, node, NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
 	memcpy(clone, arr, sizeof(Node));
@@ -168,10 +168,10 @@ Node *array_block(Node *arr){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, expr());
-			head = dst;
+			node->vector = dst;
 		}else{
-			dst->next = new_node(ND_ASSIGN, src, expr());
-			dst = dst->next;
+			dst->vector = new_node(ND_ASSIGN, src, expr());
+			dst = dst->vector;
 		}
 		consume(",");
 		ctr++;
@@ -198,15 +198,15 @@ Node *array_block(Node *arr){
 	}else if(arr->type->index_size > ctr){
 		while(ctr != arr->type->index_size){
 			src = array_index(clone, new_node_num(ctr));
-			dst->next = new_node(ND_ASSIGN, src, new_node_num(0));
-			dst = dst->next;
+			dst->vector = new_node(ND_ASSIGN, src, new_node_num(0));
+			dst = dst->vector;
 
 			ctr++;
 			consume(",");
 		}
 	}
 
-	return head;
+	return node;
 }
 
 Node *call_function(Node *node, Token *tok){

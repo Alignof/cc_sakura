@@ -202,9 +202,17 @@ GVar *find_gvar(Token *tok){
 	return NULL;
 }
 
-LVar *find_lvar(Token *tok){
+LVar *find_lvar(Token *tok, int find_range){
+	/* find_range
+	 * INSIDE_FUNC  == 0
+	 * INSIDE_SCOPE == 1 
+	 */
+
+	int out_of_scope = 0;
 	//while var not equal NULL
 	for (LVar *var = locals;var;var = var->next){
+		if(var == outside_lvar) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
 		}
@@ -221,8 +229,11 @@ Str *find_string(Token *tok){
 	return NULL;
 }
 
-Struc *find_struc(Token *tok){
+Struc *find_struc(Token *tok, int find_range){
+	int out_of_scope = 0;
 	for (Struc *var = structs;var;var = var->next){
+		if(var == outside_struct) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
 		}
@@ -230,8 +241,11 @@ Struc *find_struc(Token *tok){
 	return NULL;
 }
 
-Enum *find_enum(Token *tok){
-	for (Enum *var = enumrations;var;var = var->next){
+Enum *find_enum(Token *tok, int find_range){
+	int out_of_scope = 0;
+	for (Enum *var = enumerations;var;var = var->next){
+		if(var == outside_enum) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
 		}
@@ -239,8 +253,11 @@ Enum *find_enum(Token *tok){
 	return NULL;
 }
 
-Member *find_enumrator(Token *tok){
-	for (Enum *en = enumrations;en;en = en->next){
+Member *find_enumerator(Token *tok, int find_range){
+	int out_of_scope = 0;
+	for (Enum *en = enumerations;en;en = en->next){
+		if(en == outside_enum) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
 		for (Member *var = en->member;var;var = var->next){
 			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 				return var;
@@ -249,24 +266,6 @@ Member *find_enumrator(Token *tok){
 	}
 	return NULL;
 }
-
-Member *is_exist_enumerator(Token *tok){
-	int is_local = 1;
-	for (Enum *en = enumrations;en;en = en->next){
-		if(en == enumrations_global) is_local = 0;
-		for (Member *var = en->member;var;var = var->next){
-			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
-				if(is_local){
-					error_at(token->str, "redeclared as different kind of symbol");
-				}else{
-					return var;
-				}
-			}
-		}
-	}
-	return NULL;
-}
-
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
