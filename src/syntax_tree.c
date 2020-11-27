@@ -357,9 +357,11 @@ Node *expr(void){
 		// initialize formula
 		if(consume("=")){
 			if(consume("{")){
-				node->vector = array_block(node);
+				node = array_block(node);
+				//node->vector = array_block(node);
 			}else{
-				node->vector = init_formula(node, assign());
+				node = init_formula(node, assign());
+				//node->vector = init_formula(node, assign());
 			}
 		}
 	}else if(consume_reserved_word("break", TK_BREAK)){
