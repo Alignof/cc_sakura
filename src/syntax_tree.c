@@ -539,7 +539,7 @@ Node *stmt(void){
 		}
 	}else if(consume("{")){
 		node = new_node(ND_BLOCK, node, NULL);
-		Lvar  *stashed_lvar  = locals;
+		LVar  *stashed_lvar  = locals;
 		Enum  *stashed_enum  = enumrations;
 		Struc *stashed_struc = structs;
 

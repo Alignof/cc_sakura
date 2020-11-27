@@ -278,6 +278,7 @@ Struc *find_struc(Token *tok);
 Enum *find_enum(Token *tok);
 Member *find_enumrator(Token *tok);
 Member *is_exist_enumerator(Token *tok);
+void revert_scope(LVar *st_lvar, Enum *st_enum, Struc *st_struc);
 
 // parse_util.c
 int type_size(Type *type);

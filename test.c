@@ -1,18 +1,12 @@
 int main(){
-	enum Color{Red, Green, Blue} test = Green;
-	int  result = 13;
+	int x=0;
+	int y=1;
+	int z=2;
 
-	switch(test){
-		case Red:
-			result = 0;
-			break;
-		case Green:
-			result = 1;
-			break;
-		case Blue:
-			result = 2;
-			break;
+	if(x == 0){
+		int y=3;
 	}
+	
 
-	return result;
+	return y+z;
 }

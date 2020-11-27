@@ -267,7 +267,7 @@ Member *is_exist_enumerator(Token *tok){
 	return NULL;
 }
 
-void revert_scope(Lvar *st_lvar, Enum *st_enum, Struc *st_struc){
+void revert_scope(LVar *st_lvar, Enum *st_enum, Struc *st_struc){
 	LVar *prev_lvar;
 	while(st_lvar != locals){
 		free(st_lvar->type);
@@ -277,22 +277,24 @@ void revert_scope(Lvar *st_lvar, Enum *st_enum, Struc *st_struc){
 		st_lvar   = st_lvar->next;
 	}
 
-	Enum *prev_enum;
-	while(st_enum != locals){
-		free(st_enum->type);
-		free(prev_enum);
-		
-		prev_enum = st_enum;
-		st_enum   = st_enum->next;
-	}
-
 	Struc *prev_struc;
 	while(st_struc != locals){
-		free(st_struc->type);
+		for (Member *var = st_struc->member;var;var = var->next){
+			free(var);
+		}
 		free(prev_struc);
 		
 		prev_struc = st_struc;
 		st_struc   = st_struc->next;
+	}
+
+	Enum *prev_enum;
+	while(st_enum != locals){
+		free(st_enum->member);
+		free(prev_enum);
+		
+		prev_enum = st_enum;
+		st_enum   = st_enum->next;
 	}
 }
 
