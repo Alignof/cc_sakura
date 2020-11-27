@@ -25,6 +25,25 @@ Type *parse_type(void){
 		type->size   = found->memsize;
 		type->member = found->member;
 		type->ty     = STRUCT;
+	}else if(consume_reserved_word("enum", TK_TYPE)){
+		Token *tok   = consume_ident();
+		Enum *found = find_enum(tok);
+		if(found){
+			type->size   = 4;
+			type->member = found->member;
+			type->ty     = ENUM;
+		}else{
+			if(consume("{")){
+				Enum *new_enum = calloc(1,sizeof(Enum));
+				new_enum->len  = tok->len;
+				new_enum->name = tok->str;
+
+				declare_enum(new_enum);
+				expect(";");
+			}else{
+				error_at(token->str, "does not exist such struct");
+			}
+		}
 	}
 	type->size  = type_size(type);
 	type->align = type_align(type);

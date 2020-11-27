@@ -217,6 +217,7 @@ assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; stru
 assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; struct point *ptr; ptr=&test; ptr->col->r=2; ptr->col->g=3; ptr->col->b=4; return ptr->col->r + ptr->col->g + ptr->col->b;}"
 
 assert -cl 2  "enum Color{Red, Green, Blue}; int main(){return Blue;}"
+assert -cl 2  "enum Color{Red, Green, Blue}; int main(){enum Color test; test=Blue; return test;}"
 assert -cl 17 "enum Color{Red, Green, Blue}; int main(){int Blue = 17; return Blue;}"
 
 echo OK
