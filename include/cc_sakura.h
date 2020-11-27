@@ -238,6 +238,7 @@ extern GVar  *globals;
 extern Str   *strings;
 extern Struc *structs;
 extern Enum  *enumrations;
+extern Enum  *enumrations_global;
 extern Label *labels_head;
 extern Label *labels_tail;
 

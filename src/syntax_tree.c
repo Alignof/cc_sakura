@@ -51,13 +51,8 @@ Node *data(void){
 				node->str  = tok->str;
 				node->val  = tok->len;
 			}else{
-				Member *rator = find_enumrator(tok);
-				if(rator){
-					node = new_node_num(rator->offset);
 				// variable does not exist.
-				}else{
-					error_at(token->str, "this variable is not declaration");
-				}
+				error_at(token->str, "this variable is not declaration");
 			}
 		}
 
@@ -645,6 +640,7 @@ void program(void){
 			}
 
 			expect(";");
+			enumrations_global = enumrations;
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);

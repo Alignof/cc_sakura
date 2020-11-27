@@ -4,6 +4,7 @@ LVar  *locals;
 GVar  *globals;
 Struc *structs;
 Enum  *enumrations;
+Enum  *enumrations_global;
 // int alloc_size;
 // Token *token;
 // LVar *locals;
@@ -282,13 +283,15 @@ void declare_enum(Enum *new_enum){
 			if(token->kind != TK_NUM){
 				error_at(token->str, "enumerator value is not an integer constant");
 			}
-			counter = token->val;
-			token   = token->next;
+
+			counter	         = token->val;
+			new_memb->offset = counter;
+			token            = token->next;
 		}else{
+			new_memb->offset = counter;
 			counter++;
 		}
 
-		new_memb->offset = counter;
 		new_memb->next   = memb_head;
 		memb_head        = new_memb;
 

@@ -1,4 +1,5 @@
-enum Week{Sun, Mon, Tue, Wed, Thu, Fri, Sut,};
+enum Day{Sun, Mon, Tue, Wed, Thu, Fri, Sat,};
 int main(){
-	return Sun;
+	int Tue = 17;
+	return Tue;
 }
