@@ -210,7 +210,7 @@ struct Enum{
 	int    len;
 	char   *name;
 	Member *member;
-	Enum  *next;
+	Enum   *next;
 };
 
 // (struct|enum) member

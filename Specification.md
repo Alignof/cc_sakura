@@ -263,6 +263,16 @@ struct of structure
 | Struc \*next;		| chained list of Struc		|				|
 
 
+### Enum
+struct of enum
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int    len;		| name length 			|				|
+| char   \*name;	| struct name			|				|
+| Member \*member;	| chained list of Member	|				|
+| Struc  \*next;	| chained list of Enum		|				|
+
+
 ### Member
 struct of structure member
 | type/name		| description			| example			|
