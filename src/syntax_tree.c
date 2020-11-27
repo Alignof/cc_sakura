@@ -346,8 +346,9 @@ Node *expr(void){
 		// variable declaration
 		Token *tok = consume_ident();
 		if(tok){
+			int INSIDE_SCOPE = 1;
 			// Is enumerator already exist
-			exist_enumerator(tok);
+			find_enumerator(tok, INSIDE_SCOPE);
 			node = declare_local_variable(node, tok, star_count);
 		}else{
 			error_at(token->str, "not a variable.");

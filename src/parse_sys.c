@@ -267,23 +267,6 @@ Member *find_enumerator(Token *tok, int find_range){
 	return NULL;
 }
 
-Member *exist_enumerator(Token *tok){
-	int is_local = 1;
-	for (Enum *en = enumerations;en;en = en->next){
-		if(en == outside_enum) is_local = 0;
-		for (Member *var = en->member;var;var = var->next){
-			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
-				if(is_local){
-					error_at(token->str, "redeclared as different kind of symbol");
-				}else{
-					return var;
-				}
-			}
-		}
-	}
-	return NULL;
-}
-
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));
