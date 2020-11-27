@@ -4,7 +4,6 @@ LVar  *locals;
 GVar  *globals;
 Struc *structs;
 Enum  *enumrations;
-Enum  *enumrations_global;
 // int alloc_size;
 // Token *token;
 // LVar *locals;

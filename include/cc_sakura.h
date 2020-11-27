@@ -238,9 +238,11 @@ extern GVar  *globals;
 extern Str   *strings;
 extern Struc *structs;
 extern Enum  *enumrations;
-extern Enum  *enumrations_global;
 extern Label *labels_head;
 extern Label *labels_tail;
+extern LVar  *outside_lvar;
+extern Struc *outside_struct;
+extern Enum  *outside_enumration;
 
 // main.c
 char *read_file(char *path);
