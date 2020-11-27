@@ -86,6 +86,7 @@ typedef enum{
 
 typedef enum{
 	CHAR,
+	ENUM,
 	INT,
 	PTR,
 	ARRAY,

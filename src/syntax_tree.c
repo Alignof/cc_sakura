@@ -586,6 +586,8 @@ void program(void){
 				toplv_type->ty = CHAR;
 			}else if(consume_reserved_word("struct", TK_TYPE)){
 				toplv_type->ty = STRUCT;
+			}else if(consume_reserved_word("enum", TK_TYPE)){
+				toplv_type->ty = ENUM;
 			}
 		}
 
