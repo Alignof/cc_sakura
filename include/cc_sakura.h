@@ -237,7 +237,7 @@ extern LVar  *locals;
 extern GVar  *globals;
 extern Str   *strings;
 extern Struc *structs;
-extern Enum  *enumrations;
+extern Enum  *enumerations;
 extern Label *labels_head;
 extern Label *labels_tail;
 extern LVar  *outside_lvar;
@@ -278,7 +278,7 @@ LVar *find_lvar(Token *tok);
 Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok);
 Enum *find_enum(Token *tok);
-Member *find_enumrator(Token *tok);
+Member *find_enumerator(Token *tok);
 Member *is_exist_enumerator(Token *tok);
 void revert_scope();
 

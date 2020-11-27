@@ -51,7 +51,7 @@ Node *data(void){
 				node->str  = tok->str;
 				node->val  = tok->len;
 			}else{
-				Member *rator = find_enumrator(tok);
+				Member *rator = find_enumerator(tok);
 				if(rator){
 					node = new_node_num(rator->offset);
 				// variable does not exist.
@@ -540,7 +540,7 @@ Node *stmt(void){
 	}else if(consume("{")){
 		node = new_node(ND_BLOCK, node, NULL);
 		outside_lvar   = locals;
-		outside_enum   = enumrations;
+		outside_enum   = enumerations;
 		outside_struct = structs;
 
 		Node *block_code = calloc(1, sizeof(Node));

@@ -231,7 +231,7 @@ Struc *find_struc(Token *tok){
 }
 
 Enum *find_enum(Token *tok){
-	for (Enum *var = enumrations;var;var = var->next){
+	for (Enum *var = enumerations;var;var = var->next){
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
 		}
@@ -239,8 +239,8 @@ Enum *find_enum(Token *tok){
 	return NULL;
 }
 
-Member *find_enumrator(Token *tok){
-	for (Enum *en = enumrations;en;en = en->next){
+Member *find_enumerator(Token *tok){
+	for (Enum *en = enumerations;en;en = en->next){
 		for (Member *var = en->member;var;var = var->next){
 			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 				return var;
@@ -252,7 +252,7 @@ Member *find_enumrator(Token *tok){
 
 Member *is_exist_enumerator(Token *tok){
 	int is_local = 1;
-	for (Enum *en = enumrations;en;en = en->next){
+	for (Enum *en = enumerations;en;en = en->next){
 		if(en == outside_enum) is_local = 0;
 		for (Member *var = en->member;var;var = var->next){
 			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
@@ -289,12 +289,12 @@ void revert_scope(){
 	}
 
 	Enum *prev_enum;
-	while(enumrations != outside_enum){
-		free(enumrations->member);
+	while(enumerations != outside_enum){
+		free(enumerations->member);
 		free(prev_enum);
 		
-		prev_enum   = enumrations;
-		enumrations = enumrations->next;
+		prev_enum    = enumerations;
+		enumerations = enumerations->next;
 	}
 }
 
