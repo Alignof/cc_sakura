@@ -131,9 +131,6 @@ struct of syntax tree node.
 #### node->vector
 | Nodekind		| node-\>vector means				|
 | :--			| :--						|
-| ND\_LVAR		| chain list of initialize formula -> (next) 	|
-| ND\_LARRAY		| chain list of initialize formula -> (next) 	|
-| ND\_GARRAY		| chain list of initialize formula -> (next) 	|
 | ND\_FOR		| exit conditions -> code or block code		|
 | ND\_BLOCK		| chain of block code 				|
 | ND\_TERNARY		| else expression 				|

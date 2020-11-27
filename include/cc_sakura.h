@@ -237,10 +237,12 @@ extern LVar  *locals;
 extern GVar  *globals;
 extern Str   *strings;
 extern Struc *structs;
-extern Enum  *enumrations;
-extern Enum  *enumrations_global;
+extern Enum  *enumerations;
 extern Label *labels_head;
 extern Label *labels_tail;
+extern LVar  *outside_lvar;
+extern Struc *outside_struct;
+extern Enum  *outside_enum;
 
 // main.c
 char *read_file(char *path);
@@ -272,12 +274,12 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Func *find_func(Token *tok);
 GVar *find_gvar(Token *tok);
-LVar *find_lvar(Token *tok);
+LVar *find_lvar(Token *tok, int find_range);
 Str  *find_string(Token *tok);
-Struc *find_struc(Token *tok);
-Enum *find_enum(Token *tok);
-Member *find_enumrator(Token *tok);
-Member *is_exist_enumerator(Token *tok);
+Struc *find_struc(Token *tok, int find_range);
+Enum *find_enum(Token *tok, int find_range);
+Member *find_enumerator(Token *tok, int find_range);
+void revert_scope();
 
 // parse_util.c
 int type_size(Type *type);

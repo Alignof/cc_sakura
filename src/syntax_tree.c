@@ -22,11 +22,12 @@ Node *data(void){
 	}
 
 	// variable
+	int INSIDE_FUNC = 0;
 	Token *tok = consume_ident();
 	if(tok){
 		Node *node = calloc(1, sizeof(Node));
 
-		LVar *lvar = find_lvar(tok);
+		LVar *lvar = find_lvar(tok, INSIDE_FUNC);
 		if(lvar){
 			node->kind   = (lvar->type->ty == ARRAY)? ND_LARRAY : ND_LVAR;
 			node->offset = lvar->offset;
@@ -51,7 +52,7 @@ Node *data(void){
 				node->str  = tok->str;
 				node->val  = tok->len;
 			}else{
-				Member *rator = find_enumrator(tok);
+				Member *rator = find_enumerator(tok, INSIDE_FUNC);
 				if(rator){
 					node = new_node_num(rator->offset);
 				// variable does not exist.
@@ -345,8 +346,9 @@ Node *expr(void){
 		// variable declaration
 		Token *tok = consume_ident();
 		if(tok){
+			int INSIDE_SCOPE = 1;
 			// Is enumerator already exist
-			is_exist_enumerator(tok);
+			find_enumerator(tok, INSIDE_SCOPE);
 			node = declare_local_variable(node, tok, star_count);
 		}else{
 			error_at(token->str, "not a variable.");
@@ -355,9 +357,11 @@ Node *expr(void){
 		// initialize formula
 		if(consume("=")){
 			if(consume("{")){
-				node->vector = array_block(node);
+				node = array_block(node);
+				//node->vector = array_block(node);
 			}else{
-				node->vector = init_formula(node, assign());
+				node = init_formula(node, assign());
+				//node->vector = init_formula(node, assign());
 			}
 		}
 	}else if(consume_reserved_word("break", TK_BREAK)){
@@ -539,6 +543,9 @@ Node *stmt(void){
 		}
 	}else if(consume("{")){
 		node = new_node(ND_BLOCK, node, NULL);
+		outside_lvar   = locals;
+		outside_enum   = enumerations;
+		outside_struct = structs;
 
 		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
@@ -551,6 +558,10 @@ Node *stmt(void){
 				node->vector = block_code;
 			}
 		}
+		
+		locals       = outside_lvar; 
+		enumerations = outside_enum; 
+		structs      = outside_struct; 
 		expect("}");
 	}else{
 		node = expr();
@@ -652,7 +663,6 @@ void program(void){
 			}
 
 			expect(";");
-			enumrations_global = enumrations;
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);

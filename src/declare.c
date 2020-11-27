@@ -3,8 +3,10 @@
 LVar  *locals;
 GVar  *globals;
 Struc *structs;
-Enum  *enumrations;
-Enum  *enumrations_global;
+Enum  *enumerations;
+LVar  *outside_lvar;
+Struc *outside_struct;
+Enum  *outside_enum;
 // int alloc_size;
 // Token *token;
 // LVar *locals;
@@ -13,6 +15,7 @@ Enum  *enumrations_global;
 Type *parse_type(void){
 	Type *type = calloc(1, sizeof(Type));
 	int star_count = 0;
+	int INSIDE_SCOPE = 1;
 
 	// check type
 	if(consume_reserved_word("int", TK_TYPE)){
@@ -21,13 +24,13 @@ Type *parse_type(void){
 		type->ty = CHAR;
 	}else if(consume_reserved_word("struct", TK_TYPE)){
 		Token *tok   = consume_ident();
-		Struc *found = find_struc(tok);
+		Struc *found = find_struc(tok, INSIDE_SCOPE);
 		type->size   = found->memsize;
 		type->member = found->member;
 		type->ty     = STRUCT;
 	}else if(consume_reserved_word("enum", TK_TYPE)){
 		Token *tok   = consume_ident();
-		Enum *found = find_enum(tok);
+		Enum *found = find_enum(tok, INSIDE_SCOPE);
 		if(found){
 			type->size   = 4;
 			type->member = found->member;
@@ -140,7 +143,8 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 }
 
 Node *declare_local_variable(Node *node, Token *tok, int star_count){
-	LVar *lvar = find_lvar(tok);
+	int INSIDE_SCOPE = 1;
+	LVar *lvar = find_lvar(tok, INSIDE_SCOPE);
 	if(lvar) error_at(token->str, "this variable has already existed.");
 
 	lvar = calloc(1, sizeof(LVar));
@@ -316,6 +320,6 @@ void declare_enum(Enum *new_enum){
 	}
 
 	new_enum->member = memb_head;
-	new_enum->next   = enumrations;
-	enumrations      = new_enum;
+	new_enum->next   = enumerations;
+	enumerations     = new_enum;
 }

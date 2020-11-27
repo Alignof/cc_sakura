@@ -1,18 +1,16 @@
 int main(){
-	enum Color{Red, Green, Blue} test = Green;
-	int  result = 13;
-
-	switch(test){
-		case Red:
-			result = 0;
-			break;
-		case Green:
-			result = 1;
-			break;
-		case Blue:
-			result = 2;
-			break;
+	int x=0;
+	int z=2;
+	if(x == 0){
+		if(z==2){
+			int x=2;
+			int y=4;
+			z=x+y;
+			printf("[if] z:%d\n", z);
+		}
 	}
-
-	return result;
+	printf("[func] z:%d\n", z);
+	int y=1;
+	return y+z;
 }
+
