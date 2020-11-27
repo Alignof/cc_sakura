@@ -271,6 +271,7 @@ void declare_enum(Enum *new_enum){
 	while(1){
 		new_memb = calloc(1,sizeof(Member));
 
+		if(token->kind != TK_IDENT) error_at(token->str, "expected ‘,’ or ‘}’");
 		// add member name
 		Token *def_name  = consume_ident();
 		new_memb->name   = def_name->str;
@@ -292,7 +293,7 @@ void declare_enum(Enum *new_enum){
 		new_memb->next   = memb_head;
 		memb_head        = new_memb;
 
-		expect(",");
+		if(consume(","));
 		if(consume("}")) break;
 	}
 
