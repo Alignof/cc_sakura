@@ -91,7 +91,6 @@ typedef enum{
 	ARRAY,
 	STRUCT,
 	ENUM,
-	ENUMERATOR,
 }TypeKind;
 
 typedef enum{
