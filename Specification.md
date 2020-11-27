@@ -87,6 +87,7 @@ type of variable kind.
 | PTR		| int \*, char \*...		| 64 (8byte)			|
 | ARRAY		| int a[], char a[]...		| 8 \* size (n byte)		|
 | STRUC		| struct struc{int a; int b;};	| 8 \* sum size (n byte)	|
+| ENUM		| enum week{Sun,Mon,Tue,};	| expanded at compile time	|
 
 ### IncDeckind
 type of increment/decrement.
@@ -260,6 +261,16 @@ struct of structure
 | char  \*name;		| struct name			|				|
 | Member  \*member;	| chained list of Member	|				|
 | Struc \*next;		| chained list of Struc		|				|
+
+
+### Enum
+struct of enum
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int    len;		| name length 			|				|
+| char   \*name;	| struct name			|				|
+| Member \*member;	| chained list of Member	|				|
+| Struc  \*next;	| chained list of Enum		|				|
 
 
 ### Member

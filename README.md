@@ -272,5 +272,12 @@ struct test{int a; int b; int c[10];}; int main(){struct test x; x.a=1; x.b=2; x
 struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb col;}; int main(){struct point test; test.col.r=2; test.col.g=3; test.col.b=4; return test.col.r + test.col.g + test.col.b;} => 9
 struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; test.col->r=2; test.col->g=3; test.col->b=4; return test.col->r + test.col->g + test.col->b;} => 9
 struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; struct point *ptr; ptr=&test; ptr->col->r=2; ptr->col->g=3; ptr->col->b=4; return ptr->col->r + ptr->col->g + ptr->col->b;} => 9
+enum Color{Red, Green, Blue}; int main(){return Blue;} => 2
+enum Color{Red, Green, Blue}; int main(){enum Color test; test=Blue; return test;} => 2
+enum Color{Red, Green, Blue}; int main(){int Blue = 17; return Blue;} => 17
+int main(){enum Color{Red, Green, Blue}; return Blue;} => 2
+int main(){enum Color{Red, Green, Blue}; enum Color test; test=Blue; return test;} => 2
+int main(){enum Color{Red, Green, Blue}; enum Color test=Green; int result=13; switch(test){case Red:result=0;break; case Green:result=1;break; case Blue:result=2;break;} return result;} => 1
+int main(){enum Color{Red, Green, Blue} test=Blue; int result=13; switch(test){case Red:result=0;break; case Green:result=1;break; case Blue:result=2;break;} return result;} => 2
 OK
 ```

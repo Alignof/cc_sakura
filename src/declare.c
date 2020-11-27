@@ -3,6 +3,8 @@
 LVar  *locals;
 GVar  *globals;
 Struc *structs;
+Enum  *enumrations;
+Enum  *enumrations_global;
 // int alloc_size;
 // Token *token;
 // LVar *locals;
@@ -23,6 +25,24 @@ Type *parse_type(void){
 		type->size   = found->memsize;
 		type->member = found->member;
 		type->ty     = STRUCT;
+	}else if(consume_reserved_word("enum", TK_TYPE)){
+		Token *tok   = consume_ident();
+		Enum *found = find_enum(tok);
+		if(found){
+			type->size   = 4;
+			type->member = found->member;
+			type->ty     = ENUM;
+		}else{
+			if(consume("{")){
+				Enum *new_enum = calloc(1,sizeof(Enum));
+				new_enum->len  = tok->len;
+				new_enum->name = tok->str;
+
+				declare_enum(new_enum);
+			}else{
+				error_at(token->str, "does not exist such struct");
+			}
+		}
 	}
 	type->size  = type_size(type);
 	type->align = type_align(type);
@@ -71,7 +91,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->name = def_name->str;
 	gvar->len  = def_name->len;
 	gvar->type = toplv_type;
-	gvar->type->size = type_size(toplv_type);
+	gvar->type->size  = type_size(toplv_type);
 	gvar->type->align = type_align(toplv_type);
 
 	// add type list
@@ -128,9 +148,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->name = tok->str;
 	lvar->len  = tok->len;
 	lvar->type = node->type;
-
-	// add type list
-	//lvar->type = insert_ptr_type(lvar->type, star_count);
 
 	// Is array
 	if(check("[")){
@@ -262,4 +279,43 @@ void declare_struct(Struc *new_struc){
 	new_struc->member  = memb_head;
 	new_struc->next    = structs;
 	structs = new_struc;
+}
+
+void declare_enum(Enum *new_enum){
+	int counter = 0;
+	Member *new_memb  = NULL;
+	Member *memb_head = NULL;
+
+	while(1){
+		new_memb = calloc(1,sizeof(Member));
+
+		if(token->kind != TK_IDENT) error_at(token->str, "expected ‘,’ or ‘}’");
+		// add member name
+		Token *def_name  = consume_ident();
+		new_memb->name   = def_name->str;
+		new_memb->len    = def_name->len;
+
+		if(consume("=")){
+			if(token->kind != TK_NUM){
+				error_at(token->str, "enumerator value is not an integer constant");
+			}
+
+			counter	         = token->val;
+			new_memb->offset = counter;
+			token            = token->next;
+		}else{
+			new_memb->offset = counter;
+			counter++;
+		}
+
+		new_memb->next   = memb_head;
+		memb_head        = new_memb;
+
+		if(consume(","));
+		if(consume("}")) break;
+	}
+
+	new_enum->member = memb_head;
+	new_enum->next   = enumrations;
+	enumrations      = new_enum;
 }

@@ -12,6 +12,8 @@ int type_size(Type *type){
 			return type->index_size * type_size(type->ptr_to);
 		case STRUCT:
 			return type->size;
+		case ENUM:
+			return 4;
 		default:
 			error_at(token->str, "unknown type");
 	}
@@ -43,6 +45,8 @@ int type_align(Type *type){
 				memb_list = memb_list->next;
 			}
 			return max;
+		case ENUM:
+			return 4;
 		default:
 			error_at(token->str, "unknown type");
 	}

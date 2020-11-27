@@ -51,8 +51,13 @@ Node *data(void){
 				node->str  = tok->str;
 				node->val  = tok->len;
 			}else{
+				Member *rator = find_enumrator(tok);
+				if(rator){
+					node = new_node_num(rator->offset);
 				// variable does not exist.
-				error_at(token->str, "this variable is not declaration");
+				}else{
+					error_at(token->str, "this variable is not declaration");
+				}
 			}
 		}
 
@@ -332,9 +337,16 @@ Node *expr(void){
 		// parsing type
 		node->type = parse_type();
 
+		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
+		if(check(";")){
+			return node;
+		}
+
 		// variable declaration
 		Token *tok = consume_ident();
 		if(tok){
+			// Is enumerator already exist
+			is_exist_enumerator(tok);
 			node = declare_local_variable(node, tok, star_count);
 		}else{
 			error_at(token->str, "not a variable.");
@@ -586,6 +598,8 @@ void program(void){
 				toplv_type->ty = CHAR;
 			}else if(consume_reserved_word("struct", TK_TYPE)){
 				toplv_type->ty = STRUCT;
+			}else if(consume_reserved_word("enum", TK_TYPE)){
+				toplv_type->ty = ENUM;
 			}
 		}
 
@@ -619,19 +633,26 @@ void program(void){
 			consume("{");
 			function(func_list[func_index++]);
 			consume("}");
-		// struct
+		// struct or enum
 		}else if(consume("{")){
-			if(toplv_type->ty != STRUCT){
-				error_at(token->str, "not a struct.");
+			if(toplv_type->ty == STRUCT){
+				Struc *new_struc = calloc(1,sizeof(Struc));
+				new_struc->len   = def_name->len;
+				new_struc->name  = def_name->str;
+
+				declare_struct(new_struc);
+			}else if(toplv_type->ty == ENUM){
+				Enum *new_enum = calloc(1,sizeof(Enum));
+				new_enum->len  = def_name->len;
+				new_enum->name = def_name->str;
+
+				declare_enum(new_enum);
+			}else{
+				error_at(token->str, "invalid type");
 			}
 
-			Struc *new_struc = calloc(1,sizeof(Struc));
-			new_struc->len   = def_name->len;
-			new_struc->name  = def_name->str;
-
-			declare_struct(new_struc);
-
 			expect(";");
+			enumrations_global = enumrations;
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);

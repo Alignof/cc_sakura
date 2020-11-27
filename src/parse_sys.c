@@ -45,7 +45,7 @@ void error_at(char *loc, char *msg){
 bool check(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+			strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -55,7 +55,7 @@ bool check(char *op){
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+			strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -75,7 +75,7 @@ int string_len(void){
 
 bool consume_ret(void){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
-	    memcmp(token->str, "return", token->len)){
+			memcmp(token->str, "return", token->len)){
 		return false;
 	}
 
@@ -85,8 +85,8 @@ bool consume_ret(void){
 
 bool consume_reserved_word(char *keyword, TokenKind kind){
 	if( token->kind != kind ||
-	    token->len != strlen(keyword) ||
-	    memcmp(token->str, keyword, token->len)){
+			token->len != strlen(keyword) ||
+			memcmp(token->str, keyword, token->len)){
 		return false;
 	}
 
@@ -120,7 +120,7 @@ Token *consume_string(void){
 Token *consume_ident(void){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||
-	   !(is_alnum(*(token->str)))){
+			!(is_alnum(*(token->str)))){
 		return NULL;
 	}
 
@@ -140,8 +140,8 @@ Token *consume_ident(void){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-	    strlen(op) != token->len||
-	    memcmp(token->str, op, token->len)){
+			strlen(op) != token->len||
+			memcmp(token->str, op, token->len)){
 		error_at(token->str, "not a charctor.");
 	}
 	token = token->next;
@@ -229,6 +229,44 @@ Struc *find_struc(Token *tok){
 	}
 	return NULL;
 }
+
+Enum *find_enum(Token *tok){
+	for (Enum *var = enumrations;var;var = var->next){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
+		}
+	}
+	return NULL;
+}
+
+Member *find_enumrator(Token *tok){
+	for (Enum *en = enumrations;en;en = en->next){
+		for (Member *var = en->member;var;var = var->next){
+			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+				return var;
+			}
+		}
+	}
+	return NULL;
+}
+
+Member *is_exist_enumerator(Token *tok){
+	int is_local = 1;
+	for (Enum *en = enumrations;en;en = en->next){
+		if(en == enumrations_global) is_local = 0;
+		for (Member *var = en->member;var;var = var->next){
+			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+				if(is_local){
+					error_at(token->str, "redeclared as different kind of symbol");
+				}else{
+					return var;
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)

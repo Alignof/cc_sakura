@@ -90,6 +90,7 @@ typedef enum{
 	PTR,
 	ARRAY,
 	STRUCT,
+	ENUM,
 }TypeKind;
 
 typedef enum{
@@ -110,6 +111,7 @@ typedef struct Node   Node;
 typedef struct LVar   LVar;
 typedef struct GVar   GVar;
 typedef struct Struc  Struc;
+typedef struct Enum   Enum;
 typedef struct Member Member;
 typedef struct Func   Func;
 typedef struct Label  Label;
@@ -203,7 +205,15 @@ struct Struc{
 	Struc  *next;
 };
 
-// struct member
+// enum
+struct Enum{
+	int    len;
+	char   *name;
+	Member *member;
+	Enum   *next;
+};
+
+// (struct|enum) member
 struct Member{
 	int    len;
 	int    offset;
@@ -227,6 +237,8 @@ extern LVar  *locals;
 extern GVar  *globals;
 extern Str   *strings;
 extern Struc *structs;
+extern Enum  *enumrations;
+extern Enum  *enumrations_global;
 extern Label *labels_head;
 extern Label *labels_tail;
 
@@ -263,6 +275,9 @@ GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok);
 Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok);
+Enum *find_enum(Token *tok);
+Member *find_enumrator(Token *tok);
+Member *is_exist_enumerator(Token *tok);
 
 // parse_util.c
 int type_size(Type *type);
@@ -304,6 +319,7 @@ Type *insert_ptr_type(Type *prev, int star_count);
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type);
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
+void declare_enum(Enum *new_enum);
 
 // codegan.c
 extern int label_if;
