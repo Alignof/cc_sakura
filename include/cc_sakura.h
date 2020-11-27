@@ -86,11 +86,11 @@ typedef enum{
 
 typedef enum{
 	CHAR,
-	ENUM,
 	INT,
 	PTR,
 	ARRAY,
 	STRUCT,
+	ENUM,
 }TypeKind;
 
 typedef enum{
