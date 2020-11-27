@@ -157,7 +157,7 @@ Node *array_block(Node *arr){
 	int isize = arr->type->index_size;
 	Node *src;
 	Node *dst = calloc(1, sizeof(Node));
-	Node *head;
+	Node *node = new_node(ND_BLOCK, node, NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
 	memcpy(clone, arr, sizeof(Node));
@@ -168,10 +168,10 @@ Node *array_block(Node *arr){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, expr());
-			head = dst;
+			node->vector = dst;
 		}else{
-			dst->next = new_node(ND_ASSIGN, src, expr());
-			dst = dst->next;
+			dst->vector = new_node(ND_ASSIGN, src, expr());
+			dst = dst->vector;
 		}
 		consume(",");
 		ctr++;
@@ -198,15 +198,15 @@ Node *array_block(Node *arr){
 	}else if(arr->type->index_size > ctr){
 		while(ctr != arr->type->index_size){
 			src = array_index(clone, new_node_num(ctr));
-			dst->next = new_node(ND_ASSIGN, src, new_node_num(0));
-			dst = dst->next;
+			dst->vector = new_node(ND_ASSIGN, src, new_node_num(0));
+			dst = dst->vector;
 
 			ctr++;
 			consume(",");
 		}
 	}
 
-	return head;
+	return node;
 }
 
 Node *call_function(Node *node, Token *tok){

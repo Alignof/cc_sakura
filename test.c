@@ -1,4 +1,3 @@
-/*
 int main(){
 	int x=0;
 	int z=2;
@@ -14,6 +13,4 @@ int main(){
 	int y=1;
 	return y+z;
 }
-*/
 
-int main(){char x[]="hello"; *(x+2);}
