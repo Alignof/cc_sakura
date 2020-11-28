@@ -111,7 +111,7 @@ Node *array_str(Node *arr, Node *init_val){
 	int isize = arr->type->index_size;
 	Node *src;
 	Node *dst  = calloc(1, sizeof(Node));
-	Node *node = new_node(ND_BLOCK, node, NULL);
+	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
 	memcpy(clone, arr, sizeof(Node));
@@ -157,7 +157,7 @@ Node *array_block(Node *arr){
 	int isize = arr->type->index_size;
 	Node *src;
 	Node *dst = calloc(1, sizeof(Node));
-	Node *node = new_node(ND_BLOCK, node, NULL);
+	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
 	memcpy(clone, arr, sizeof(Node));
