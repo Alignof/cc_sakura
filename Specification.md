@@ -193,6 +193,14 @@ struct of type of variable kind.
 | int size		| size of type			| 25				|
 | int align		| alignment			| 4				|
 
+### Def\_Type
+struct of defined type.
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int len;		| name length 			| 4				|
+| char \*name;		| variable name			| "UINT; int main(){int x;"	|
+| Type type;		| variable type			| (struct Type)			|
+| Def\_Type \*next;	| chained list of Def\_Type	| (next Def\_Type chain)	|
 
 
 ### Func

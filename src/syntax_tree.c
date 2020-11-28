@@ -601,8 +601,15 @@ void program(void){
 
 		// typedef
 		if(consume_reserved_word("typedef", TK_TYPEDEF)){
-			Type *specified_type = parse_type();
-			Token *def_name = consume_ident();
+			Type *specified_type   = parse_type();
+			Token *def_name        = consume_ident();
+
+			Def_Type *def_new_type = calloc(1, sizeof(Def_Type));
+			def_new_type->len      = def_name->len;
+			def_new_type->name     = def_name->str;
+			def_new_type->type     = specified_type;
+			def_new_type->next     = defined_types;
+			defined_types          = def_new_type;
 			continue;
 		}
 

@@ -142,10 +142,10 @@ struct Type{
 
 // defined type
 struct Def_Type{
-	int len;
-	char *name;
-	Type *type;
-	LVar *next;
+	int      len;
+	char     *name;
+	Type     *type;
+	Def_Type *next;
 };
 
 // tree object
