@@ -1,12 +1,14 @@
 #include "cc_sakura.h"
 
-LVar  *locals;
-GVar  *globals;
-Struc *structs;
-Enum  *enumerations;
-LVar  *outside_lvar;
-Struc *outside_struct;
-Enum  *outside_enum;
+LVar     *locals;
+GVar     *globals;
+Struc    *structs;
+Enum     *enumerations;
+Def_Type *defined_types;
+LVar     *outside_lvar;
+Struc    *outside_struct;
+Enum     *outside_enum;
+Def_Type *outside_deftype;
 // int alloc_size;
 // Token *token;
 // LVar *locals;

@@ -598,6 +598,14 @@ void program(void){
 		// reset lvar counter
 		alloc_size = 0;
 		star_count = 0;
+
+		// typedef
+		if(consume_reserved_word("typedef", TK_TYPEDEF)){
+			Type *specified_type = parse_type();
+			Token *def_name = consume_ident();
+			continue;
+		}
+
 		func_list[func_index] = (Func *)malloc(sizeof(Func));
 
 		toplv_type = calloc(1,sizeof(Type));
