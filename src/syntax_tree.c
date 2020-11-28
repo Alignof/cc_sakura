@@ -613,11 +613,15 @@ void program(void){
 			continue;
 		}
 
-		func_list[func_index] = (Func *)malloc(sizeof(Func));
-
+		// parsing type
 		toplv_type = parse_type();
-		//toplv_type = calloc(1,sizeof(Type));
 
+		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
+		if(consume(";")){
+			continue;
+		}
+
+		func_list[func_index] = (Func *)malloc(sizeof(Func));
 
 		// Is function?
 		if(token->kind != TK_IDENT ||!(is_alnum(*token->str))){
