@@ -1,14 +1,21 @@
+struct rgb{
+	int r;
+	int g;
+	int b;
+};
+struct point{
+	int x;
+	int y;
+	struct rgb *col;
+};
 int main(){
-	int x=0;
-	int y=1;
-	int z=2;
-	if(x == 0){
-		if(z==2){
-			int x=2;
-			int y=4;
-			z=x+y;
-		}
-	}
-	return y+z;
+	struct point test;
+	struct point *ptr;
+
+	ptr = &test;
+	ptr->col->r = 2;
+	ptr->col->g = 3;
+	ptr->col->b = 4;
+	return ptr->col->r + ptr->col->g + ptr->col->b;
 }
 

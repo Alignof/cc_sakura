@@ -85,6 +85,7 @@ typedef enum{
 }NodeKind;
 
 typedef enum{
+	VOID,
 	CHAR,
 	INT,
 	PTR,
