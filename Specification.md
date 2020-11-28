@@ -26,6 +26,7 @@ parsed tokens kind.
 | TK\_BREAK	| break				| break 		|
 | TK\_CONTINUE	| continue			| continue		|
 | TK\_RETURN	| return			| return		|
+| TK\_TYPEDEF	| typedef			| typedef		|
 | TK\_EOF	| end of file			|			|
 
 ### Nodekind
@@ -82,6 +83,7 @@ type of variable kind.
 
 | name		| description			| bit(byte)			|
 | :--		| :--				| :--				|
+| VOID		| void				| --				|
 | CHAR		| char				| 8  (1byte)			|
 | INT		| int				| 32 (4byte)			|
 | PTR		| int \*, char \*...		| 64 (8byte)			|
@@ -191,6 +193,14 @@ struct of type of variable kind.
 | int size		| size of type			| 25				|
 | int align		| alignment			| 4				|
 
+### Def\_Type
+struct of defined type.
+| type/name		| description			| example			|
+| :--			| :--				| :--				|
+| int len;		| name length 			| 4				|
+| char \*name;		| variable name			| "UINT; int main(){int x;"	|
+| Type type;		| variable type			| (struct Type)			|
+| Def\_Type \*next;	| chained list of Def\_Type	| (next Def\_Type chain)	|
 
 
 ### Func

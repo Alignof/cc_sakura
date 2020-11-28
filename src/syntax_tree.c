@@ -598,31 +598,30 @@ void program(void){
 		// reset lvar counter
 		alloc_size = 0;
 		star_count = 0;
+
+		// typedef
+		if(consume_reserved_word("typedef", TK_TYPEDEF)){
+			Type *specified_type   = parse_type();
+			Token *def_name        = consume_ident();
+
+			Def_Type *def_new_type = calloc(1, sizeof(Def_Type));
+			def_new_type->len      = def_name->len;
+			def_new_type->name     = def_name->str;
+			def_new_type->type     = specified_type;
+			def_new_type->next     = defined_types;
+			defined_types          = def_new_type;
+			continue;
+		}
+
+		// parsing type
+		toplv_type = parse_type();
+
+		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
+		if(consume(";")){
+			continue;
+		}
+
 		func_list[func_index] = (Func *)malloc(sizeof(Func));
-
-		toplv_type = calloc(1,sizeof(Type));
-
-		// type of function return value
-		if(token->kind == TK_TYPE){
-			if(consume_reserved_word("void", TK_TYPE)){
-				toplv_type->ty = VOID;
-			}else if(consume_reserved_word("char", TK_TYPE)){
-				toplv_type->ty = CHAR;
-			}else if(consume_reserved_word("int", TK_TYPE)){
-				toplv_type->ty = INT;
-			}else if(consume_reserved_word("struct", TK_TYPE)){
-				toplv_type->ty = STRUCT;
-			}else if(consume_reserved_word("enum", TK_TYPE)){
-				toplv_type->ty = ENUM;
-			}
-		}
-
-		// count asterisk
-		while(token->kind == TK_RESERVED && *(token->str) == '*'){
-			star_count++;
-			token = token->next;
-		}
-
 
 		// Is function?
 		if(token->kind != TK_IDENT ||!(is_alnum(*token->str))){
@@ -647,25 +646,6 @@ void program(void){
 			consume("{");
 			function(func_list[func_index++]);
 			consume("}");
-		// struct or enum
-		}else if(consume("{")){
-			if(toplv_type->ty == STRUCT){
-				Struc *new_struc = calloc(1,sizeof(Struc));
-				new_struc->len   = def_name->len;
-				new_struc->name  = def_name->str;
-
-				declare_struct(new_struc);
-			}else if(toplv_type->ty == ENUM){
-				Enum *new_enum = calloc(1,sizeof(Enum));
-				new_enum->len  = def_name->len;
-				new_enum->name = def_name->str;
-
-				declare_enum(new_enum);
-			}else{
-				error_at(token->str, "invalid type");
-			}
-
-			expect(";");
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);

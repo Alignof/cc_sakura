@@ -147,6 +147,7 @@ Token *tokenize(char *p){
 		if(consume_reserved(&p, "break",    5, &now, TK_BREAK))    continue;
 		if(consume_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;
 		if(consume_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
+		if(consume_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
 		if(consume_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
 
 		//Is block? '{' or '}'

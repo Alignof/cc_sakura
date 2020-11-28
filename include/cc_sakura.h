@@ -26,6 +26,7 @@ typedef enum{
 	TK_STR,
 	TK_BREAK,
 	TK_CONTINUE,
+	TK_TYPEDEF,
 	TK_RETURN,
 	TK_EOF,
 }TokenKind;
@@ -116,8 +117,9 @@ typedef struct Enum   Enum;
 typedef struct Member Member;
 typedef struct Func   Func;
 typedef struct Label  Label;
-typedef struct Type   Type;
 typedef struct Str    Str;
+typedef struct Type   Type;
+typedef struct Def_Type Def_Type;
 
 // code token
 struct Token{
@@ -136,6 +138,14 @@ struct Type{
 	int	 size;
 	int	 align;
 	int      index_size;
+};
+
+// defined type
+struct Def_Type{
+	int      len;
+	char     *name;
+	Type     *type;
+	Def_Type *next;
 };
 
 // tree object
@@ -227,23 +237,25 @@ struct Member{
 
 
 // global variable
-extern int   llid;
-extern int   lvar_count;
-extern int   alloc_size;
-extern char  *user_input;
-extern char  filename[100];
-extern Token *token;
-extern Func  *func_list[100];
-extern LVar  *locals;
-extern GVar  *globals;
-extern Str   *strings;
-extern Struc *structs;
-extern Enum  *enumerations;
-extern Label *labels_head;
-extern Label *labels_tail;
-extern LVar  *outside_lvar;
-extern Struc *outside_struct;
-extern Enum  *outside_enum;
+extern int      llid;
+extern int      lvar_count;
+extern int      alloc_size;
+extern char     *user_input;
+extern char     filename[100];
+extern Token    *token;
+extern Func     *func_list[100];
+extern LVar     *locals;
+extern GVar     *globals;
+extern Str      *strings;
+extern Struc    *structs;
+extern Enum     *enumerations;
+extern Def_Type *defined_types;
+extern Label    *labels_head;
+extern Label    *labels_tail;
+extern LVar     *outside_lvar;
+extern Struc    *outside_struct;
+extern Enum     *outside_enum;
+extern Def_Type *outside_deftype;
 
 // main.c
 char *read_file(char *path);
