@@ -347,7 +347,7 @@ Node *expr(void){
 		Token *tok = consume_ident();
 		if(tok){
 			int INSIDE_SCOPE = 1;
-			// Is enumerator already exist
+			// If enumerator already exist -> error
 			find_enumerator(tok, INSIDE_SCOPE);
 			node = declare_local_variable(node, tok, star_count);
 		}else{

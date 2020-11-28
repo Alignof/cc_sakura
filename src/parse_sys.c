@@ -266,6 +266,18 @@ Member *find_enumerator(Token *tok, int find_range){
 	return NULL;
 }
 
+Def_Type *find_defined_type(Token *tok, int find_range){
+	int out_of_scope = 0;
+	for (Def_Type *var = defined_types;var;var = var->next){
+		if(var == outside_deftype) out_of_scope = 1;
+		if(out_of_scope) break;
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
+		}
+	}
+	return NULL;
+}
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));

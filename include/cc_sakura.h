@@ -292,6 +292,7 @@ Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok, int find_range);
 Enum *find_enum(Token *tok, int find_range);
 Member *find_enumerator(Token *tok, int find_range);
+Def_Type *find_defined_type(Token *tok, int find_range);
 void revert_scope();
 
 // parse_util.c

@@ -13,12 +13,10 @@ int main(){
 */
 
 
-typedef struct test Test;
-
-Test{
+typedef struct test{
 	int a;
 	int b;
-};
+}Test;
 
 int main(){
 	Test x;

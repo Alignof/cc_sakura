@@ -88,16 +88,12 @@ Type *parse_type(void){
 	}else if(consume_reserved_word("enum", TK_TYPE)){
 		type = set_type(ENUM, consume_ident());
 	}else{
-		int out_of_scope = 0;
-		Token *tok       = consume_ident();
-
-		for (Def_Type *var = defined_types;var;var = var->next){
-			if(var == outside_deftype) out_of_scope = 1;
-			if(out_of_scope) break;
-			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
-				type = set_type(var->type->ty, tok);
-				break;
-			}
+		Token *tok = consume_ident();
+		Def_Type *def_found = find_defined_type(tok, 1);
+		if(def_found){
+			type = set_type(def_found->type->ty, tok);
+		}else{
+			error_at(tok->str, "unknown type.");
 		}
 	}
 
