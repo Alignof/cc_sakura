@@ -14,8 +14,7 @@ Def_Type *outside_deftype;
 // LVar *locals;
 // Func *func_list[100];
 
-Type *set_type(TypeKind kind){
-	Token *tok;
+Type *set_type(TypeKind kind, Token *tok){
 	Enum  *enum_found;
 	Struc *struc_found;
 	int INSIDE_SCOPE = 1;
@@ -30,26 +29,27 @@ Type *set_type(TypeKind kind){
 			type->ty = kind;
 			break;
 		case STRUCT:
-			tok         = consume_ident();
 			struc_found = find_struc(tok, INSIDE_SCOPE);
 			if(struc_found){
 				type->size   = struc_found->memsize;
 				type->member = struc_found->member;
 				type->ty     = STRUCT;
 			}else{
+				Struc *new_struc = calloc(1,sizeof(Struc));
+				new_struc->len   = tok->len;
+				new_struc->name  = tok->str;
 				if(consume("{")){
-					Struc *new_struc = calloc(1,sizeof(Struc));
-					new_struc->len   = tok->len;
-					new_struc->name  = tok->str;
-
+					if(struc_found) error_at(token->str, "multiple definition");
 					declare_struct(new_struc);
 				}else{
-					error_at(token->str, "does not exist such struct");
+					new_struc->next = structs;
+					structs         = new_struc;
+					type->ty        = STRUCT;
 				}
 			}
+
 			break;
 		case ENUM:
-			tok       = consume_ident();
 			enum_found = find_enum(tok, INSIDE_SCOPE);
 			if(enum_found){
 				type->size   = 4;
@@ -78,15 +78,15 @@ Type *parse_type(void){
 
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
-		type = set_type(VOID);
+		type = set_type(VOID, NULL);
 	}else if(consume_reserved_word("char", TK_TYPE)){
-		type = set_type(CHAR);
+		type = set_type(CHAR, NULL);
 	}else if(consume_reserved_word("int", TK_TYPE)){
-		type = set_type(INT);
+		type = set_type(INT, NULL);
 	}else if(consume_reserved_word("struct", TK_TYPE)){
-		type = set_type(STRUCT);
+		type = set_type(STRUCT, consume_ident());
 	}else if(consume_reserved_word("enum", TK_TYPE)){
-		type = set_type(ENUM);
+		type = set_type(ENUM, consume_ident());
 	}else{
 		int out_of_scope = 0;
 		Token *tok       = consume_ident();
@@ -95,7 +95,7 @@ Type *parse_type(void){
 			if(var == outside_deftype) out_of_scope = 1;
 			if(out_of_scope) break;
 			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
-				type = set_type(var->type->ty);
+				type = set_type(var->type->ty, tok);
 				break;
 			}
 		}

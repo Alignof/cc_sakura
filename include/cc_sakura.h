@@ -329,6 +329,7 @@ Node *call_function(Node *node, Token *tok);
 Node *array_index(Node *node, Node *index);
 
 // declare.c
+Type *set_type(TypeKind kind, Token *tok);
 Type *parse_type(void);
 Type *insert_ptr_type(Type *prev, int star_count);
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type);

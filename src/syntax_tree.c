@@ -579,6 +579,7 @@ void function(Func *func){
 	int i = 0;
 
 	Def_Type *stash_def_types = defined_types;
+
 	// while end of function block
 	while(!consume("}")){
 		func->code[i++] = stmt();
@@ -613,6 +614,8 @@ void program(void){
 			def_new_type->type     = specified_type;
 			def_new_type->next     = defined_types;
 			defined_types          = def_new_type;
+
+			expect(";");
 			continue;
 		}
 
