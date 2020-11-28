@@ -520,7 +520,9 @@ void gen(Node *node){
 
 			return;
 		case ND_RETURN:
-			gen(node->rhs);
+			if(node->rhs){
+				gen(node->rhs);
+			}
 			printf("	pop rax\n");
 			printf("	mov rsp,rbp\n");
 			printf("	pop rbp\n");

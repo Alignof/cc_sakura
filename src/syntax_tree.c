@@ -381,9 +381,10 @@ Node *stmt(void){
 	Node *node = NULL;
 
 	if(consume_reserved_word("return", TK_RETURN)){
-		node = new_node(ND_RETURN, node, expr());
+		node = new_node(ND_RETURN, node, NULL);
 		if(!consume(";")){
-			error_at(token->str, "not a ';' token.");
+			node->rhs = expr();
+			if(!consume(";")) error_at(token->str, "not a ';' token.");
 		}
 	}else if(consume_reserved_word("if", TK_IF)){
 		/*

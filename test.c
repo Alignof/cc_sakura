@@ -1,12 +1,12 @@
-void hello(void){
-	char *str = "hello world!";
-	printf("%s\n",str);
+int i=0;
+void increment(void){
+	i++;
 
-	return 0;
+	return;
 }
 
 int main(){
-	hello();
-	return 0;
+	increment();
+	return i;
 }
 
