@@ -252,6 +252,11 @@ void get_argument(int func_index){
 	Node *next;
 	Node **args_ptr;
 
+	if(consume_reserved_word("void", TK_TYPE)){
+		expect(")");
+		return;
+	}
+
 	// get argument
 	if(!(consume(")"))){
 		// set args node

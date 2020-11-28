@@ -2,6 +2,8 @@
 
 int type_size(Type *type){
 	switch(type->ty){
+		case VOID:
+			return 1;
 		case CHAR:
 			return 1;
 		case INT:
@@ -27,6 +29,8 @@ int type_align(Type *type){
 	Member *memb_list;
 
 	switch(type->ty){
+		case VOID:
+			return 1;
 		case CHAR:
 			return 1;
 		case INT:

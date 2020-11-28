@@ -95,10 +95,10 @@ assert -cl 16 "int main(){int i; int x[10];for(i=0;i<10;i++){if(i == 5){x[i]=13;
 assert -cl 16 "int main(){int i=-1; int x[10]; while(i<10){i++;if(i == 5){x[i]=13;continue;}x[i]=i;} return x[5]+x[3];}"
 assert -cl 50 "int main(){int i; int k; int x=0; for(i=0;i<10;i++){for(k=0;k<10;k++){if(k==5){break;} x++;}} return x;}"
 
-assert -cl 3  "int main() {int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;}"
-assert -cl 4  "int main() {int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3; case 2:x=4;break; default:x=5;} return x;}"
-assert -cl 5  "int main() {int i=8; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;}"
-assert -cl 10 "int main() {int i; int x=1; for(i=0; i<4; i++){switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=10;}} return x;}"
+assert -cl 3  "int main(){int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;}"
+assert -cl 4  "int main(){int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3; case 2:x=4;break; default:x=5;} return x;}"
+assert -cl 5  "int main(){int i=8; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;}"
+assert -cl 10 "int main(){int i; int x=1; for(i=0; i<4; i++){switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=10;}} return x;}"
 
 
 assert -cl 2  "int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;}"
@@ -114,6 +114,8 @@ assert -cl 3  "int func(){int a; a=9;return a;} int main(){int b;int c; b=3;c=fu
 
 assert -cl 1  "int func(int a){return a;} int main(){int b;b=func(1);b;}"
 assert -cl 1  "int func(int a){return a;} int main(){int a;a=func(1);a;}"
+assert -cl 1  "int i=0; void increment(void){i++; return;} int main(){increment(); return i;}"
+
 
 assert -cl 5  "int add(int a,int b){return a+b;} int main(){add(2,3);}"
 assert -cl 5  "int add(int a,int b){return a+b;} int main(){int a;int b; a=2;b=3;add(a,b);}"
