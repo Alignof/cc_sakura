@@ -29,9 +29,21 @@ Type *parse_type(void){
 	}else if(consume_reserved_word("struct", TK_TYPE)){
 		Token *tok   = consume_ident();
 		Struc *found = find_struc(tok, INSIDE_SCOPE);
-		type->size   = found->memsize;
-		type->member = found->member;
-		type->ty     = STRUCT;
+		if(found){
+			type->size   = found->memsize;
+			type->member = found->member;
+			type->ty     = STRUCT;
+		}else{
+			if(consume("{")){
+				Struc *new_struc = calloc(1,sizeof(Struc));
+				new_struc->len   = tok->len;
+				new_struc->name  = tok->str;
+
+				declare_struct(new_struc);
+			}else{
+				error_at(token->str, "does not exist such struct");
+			}
+		}
 	}else if(consume_reserved_word("enum", TK_TYPE)){
 		Token *tok   = consume_ident();
 		Enum *found = find_enum(tok, INSIDE_SCOPE);
@@ -47,7 +59,7 @@ Type *parse_type(void){
 
 				declare_enum(new_enum);
 			}else{
-				error_at(token->str, "does not exist such struct");
+				error_at(token->str, "does not exist such enum");
 			}
 		}
 	}

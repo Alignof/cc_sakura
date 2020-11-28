@@ -615,28 +615,8 @@ void program(void){
 
 		func_list[func_index] = (Func *)malloc(sizeof(Func));
 
-		toplv_type = calloc(1,sizeof(Type));
-
-		// type of function return value
-		if(token->kind == TK_TYPE){
-			if(consume_reserved_word("void", TK_TYPE)){
-				toplv_type->ty = VOID;
-			}else if(consume_reserved_word("char", TK_TYPE)){
-				toplv_type->ty = CHAR;
-			}else if(consume_reserved_word("int", TK_TYPE)){
-				toplv_type->ty = INT;
-			}else if(consume_reserved_word("struct", TK_TYPE)){
-				toplv_type->ty = STRUCT;
-			}else if(consume_reserved_word("enum", TK_TYPE)){
-				toplv_type->ty = ENUM;
-			}
-		}
-
-		// count asterisk
-		while(token->kind == TK_RESERVED && *(token->str) == '*'){
-			star_count++;
-			token = token->next;
-		}
+		toplv_type = parse_type();
+		//toplv_type = calloc(1,sizeof(Type));
 
 
 		// Is function?
@@ -662,25 +642,6 @@ void program(void){
 			consume("{");
 			function(func_list[func_index++]);
 			consume("}");
-		// struct or enum
-		}else if(consume("{")){
-			if(toplv_type->ty == STRUCT){
-				Struc *new_struc = calloc(1,sizeof(Struc));
-				new_struc->len   = def_name->len;
-				new_struc->name  = def_name->str;
-
-				declare_struct(new_struc);
-			}else if(toplv_type->ty == ENUM){
-				Enum *new_enum = calloc(1,sizeof(Enum));
-				new_enum->len  = def_name->len;
-				new_enum->name = def_name->str;
-
-				declare_enum(new_enum);
-			}else{
-				error_at(token->str, "invalid type");
-			}
-
-			expect(";");
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
