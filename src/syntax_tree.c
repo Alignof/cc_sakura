@@ -578,10 +578,13 @@ Node *stmt(void){
 void function(Func *func){
 	int i = 0;
 
+	Def_Type *stash_def_types = defined_types;
 	// while end of function block
 	while(!consume("}")){
 		func->code[i++] = stmt();
 	}
+
+	defined_types = stash_def_types;
 
 	func->stack_size = alloc_size;
 	func->code[i] = NULL;
