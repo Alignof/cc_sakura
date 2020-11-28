@@ -1,21 +1,12 @@
-struct rgb{
-	int r;
-	int g;
-	int b;
-};
-struct point{
-	int x;
-	int y;
-	struct rgb *col;
-};
-int main(){
-	struct point test;
-	struct point *ptr;
+void hello(void){
+	char *str = "hello world!";
+	printf("%s\n",str);
 
-	ptr = &test;
-	ptr->col->r = 2;
-	ptr->col->g = 3;
-	ptr->col->b = 4;
-	return ptr->col->r + ptr->col->g + ptr->col->b;
+	return 0;
+}
+
+int main(){
+	hello();
+	return 0;
 }
 
