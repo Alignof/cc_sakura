@@ -73,10 +73,10 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	//                        char  int   ptr  array
-	const char reg_ax[4][4]={"eax","eax","rax","rax"};
-	const char reg_dx[4][4]={"edx","edx","rdx","rdx"};
-	const char reg_di[4][4]={"edi","edi","rdi","rdi"};
+	//                        void  char  int   ptr  array
+	const char reg_ax[5][4]={"eax","eax","eax","rax","rax"};
+	const char reg_dx[5][4]={"edx","edx","edx","rdx","rdx"};
+	const char reg_di[5][4]={"edi","edi","edi","rdi","rdi"};
 	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
 
 	switch(node->kind){

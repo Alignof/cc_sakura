@@ -18,10 +18,12 @@ Type *parse_type(void){
 	int INSIDE_SCOPE = 1;
 
 	// check type
-	if(consume_reserved_word("int", TK_TYPE)){
-		type->ty = INT;
+	if(consume_reserved_word("void", TK_TYPE)){
+		type->ty = VOID;
 	}else if(consume_reserved_word("char", TK_TYPE)){
 		type->ty = CHAR;
+	}else if(consume_reserved_word("int", TK_TYPE)){
+		type->ty = INT;
 	}else if(consume_reserved_word("struct", TK_TYPE)){
 		Token *tok   = consume_ident();
 		Struc *found = find_struc(tok, INSIDE_SCOPE);

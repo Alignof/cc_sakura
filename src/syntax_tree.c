@@ -603,10 +603,12 @@ void program(void){
 
 		// type of function return value
 		if(token->kind == TK_TYPE){
-			if(consume_reserved_word("int", TK_TYPE)){
-				toplv_type->ty = INT;
+			if(consume_reserved_word("void", TK_TYPE)){
+				toplv_type->ty = VOID;
 			}else if(consume_reserved_word("char", TK_TYPE)){
 				toplv_type->ty = CHAR;
+			}else if(consume_reserved_word("int", TK_TYPE)){
+				toplv_type->ty = INT;
 			}else if(consume_reserved_word("struct", TK_TYPE)){
 				toplv_type->ty = STRUCT;
 			}else if(consume_reserved_word("enum", TK_TYPE)){
