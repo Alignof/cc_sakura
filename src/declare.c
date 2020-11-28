@@ -14,55 +14,93 @@ Def_Type *outside_deftype;
 // LVar *locals;
 // Func *func_list[100];
 
-Type *parse_type(void){
-	Type *type = calloc(1, sizeof(Type));
-	int star_count = 0;
+Type *set_type(TypeKind kind){
+	Token *tok;
+	Enum  *enum_found;
+	Struc *struc_found;
 	int INSIDE_SCOPE = 1;
+	Type *type       = calloc(1, sizeof(Type));
+
+	switch(kind){
+		case VOID:
+		case CHAR:
+		case INT:
+		case PTR:
+		case ARRAY:
+			type->ty = kind;
+			break;
+		case STRUCT:
+			tok         = consume_ident();
+			struc_found = find_struc(tok, INSIDE_SCOPE);
+			if(struc_found){
+				type->size   = struc_found->memsize;
+				type->member = struc_found->member;
+				type->ty     = STRUCT;
+			}else{
+				if(consume("{")){
+					Struc *new_struc = calloc(1,sizeof(Struc));
+					new_struc->len   = tok->len;
+					new_struc->name  = tok->str;
+
+					declare_struct(new_struc);
+				}else{
+					error_at(token->str, "does not exist such struct");
+				}
+			}
+			break;
+		case ENUM:
+			tok       = consume_ident();
+			enum_found = find_enum(tok, INSIDE_SCOPE);
+			if(enum_found){
+				type->size   = 4;
+				type->member = enum_found->member;
+				type->ty     = ENUM;
+			}else{
+				if(consume("{")){
+					Enum *new_enum = calloc(1,sizeof(Enum));
+					new_enum->len  = tok->len;
+					new_enum->name = tok->str;
+
+					declare_enum(new_enum);
+				}else{
+					error_at(token->str, "does not exist such enum");
+				}
+			}
+			break;
+	}
+
+	return type;
+}
+
+Type *parse_type(void){
+	Type *type;
+	int star_count = 0;
 
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
-		type->ty = VOID;
+		type = set_type(VOID);
 	}else if(consume_reserved_word("char", TK_TYPE)){
-		type->ty = CHAR;
+		type = set_type(CHAR);
 	}else if(consume_reserved_word("int", TK_TYPE)){
-		type->ty = INT;
+		type = set_type(INT);
 	}else if(consume_reserved_word("struct", TK_TYPE)){
-		Token *tok   = consume_ident();
-		Struc *found = find_struc(tok, INSIDE_SCOPE);
-		if(found){
-			type->size   = found->memsize;
-			type->member = found->member;
-			type->ty     = STRUCT;
-		}else{
-			if(consume("{")){
-				Struc *new_struc = calloc(1,sizeof(Struc));
-				new_struc->len   = tok->len;
-				new_struc->name  = tok->str;
-
-				declare_struct(new_struc);
-			}else{
-				error_at(token->str, "does not exist such struct");
-			}
-		}
+		type = set_type(STRUCT);
 	}else if(consume_reserved_word("enum", TK_TYPE)){
-		Token *tok   = consume_ident();
-		Enum *found = find_enum(tok, INSIDE_SCOPE);
-		if(found){
-			type->size   = 4;
-			type->member = found->member;
-			type->ty     = ENUM;
-		}else{
-			if(consume("{")){
-				Enum *new_enum = calloc(1,sizeof(Enum));
-				new_enum->len  = tok->len;
-				new_enum->name = tok->str;
+		type = set_type(ENUM);
+	}else{
+		int out_of_scope = 0;
+		Token *tok       = consume_ident();
 
-				declare_enum(new_enum);
-			}else{
-				error_at(token->str, "does not exist such enum");
+		for (Def_Type *var = defined_types;var;var = var->next){
+			if(var == outside_deftype) out_of_scope = 1;
+			if(out_of_scope) break;
+			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+				type = set_type(var->type->ty);
+				break;
 			}
 		}
 	}
+
 	type->size  = type_size(type);
 	type->align = type_align(type);
 	
