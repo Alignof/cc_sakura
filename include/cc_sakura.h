@@ -26,6 +26,7 @@ typedef enum{
 	TK_STR,
 	TK_BREAK,
 	TK_CONTINUE,
+	TK_TYPEDEF,
 	TK_RETURN,
 	TK_EOF,
 }TokenKind;

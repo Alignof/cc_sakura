@@ -26,6 +26,7 @@ parsed tokens kind.
 | TK\_BREAK	| break				| break 		|
 | TK\_CONTINUE	| continue			| continue		|
 | TK\_RETURN	| return			| return		|
+| TK\_TYPEDEF	| typedef			| typedef		|
 | TK\_EOF	| end of file			|			|
 
 ### Nodekind
@@ -82,6 +83,7 @@ type of variable kind.
 
 | name		| description			| bit(byte)			|
 | :--		| :--				| :--				|
+| VOID		| void				| --				|
 | CHAR		| char				| 8  (1byte)			|
 | INT		| int				| 32 (4byte)			|
 | PTR		| int \*, char \*...		| 64 (8byte)			|
