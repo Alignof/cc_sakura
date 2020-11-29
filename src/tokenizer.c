@@ -162,10 +162,7 @@ Token *tokenize(char *p){
 		//Is string?
 		if(*p == '"'){
 			p++;
-			while(*p != '"'){
-				if(*p == '\\'){
-					p++;
-				}
+			while(!(*(p-1) != '\\' && *p == '"')){
 				now = new_token(TK_STR, now, p++);
 			}
 			p++;
@@ -218,7 +215,7 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		error_at(p, "cat not tokenize.");
+		error_at(p, "can not tokenize.");
 	}
 
 	//add EOF token

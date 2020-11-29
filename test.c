@@ -380,9 +380,5 @@ int main(int argc, char **argv){
 */
 
 int main(){
-	char *str = "\'hello\'";
-
-	printf("%s\n", str);
-
-	return 0;
+	return '\\';
 }

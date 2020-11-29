@@ -102,16 +102,12 @@ Token *consume_string(void){
 
 	Token *ret = token;
 	int counter = 0;
-	for(char *str = token->str;*str != '"';str++){
+	while(token->kind == TK_STR){
 		counter++;
-	}
-
-	token->len = counter;
-
-	//move next token 
-	for(int i = 0;i < counter;i++){
 		token = token->next;
 	}
+
+	ret->len = counter;
 
 	return ret;
 }
