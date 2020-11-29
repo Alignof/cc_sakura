@@ -157,7 +157,7 @@ struct Node{
 	Node *lhs;
 	Node *rhs;
 	Node *next;
-	Node *vector;
+	Node *block_code;
 	Type *type;
 	int  val;
 	char *str;
@@ -356,6 +356,6 @@ void gen_gvar(Node *node);
 void gen_struc(Node *node);
 void gen_address(Node *node);
 void expand_next(Node *node);
-void expand_vector(Node *node);
+void expand_block_code(Node *node);
 
 

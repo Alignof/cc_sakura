@@ -123,15 +123,15 @@ struct of syntax tree node.
 | Node \*lhs    	| node of left hand side	| (left hand node address)	|
 | Node \*rhs    	| node of right hand side	| (right hand node address)	|
 | Node \*next   	| **see table below**		| (next argument chain)		|
-| Node \*vector 	| **see table below**		| NULL				|
+| Node \*block\_code 	| **see table below**		| NULL				|
 | Type type		| node type 			| (struct Type)			|
 | int val		| **see table below**		| 0				|
 | int offset		| local variable offset		| 0				|
 | char \*str    	| name  			| NULL				|
 
 
-#### node->vector
-| Nodekind		| node-\>vector means				|
+#### node->block\_code
+| Nodekind		| node-\>block\_code means			|
 | :--			| :--						|
 | ND\_BLOCK		| chain of block code 				|
 
