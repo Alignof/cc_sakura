@@ -171,7 +171,7 @@ struct Func{
 	char *name;
 	Type *type;
 	Node *args;
-	Node *code[100];
+	Node *code[300];
 	Func *next;
 };
 
@@ -246,7 +246,7 @@ extern int      alloc_size;
 extern char     *user_input;
 extern char     filename[100];
 extern Token    *token;
-extern Func     *func_list[100];
+extern Func     *func_list[300];
 extern LVar     *locals;
 extern GVar     *globals;
 extern Str      *strings;

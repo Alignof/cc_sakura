@@ -510,7 +510,12 @@ Node *stmt(void){
 		node->rhs = stmt();
 		label_register(node, LB_DEFAULT);
 	}else if(consume_reserved_word("for", TK_FOR)){
+		outside_lvar   = locals;
+		outside_enum   = enumerations;
+		outside_struct = structs;
+		
 		node = new_node(ND_FOR, node, NULL);
+
 		if(consume("(")){
 			//jmp expr
 			Node *init = expr();
@@ -528,6 +533,10 @@ Node *stmt(void){
 			node->lhs->next = cond;
 			node->lhs->next->next = calc;
 		}
+
+		locals       = outside_lvar; 
+		enumerations = outside_enum; 
+		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
 		node = new_node(ND_DOWHILE, NULL, stmt());
