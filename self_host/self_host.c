@@ -253,11 +253,111 @@ int label_loop;
 int if_depth;
 int loop_depth;
 
+//================standard library=====================
+typedef struct _IO_FILE FILE;
+typedef void   _IO_lock_t;
+typedef void*  __off_t;
+
+struct _IO_FILE{
+	int _flags;           /* High-order word is _IO_MAGIC; rest is flags. */
+
+	/* The following pointers correspond to the C++ streambuf protocol. */
+	char *_IO_read_ptr;   /* Current read pointer */
+	char *_IO_read_end;   /* End of get area. */
+	char *_IO_read_base;  /* Start of putback+get area. */
+	char *_IO_write_base; /* Start of put area. */
+	char *_IO_write_ptr;  /* Current put pointer. */
+	char *_IO_write_end;  /* End of put area. */
+	char *_IO_buf_base;   /* Start of reserve area. */
+	char *_IO_buf_end;    /* End of reserve area. */
+
+	/* The following fields are used to support backing up and undo. */
+	char *_IO_save_base; /* Pointer to start of non-current get area. */
+	char *_IO_backup_base;  /* Pointer to first valid character of backup area */
+	char *_IO_save_end; /* Pointer to end of non-current get area. */
+
+	struct _IO_marker *_markers;
+
+	struct _IO_FILE *_chain;
+
+	int _fileno;
+	int _flags2;
+
+	__off_t _old_offset; /* This used to be _offset but it's too small.  */
+
+	/* 1+column number of pbase(); 0 is unknown. */
+	//unsigned short _cur_column;
+	//signed char _vtable_offset;
+	int  _cur_column;
+	char _vtable_offset;
+	char _shortbuf[1];
+
+	_IO_lock_t *_lock;
+};
+
+FILE *stderr;
+//=========================================================
+
+
 
 //================temporary definition=====================
+int  SEEK_SET = 0;
+int  SEEK_END = 2;
+char errno;
 
-void *stderr;
+typedef void* size_t;
 //=========================================================
+
+char *read_file(char *path){
+	FILE *fp;
+	char *buf;
+
+	strcpy(filename, path);
+	if ((fp = fopen(path, "r")) == __NULL) {
+		fprintf(stderr, "File open error.\n");
+		exit(1);
+	}
+
+	// get file size
+	if(fseek(fp, 0, SEEK_END) == -1){
+		error("%s: fseek:%s", path, strerror(errno));
+	}
+
+	size_t size = ftell(fp);
+	
+	if(fseek(fp, 0, SEEK_SET) == -1){
+		error("%s: fseek:%s", path, strerror(errno));
+	}
+
+	buf = calloc(1, size+2);
+	fread(buf, size, 1, fp);
+
+	if(size == 0 || buf[size-1] != '\n'){
+		buf[size++] = '\n';
+	}
+
+	buf[size] = '\0';
+	fclose(fp);
+
+	return buf;
+}
+
+void get_code(int argc, char **argv){
+	if(argc == 2){
+		user_input = read_file(argv[1]);
+	}else if(argc == 3){
+		if(!strcmp(argv[1], "-cl")){
+			user_input = argv[2];
+			strcpy(filename, "command line");
+		}else{
+			fprintf(stderr, "Incorrect option\n");
+			exit(1);
+		}
+	}else{
+		fprintf(stderr, "Incorrect number of arguments\n");
+		exit(1);
+	}
+}
 
 int main(int argc, char **argv){
 	int i;
