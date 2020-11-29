@@ -126,8 +126,6 @@ int main(int argc, char **argv){
 		}
 
 		for(j = 0;func_list[i]->code[j] != NULL;j++){
-			label_if_num   = 0;
-			label_loop_num = 0;
 
 			// gen code
 			gen(func_list[i]->code[j]);
