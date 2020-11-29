@@ -238,6 +238,7 @@ assert -cl 3  "typedef int suuji; typedef int* int_ptr; suuji main(void){suuji x
 assert -cl 3  "typedef int suuji; typedef int* int_ptr; typedef int** int_ptr_ptr; suuji main(void){suuji x=3; int_ptr y=&x; int_ptr_ptr z=&y; return **z;}"
 assert -cl 2  "typedef enum Color{Red, Green, Blue}Color; int main(){Color test; test=Blue; return test;}"
 assert -cl 2  "typedef enum Color Color; Color{Red, Green, Blue}; int main(){Color test; test=Blue; return test;}"
+assert -cl 1  "typedef enum{RED,GREEN,BLUE,}COLOR; int main(void){COLOR c = GREEN; return GREEN;}"
 assert -cl 5  "typedef struct test{int a; int b;}Test; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 assert -cl 5  "typedef struct test Test; Test{int a; int b;}; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 

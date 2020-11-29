@@ -68,8 +68,10 @@ Type *set_type(Type *type, Token *tok){
 				}
 			}else{
 				Enum *new_enum = calloc(1,sizeof(Struc));
-				new_enum->len   = tok->len;
-				new_enum->name  = tok->str;
+				if(tok){
+					new_enum->len   = tok->len;
+					new_enum->name  = tok->str;
+				}
 				if(consume("{")){
 					if(enum_found) error_at(token->str, "multiple definition");
 					declare_enum(new_enum);

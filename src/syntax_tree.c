@@ -618,8 +618,15 @@ void program(void){
 				def_new_type->tag     = structs->name;
 				def_new_type->tag_len = structs->len;
 			}else if(specified_type->ty == ENUM){
-				def_new_type->tag     = enumerations->name;
-				def_new_type->tag_len = enumerations->len;
+				if(enumerations->name){
+					def_new_type->tag     = enumerations->name;
+					def_new_type->tag_len = enumerations->len;
+				}else{
+					enumerations->name    = def_name->str;
+					enumerations->len     = def_name->len;
+					def_new_type->tag     = def_name->str;
+					def_new_type->tag_len = def_name->len;
+				}
 			}
 
 			def_new_type->type = specified_type;

@@ -1,4 +1,3 @@
-/*
 typedef enum{
 	TK_TYPE,
 	TK_RESERVED,
@@ -376,9 +375,4 @@ int main(int argc, char **argv){
 	}
 
 	return 0;
-}
-*/
-
-int main(){
-	return '\\';
 }
