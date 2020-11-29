@@ -150,6 +150,12 @@ Token *tokenize(char *p){
 		if(consume_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
 		if(consume_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
 
+		// compiler directive
+		if(consume_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(consume_reserved(&p, "define",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(consume_reserved(&p, "include",  7, &now, TK_COMPILER_DIRECTIVE)) continue;
+
+
 		//Is block? '{' or '}'
 		if(isblock(p)){
 			now = new_token(TK_BLOCK, now, p);

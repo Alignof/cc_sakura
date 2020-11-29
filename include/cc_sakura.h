@@ -29,6 +29,7 @@ typedef enum{
 	TK_TYPEDEF,
 	TK_RETURN,
 	TK_EOF,
+	TK_COMPILER_DIRECTIVE,
 }TokenKind;
 
 typedef enum{
