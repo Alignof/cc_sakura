@@ -31,9 +31,9 @@ Type *set_type(TypeKind kind, Token *tok){
 		case STRUCT:
 			struc_found = find_struc(tok, INSIDE_SCOPE);
 			if(struc_found){
+				type->ty     = STRUCT;
 				type->size   = struc_found->memsize;
 				type->member = struc_found->member;
-				type->ty     = STRUCT;
 			}else{
 				Struc *new_struc = calloc(1,sizeof(Struc));
 				new_struc->len   = tok->len;
@@ -41,6 +41,9 @@ Type *set_type(TypeKind kind, Token *tok){
 				if(consume("{")){
 					if(struc_found) error_at(token->str, "multiple definition");
 					declare_struct(new_struc);
+					type->ty        = STRUCT;
+					type->size      = structs->memsize;
+					type->member    = structs->member;
 				}else{
 					new_struc->next = structs;
 					structs         = new_struc;

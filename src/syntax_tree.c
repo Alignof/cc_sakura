@@ -328,10 +328,11 @@ Node *assign(void){
 }
 
 Node *expr(void){
-	int star_count = 0;
+	int star_count   = 0;
+	int INSIDE_SCOPE = 1;
 	Node *node;
 
-	if(token->kind == TK_TYPE){
+	if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 
