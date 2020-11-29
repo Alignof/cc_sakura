@@ -162,7 +162,20 @@ Token *tokenize(char *p){
 		//Is string?
 		if(*p == '"'){
 			p++;
-			while(*p != '"') now = new_token(TK_STR, now, p++);
+			while(*p != '"'){
+				if(*p == '\\'){
+					p++;
+				}
+				now = new_token(TK_STR, now, p++);
+			}
+			p++;
+			continue;
+		}
+
+
+		//Is escape?
+		if(*p == '\\' && *(p+1) == '\\'){
+			now = new_token(TK_IDENT, now, p++);
 			p++;
 			continue;
 		}
