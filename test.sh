@@ -230,6 +230,7 @@ assert -cl 3  "int main(){int x=0; int y=1; int z=2; if(x == 0){int y=4;}else{in
 assert -cl 3  "int main(){int x=0; int z=2; if(x == 0){int y=4;}else{int y=11;} int y=1; return y+z;}"
 assert -cl 7  "int main(){int x=0; int z=2; if(x == 0){if(z==2){int x=2; int y=4; z=x+y;}} int y=1; return y+z;}"
 
+assert -cl 5  "typedef struct test{int a; int b;}Test; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 
 
 echo OK

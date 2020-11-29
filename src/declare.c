@@ -32,8 +32,12 @@ Type *set_type(TypeKind kind, Token *tok){
 			struc_found = find_struc(tok, INSIDE_SCOPE);
 			if(struc_found){
 				type->ty     = STRUCT;
-				type->size   = struc_found->memsize;
-				type->member = struc_found->member;
+				if(struc_found == NULL && consume("{")){
+					type->member = create_member_chain(&(type->size));
+				}else{
+					type->member = struc_found->member;
+					type->size   = struc_found->memsize;
+				}
 			}else{
 				Struc *new_struc = calloc(1,sizeof(Struc));
 				new_struc->len   = tok->len;
@@ -260,15 +264,14 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	return node;
 }
 
-
-void declare_struct(Struc *new_struc){
+Member *create_member_chain(int *asize_ptr){
 	int size_of_type;
-	int asize	  = 0;
+	int INSIDE_SCOPE  = 1;
 	Member *new_memb  = NULL;
 	Member *memb_head = NULL;
 
 	while(1){
-		if(token->kind != TK_TYPE){
+		if(!(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE))){
 			error_at(token->str, "not a type.");
 		}
 
@@ -324,7 +327,7 @@ void declare_struct(Struc *new_struc){
 		}else{
 			new_memb->offset = 0;
 		}
-		asize += size_of_type + padding;
+		(*asize_ptr) += size_of_type + padding;
 
 		new_memb->next = memb_head;
 		memb_head      = new_memb;
@@ -332,10 +335,16 @@ void declare_struct(Struc *new_struc){
 		expect(";");
 		if(consume("}")) break;
 	}
+
+	(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
+	return memb_head;
+}
+
+void declare_struct(Struc *new_struc){
+	int asize = 0;
 	
-	asize = (asize%8) ? asize/8*8+8 : asize;
+	new_struc->member  = create_member_chain(&asize);
 	new_struc->memsize = asize;
-	new_struc->member  = memb_head;
 	new_struc->next    = structs;
 	structs = new_struc;
 }

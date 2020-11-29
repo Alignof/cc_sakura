@@ -1,22 +1,8 @@
-/*
-int i=0;
-void increment(void){
-	i++;
-
-	return;
-}
-
-int main(){
-	increment();
-	return i;
-}
-*/
-
-
-typedef struct test{
+typedef struct test Test;
+Test{
 	int a;
 	int b;
-}Test;
+};
 
 int main(){
 	Test x;
@@ -24,3 +10,4 @@ int main(){
 	x.b=3;
 	return x.a + x.b;
 }
+
