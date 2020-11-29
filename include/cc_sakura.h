@@ -323,6 +323,7 @@ Node *data(void);
 
 // parse_part.c
 void get_argument(int func_index);
+Node *compiler_directive();
 Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(NodeKind type, Node *node);
 Node *init_formula(Node *node, Node *init_val);

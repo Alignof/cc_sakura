@@ -5,6 +5,24 @@
 // LVar *locals;
 // Func *func_list[100];
 
+Node *compiler_directive(){
+	Node *node;
+	
+	if(consume_reserved_word("__NULL", TK_COMPILER_DIRECTIVE)){
+		node = new_node_num(0);
+		node->type->ty    = PTR;
+		node->type->size  = 8;
+		node->type->align = 8;
+
+		node->type->ptr_to        = calloc(1, sizeof(Type));
+		node->type->ptr_to->ty    = VOID;
+		node->type->ptr_to->size  = 1;
+		node->type->ptr_to->align = 1;
+	}
+
+	return node;
+}
+
 Node *compound_assign(TypeKind type, Node *dst, Node *src){
 	Node *calc = new_node(type, dst, src);
 	Node *new  = new_node(ND_COMPOUND, dst, calc);

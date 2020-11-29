@@ -20,6 +20,12 @@ Node *data(void){
 		expect("'");
 		return node;
 	}
+	
+	// compiler directive
+	if(token->kind == TK_COMPILER_DIRECTIVE){
+		Node *node = compiler_directive();
+		return node;
+	}
 
 	// variable
 	int INSIDE_FUNC = 0;
