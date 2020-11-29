@@ -288,7 +288,7 @@ void gen(Node *node){
 			printf(".Lelse%03d:\n", label_if);
 
 			// false
-			gen(node->vector);
+			gen(node->next);
 			printf(".LifEnd%03d:\n", label_if);
 
 			label_if--;
@@ -373,7 +373,7 @@ void gen(Node *node){
 
 			// condition
 			printf(".LloopBegin%03d:\n", label_loop);
-			gen(node->lhs->vector);
+			gen(node->lhs->next);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// if cond true then jump to  loop end.
@@ -384,7 +384,7 @@ void gen(Node *node){
 
 			// gen update expression
 			printf(".LloopCont%03d:\n", label_loop);
-			gen(node->lhs->vector->vector);
+			gen(node->lhs->next->next);
 			printf("	pop rax\n");
 
 			// continue

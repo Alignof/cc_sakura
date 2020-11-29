@@ -133,9 +133,7 @@ struct of syntax tree node.
 #### node->vector
 | Nodekind		| node-\>vector means				|
 | :--			| :--						|
-| ND\_FOR		| exit conditions -> code or block code		|
 | ND\_BLOCK		| chain of block code 				|
-| ND\_TERNARY		| else expression 				|
 
 
 
@@ -146,6 +144,8 @@ struct of syntax tree node.
 | ND\_ASSIGN		| chain of initialize formula		|
 | ND\_CALL\_FUNC	| head of argument chained lists	|
 | ND\_SWITCH		| chain of case condition		|
+| ND\_FOR		| exit conditions -> code or block code	|
+| ND\_TERNARY		| else expression 			|
 | ND\_AND		| chain of arguments			|
 | ND\_OR		| chain of arguments			|
 | ND\_EQ		| chain of arguments			|
