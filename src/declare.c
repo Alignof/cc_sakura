@@ -14,19 +14,17 @@ Def_Type *outside_deftype;
 // LVar *locals;
 // Func *func_list[100];
 
-Type *set_type(TypeKind kind, Token *tok){
+Type *set_type(Type *type, Token *tok){
 	Enum  *enum_found;
 	Struc *struc_found;
 	int INSIDE_SCOPE = 1;
-	Type *type       = calloc(1, sizeof(Type));
 
-	switch(kind){
+	switch(type->ty){
 		case VOID:
 		case CHAR:
 		case INT:
 		case PTR:
 		case ARRAY:
-			type->ty = kind;
 			break;
 		case STRUCT:
 			struc_found = find_struc(tok, INSIDE_SCOPE);
@@ -63,7 +61,7 @@ Type *set_type(TypeKind kind, Token *tok){
 			if(enum_found){
 				type->ty = ENUM;
 				if(enum_found->member == NULL && consume("{")){
-					//enum_found->member = register_enum_member(&(dummy));
+					enum_found->member = register_enum_member();
 					type->member = enum_found->member;
 				}else{
 					type->member = enum_found->member;
@@ -90,27 +88,32 @@ Type *set_type(TypeKind kind, Token *tok){
 }
 
 Type *parse_type(void){
-	Type *type;
+	Type *type     = calloc(1, sizeof(Type));
 	int star_count = 0;
 
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
-		type = set_type(VOID, NULL);
+		type->ty = VOID;
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("char", TK_TYPE)){
-		type = set_type(CHAR, NULL);
+		type->ty = CHAR;
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("int", TK_TYPE)){
-		type = set_type(INT, NULL);
+		type->ty = INT;
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("struct", TK_TYPE)){
-		type = set_type(STRUCT, consume_ident());
+		type->ty = STRUCT;
+		type = set_type(type, consume_ident());
 	}else if(consume_reserved_word("enum", TK_TYPE)){
-		type = set_type(ENUM, consume_ident());
+		type->ty = ENUM;
+		type = set_type(type, consume_ident());
 	}else{
 		Token *tok = consume_ident();
 		Def_Type *def_found = find_defined_type(tok, 1);
 		if(def_found){
 			tok->str = def_found->tag;
 			tok->len = def_found->tag_len;
-			type     = set_type(def_found->type->ty, tok);
+			type     = set_type(def_found->type, tok);
 		}else{
 			error_at(tok->str, "unknown type.");
 		}
@@ -359,7 +362,7 @@ void declare_struct(Struc *new_struc){
 	structs = new_struc;
 }
 
-void declare_enum(Enum *new_enum){
+Member *register_enum_member(void){
 	int counter = 0;
 	Member *new_memb  = NULL;
 	Member *memb_head = NULL;
@@ -393,7 +396,11 @@ void declare_enum(Enum *new_enum){
 		if(consume("}")) break;
 	}
 
-	new_enum->member = memb_head;
+	return memb_head;
+}
+
+void declare_enum(Enum *new_enum){
+	new_enum->member = register_enum_member();
 	new_enum->next   = enumerations;
 	enumerations     = new_enum;
 }
