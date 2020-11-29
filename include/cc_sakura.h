@@ -171,7 +171,7 @@ struct Func{
 	char *name;
 	Type *type;
 	Node *args;
-	Node *code[100];
+	Node *code[300];
 	Func *next;
 };
 
@@ -246,7 +246,7 @@ extern int      alloc_size;
 extern char     *user_input;
 extern char     filename[100];
 extern Token    *token;
-extern Func     *func_list[100];
+extern Func     *func_list[FUNC_NUM];
 extern LVar     *locals;
 extern GVar     *globals;
 extern Str      *strings;
@@ -347,8 +347,8 @@ Member *register_enum_member(void);
 // codegan.c
 extern int label_if;
 extern int label_loop;
-extern int if_depth;
-extern int loop_depth;
+extern int label_if_num;
+extern int label_loop_num;
 void gen(Node *node);
 void gen_calc(Node *node);
 void gen_lvar(Node *node);

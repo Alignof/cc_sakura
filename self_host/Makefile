@@ -1,10 +1,10 @@
 CC	 := gcc
 CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
 
-INCLUDE  := -I ./include
-TARGET   := ./cc_sakura
-SRCDIR   := ./src
-OBJDIR   := ./src/obj
+INCLUDE  := -I ../include
+TARGET   := ../cc_sakura
+SRCDIR   := ../src
+OBJDIR   := ../src/obj
 SOURCES  := $(wildcard ./src/*.c)
 OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 

@@ -1,10 +1,8 @@
 #include "cc_sakura.h"
 
 int   llid;
-int   label_loop;
-int   label_if;
-int   if_depth;
-int   loop_depth;
+int   label_if_num;
+int   label_loop_num;
 char  *user_input;
 char  filename[100];
 Func  *func_list[FUNC_NUM];
@@ -98,13 +96,11 @@ int main(int argc, char **argv){
 		printf("	.string \"%.*s\"\n", var->len, var->str);
 	}
 
-	llid        = 0;
-	label_loop  = 0;
-	loop_depth  = 0;
-	label_if    = 0;
-	if_depth    = 0;
-	labels_head = NULL;
-	labels_tail = NULL;
+	llid           = 0;
+	label_if_num   = 0;
+	label_loop_num = 0;
+	labels_head    = NULL;
+	labels_tail    = NULL;
 
 	//generate assembly at first expr
 	for(i = 0;func_list[i];i++){
@@ -130,15 +126,10 @@ int main(int argc, char **argv){
 		}
 
 		for(j = 0;func_list[i]->code[j] != NULL;j++){
-			if_depth   = 0;
-			loop_depth = 0;
 
 			// gen code
 			gen(func_list[i]->code[j]);
 			printf("\n	pop rax\n");
-
-			label_if   += if_depth;
-			label_loop += loop_depth;
 		}
 
 		// epiroge
