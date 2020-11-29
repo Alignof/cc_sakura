@@ -57,7 +57,10 @@ Type *set_type(Type *type, Token *tok){
 
 			break;
 		case ENUM:
-			enum_found = find_enum(tok, INSIDE_SCOPE);
+			if(tok){
+				enum_found = find_enum(tok, INSIDE_SCOPE);
+			}
+
 			if(enum_found){
 				type->ty = ENUM;
 				if(enum_found->member == NULL && consume("{")){

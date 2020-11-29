@@ -238,6 +238,7 @@ Struc *find_struc(Token *tok, int find_range){
 
 Enum *find_enum(Token *tok, int find_range){
 	int out_of_scope = 0;
+
 	for (Enum *var = enumerations;var;var = var->next){
 		if(var == outside_enum) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
