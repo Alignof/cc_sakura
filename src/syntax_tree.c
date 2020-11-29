@@ -610,11 +610,20 @@ void program(void){
 			Token *def_name        = consume_ident();
 
 			Def_Type *def_new_type = calloc(1, sizeof(Def_Type));
-			def_new_type->len      = def_name->len;
 			def_new_type->name     = def_name->str;
-			def_new_type->type     = specified_type;
-			def_new_type->next     = defined_types;
-			defined_types          = def_new_type;
+			def_new_type->name_len = def_name->len;
+
+			if(specified_type->ty == STRUCT){
+				def_new_type->tag     = structs->name;
+				def_new_type->tag_len = structs->len;
+			}else if(specified_type->ty == ENUM){
+				def_new_type->tag     = enumerations->name;
+				def_new_type->tag_len = enumerations->len;
+			}
+
+			def_new_type->type = specified_type;
+			def_new_type->next = defined_types;
+			defined_types      = def_new_type;
 
 			expect(";");
 			continue;

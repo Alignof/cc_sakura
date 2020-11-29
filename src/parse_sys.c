@@ -271,7 +271,7 @@ Def_Type *find_defined_type(Token *tok, int find_range){
 	for (Def_Type *var = defined_types;var;var = var->next){
 		if(var == outside_deftype) out_of_scope = 1;
 		if(out_of_scope) break;
-		if(var->len == len_val(tok->str) && !memcmp(tok->str, var->name, var->len)){
+		if(var->name_len == len_val(tok->str) && !memcmp(tok->str, var->name, var->name_len)){
 			return var;
 		}
 	}

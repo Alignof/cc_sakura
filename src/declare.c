@@ -94,7 +94,9 @@ Type *parse_type(void){
 		Token *tok = consume_ident();
 		Def_Type *def_found = find_defined_type(tok, 1);
 		if(def_found){
-			type = set_type(def_found->type->ty, tok);
+			tok->str = def_found->tag;
+			tok->len = def_found->tag_len;
+			type     = set_type(def_found->type->ty, tok);
 		}else{
 			error_at(tok->str, "unknown type.");
 		}

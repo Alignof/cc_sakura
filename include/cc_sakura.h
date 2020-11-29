@@ -142,8 +142,10 @@ struct Type{
 
 // defined type
 struct Def_Type{
-	int      len;
 	char     *name;
+	int      name_len;
+	char     *tag;
+	int      tag_len;
 	Type     *type;
 	Def_Type *next;
 };
