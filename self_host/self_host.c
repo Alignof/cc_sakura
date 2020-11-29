@@ -227,83 +227,60 @@ struct Member{
 };
 
 
-int   llid;
-int   label_loop;
-int   label_if;
-int   if_depth;
-int   loop_depth;
-char  *user_input;
-char  filename[100];
-Func  *func_list[100];
-Label *labels_head;
-Label *labels_tail;
+// global variable
+int      llid;
+int      lvar_count;
+int      alloc_size;
+char     *user_input;
+char     filename[100];
+Token    *token;
+Func     *func_list[100];
+LVar     *locals;
+GVar     *globals;
+Str      *strings;
+Struc    *structs;
+Enum     *enumerations;
+Def_Type *defined_types;
+Label    *labels_head;
+Label    *labels_tail;
+LVar     *outside_lvar;
+Struc    *outside_struct;
+Enum     *outside_enum;
+Def_Type *outside_deftype;
+
+int label_if;
+int label_loop;
+int if_depth;
+int loop_depth;
 
 
-char *read_file(char *path){
-	void *fp;
-	char *buf;
+//================temporary definition=====================
 
-	strcpy(filename, path);
-	if ((fp = fopen(path, "r")) == NULL){
-		fprintf(stderr, "File open error.\n");
-		exit(1);
-	}
-
-	// get file size
-	if(fseek(fp, 0L, SEEK_END) == -1){
-		error("%s: fseek:%s", path, strerror(errno));
-	}
-
-	size_t size = ftell(fp);
-	
-	if(fseek(fp, 0L, SEEK_SET) == -1){
-		error("%s: fseek:%s", path, strerror(errno));
-	}
-
-	buf = calloc(1, size+2);
-	fread(buf, size, 1, fp);
-
-	if(size == 0 || buf[size-1] != '\n'){
-		buf[size++] = '\n';
-	}
-
-	buf[size] = '\0';
-	fclose(fp);
-
-	return buf;
-}
-
-void get_code(int argc, char **argv){
-	if(argc == 2){
-		user_input = read_file(argv[1]);
-	}else if(argc == 3){
-		if(!strcmp(argv[1], "-cl")){
-			user_input = argv[2];
-			strcpy(filename, "command line");
-		}else{
-			fprintf(stderr, "Incorrect option\n");
-			exit(1);
-		}
-	}else{
-		fprintf(stderr, "Incorrect number of arguments\n");
-		exit(1);
-	}
-}
+void *stderr;
+//=========================================================
 
 int main(int argc, char **argv){
-	int i, j;
+	int i;
+	int j;
 
-	char reg[6][4] = {"rdi","rsi","rdx","rcx","r8","r9"};
+	char *reg[6];
+	reg[0] = "rdi";
+	reg[1] = "rsi";
+	reg[2] = "rdx";
+	reg[3] = "rcx";
+	reg[4] = "r8";
+	reg[5] = "r9";
 
 	// get source code
 	get_code(argc, argv);
 
 	// tokenize
 	token = tokenize(user_input);
+
 	// make syntax tree
 	program();
 
-	if(func_list == NULL){
+	if(func_list == __NULL){
 		fprintf(stderr, "function is not found.");
 	}
 
@@ -317,7 +294,6 @@ int main(int argc, char **argv){
 	for (GVar *var = start;var;var = var->next){
 		int comm_align = (var->memsize >=  32) ? 32 : var->memsize/8*8;
 		printf(".comm	_%.*s, %d, %d\n", var->len, var->name, var->memsize, comm_align);
-		//printf("_%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
 	}
 
 	// set string
@@ -331,8 +307,8 @@ int main(int argc, char **argv){
 	loop_depth  = 0;
 	label_if    = 0;
 	if_depth    = 0;
-	labels_head = NULL;
-	labels_tail = NULL;
+	labels_head = __NULL;
+	labels_tail = __NULL;
 
 	//generate assembly at first expr
 	for(i = 0;func_list[i];i++){
@@ -357,7 +333,7 @@ int main(int argc, char **argv){
 			}
 		}
 
-		for(j = 0;func_list[i]->code[j] != NULL;j++){
+		for(j = 0;func_list[i]->code[j] != __NULL;j++){
 			if_depth   = 0;
 			loop_depth = 0;
 
