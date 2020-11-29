@@ -172,7 +172,6 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-
 		//Is escape?
 		if(*p == '\\' && *(p+1) == '\\'){
 			now = new_token(TK_IDENT, now, p++);
@@ -180,6 +179,22 @@ Token *tokenize(char *p){
 			continue;
 		}
 		
+		//Is LF? (\n)
+		if(*p == '\\' && *(p+1) == 'n'){
+			now = new_token(TK_NUM, now, p++);
+			now->val = 10;
+			p++;
+			continue;
+		}
+
+		//Is NUL? (\0)
+		if(*p == '\\' && *(p+1) == '0'){
+			now = new_token(TK_NUM, now, p++);
+			now->val = 0;
+			p++;
+			continue;
+		}
+
 		//Is number?
 		if(isdigit(*p)){
 			if(now->kind == TK_IDENT){
