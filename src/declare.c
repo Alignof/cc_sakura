@@ -31,9 +31,11 @@ Type *set_type(TypeKind kind, Token *tok){
 		case STRUCT:
 			struc_found = find_struc(tok, INSIDE_SCOPE);
 			if(struc_found){
-				type->ty     = STRUCT;
-				if(struc_found == NULL && consume("{")){
-					type->member = create_member_chain(&(type->size));
+				type->ty = STRUCT;
+				if(struc_found->member == NULL && consume("{")){
+					struc_found->member = create_member_chain(&(struc_found->memsize));
+					type->member = struc_found->member;
+					type->size   = struc_found->memsize;
 				}else{
 					type->member = struc_found->member;
 					type->size   = struc_found->memsize;
