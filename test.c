@@ -1,15 +1,13 @@
 /*
-int i=0;
-void increment(void){
-	i++;
+typedef int suuji;
+typedef int* int_ptr;
 
-	return;
-}
+suuji main(void){
+	suuji x = 3;
+	int_ptr ptr = &x;
 
-int main(){
-	increment();
-	return i;
+	return *ptr;
 }
 */
 
-struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;}
+

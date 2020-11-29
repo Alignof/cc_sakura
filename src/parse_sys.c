@@ -119,8 +119,7 @@ Token *consume_string(void){
 
 Token *consume_ident(void){
 	// judge whether token is a ident and token pointer
-	if(token->kind != TK_IDENT ||
-			!(is_alnum(*(token->str)))){
+	if(token->kind != TK_IDENT ||!(is_alnum(*(token->str)))){
 		return NULL;
 	}
 
@@ -262,6 +261,18 @@ Member *find_enumerator(Token *tok, int find_range){
 			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 				return var;
 			}
+		}
+	}
+	return NULL;
+}
+
+Def_Type *find_defined_type(Token *tok, int find_range){
+	int out_of_scope = 0;
+	for (Def_Type *var = defined_types;var;var = var->next){
+		if(var == outside_deftype) out_of_scope = 1;
+		if(out_of_scope) break;
+		if(var->name_len == len_val(tok->str) && !memcmp(tok->str, var->name, var->name_len)){
+			return var;
 		}
 	}
 	return NULL;

@@ -142,8 +142,10 @@ struct Type{
 
 // defined type
 struct Def_Type{
-	int      len;
 	char     *name;
+	int      name_len;
+	char     *tag;
+	int      tag_len;
 	Type     *type;
 	Def_Type *next;
 };
@@ -292,6 +294,7 @@ Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok, int find_range);
 Enum *find_enum(Token *tok, int find_range);
 Member *find_enumerator(Token *tok, int find_range);
+Def_Type *find_defined_type(Token *tok, int find_range);
 void revert_scope();
 
 // parse_util.c
@@ -329,12 +332,15 @@ Node *call_function(Node *node, Token *tok);
 Node *array_index(Node *node, Node *index);
 
 // declare.c
+Type *set_type(Type *type, Token *tok);
 Type *parse_type(void);
 Type *insert_ptr_type(Type *prev, int star_count);
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type);
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
 void declare_enum(Enum *new_enum);
+Member *register_struc_member(int *asize_ptr);
+Member *register_enum_member(void);
 
 // codegan.c
 extern int label_if;

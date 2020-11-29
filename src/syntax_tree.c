@@ -198,7 +198,8 @@ Node *unary(void){
 		// sizeof(&a)  = > 8
 
 		if(consume("(")){
-			if(token->kind == TK_TYPE){
+			int INSIDE_SCOPE = 1;
+			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE)){
 				Type *target_type = parse_type();
 				node = new_node(ND_NUM, node, new_node_num(target_type->size));
 				node->val = target_type->size;
@@ -328,10 +329,11 @@ Node *assign(void){
 }
 
 Node *expr(void){
-	int star_count = 0;
+	int star_count   = 0;
+	int INSIDE_SCOPE = 1;
 	Node *node;
 
-	if(token->kind == TK_TYPE){
+	if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 
@@ -347,7 +349,7 @@ Node *expr(void){
 		Token *tok = consume_ident();
 		if(tok){
 			int INSIDE_SCOPE = 1;
-			// Is enumerator already exist
+			// If enumerator already exist -> error
 			find_enumerator(tok, INSIDE_SCOPE);
 			node = declare_local_variable(node, tok, star_count);
 		}else{
@@ -578,10 +580,14 @@ Node *stmt(void){
 void function(Func *func){
 	int i = 0;
 
+	Def_Type *stash_def_types = defined_types;
+
 	// while end of function block
 	while(!consume("}")){
 		func->code[i++] = stmt();
 	}
+
+	defined_types = stash_def_types;
 
 	func->stack_size = alloc_size;
 	func->code[i] = NULL;
@@ -605,11 +611,22 @@ void program(void){
 			Token *def_name        = consume_ident();
 
 			Def_Type *def_new_type = calloc(1, sizeof(Def_Type));
-			def_new_type->len      = def_name->len;
 			def_new_type->name     = def_name->str;
-			def_new_type->type     = specified_type;
-			def_new_type->next     = defined_types;
-			defined_types          = def_new_type;
+			def_new_type->name_len = def_name->len;
+
+			if(specified_type->ty == STRUCT){
+				def_new_type->tag     = structs->name;
+				def_new_type->tag_len = structs->len;
+			}else if(specified_type->ty == ENUM){
+				def_new_type->tag     = enumerations->name;
+				def_new_type->tag_len = enumerations->len;
+			}
+
+			def_new_type->type = specified_type;
+			def_new_type->next = defined_types;
+			defined_types      = def_new_type;
+
+			expect(";");
 			continue;
 		}
 
