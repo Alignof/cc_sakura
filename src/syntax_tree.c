@@ -309,8 +309,8 @@ Node *ternary(void){
 		//                          cond  if true
 		node = new_node(ND_TERNARY, node, ternary());
 		expect(":");
-		//             if false
-		node->vector = ternary();
+		//           if false
+		node->next = ternary();
 	}
 
 	return node;
@@ -366,10 +366,10 @@ Node *expr(void){
 		if(consume("=")){
 			if(consume("{")){
 				node = array_block(node);
-				//node->vector = array_block(node);
+				//node->block_code = array_block(node);
 			}else{
 				node = init_formula(node, assign());
-				//node->vector = init_formula(node, assign());
+				//node->block_code = init_formula(node, assign());
 			}
 		}
 	}else if(consume_reserved_word("break", TK_BREAK)){
@@ -525,8 +525,8 @@ Node *stmt(void){
 			// +-> (init->cond->loop)  +<-for->expr
 			node->rhs = stmt();
 			node->lhs = init;
-			node->lhs->vector = cond;
-			node->lhs->vector->vector = calc;
+			node->lhs->next = cond;
+			node->lhs->next->next = calc;
 		}
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
@@ -559,12 +559,12 @@ Node *stmt(void){
 		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
 			//Is first?
-			if(node->vector){
-				block_code->vector = stmt();
-				block_code = block_code->vector;
+			if(node->block_code){
+				block_code->block_code = stmt();
+				block_code = block_code->block_code;
 			}else{
 				block_code = stmt();
-				node->vector = block_code;
+				node->block_code = block_code;
 			}
 		}
 		

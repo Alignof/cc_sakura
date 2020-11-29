@@ -140,17 +140,17 @@ Node *array_str(Node *arr, Node *init_val){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
-			node->vector = dst;
+			node->block_code = dst;
 		}else{
-			dst->vector = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
-			dst = dst->vector;
+			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
+			dst = dst->block_code;
 		}
 		ctr++;
 	}
 
 	// '\0'
-	dst->vector = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->offset)), new_node_num('\0'));
-	dst = dst->vector;
+	dst->block_code = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->offset)), new_node_num('\0'));
+	dst = dst->block_code;
 	ctr++;
 
 	// ommitted
@@ -186,10 +186,10 @@ Node *array_block(Node *arr){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, expr());
-			node->vector = dst;
+			node->block_code = dst;
 		}else{
-			dst->vector = new_node(ND_ASSIGN, src, expr());
-			dst = dst->vector;
+			dst->block_code = new_node(ND_ASSIGN, src, expr());
+			dst = dst->block_code;
 		}
 		consume(",");
 		ctr++;
@@ -216,8 +216,8 @@ Node *array_block(Node *arr){
 	}else if(arr->type->index_size > ctr){
 		while(ctr != arr->type->index_size){
 			src = array_index(clone, new_node_num(ctr));
-			dst->vector = new_node(ND_ASSIGN, src, new_node_num(0));
-			dst = dst->vector;
+			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(0));
+			dst = dst->block_code;
 
 			ctr++;
 			consume(",");

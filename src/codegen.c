@@ -14,11 +14,11 @@ void expand_next(Node *node){
 	printf("	push rax\n");
 }
 
-void expand_vector(Node *node){
+void expand_block_code(Node *node){
 	while(node){
 		gen(node);
 		printf("	pop rax\n");
-		node=node->vector;
+		node=node->block_code;
 	}
 	printf("	push rax\n");
 }
@@ -169,19 +169,19 @@ void gen(Node *node){
 			printf("	push rax\n");
 
 			// init formula
-			if(node->vector != NULL) gen(node->vector);
+			if(node->block_code != NULL) gen(node->block_code);
 			return;
 		case ND_GARRAY:
 			gen_gvar(node);
 
 			// init formula
-			if(node->vector != NULL) expand_next(node->vector);
+			if(node->block_code != NULL) expand_next(node->block_code);
 			return;
 		case ND_LARRAY:
 			gen_lvar(node);
 
 			// init formula
-			if(node->vector != NULL) expand_next(node->vector);
+			if(node->block_code != NULL) expand_next(node->block_code);
 			return;
 		case ND_PREID:
 			// ++p -> p += 1
@@ -288,7 +288,7 @@ void gen(Node *node){
 			printf(".Lelse%03d:\n", label_if);
 
 			// false
-			gen(node->vector);
+			gen(node->next);
 			printf(".LifEnd%03d:\n", label_if);
 
 			label_if--;
@@ -373,7 +373,7 @@ void gen(Node *node){
 
 			// condition
 			printf(".LloopBegin%03d:\n", label_loop);
-			gen(node->lhs->vector);
+			gen(node->lhs->next);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// if cond true then jump to  loop end.
@@ -384,7 +384,7 @@ void gen(Node *node){
 
 			// gen update expression
 			printf(".LloopCont%03d:\n", label_loop);
-			gen(node->lhs->vector->vector);
+			gen(node->lhs->next->next);
 			printf("	pop rax\n");
 
 			// continue
@@ -453,7 +453,7 @@ void gen(Node *node){
 			printf("	jmp .LloopEnd%03d\n", label_loop);
 			return;
 		case ND_BLOCK:
-			expand_vector(node->vector);
+			expand_block_code(node->block_code);
 			return;
 		case ND_CALL_FUNC:
 			tmp=node->next;
