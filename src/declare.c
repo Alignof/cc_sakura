@@ -33,7 +33,7 @@ Type *set_type(TypeKind kind, Token *tok){
 			if(struc_found){
 				type->ty = STRUCT;
 				if(struc_found->member == NULL && consume("{")){
-					struc_found->member = create_member_chain(&(struc_found->memsize));
+					struc_found->member = register_struc_member(&(struc_found->memsize));
 					type->member = struc_found->member;
 					type->size   = struc_found->memsize;
 				}else{
@@ -61,18 +61,26 @@ Type *set_type(TypeKind kind, Token *tok){
 		case ENUM:
 			enum_found = find_enum(tok, INSIDE_SCOPE);
 			if(enum_found){
-				type->size   = 4;
-				type->member = enum_found->member;
-				type->ty     = ENUM;
-			}else{
-				if(consume("{")){
-					Enum *new_enum = calloc(1,sizeof(Enum));
-					new_enum->len  = tok->len;
-					new_enum->name = tok->str;
-
-					declare_enum(new_enum);
+				type->ty = ENUM;
+				if(enum_found->member == NULL && consume("{")){
+					//enum_found->member = register_enum_member(&(dummy));
+					type->member = enum_found->member;
 				}else{
-					error_at(token->str, "does not exist such enum");
+					type->member = enum_found->member;
+				}
+			}else{
+				Enum *new_enum = calloc(1,sizeof(Struc));
+				new_enum->len   = tok->len;
+				new_enum->name  = tok->str;
+				if(consume("{")){
+					if(enum_found) error_at(token->str, "multiple definition");
+					declare_enum(new_enum);
+					type->ty        = ENUM;
+					type->member    = enumerations->member;
+				}else{
+					new_enum->next  = enumerations;
+					enumerations    = new_enum;
+					type->ty        = ENUM;
 				}
 			}
 			break;
@@ -266,7 +274,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	return node;
 }
 
-Member *create_member_chain(int *asize_ptr){
+Member *register_struc_member(int *asize_ptr){
 	int size_of_type;
 	int INSIDE_SCOPE  = 1;
 	Member *new_memb  = NULL;
@@ -345,7 +353,7 @@ Member *create_member_chain(int *asize_ptr){
 void declare_struct(Struc *new_struc){
 	int asize = 0;
 	
-	new_struc->member  = create_member_chain(&asize);
+	new_struc->member  = register_struc_member(&asize);
 	new_struc->memsize = asize;
 	new_struc->next    = structs;
 	structs = new_struc;
