@@ -134,8 +134,10 @@ int main(int argc, char **argv){
 			loop_depth = 0;
 
 			// gen code
-			gen(func_list[i]->code[j]);
-			printf("\n	pop rax\n");
+			if(func_list[i]->code[j]->kind != ND_NULL_STMT){
+				gen(func_list[i]->code[j]);
+				printf("\n	pop rax\n");
+			}
 
 			label_if   += if_depth;
 			label_loop += loop_depth;

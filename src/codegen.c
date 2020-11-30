@@ -144,7 +144,12 @@ void gen(Node *node){
 	Node *cases;
 	int arg = 0;
 
+
+	// generate assembly
 	switch(node->kind){
+		case ND_NULL_STMT:
+			// NULL statement
+			return;
 		case ND_NUM:
 			printf("	push %d\n", node->val);
 			return;

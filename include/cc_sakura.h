@@ -83,6 +83,7 @@ typedef enum{
 	ND_BREAK, 	//  break
 	ND_CONTINUE, 	//  continue
 	ND_TYPE, 	//  int, double, char...
+	ND_NULL_STMT, 	//  NULL statement (;) 
 }NodeKind;
 
 typedef enum{

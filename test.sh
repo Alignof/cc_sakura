@@ -243,6 +243,9 @@ assert -cl 5  "typedef struct test{int a; int b;}Test; int main(){Test x; x.a=2;
 assert -cl 5  "typedef struct test Test; Test{int a; int b;}; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 
 
+assert -cl 5  "int main(){int x=5; ; return x;}"
+assert -cl 10 "int main(){int i=0; int x=0; for(;i<10;i++){x++;}return x ;}"
+
 
 
 echo OK
