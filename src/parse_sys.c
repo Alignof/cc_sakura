@@ -236,6 +236,21 @@ Struc *find_struc(Token *tok, int find_range){
 	return NULL;
 }
 
+Member *find_struct_member(Type *type, int find_range){
+	char *struc_name = type->name;
+	int  struc_len   = type->len;
+	int out_of_scope = 0;
+
+	for (Struc *var = structs;var;var = var->next){
+		if(var == outside_struct) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
+		if(var->len == struc_len && !memcmp(struc_name, var->name, var->len)){
+			return var->member;
+		}
+	}
+	return NULL;
+}
+
 Enum *find_enum(Token *tok, int find_range){
 	int out_of_scope = 0;
 

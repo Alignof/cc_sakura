@@ -49,9 +49,9 @@ Node *dot_arrow(NodeKind type, Node *node){
 
 	// get member list
 	if(type == ND_DOT){
-		memb_list = struc_type->member;
+		memb_list = find_struct_member(struc_type, 1);
 	}else{
-		memb_list = struc_type->ptr_to->member;
+		memb_list = find_struct_member(struc_type->ptr_to, 1);
 	}
 
 	while(memb_list){
