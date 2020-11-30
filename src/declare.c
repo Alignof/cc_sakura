@@ -92,6 +92,7 @@ Type *set_type(Type *type, Token *tok){
 Type *parse_type(void){
 	Type *type     = calloc(1, sizeof(Type));
 	int star_count = 0;
+	int INSIDE_FILE = 0;
 
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
@@ -114,7 +115,7 @@ Type *parse_type(void){
 		type = set_type(type, consume_ident());
 	}else{
 		Token *tok = consume_ident();
-		Def_Type *def_found = find_defined_type(tok, 1);
+		Def_Type *def_found = find_defined_type(tok, INSIDE_FILE);
 		if(def_found){
 			tok->str = def_found->tag;
 			tok->len = def_found->tag_len;
