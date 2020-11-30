@@ -88,6 +88,7 @@ typedef enum{
 
 typedef enum{
 	VOID,
+	BOOL,
 	CHAR,
 	INT,
 	PTR,

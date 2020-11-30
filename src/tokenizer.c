@@ -132,6 +132,7 @@ Token *tokenize(char *p){
 		}
 
 		if(consume_reserved(&p, "void",     4, &now, TK_TYPE))	   continue;
+		if(consume_reserved(&p, "_Bool",    5, &now, TK_TYPE))	   continue;
 		if(consume_reserved(&p, "char",     4, &now, TK_TYPE))	   continue;
 		if(consume_reserved(&p, "int",	    3, &now, TK_TYPE))	   continue;
 		if(consume_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
