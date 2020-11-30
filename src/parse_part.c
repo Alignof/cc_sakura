@@ -235,27 +235,25 @@ Node *call_function(Node *node, Token *tok){
 	node->str  = tok->str;
 	node->val  = tok->len;
 
-	int ctr = 0;
 	// have argument?
-	if(!(consume(")"))){
-		Node *new = NULL;
-		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED ||
-			token->kind == TK_SIZEOF || token->kind == TK_STR){
+	if(consume(")")) return node;
 
-			if(new == NULL){
-				new        = logical();
-				node->next = new;
-			}else{
-				new->next  = logical();
-				new        = new->next;
-			}
-
-			ctr++;
-
-			if(!(consume(","))) break;
+	int ctr = 0;
+	Node *new = NULL;
+	while(1){
+		if(new == NULL){
+			new        = logical();
+			node->next = new;
+		}else{
+			new->next  = logical();
+			new        = new->next;
 		}
-		expect(")");
+
+		ctr++;
+
+		if(!(consume(","))) break;
 	}
+	expect(")");
 
 	return node;
 }

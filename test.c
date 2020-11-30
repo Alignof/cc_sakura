@@ -1,3 +1,4 @@
+/*
 typedef struct test Test;
 
 struct test{
@@ -24,3 +25,5 @@ int main(void){
 	// 4
 	return x.next->r;
 }
+*/
+int add(int a,int b){return a+b;} int main(){add(2,3);}
