@@ -80,7 +80,7 @@ Node *primary(void){
 
 	// Is array index
 	while(consume("[")){
-		node = array_index(node, mul());
+		node = array_index(node, add());
 		expect("]");
 	}
 
