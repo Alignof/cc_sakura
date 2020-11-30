@@ -319,698 +319,354 @@ char errno;
 
 
 
-//====================== syntax_tree.c===========================
-Node *data(void){
-	if(consume("(")){
-		Node *node = expr();
-		expect(")");
-		return node;
-	}
-	
-	// compiler directive
-	if(token->kind == TK_COMPILER_DIRECTIVE){
-		Node *node = compiler_directive();
-		return node;
-	}
+//======================== parse_sys.c ===============================
+void error(char *loc, char *fmt){
+	//va_list ap;
+	//va_start(ap, fmt);
 
-	// variable
-	int INSIDE_FUNC = 0;
-	Token *tok = consume_ident();
-	if(tok){
-		Node *node = calloc(1, sizeof(Node));
-
-		LVar *lvar = find_lvar(tok, INSIDE_FUNC);
-		if(lvar){
-			node->kind   = (lvar->type->ty == ARRAY)? ND_LARRAY : ND_LVAR;
-			node->offset = lvar->offset;
-			node->type   = lvar->type;
-		// call function
-		}else if(check("(")){
-			Func *called = find_func(tok);
-			if(called){
-				node->type = called->type;
-			}else{
-				node->type = calloc(1, sizeof(Type));
-				node->type->ty = INT;
-			}
-
-			node = call_function(node, tok);
-		}else{
-			GVar *gvar = find_gvar(tok);
-			if(gvar){
-				// global variable exist
-				node->kind = (gvar->type->ty == ARRAY)? ND_GARRAY : ND_GVAR;
-				node->type = gvar->type;
-				node->str  = tok->str;
-				node->val  = tok->len;
-			}else{
-				Member *rator = find_enumerator(tok, INSIDE_FUNC);
-				if(rator){
-					node = new_node_num(rator->offset);
-				// variable does not exist.
-				}else{
-					error_at(token->str, "this variable is not declaration");
-				}
-			}
-		}
-
-		return node;
-	}
-
-	// return new num node
-	return new_node_num(expect_number());
+	int pos = loc-user_input;
+	fprintf(stderr, "%s\n", user_input);
+	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "^ ");
+	//vfprintf(stderr, fmt, ap);
+	fprintf(stderr, "\n");
+	exit(1);
 }
 
-Node *primary(void){
-	Node *node = data();
+void error_at(char *loc, char *msg){
+	while((user_input < loc) && (loc[-1] == '\n' || loc[-1] == '\t')) loc--;
 
-	// Is array index
-	while(consume("[")){
-		node = array_index(node, add());
-		expect("]");
+	char *start = loc;
+	while((user_input < start) && (start[-1] != '\n')) start--;
+
+	char *end = loc;
+	while(*end != '\n') end++;
+
+	int line_num = 1;
+	for(char *c = user_input;c < loc;c++){
+		if(*c == '\n') line_num++;
 	}
 
-	// increment
-	if(consume("++")){
-		node = incdec(node, POST_INC);
-	}
+	// consume \t
+	while(*start == '\t') start++;
 
-	// decrement
-	if(consume("--")){
-		node = incdec(node, POST_DEC);
-	}
+	int indent = fprintf(stderr, "%s:%d ", filename, line_num);
+	fprintf(stderr, "%.*s\n", (int)(end-start), start);
 
-	// member variable
-	while(check(".") || check("->")){
-		// dot
-		if(consume(".")){
-			if(node->kind == ND_LVAR){
-				node = new_node(ND_ADDRESS, __NULL, node);
-			}
-			node = dot_arrow(ND_DOT, node);
-		}
-
-		// arrow
-		if(consume("->")){
-			node = dot_arrow(ND_ARROW, node);
-		}
-
-		// array index
-		while(consume("[")){
-			node = array_index(node, mul());
-			expect("]");
-		}
-	}
-
-	return node;
+	int pos = indent+loc-start;
+	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "^ %s\n", msg);
+	exit(1);
 }
 
-Node *unary(void){
-	Node *node=__NULL;
-
-	// logical not
-	if(consume("!")){
-		node = new_node(ND_NOT, __NULL, logical());
-		return node;
+bool check(char *op){
+	// judge whether op is a symbol and return judge result
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
+			strlen(op) != token->len || memcmp(token->str, op, token->len)){
+		return false;
 	}
 
-	if(consume("*")){
-		node = new_node(ND_DEREF, __NULL, unary());
-
-		return node;
-	}
-
-	if(consume("&")){
-		node = new_node(ND_ADDRESS, __NULL, unary());
-
-		return node;
-	}
-
-	if(token->kind == TK_STR){
-		consume("\"");
-		Node *node = calloc(1, sizeof(Node));
-		node->kind = ND_STR;
-		node->type = calloc(1, sizeof(Type));
-		node->type->ty = PTR;
-
-		Token *tok = consume_string();
-		Str *fstr = find_string(tok);
-
-		// has already
-		if(fstr){
-			node->str = fstr->str;
-			node->val = fstr->label_num;
-			node->offset = fstr->len;
-		// new one
-		}else{
-			Str *new = calloc(1, sizeof(Str));
-			new->len = tok->len;
-			new->str = tok->str;
-			new->label_num = strings ? strings->label_num+1 : 0;
-			node->str = new->str;
-			node->offset = new->len;
-			node->val = new->label_num;
-
-			if(strings == __NULL){
-				strings = new;
-			}else{
-				new->next = strings;
-				strings = new;
-			}
-		}
-
-		return node;
-	}
-
-	if(consume("+")){
-		//ignore +n
-		return primary();
-	}
-
-	if(consume("-")){
-		//convert to 0-n
-		return new_node(ND_SUB, new_node_num(0), primary());
-	}
-
-	// increment
-	if(consume("++")){
-		return incdec(primary(), PRE_INC);
-	}
-
-	// decrement
-	if(consume("--")){
-		return incdec(primary(), PRE_DEC);
-	}
-
-	if(consume_reserved_word("sizeof", TK_SIZEOF)){
-		// sizeof(5)  = > 4
-		// sizeof(&a)  = > 8
-
-		if(consume("(")){
-			int INSIDE_FILE = 0;
-			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
-				Type *target_type = parse_type();
-				node = new_node(ND_NUM, node, new_node_num(target_type->size));
-				node->val = target_type->size;
-			}else{
-				Node *target = expr();
-				node = new_node(ND_NUM, node, target);
-				node->val = node->rhs->type->size;
-			}
-			expect(")");
-		}
-
-		return node;
-	}
-
-	return primary();
+	return true;
 }
 
-Node *mul(void){
-	//jmp unary()
-	Node *node = unary();
-
-	for(;;){
-		// is * and move the pointer next
-		if(consume("*")){
-			//create new node and jmp unary
-			node = new_node(ND_MUL, node, unary());
-		}else if(consume("/")){
-			node = new_node(ND_DIV, node, unary());
-		}else if(consume("%")){
-			node = new_node(ND_MOD, node, unary());
-		}else{
-			return node;
-		}
-	}
-}
-
-Node *add(void){
-	//jmp mul()
-	Node *node = mul();
-
-	for(;;){
-		if(consume("+")){
-			node = new_node(ND_ADD, node, mul());
-		}else if(consume("-")){
-			node = new_node(ND_SUB, node, mul());
-		}else{
-			return node;
-		}
-	}
-}
-
-Node *relational(void){
-	Node *node = add();
-
-	for(;;){
-		//prefer multi symbol
-		if(consume(">=")){
-			node = new_node(ND_GE, node, add());
-		}else if(consume("<=")){
-			node = new_node(ND_LE, node, add());
-		}else if(consume(">")){
-			node = new_node(ND_GT, node, add());
-		}else if(consume("<")){
-			node = new_node(ND_LT, node, add());
-		}else{
-			return node;
-		}
-	}
-}
-
-Node *equelity(void){
-	Node *node = relational();
-
-	for(;;){
-		if(consume("==")){
-			node = new_node(ND_EQ, node, relational());
-		}else if(consume("!=")){
-			node = new_node(ND_NE, node, relational());
-		}else{
-			return node;
-		}
-	}
-}
-
-Node *logical(void){
-	Node *node = equelity();
-	for(;;){
-		if(consume("&&")){
-			node = new_node(ND_AND, node, equelity());
-		}else if(consume("||")){
-			node = new_node(ND_OR, node, equelity());
-		}else{
-			return node;
-		}
-	}
-}
-
-Node *ternary(void){
-	Node *node = logical();
-	if(consume("?")){
-		//                          cond  if true
-		node = new_node(ND_TERNARY, node, ternary());
-		expect(":");
-		//           if false
-		node->next = ternary();
+bool consume(char *op){
+	// judge whether op is a symbol and return judge result
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
+			strlen(op) != token->len || memcmp(token->str, op, token->len)){
+		return false;
 	}
 
-	return node;
+	token = token->next;
+	return true;
 }
 
-Node *assign(void){
-	Node *node = ternary();
-
-	if(consume("=")){
-		node = new_node(ND_ASSIGN, node, assign());
-	}else if(consume("+=")){
-		node = compound_assign(ND_ADD, node, assign());
-	}else if(consume("-=")){
-		node = compound_assign(ND_SUB, node, assign());
-	}else if(consume("*=")){
-		node = compound_assign(ND_MUL, node, assign());
-	}else if(consume("/=")){
-		node = compound_assign(ND_DIV, node, assign());
+int string_len(void){
+	int len = 0;
+	while(token->kind == TK_STR){
+		token = token->next;
+		len++;
 	}
 
-
-	return node;
+	return len;
 }
 
-Node *expr(void){
-	int star_count   = 0;
-	int INSIDE_SCOPE = 1;
-	Node *node;
+bool consume_ret(void){
+	if((token->kind != TK_RETURN) || (token->len != 6) ||
+			memcmp(token->str, "return", token->len)){
+		return false;
+	}
 
-	if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE)){
-		node	   = calloc(1, sizeof(Node));
-		node->kind = ND_LVAR;
+	token = token->next;
+	return true;
+}
 
-		// parsing type
-		node->type = parse_type();
+bool consume_reserved_word(char *keyword, TokenKind kind){
+	if( token->kind != kind ||
+			token->len != strlen(keyword) ||
+			memcmp(token->str, keyword, token->len)){
+		return false;
+	}
 
-		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
-		if(check(";")){
-			return node;
-		}
+	token = token->next;
+	return true;
+}
 
-		// variable declaration
-		Token *tok = consume_ident();
-		if(tok){
-			int INSIDE_SCOPE = 1;
-			// If enumerator already exist -> error
-			find_enumerator(tok, INSIDE_SCOPE);
-			node = declare_local_variable(node, tok, star_count);
-		}else{
-			error_at(token->str, "not a variable.");
-		}
+Token *consume_string(void){
+	// judge whether token is a ident and token pointer
+	if(token->kind != TK_STR || !(isascii(*(token->str)))){
+		return false;
+	}
 
-		// initialize formula
-		if(consume("=")){
-			if(consume("{")){
-				node = array_block(node);
-				//node->block_code = array_block(node);
-			}else{
-				node = init_formula(node, assign());
-				//node->block_code = init_formula(node, assign());
-			}
-		}
-	}else if(consume_reserved_word("break", TK_BREAK)){
-		node	   = calloc(1, sizeof(Node));
-		node->kind = ND_BREAK;
-	}else if(consume_reserved_word("continue", TK_CONTINUE)){
-		node	   = calloc(1, sizeof(Node));
-		node->kind = ND_CONTINUE;
+	Token *ret = token;
+	int counter = 0;
+	while(token->kind == TK_STR){
+		counter++;
+		token = token->next;
+	}
+
+	ret->len = counter;
+
+	return ret;
+}
+
+
+Token *consume_ident(void){
+	// judge whether token is a ident and token pointer
+	if(token->kind != TK_IDENT ||!(is_alnum(*(token->str)))){
+		return NULL;
+	}
+
+	Token *ret = token;
+	//check variable length
+	int _len = len_val(token->str);
+	token->len = _len;
+
+	//move next token 
+	for(int i = 0;i < _len;i++){
+		token = token->next;
+	}
+
+	return ret;
+}
+
+void expect(char *op){
+	// judge whether op is a symbol and move the pointer to the next
+	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
+			strlen(op) != token->len||
+			memcmp(token->str, op, token->len)){
+		error_at(token->str, "not a charctor.");
+	}
+	token = token->next;
+}
+
+int expect_number(void){
+	// judge whether token is a number and move the pointer to the next and return value
+	if(token->kind != TK_NUM){
+		error_at(token->str, "not a number");
+	}
+
+	int val = token->val;
+	token = token->next;
+	return val;
+}
+
+void label_register(Node *node, LabelKind kind){
+	Label *new_label;
+	if(labels_tail){
+		labels_tail->next = calloc(1, sizeof(Label));
+		new_label         = labels_tail->next;
 	}else{
-		node = assign();
+		labels_head = calloc(1, sizeof(Label));
+		new_label   = labels_head;
 	}
 
-	return node;
+	new_label->kind  = kind;
+	new_label->id    = llid;
+	node->val        = llid;
+	labels_tail      = (labels_tail) ? labels_tail->next : labels_head;
+
+	llid++;
+
+
+	if(kind == LB_CASE){
+		new_label->cond = node->lhs;
+	}else if(kind == LB_DEFAULT){
+		new_label->cond = node->rhs;
+	}
 }
 
-Node *stmt(void){
-	Node *node = __NULL;
-
-	// NULL statement
-	if(consume(";")){
-		node = new_node(ND_NULL_STMT, __NULL, __NULL);
-	}else if(consume_reserved_word("return", TK_RETURN)){
-		node = new_node(ND_RETURN, node, __NULL);
-		if(!consume(";")){
-			node->rhs = expr();
-			if(!consume(";")) error_at(token->str, "not a ';' token.");
+Func *find_func(Token *tok){
+	for (int i = 0;func_list[i] && i < FUNC_NUM;i++){
+		if(!memcmp(tok->str, func_list[i]->name, tok->len)){
+			return func_list[i];
 		}
-	}else if(consume_reserved_word("if", TK_IF)){
-		/*
-		 * =========== if =========== 
-		 *
-		 *     (cond)<--if-->expr
-		 *
-		 * ========= else if =========== 
-		 *
-		 *     (cond)<--if-----+
-		 *                     | 
-		 *        if(cond)<--else-->expr
-		 */
-		node = new_node(ND_IF, node, __NULL);
-		if(consume("(")){
-			//jmp expr
-			Node *cond = expr();
-			//check end of caret
-			expect(")");
+	}
+	return NULL;
+}
 
-			// (cond)<-if->expr
-			node->lhs = cond;
-			node->rhs = stmt();
+GVar *find_gvar(Token *tok){
+	//while var not equal NULL
+	for (GVar *var = globals;var;var = var->next){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
 		}
+	}
+	return NULL;
+}
 
-		if(consume_reserved_word("else", TK_ELSE)){
-			// if()~ <-else-> expr
-			Node *else_block = new_node(ND_ELSE, node, stmt());
-			else_block->lhs  = node->rhs;
-			node->rhs  = else_block;
-			node->kind = ND_IFELSE;
+LVar *find_lvar(Token *tok, int find_range){
+	/* find_range
+	 * INSIDE_FUNC  == 0
+	 * INSIDE_SCOPE == 1 
+	 */
+
+	int out_of_scope = 0;
+	//while var not equal NULL
+	for (LVar *var = locals;var;var = var->next){
+		if(var == outside_lvar) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
 		}
- 
- 	}else if(consume_reserved_word("switch", TK_SWITCH)){
- 		/*
- 		 * default<---switch--->block code
- 		 *               | 
- 		 *               | (next)
- 		 *               | 
- 		 *   (cond)<---case->code
- 		 *               | 
- 		 *               | (next: chain_case)
- 		 *               +----->case->case->... 
- 		 */
- 
- 		Node  *cond = __NULL;
-		Label *before_switch = labels_tail;
-		Label *prev = __NULL;
+	}
+	return NULL;
+}
 
- 		node = new_node(ND_SWITCH, node, __NULL);
- 		if(consume("(")){
- 			//jmp expr
- 			cond = expr();
- 			//check end of caret
- 			expect(")");
- 		}else{
- 			error_at(token->str, "expected ‘(’ before ‘{’ token");
- 		}
+Str *find_string(Token *tok){
+	for (Str *var = strings;var;var = var->next){
+		if(var->len == tok->len && !memcmp(tok->str, var->str, var->len)){
+			return var;
+		}
+	}
+	return NULL;
+}
 
-		// get code block 
-		node->rhs = stmt(); 
+Struc *find_struc(Token *tok, int find_range){
+	int out_of_scope = 0;
+	for (Struc *var = structs;var;var = var->next){
+		if(var == outside_struct) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
+		}
+	}
+	return NULL;
+}
 
-		// register and remove case
-		Node *cond_cases = __NULL;
-		prev = before_switch;
-		Label *lb = (before_switch) ? prev->next : labels_head;
-		while(lb){
-			if(lb->kind == LB_CASE){
-				if(cond_cases){
-					cond_cases->next      = new_node(ND_EQ, cond, lb->cond);
-					cond_cases->next->val = lb->id;
-					cond_cases            = cond_cases->next;
-				}else{
-					cond_cases      = new_node(ND_EQ, cond, lb->cond);
-					cond_cases->val = lb->id;
-					node->next      = cond_cases;
-				}
-			}else if(lb->kind == LB_DEFAULT){
-				if(node->lhs){
-					error_at(token->str, "multiple default labels in one switch");
-				}else{
-					node->lhs      = lb->cond;
-					node->lhs->val = lb->id;
-				}
-			}
+Member *find_struct_member(Type *type, int find_range){
+	char *struc_name = type->name;
+	int  struc_len   = type->len;
+	int out_of_scope = 0;
 
-			// remove used case
-			if(prev){
-				prev->next = lb->next;
-				//free(lb);
-				lb   = prev->next;
-				prev = lb;
-			// remove head
-			}else{
-				prev = lb;
-				//free(prev);
-				lb   = lb->next;
-				prev = __NULL;
+	for (Struc *var = structs;var;var = var->next){
+		if(var == outside_struct) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
+		if(var->len == struc_len && !memcmp(struc_name, var->name, var->len)){
+			return var->member;
+		}
+	}
+	return NULL;
+}
+
+Enum *find_enum(Token *tok, int find_range){
+	int out_of_scope = 0;
+
+	for (Enum *var = enumerations;var;var = var->next){
+		if(var == outside_enum) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
+		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			return var;
+		}
+	}
+	return NULL;
+}
+
+Member *find_enumerator(Token *tok, int find_range){
+	int out_of_scope = 0;
+	for (Enum *en = enumerations;en;en = en->next){
+		if(en == outside_enum) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
+		for (Member *var = en->member;var;var = var->next){
+			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+				return var;
 			}
 		}
-	}else if(consume_reserved_word("case", TK_CASE)){
-		/*
-		 *  (cond) <--- case ---> code
-		 */
-		node = new_node(ND_CASE, logical(), __NULL);
-		expect(":");
-		label_register(node, LB_CASE);
-		node->rhs = stmt();
-	}else if(consume_reserved_word("default", TK_DEFAULT)){
-		/*
-		 *  (cond) <--- default ---> code
-		 */
-		node = new_node(ND_CASE, __NULL, __NULL);
-		expect(":");
-		node->rhs = stmt();
-		label_register(node, LB_DEFAULT);
-	}else if(consume_reserved_word("for", TK_FOR)){
-		outside_lvar   = locals;
-		outside_enum   = enumerations;
-		outside_struct = structs;
-		
-		node = new_node(ND_FOR, node, __NULL);
+	}
+	return NULL;
+}
 
-		if(consume("(")){
-			//jmp expr
-			Node *init = stmt();
-			Node *cond = stmt();
-			Node *calc = expr();
-			//check end of caret
-			expect(")");
-
-			// +-----------------------+
-			// +-> (init->cond->loop)  +<-for->expr
-			node->rhs = stmt();
-			node->lhs = init;
-			node->lhs->next = cond;
-			node->lhs->next->next = calc;
+Def_Type *find_defined_type(Token *tok, int find_range){
+	int out_of_scope = 0;
+	for (Def_Type *var = defined_types;var;var = var->next){
+		if(var == outside_deftype) out_of_scope = 1;
+		if(out_of_scope) break;
+		if(var->name_len == len_val(tok->str) && !memcmp(tok->str, var->name, var->name_len)){
+			return var;
 		}
+	}
+	return NULL;
+}
 
-		locals       = outside_lvar; 
-		enumerations = outside_enum; 
-		structs      = outside_struct; 
-	}else if(consume_reserved_word("do", TK_DO)){
-		// (cond)<-- do-while -->block
-		node = new_node(ND_DOWHILE, __NULL, stmt());
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
+	//create new node(symbol)
+	Node *node = calloc(1, sizeof(Node));
+	node->type = calloc(1, sizeof(Type));
+	node->kind = kind;
+	node->lhs  = lhs;
+	node->rhs  = rhs;
 
-		consume_reserved_word("while", TK_WHILE);
-		if(consume("(")){
-			node->lhs = expr();
-			expect(")");
-		}
-		expect(";");
-	}else if(consume_reserved_word("while", TK_WHILE)){
-		node = new_node(ND_WHILE, node, __NULL);
-		if(consume("(")){
-			//jmp expr
-			Node *cond = expr();
-			//check end of caret
-			expect(")");
-
-			// (cond)<-while->expr
-			node->lhs = cond;
-			node->rhs = stmt();
-		}
-	}else if(consume("{")){
-		node = new_node(ND_BLOCK, node, __NULL);
-		outside_lvar   = locals;
-		outside_enum   = enumerations;
-		outside_struct = structs;
-
-		Node *block_code = calloc(1, sizeof(Node));
-		while(token->kind!=TK_BLOCK){
-			//Is first?
-			if(node->block_code){
-				block_code->block_code = stmt();
-				block_code = block_code->block_code;
-			}else{
-				block_code = stmt();
-				node->block_code = block_code;
-			}
-		}
-		
-		locals       = outside_lvar; 
-		enumerations = outside_enum; 
-		structs      = outside_struct; 
-		expect("}");
-	}else{
-		node = expr();
-		if(!consume(";")){
-			while(*(token->str)!='\n') (token->str)--;
-			error_at(token->str, "not a ';' token.");
+	if(kind == ND_ADD || kind == ND_SUB){
+		if(lhs->type->ty >= PTR  ||  rhs->type->ty >= PTR){
+			node = pointer_calc(node, lhs->type, rhs->type);
 		}
 	}
 
-	return node;
-}
-
-void function(Func *func){
-	int i = 0;
-
-	Def_Type *stash_def_types = defined_types;
-
-	// while end of function block
-	while(!consume("}")){
-		func->code[i++] = stmt();
+	if(kind == ND_ASSIGN){
+		if(lhs->type->ty == BOOL){
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
+		}
 	}
 
-	defined_types = stash_def_types;
+	if(ND_ADD <= kind && kind <= ND_ASSIGN){
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	}
 
-	func->stack_size = alloc_size;
-	func->code[i] = __NULL;
-}
+	if(kind == ND_DOT || kind == ND_ARROW){
+		node->type = lhs->type;
+	}
 
-void program(void){
-	int func_index = 0;
-	int star_count;
-	Type *toplv_type;
+	if(kind == ND_ADDRESS){
+		node->type->ty     = PTR;
+		node->type->size   = type_size(node->type);
+		node->type->align  = type_align(node->type);
+		node->type->ptr_to = rhs->type;
+	}
 
-	while(!at_eof()){
-		// reset lvar list
-		locals = __NULL;
-		// reset lvar counter
-		alloc_size = 0;
-		star_count = 0;
-
-		// typedef
-		if(consume_reserved_word("typedef", TK_TYPEDEF)){
-			Type *specified_type   = parse_type();
-			Token *def_name        = consume_ident();
-
-			Def_Type *def_new_type = calloc(1, sizeof(Def_Type));
-			def_new_type->name     = def_name->str;
-			def_new_type->name_len = def_name->len;
-
-			if(specified_type->ty == STRUCT){
-				def_new_type->tag     = structs->name;
-				def_new_type->tag_len = structs->len;
-			}else if(specified_type->ty == ENUM){
-				if(enumerations->name){
-					def_new_type->tag     = enumerations->name;
-					def_new_type->tag_len = enumerations->len;
-				}else{
-					enumerations->name    = def_name->str;
-					enumerations->len     = def_name->len;
-					def_new_type->tag     = def_name->str;
-					def_new_type->tag_len = def_name->len;
-				}
-			}
-
-			def_new_type->type = specified_type;
-			def_new_type->next = defined_types;
-			defined_types      = def_new_type;
-
-			expect(";");
-			continue;
-		}
-
-		// parsing type
-		toplv_type = parse_type();
-
-		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
-		if(consume(";")){
-			continue;
-		}
-
-		func_list[func_index] = (Func *)malloc(sizeof(Func));
-
-		// Is function?
-		if(token->kind != TK_IDENT ||!(is_alnum(*token->str))){
-			error_at(token->str, "not a function.");
-		}
-
-		Token *def_name = consume_ident();
-
-		// function
-		if(consume("(")){
-			func_list[func_index]->type = toplv_type;
-			func_list[func_index]->name = calloc(def_name->len, sizeof(char));
-			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
-			
-			// add type list
-			func_list[func_index]->type = insert_ptr_type(func_list[func_index]->type, star_count);
-
-			// get arguments
-			get_argument(func_index);
-
-			// get function block
-			consume("{");
-			function(func_list[func_index++]);
-			consume("}");
-		// global variable
+	if(kind == ND_DEREF){
+		if(rhs->type->ptr_to == NULL || rhs->type->ptr_to->ty != ARRAY){
+			node->type = node->rhs->type->ptr_to;
 		}else{
-			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
-
-			// initialize formula
-			if(consume("=")){
-				if(consume("{")){
-					globals->init = array_block(init_gv);
-				}else{
-					globals->init = init_formula(init_gv, assign());
-				}
-			}else{
-				if(init_gv->kind == ND_GVAR){
-					globals->init = init_formula(init_gv, new_node_num(0));
-				}
-			}
-
-			expect(";");
+			free(node->type);
+			free(node);
+			rhs->type = rhs->type->ptr_to;
+			return rhs;
 		}
 	}
-	func_list[func_index] = __NULL;
+
+	return node;
 }
-//====================================================
+
+Node *new_node_num(int val){
+	//create new node(number)
+	Node *node = calloc(1, sizeof(Node));
+	node->kind = ND_NUM;
+	node->val  = val;
+	node->type = calloc(1, sizeof(Type));
+	node->type->ty    = INT;
+	node->type->size  = type_size(node->type);
+	node->type->align = type_align(node->type);
+	return node;
+}
+
+
 
