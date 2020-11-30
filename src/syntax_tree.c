@@ -61,10 +61,14 @@ Node *data(void){
 		}
 
 		return node;
+	// return new num node
+	}else if(token->kind == TK_NUM){
+		return new_node_num(expect_number());
 	}
 
-	// return new num node
-	return new_node_num(expect_number());
+
+	// NULL statement
+	return new_node(ND_NULL_STMT, NULL, NULL);
 }
 
 Node *primary(void){
@@ -378,10 +382,7 @@ Node *expr(void){
 Node *stmt(void){
 	Node *node = NULL;
 
-	// NULL statement
-	if(consume(";")){
-		node = new_node(ND_NULL_STMT, NULL, NULL);
-	}else if(consume_reserved_word("return", TK_RETURN)){
+	if(consume_reserved_word("return", TK_RETURN)){
 		node = new_node(ND_RETURN, node, NULL);
 		if(!consume(";")){
 			node->rhs = expr();
@@ -511,8 +512,10 @@ Node *stmt(void){
 
 		if(consume("(")){
 			//jmp expr
-			Node *init = stmt();
-			Node *cond = stmt();
+			Node *init = expr();
+			expect(";");
+			Node *cond = expr();
+			expect(";");
 			Node *calc = expr();
 			//check end of caret
 			expect(")");
