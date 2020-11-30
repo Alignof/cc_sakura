@@ -73,10 +73,10 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	//                        void  bool  char  int   ptr  array
-	const char reg_ax[5][4]={"eax","eax","eax","eax","rax","rax"};
-	const char reg_dx[5][4]={"edx","edx","edx","edx","rdx","rdx"};
-	const char reg_di[5][4]={"edi","edi","edi","edi","rdi","rdi"};
+	//                        void _Bool  char  int   ptr  array
+	const char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
+	const char reg_dx[6][4]={"edx","edx","edx","edx","rdx","rdx"};
+	const char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
 	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
 
 	switch(node->kind){
@@ -162,7 +162,7 @@ void gen(Node *node){
 			gen_lvar(node);
 
 			printf("	pop rax\n");
-			if(node->type->ty == CHAR){
+			if(node->type->ty <= CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
 				printf("	movsx eax,al\n");
 			}else{
@@ -207,7 +207,7 @@ void gen(Node *node){
 			// assign
 			printf("	pop rdi\n"); // src
 			printf("	pop rax\n"); // dst
-			if(node->lhs->type->ty == CHAR){
+			if(node->lhs->type->ty <= CHAR){
 				printf("	mov [rax],dil\n");
 			}else if(node->lhs->type->ty == INT){
 				printf("	mov [rax],edi\n");
@@ -226,7 +226,7 @@ void gen(Node *node){
 
 			printf("	pop rdi\n");
 			printf("	pop rax\n");
-			if(node->lhs->type->ty == CHAR){
+			if(node->lhs->type->ty <= CHAR){
 				printf("	mov [rax],dil\n");
 			}else if(node->lhs->type->ty == INT){
 				printf("	mov [rax],edi\n");
@@ -254,7 +254,7 @@ void gen(Node *node){
 			// assign
 			printf("	pop rdi\n"); // src
 			printf("	pop rax\n"); // dst
-			if(node->lhs->type->ty == CHAR){
+			if(node->lhs->type->ty <= CHAR){
 				printf("	mov [rax],dil\n");
 			}else if(node->lhs->type->ty == INT){
 				printf("	mov [rax],edi\n");
@@ -497,7 +497,7 @@ void gen(Node *node){
 		case ND_DEREF:
 			gen(node->rhs);
 			printf("	pop rax\n");
-			if(node->type->ty == CHAR){
+			if(node->type->ty <= CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
 				printf("	movsx eax,al\n");
 			}else{

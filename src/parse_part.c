@@ -233,10 +233,6 @@ Node *call_function(Node *node, Token *tok){
 	node->kind = ND_CALL_FUNC;
 	node->str  = tok->str;
 	node->val  = tok->len;
-/*
-	node->str = (char *)calloc(tok->len, sizeof(char));
-	strncpy(node->str, tok->str, tok->len);
-*/
 
 	int ctr = 0;
 	// have argument?
@@ -284,16 +280,33 @@ void get_argument(int func_index){
 	// get argument
 	if(!(consume(")"))){
 		// set args node
-		args_ptr = &(func_list[func_index]->args);
-		next = *args_ptr;
+		Node *new_arg = NULL;
+
+		//args_ptr = &(func_list[func_index]->args);
+		//next = *args_ptr;
 		while(token->kind == TK_NUM || token->kind == TK_TYPE){
-			*args_ptr = (Node *)calloc(1, sizeof(Node));
+			if(new == NULL){
+				new       = calloc(1, sizeof(Node));
+				new->kind = ND_ARG;
+				new->val  = arg_counter;
+				new->rhs  = expr();
+				func_list[func_index]->args->next = new;
+			}else{
+				new->next       = calloc(1, sizeof(Node));
+				new->next->kind = ND_ARG;
+				new->next->val  = arg_counter;
+				new->next->rhs  = expr();
+				new             = new->next;
+			}
+/*
+			*args_ptr = calloc(1, sizeof(Node));
 			(*args_ptr)->kind = ND_ARG;
 			(*args_ptr)->val  = arg_counter;
 			(*args_ptr)->next = expr();
 			(*args_ptr)->rhs  = next;
 			// go to next
 			next = *args_ptr;
+*/
 
 			arg_counter++;
 
@@ -301,8 +314,9 @@ void get_argument(int func_index){
 				break;
 			}
 		}
-		args_ptr = NULL;
-		func_list[func_index]->args->val = arg_counter-1;
+		//args_ptr = NULL;
+		//func_list[func_index]->args      = new_arg;
+		//func_list[func_index]->args->val = arg_counter-1;
 		expect(")");
 	}
 }

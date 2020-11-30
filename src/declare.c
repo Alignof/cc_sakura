@@ -21,6 +21,7 @@ Type *set_type(Type *type, Token *tok){
 
 	switch(type->ty){
 		case VOID:
+		case BOOL:
 		case CHAR:
 		case INT:
 		case PTR:
@@ -103,6 +104,9 @@ Type *parse_type(void){
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
 		type->ty = VOID;
+		type = set_type(type, NULL);
+	}else if(consume_reserved_word("_Bool", TK_TYPE)){
+		type->ty = BOOL;
 		type = set_type(type, NULL);
 	}else if(consume_reserved_word("char", TK_TYPE)){
 		type->ty = CHAR;
