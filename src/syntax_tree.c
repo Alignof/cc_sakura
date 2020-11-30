@@ -12,16 +12,6 @@ Node *data(void){
 		expect(")");
 		return node;
 	}
-
-/*
-	// character literal
-	if(consume("'")){
-		Node *node=new_node_num((int)*(token->str));
-		token=token->next;
-		expect("'");
-		return node;
-	}
-*/
 	
 	// compiler directive
 	if(token->kind == TK_COMPILER_DIRECTIVE){

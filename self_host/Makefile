@@ -27,7 +27,7 @@ file_test: $(TARGET)
 	./tmp || echo $$?
 
 clean:
-	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out
+	rm -f *.o *.s *~ tmp* *.txt *.out
 	rm -f $(OBJECTS) $(TARGET)
 
 .PHONY: test clean install

@@ -54,9 +54,9 @@ Type *set_type(Type *type, Token *tok){
 					type->member    = structs->member;
 				// in typedef
 				}else{
+					type->ty        = STRUCT;
 					new_struc->next = structs;
 					structs         = new_struc;
-					type->ty        = STRUCT;
 				}
 			}
 

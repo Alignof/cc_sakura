@@ -136,6 +136,9 @@ Token *tokenize(char *p){
 				}else if(*p == '\\'){
 					now = new_token(TK_NUM, now, p++);
 					now->val = 92;
+				}else if(*p == '\''){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 39;
 				}
 			}else{
 				now = new_token(TK_NUM, now, p);
@@ -209,15 +212,11 @@ Token *tokenize(char *p){
 
 		//Is string?
 		if(*p == '"'){
-			if(*(p-1) == '\''){
-				now = new_token(TK_RESERVED, now, p++);
-			}else{
-				p++;
-				while(!(*(p-1) != '\\' && *p == '"')){
-					now = new_token(TK_STR, now, p++);
-				}
-				p++;
+			p++;
+			while(!(*(p-1) != '\\' && *p == '"')){
+				now = new_token(TK_STR, now, p++);
 			}
+			p++;
 			continue;
 		}
 
