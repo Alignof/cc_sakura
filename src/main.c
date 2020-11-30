@@ -63,8 +63,6 @@ void get_code(int argc, char **argv){
 int main(int argc, char **argv){
 	int i, j;
 
-	char reg[6][4] = {"rdi","rsi","rdx","rcx","r8","r9"};
-
 	// get source code
 	get_code(argc, argv);
 
@@ -110,9 +108,6 @@ int main(int argc, char **argv){
 		printf("	sub rsp,%d\n", func_list[i]->stack_size);
 
 		if(func_list[i]->args){
-			// push argument stack
-			for(j = func_list[i]->args->val;j >= 0;j--) printf("	push %s\n", reg[j]);
-
 			// set local variable
 			gen(func_list[i]->args);
 		}

@@ -145,6 +145,7 @@ void gen(Node *node){
 	int  arg_num    = 0;
 	int  label_if   = label_if_num;
 	int  label_loop = label_loop_num;
+	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
 
 	switch(node->kind){
 		case ND_NUM:
@@ -467,19 +468,17 @@ void gen(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_ARG:
-			args = node;
-			while(args){
-				// generate arg as lvar
-				gen(args->next);
-				printf("	pop rax\n");
-				gen_lvar(args->next);
+			while(node){
+				// push register argument saved
+				printf("	push %s\n", reg[node->val]);
+				gen_lvar(node->rhs);
 				printf("	pop rax\n");
 				printf("	pop rdi\n");
 				printf("	mov [rax],rdi\n");
 				printf("	push rdi\n");
-				args=args->rhs;
 				// pop stack top
 				printf("	pop rax\n");
+				node=node->next;
 			}
 
 			return;

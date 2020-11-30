@@ -274,6 +274,7 @@ void get_argument(int func_index){
 
 	if(consume_reserved_word("void", TK_TYPE)){
 		expect(")");
+		func_list[func_index]->args->val = 0;
 		return;
 	}
 
@@ -285,18 +286,18 @@ void get_argument(int func_index){
 		//args_ptr = &(func_list[func_index]->args);
 		//next = *args_ptr;
 		while(token->kind == TK_NUM || token->kind == TK_TYPE){
-			if(new == NULL){
-				new       = calloc(1, sizeof(Node));
-				new->kind = ND_ARG;
-				new->val  = arg_counter;
-				new->rhs  = expr();
-				func_list[func_index]->args->next = new;
+			if(new_arg == NULL){
+				new_arg       = calloc(1, sizeof(Node));
+				new_arg->kind = ND_ARG;
+				new_arg->val  = arg_counter;
+				new_arg->rhs  = expr();
+				func_list[func_index]->args = new_arg;
 			}else{
-				new->next       = calloc(1, sizeof(Node));
-				new->next->kind = ND_ARG;
-				new->next->val  = arg_counter;
-				new->next->rhs  = expr();
-				new             = new->next;
+				new_arg->next       = calloc(1, sizeof(Node));
+				new_arg->next->kind = ND_ARG;
+				new_arg->next->val  = arg_counter;
+				new_arg->next->rhs  = expr();
+				new_arg             = new_arg->next;
 			}
 /*
 			*args_ptr = calloc(1, sizeof(Node));
@@ -314,9 +315,7 @@ void get_argument(int func_index){
 				break;
 			}
 		}
-		//args_ptr = NULL;
-		//func_list[func_index]->args      = new_arg;
-		//func_list[func_index]->args->val = arg_counter-1;
+		func_list[func_index]->args->val = arg_counter-1;
 		expect(")");
 	}
 }
