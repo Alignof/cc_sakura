@@ -12,14 +12,6 @@ Node *data(void){
 		expect(")");
 		return node;
 	}
-
-	// character literal
-	if(consume("'")){
-		Node *node=new_node_num((int)*(token->str));
-		token=token->next;
-		expect("'");
-		return node;
-	}
 	
 	// compiler directive
 	if(token->kind == TK_COMPILER_DIRECTIVE){
@@ -136,9 +128,6 @@ Node *unary(void){
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, NULL, unary());
-		node->type->ty    = PTR;
-		node->type->size  = type_size(node->type);
-		node->type->align = type_align(node->type);
 
 		return node;
 	}

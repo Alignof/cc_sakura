@@ -1,3 +1,4 @@
+
 typedef enum{
 	TK_TYPE,
 	TK_RESERVED,
@@ -19,6 +20,7 @@ typedef enum{
 	TK_TYPEDEF,
 	TK_RETURN,
 	TK_EOF,
+	TK_COMPILER_DIRECTIVE,
 }TokenKind;
 
 typedef enum{
@@ -73,10 +75,12 @@ typedef enum{
 	ND_BREAK, 	//  break
 	ND_CONTINUE, 	//  continue
 	ND_TYPE, 	//  int, double, char...
+	ND_NULL_STMT, 	//  NULL statement (;) 
 }NodeKind;
 
 typedef enum{
 	VOID,
+	BOOL,
 	CHAR,
 	INT,
 	PTR,
@@ -146,7 +150,7 @@ struct Node{
 	Node *lhs;
 	Node *rhs;
 	Node *next;
-	Node *vector;
+	Node *block_code;
 	Type *type;
 	int  val;
 	char *str;
@@ -160,7 +164,7 @@ struct Func{
 	char *name;
 	Type *type;
 	Node *args;
-	Node *code[100];
+	Node *code[300];
 	Func *next;
 };
 
@@ -227,6 +231,7 @@ struct Member{
 };
 
 
+
 // global variable
 int      llid;
 int      lvar_count;
@@ -234,7 +239,7 @@ int      alloc_size;
 char     *user_input;
 char     filename[100];
 Token    *token;
-Func     *func_list[100];
+Func     *func_list[200];
 LVar     *locals;
 GVar     *globals;
 Str      *strings;
@@ -250,9 +255,8 @@ Def_Type *outside_deftype;
 
 int label_if;
 int label_loop;
-int if_depth;
-int loop_depth;
-
+int label_if_num;
+int label_loop_num;
 //================standard library=====================
 typedef struct _IO_FILE FILE;
 typedef void   _IO_lock_t;
@@ -296,100 +300,106 @@ struct _IO_FILE{
 };
 
 FILE *stderr;
+
+typedef _Bool bool;
+bool true  = 1;
+bool false = 0;
 //=========================================================
 
 
 
 //================temporary definition=====================
+typedef void* size_t;
+
 int  SEEK_SET = 0;
 int  SEEK_END = 2;
 char errno;
 
-typedef void* size_t;
-typedef char bool;
+
 //=========================================================
 
-bool isblock(char *str){
-	return (*str == '{') || (*str == '}');
-}
 
-bool at_eof(void){
-	return token->kind == TK_EOF;
-}
-
-int is_alnum(char c){
-	return	(('a' <=  c) && (c <=  'z')) ||
-		(('A' <=  c) && (c <=  'Z')) ||
-		(('0' <=  c) && (c <=  '9')) ||
-		(c == '_');
-}
-
-int len_val(char *str){
-	int counter = 0;
-	for(;is_alnum(*str);str++){
-		counter++;
-	}
-
-	return counter;
-}
-
-bool issymbol(char *str,  bool *single_flag){
-	int i;
-	int size;
-	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
-	char repeat_symbol[] = "<>&|+-";
-	char multi_symbol[]  = "->";
-	char multi_eq[]      = "<=>!+*-/";
-	
-	//Is multi equal? (<=,==,!=,>=)
-	size = sizeof(multi_eq)/sizeof(char);
-	for(i = 0;i < size;i++){
-		if((*str == multi_eq[i]) && (*(str+1) == '=')){
-			*single_flag = false;
-			return true;
-		}
-	}
-	
-	//Is repeat symbol? (<<,>>,&&,||,++,--)
-	size = sizeof(repeat_symbol)/sizeof(char);
-	for(i = 0;i < size;i++){
-		if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
-			*single_flag = false;
-			return true;
-		}
-	}
-
-	//Is multi symbol? (->)
-	size = sizeof(multi_symbol)/sizeof(char)/2;
-	for(i = 0;i < size;i += 2){
-		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
-			*single_flag = false;
-			return true;
-		}
-	}
-
-	//Is single symbol? (+,-,*,/,%,<,>,',.)
-	size = sizeof(single_symbol)/sizeof(char);
-	for(i = 0;i < size;i++){
-		if(*str == single_symbol[i]){
-			*single_flag = true;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-Token *new_token(TokenKind kind, Token *cur, char *str){
-	Token *new = calloc(1, sizeof(Token));
-	new->kind = kind;
-	//Remaining characters
-	new->str = str;
-	new->len = 1;
-	cur->next = new;
-	return new;
-}
-
+// bool isblock(char *str){
+// 	return (*str == '{') || (*str == '}');
+// }
+// 
+// bool at_eof(void){
+// 	return token->kind == TK_EOF;
+// }
+// 
+// int is_alnum(char c){
+// 	return	(('a' <=  c) && (c <=  'z')) ||
+// 		(('A' <=  c) && (c <=  'Z')) ||
+// 		(('0' <=  c) && (c <=  '9')) ||
+// 		(c == '_');
+// }
+// 
+// int len_val(char *str){
+// 	int counter = 0;
+// 	for(;is_alnum(*str);str++){
+// 		counter++;
+// 	}
+// 
+// 	return counter;
+// }
+// 
+// bool issymbol(char *str,  bool *single_flag){
+// 	int i;
+// 	int size;
+// 	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
+// 	char repeat_symbol[] = "<>&|+-";
+// 	char multi_symbol[]  = "->";
+// 	char multi_eq[]      = "<=>!+*-/";
+// 	
+// 	//Is multi equal? (<=,==,!=,>=)
+// 	size = sizeof(multi_eq)/sizeof(char);
+// 	for(i = 0;i < size;i++){
+// 		if((*str == multi_eq[i]) && (*(str+1) == '=')){
+// 			*single_flag = false;
+// 			return true;
+// 		}
+// 	}
+// 	
+// 	//Is repeat symbol? (<<,>>,&&,||,++,--)
+// 	size = sizeof(repeat_symbol)/sizeof(char);
+// 	for(i = 0;i < size;i++){
+// 		if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
+// 			*single_flag = false;
+// 			return true;
+// 		}
+// 	}
+// 
+// 	//Is multi symbol? (->)
+// 	size = sizeof(multi_symbol)/sizeof(char)/2;
+// 	for(i = 0;i < size;i += 2){
+// 		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
+// 			*single_flag = false;
+// 			return true;
+// 		}
+// 	}
+// 
+// 	//Is single symbol? (+,-,*,/,%,<,>,',.)
+// 	size = sizeof(single_symbol)/sizeof(char);
+// 	for(i = 0;i < size;i++){
+// 		if(*str == single_symbol[i]){
+// 			*single_flag = true;
+// 			return true;
+// 		}
+// 	}
+// 
+// 	return false;
+// }
+// 
+// Token *new_token(TokenKind kind, Token *cur, char *str){
+// 	Token *new = calloc(1, sizeof(Token));
+// 	new->kind = kind;
+// 	//Remaining characters
+// 	new->str = str;
+// 	new->len = 1;
+// 	cur->next = new;
+// 	return new;
+// }
+// 
 bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
 	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len])){
 		return false;
@@ -406,7 +416,7 @@ bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_ki
 Token *tokenize(char *p){
 	bool is_single_token;
 	Token head;
-	head.next = NULL;
+	head.next = __NULL;
 
 	//set head pointer to cur
 	Token *now = &head;
@@ -428,6 +438,47 @@ Token *tokenize(char *p){
 			continue;
 		}
 
+		//Is character literal?
+		if(*p == '\''){
+			p++;// consume single quote
+			if(*p == '\\'){
+				p++;// consume back slash
+
+				//Is LF? (\n)
+				if(*p == 'n'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 10;
+				//Is NUL? (\0)
+				}else if(*p == '0'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 0;
+				}else if(*p == '\\'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 92;
+				}
+			}else{
+				now = new_token(TK_NUM, now, p);
+				now->val = *p++;
+			}
+			// consume single quote
+			p++;
+			continue;
+		}
+
+		//Is number?
+		if(isdigit(*p)){
+			if(now->kind == TK_IDENT){
+				now = new_token(TK_IDENT, now, p++);
+				now->len = 1;
+			}else{
+				//add number token
+				now = new_token(TK_NUM, now, p);
+				//set number
+				now->val = strtol(p, &p, 10);
+			}
+			continue;
+		}
+
 		//judge single token or multi token or isn't token
 		if(issymbol(p, &is_single_token)){
 			now = new_token(TK_RESERVED, now, p);
@@ -441,6 +492,7 @@ Token *tokenize(char *p){
 		}
 
 		if(consume_reserved(&p, "void",     4, &now, TK_TYPE))	   continue;
+		if(consume_reserved(&p, "_Bool",    5, &now, TK_TYPE))	   continue;
 		if(consume_reserved(&p, "char",     4, &now, TK_TYPE))	   continue;
 		if(consume_reserved(&p, "int",	    3, &now, TK_TYPE))	   continue;
 		if(consume_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
@@ -476,11 +528,15 @@ Token *tokenize(char *p){
 
 		//Is string?
 		if(*p == '"'){
-			p++;
-			while(!(*(p-1) != '\\' && *p == '"')){
-				now = new_token(TK_STR, now, p++);
+			if(*(p-1) == '\''){
+				now = new_token(TK_RESERVED, now, p++);
+			}else{
+				p++;
+				while(!(*(p-1) != '\\' && *p == '"')){
+					now = new_token(TK_STR, now, p++);
+				}
+				p++;
 			}
-			p++;
 			continue;
 		}
 
@@ -491,36 +547,6 @@ Token *tokenize(char *p){
 			continue;
 		}
 		
-		//Is LF? (\n)
-		if(*p == '\\' && *(p+1) == 'n'){
-			now = new_token(TK_NUM, now, p++);
-			now->val = 10;
-			p++;
-			continue;
-		}
-
-		//Is NUL? (\0)
-		if(*p == '\\' && *(p+1) == '0'){
-			now = new_token(TK_NUM, now, p++);
-			now->val = 0;
-			p++;
-			continue;
-		}
-
-		//Is number?
-		if(isdigit(*p)){
-			if(now->kind == TK_IDENT){
-				now = new_token(TK_IDENT, now, p++);
-				now->len = 1;
-			}else{
-				//add number token
-				now = new_token(TK_NUM, now, p);
-				//set number
-				now->val = strtol(p, &p, 10);
-			}
-			continue;
-		}
-
 		//Is valiable?
 		if(is_alnum(*p)){
 			while(is_alnum(*p)){
@@ -589,24 +615,16 @@ void get_code(int argc, char **argv){
 	}
 }
 
+
 int main(int argc, char **argv){
 	int i;
 	int j;
-
-	char *reg[6];
-	reg[0] = "rdi";
-	reg[1] = "rsi";
-	reg[2] = "rdx";
-	reg[3] = "rcx";
-	reg[4] = "r8";
-	reg[5] = "r9";
 
 	// get source code
 	get_code(argc, argv);
 
 	// tokenize
 	token = tokenize(user_input);
-
 	// make syntax tree
 	program();
 
@@ -632,13 +650,11 @@ int main(int argc, char **argv){
 		printf("	.string \"%.*s\"\n", var->len, var->str);
 	}
 
-	llid        = 0;
-	label_loop  = 0;
-	loop_depth  = 0;
-	label_if    = 0;
-	if_depth    = 0;
-	labels_head = __NULL;
-	labels_tail = __NULL;
+	llid           = 0;
+	label_if_num   = 0;
+	label_loop_num = 0;
+	labels_head    = __NULL;
+	labels_tail    = __NULL;
 
 	//generate assembly at first expr
 	for(i = 0;func_list[i];i++){
@@ -648,9 +664,6 @@ int main(int argc, char **argv){
 		printf("	sub rsp,%d\n", func_list[i]->stack_size);
 
 		if(func_list[i]->args){
-			// push argument stack
-			for(j = func_list[i]->args->val;j >= 0;j--) printf("	push %s\n", reg[j]);
-
 			// set local variable
 			gen(func_list[i]->args);
 		}
@@ -664,15 +677,11 @@ int main(int argc, char **argv){
 		}
 
 		for(j = 0;func_list[i]->code[j] != __NULL;j++){
-			if_depth   = 0;
-			loop_depth = 0;
-
 			// gen code
-			gen(func_list[i]->code[j]);
-			printf("\n	pop rax\n");
-
-			label_if   += if_depth;
-			label_loop += loop_depth;
+			if(func_list[i]->code[j]->kind != ND_NULL_STMT){
+				gen(func_list[i]->code[j]);
+				printf("\n	pop rax\n");
+			}
 		}
 
 		// epiroge

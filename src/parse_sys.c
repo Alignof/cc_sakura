@@ -236,6 +236,21 @@ Struc *find_struc(Token *tok, int find_range){
 	return NULL;
 }
 
+Member *find_struct_member(Type *type, int find_range){
+	char *struc_name = type->name;
+	int  struc_len   = type->len;
+	int out_of_scope = 0;
+
+	for (Struc *var = structs;var;var = var->next){
+		if(var == outside_struct) out_of_scope = 1;
+		if(find_range && out_of_scope) break;
+		if(var->len == struc_len && !memcmp(struc_name, var->name, var->len)){
+			return var->member;
+		}
+	}
+	return NULL;
+}
+
 Enum *find_enum(Token *tok, int find_range){
 	int out_of_scope = 0;
 
@@ -289,6 +304,27 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		}
 	}
 
+	if(kind == ND_ASSIGN){
+		if(lhs->type->ty == BOOL){
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
+		}
+	}
+
+	if(ND_ADD <= kind && kind <= ND_ASSIGN){
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	}
+
+	if(kind == ND_DOT || kind == ND_ARROW){
+		node->type = lhs->type;
+	}
+
+	if(kind == ND_ADDRESS){
+		node->type->ty     = PTR;
+		node->type->size   = type_size(node->type);
+		node->type->align  = type_align(node->type);
+		node->type->ptr_to = rhs->type;
+	}
+
 	if(kind == ND_DEREF){
 		if(rhs->type->ptr_to == NULL || rhs->type->ptr_to->ty != ARRAY){
 			node->type = node->rhs->type->ptr_to;
@@ -298,16 +334,6 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 			rhs->type = rhs->type->ptr_to;
 			return rhs;
 		}
-	}
-
-	if(kind == ND_ASSIGN){
-		if(lhs->type->ty == BOOL){
-			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
-		}
-	}
-
-	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}
 
 	return node;

@@ -28,18 +28,16 @@ Type *set_type(Type *type, Token *tok){
 		case ARRAY:
 			break;
 		case STRUCT:
+			// find with tag name
 			struc_found = find_struc(tok, INSIDE_SCOPE);
+			type->len   = tok->len;
+			type->name  = tok->str;
 			if(struc_found){
 				type->ty = STRUCT;
+				type->size   = struc_found->memsize;
 				// unname enum
 				if(struc_found->member == NULL && consume("{")){
 					struc_found->member = register_struc_member(&(struc_found->memsize));
-					type->member = struc_found->member;
-					type->size   = struc_found->memsize;
-				// normal enum
-				}else{
-					type->member = struc_found->member;
-					type->size   = struc_found->memsize;
 				}
 			}else{
 				Struc *new_struc = calloc(1,sizeof(Struc));
@@ -47,16 +45,14 @@ Type *set_type(Type *type, Token *tok){
 				new_struc->name  = tok->str;
 				// normal declare
 				if(consume("{")){
-					if(struc_found) error_at(token->str, "multiple definition");
 					declare_struct(new_struc);
 					type->ty        = STRUCT;
 					type->size      = structs->memsize;
-					type->member    = structs->member;
 				// in typedef
 				}else{
+					type->ty        = STRUCT;
 					new_struc->next = structs;
 					structs         = new_struc;
-					type->ty        = STRUCT;
 				}
 			}
 
@@ -70,9 +66,6 @@ Type *set_type(Type *type, Token *tok){
 				type->ty = ENUM;
 				if(enum_found->member == NULL && consume("{")){
 					enum_found->member = register_enum_member();
-					type->member = enum_found->member;
-				}else{
-					type->member = enum_found->member;
 				}
 			}else{
 				Enum *new_enum = calloc(1,sizeof(Struc));
@@ -84,7 +77,6 @@ Type *set_type(Type *type, Token *tok){
 					if(enum_found) error_at(token->str, "multiple definition");
 					declare_enum(new_enum);
 					type->ty        = ENUM;
-					type->member    = enumerations->member;
 				}else{
 					new_enum->next  = enumerations;
 					enumerations    = new_enum;

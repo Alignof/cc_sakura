@@ -119,6 +119,50 @@ Token *tokenize(char *p){
 			continue;
 		}
 
+		//Is character literal?
+		if(*p == '\''){
+			p++;// consume single quote
+			if(*p == '\\'){
+				p++;// consume back slash
+
+				//Is LF? (\n)
+				if(*p == 'n'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 10;
+				//Is NUL? (\0)
+				}else if(*p == '0'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 0;
+				}else if(*p == '\\'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 92;
+				}else if(*p == '\''){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 39;
+				}
+			}else{
+				now = new_token(TK_NUM, now, p);
+				now->val = *p++;
+			}
+			// consume single quote
+			p++;
+			continue;
+		}
+
+		//Is number?
+		if(isdigit(*p)){
+			if(now->kind == TK_IDENT){
+				now = new_token(TK_IDENT, now, p++);
+				now->len = 1;
+			}else{
+				//add number token
+				now = new_token(TK_NUM, now, p);
+				//set number
+				now->val = strtol(p, &p, 10);
+			}
+			continue;
+		}
+
 		//judge single token or multi token or isn't token
 		if(issymbol(p, &is_single_token)){
 			now = new_token(TK_RESERVED, now, p);
@@ -183,36 +227,6 @@ Token *tokenize(char *p){
 			continue;
 		}
 		
-		//Is LF? (\n)
-		if(*p == '\\' && *(p+1) == 'n'){
-			now = new_token(TK_NUM, now, p++);
-			now->val = 10;
-			p++;
-			continue;
-		}
-
-		//Is NUL? (\0)
-		if(*p == '\\' && *(p+1) == '0'){
-			now = new_token(TK_NUM, now, p++);
-			now->val = 0;
-			p++;
-			continue;
-		}
-
-		//Is number?
-		if(isdigit(*p)){
-			if(now->kind == TK_IDENT){
-				now = new_token(TK_IDENT, now, p++);
-				now->len = 1;
-			}else{
-				//add number token
-				now = new_token(TK_NUM, now, p);
-				//set number
-				now->val = strtol(p, &p, 10);
-			}
-			continue;
-		}
-
 		//Is valiable?
 		if(is_alnum(*p)){
 			while(is_alnum(*p)){

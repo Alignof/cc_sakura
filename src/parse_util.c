@@ -44,7 +44,7 @@ int type_align(Type *type){
 		case ARRAY:
 			return type_align(type->ptr_to);
 		case STRUCT:
-			memb_list = type->member;
+			memb_list = find_struct_member(type, 1);
 			while(memb_list){
 				align_num = type_align(memb_list->type);
 				if(max < align_num){

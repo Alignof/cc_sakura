@@ -210,6 +210,8 @@ assert -cl 6  'int main(){int i; int x[4]={0,1,2,3}; int y[4]={0,1,2,3}; int *p=
 assert -cl 21 'int global = 7; int *f(int *x){*x += 4; global += 3; return x;} int main(){int x=3; *f(&x) += 4; return global + x;}'
 
 assert -cl 97 "int main(){return 'a';}"
+assert -cl 0  "int main(){return '\0';}"
+assert -cl 10 "int main(){return '\n';}"
 assert -cl 92 "int main(){return '\\\\';}"
 assert -cl 1  "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
 
@@ -244,6 +246,8 @@ assert -cl 2  "typedef enum Color Color; Color{Red, Green, Blue}; int main(){Col
 assert -cl 1  "typedef enum{RED,GREEN,BLUE,}COLOR; int main(void){COLOR c = GREEN; return GREEN;}"
 assert -cl 5  "typedef struct test{int a; int b;}Test; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 assert -cl 5  "typedef struct test Test; Test{int a; int b;}; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
+assert -cl 4  "typedef struct test Test; struct test{int r; int g; int b; Test *next;}; int main(void){Test x; Test y; x.r=1; x.g=2; x.b=3; y.r=4; y.g=5; y.b=6; x.next = &y; return x.next->r;}"
+
 
 assert -cl 1  "int main(){_Bool x = 3; return sizeof(x);}"
 assert -cl 1  "int main(){_Bool x = 3; return x;}"

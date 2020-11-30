@@ -137,10 +137,12 @@ struct Token{
 struct Type{
 	TypeKind ty;
 	Type	 *ptr_to;
-	Member   *member;
+	//Member   *member;
 	int	 size;
 	int	 align;
 	int      index_size;
+	int      len;
+	char     *name;
 };
 
 // defined type
@@ -297,6 +299,7 @@ Str  *find_string(Token *tok);
 Struc *find_struc(Token *tok, int find_range);
 Enum *find_enum(Token *tok, int find_range);
 Member *find_enumerator(Token *tok, int find_range);
+Member *find_struct_member(Type *type, int find_range);
 Def_Type *find_defined_type(Token *tok, int find_range);
 void revert_scope();
 
