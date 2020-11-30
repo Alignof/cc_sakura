@@ -231,26 +231,32 @@ Node *call_function(Node *node, Token *tok){
 	expect("(");
 
 	node->kind = ND_CALL_FUNC;
+	node->str  = tok->str;
+	node->val  = tok->len;
+/*
 	node->str = (char *)calloc(tok->len, sizeof(char));
 	strncpy(node->str, tok->str, tok->len);
+*/
 
 	int ctr = 0;
 	// have argument?
 	if(!(consume(")"))){
-		Node *now;
-		Node *prev = NULL;
+		Node *new = NULL;
 		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED ||
 			token->kind == TK_SIZEOF || token->kind == TK_STR){
 
-			now = logical();
-			now->next = prev;
-			prev = now;
+			if(new == NULL){
+				new        = logical();
+				node->next = new;
+			}else{
+				new->next  = logical();
+				new        = new->next;
+			}
+
 			ctr++;
 
 			if(!(consume(","))) break;
 		}
-		node->next = now;
-		node->val = ctr-1;
 		expect(")");
 	}
 
