@@ -1,3 +1,4 @@
+
 typedef enum{
 	TK_TYPE,
 	TK_RESERVED,
@@ -19,6 +20,7 @@ typedef enum{
 	TK_TYPEDEF,
 	TK_RETURN,
 	TK_EOF,
+	TK_COMPILER_DIRECTIVE,
 }TokenKind;
 
 typedef enum{
@@ -73,10 +75,12 @@ typedef enum{
 	ND_BREAK, 	//  break
 	ND_CONTINUE, 	//  continue
 	ND_TYPE, 	//  int, double, char...
+	ND_NULL_STMT, 	//  NULL statement (;) 
 }NodeKind;
 
 typedef enum{
 	VOID,
+	BOOL,
 	CHAR,
 	INT,
 	PTR,
@@ -146,7 +150,7 @@ struct Node{
 	Node *lhs;
 	Node *rhs;
 	Node *next;
-	Node *vector;
+	Node *block_code;
 	Type *type;
 	int  val;
 	char *str;
@@ -160,7 +164,7 @@ struct Func{
 	char *name;
 	Type *type;
 	Node *args;
-	Node *code[100];
+	Node *code[300];
 	Func *next;
 };
 
@@ -227,6 +231,7 @@ struct Member{
 };
 
 
+
 // global variable
 int      llid;
 int      lvar_count;
@@ -234,7 +239,7 @@ int      alloc_size;
 char     *user_input;
 char     filename[100];
 Token    *token;
-Func     *func_list[100];
+Func     *func_list[200];
 LVar     *locals;
 GVar     *globals;
 Str      *strings;
@@ -250,9 +255,8 @@ Def_Type *outside_deftype;
 
 int label_if;
 int label_loop;
-int if_depth;
-int loop_depth;
-
+int label_if_num;
+int label_loop_num;
 //================standard library=====================
 typedef struct _IO_FILE FILE;
 typedef void   _IO_lock_t;
@@ -296,17 +300,22 @@ struct _IO_FILE{
 };
 
 FILE *stderr;
+
+typedef _Bool bool;
+bool true  = 1;
+bool false = 0;
 //=========================================================
 
 
 
 //================temporary definition=====================
+typedef void* size_t;
+
 int  SEEK_SET = 0;
 int  SEEK_END = 2;
 char errno;
 
-typedef void* size_t;
-typedef char bool;
+
 //=========================================================
 
 bool isblock(char *str){
@@ -406,7 +415,7 @@ bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_ki
 Token *tokenize(char *p){
 	bool is_single_token;
 	Token head;
-	head.next = NULL;
+	head.next = __NULL;
 
 	//set head pointer to cur
 	Token *now = &head;
