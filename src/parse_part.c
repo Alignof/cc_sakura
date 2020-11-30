@@ -33,6 +33,7 @@ Node *dot_arrow(NodeKind type, Node *node){
 	// struc.aaa.bbb.ccc;
 	// struc->aaa->bbb->ccc;
 	// (lvar <- node -> dot) <- node -> dot
+	int INSIDE_FILE = 0;
 	Type *struc_type;
 	Node *new = new_node(type, node, NULL);
 	Token *memb_name  = consume_ident();
@@ -49,9 +50,9 @@ Node *dot_arrow(NodeKind type, Node *node){
 
 	// get member list
 	if(type == ND_DOT){
-		memb_list = find_struct_member(struc_type, 1);
+		memb_list = find_struct_member(struc_type, INSIDE_FILE);
 	}else{
-		memb_list = find_struct_member(struc_type->ptr_to, 1);
+		memb_list = find_struct_member(struc_type->ptr_to, INSIDE_FILE);
 	}
 
 	while(memb_list){
@@ -282,7 +283,7 @@ void get_argument(int func_index){
 		Node *new_arg = NULL;
 		int arg_counter = 0;
 
-		while(token->kind == TK_NUM || token->kind == TK_TYPE  || find_defined_type(token, 1)){
+		while(token->kind == TK_NUM || token->kind == TK_TYPE  || find_defined_type(token, 0)){
 			if(new_arg == NULL){
 				new_arg       = calloc(1, sizeof(Node));
 				new_arg->kind = ND_ARG;

@@ -137,7 +137,6 @@ struct Token{
 struct Type{
 	TypeKind ty;
 	Type	 *ptr_to;
-	//Member   *member;
 	int	 size;
 	int	 align;
 	int      index_size;
