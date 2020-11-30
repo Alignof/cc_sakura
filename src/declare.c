@@ -21,6 +21,7 @@ Type *set_type(Type *type, Token *tok){
 
 	switch(type->ty){
 		case VOID:
+		case BOOL:
 		case CHAR:
 		case INT:
 		case PTR:
@@ -30,10 +31,12 @@ Type *set_type(Type *type, Token *tok){
 			struc_found = find_struc(tok, INSIDE_SCOPE);
 			if(struc_found){
 				type->ty = STRUCT;
+				// unname enum
 				if(struc_found->member == NULL && consume("{")){
 					struc_found->member = register_struc_member(&(struc_found->memsize));
 					type->member = struc_found->member;
 					type->size   = struc_found->memsize;
+				// normal enum
 				}else{
 					type->member = struc_found->member;
 					type->size   = struc_found->memsize;
@@ -42,12 +45,14 @@ Type *set_type(Type *type, Token *tok){
 				Struc *new_struc = calloc(1,sizeof(Struc));
 				new_struc->len   = tok->len;
 				new_struc->name  = tok->str;
+				// normal declare
 				if(consume("{")){
 					if(struc_found) error_at(token->str, "multiple definition");
 					declare_struct(new_struc);
 					type->ty        = STRUCT;
 					type->size      = structs->memsize;
 					type->member    = structs->member;
+				// in typedef
 				}else{
 					new_struc->next = structs;
 					structs         = new_struc;
@@ -99,6 +104,9 @@ Type *parse_type(void){
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
 		type->ty = VOID;
+		type = set_type(type, NULL);
+	}else if(consume_reserved_word("_Bool", TK_TYPE)){
+		type->ty = BOOL;
 		type = set_type(type, NULL);
 	}else if(consume_reserved_word("char", TK_TYPE)){
 		type->ty = CHAR;

@@ -91,6 +91,7 @@ assert -cl 10 "int main(){int a; int i; a=0; for(i=0;i<10;i=i+1) a=a+1;a;}"
 assert -cl 64 "int main(){int a; int i; a=1; for(i=0;i<6;i=i+1) a=a*2;a;}"
 assert -cl 5  "int main(){int i; for(i=0;i<10;i++){if(i==5) break;} return i;}"
 assert -cl 5  "int main(){int i=0; while(i<10){if(i==5){break;}i++;} return i;}"
+assert -cl 50 "int main(){int i; int k; int l; int x=0; for(i=0;i<5;i++){for(k=0;k<10;k++){if(k==5){break;} x++;}for(l=0;l<10;l++){if(l==5){break;} x++;}} return x;}"
 assert -cl 16 "int main(){int i; int x[10];for(i=0;i<10;i++){if(i == 5){x[i]=13;continue;}x[i]=i;} return x[5]+x[3];}"
 assert -cl 16 "int main(){int i=-1; int x[10]; while(i<10){i++;if(i == 5){x[i]=13;continue;}x[i]=i;} return x[5]+x[3];}"
 assert -cl 50 "int main(){int i; int k; int x=0; for(i=0;i<10;i++){for(k=0;k<10;k++){if(k==5){break;} x++;}} return x;}"
@@ -140,6 +141,8 @@ assert -cl 1  "int main(){return sizeof(char);}"
 assert -cl 4  "int main(){return sizeof(int);}"
 assert -cl 8  "int main(){return sizeof(char *);}"
 assert -cl 8  "int main(){return sizeof(int **);}"
+assert -cl 8  "int main(){return sizeof(__NULL);}"
+assert -cl 1  "int main(){return sizeof(*__NULL);}"
 
 assert -cl 1  "int main(){int a[4]; *a=1; return *a;}"
 assert -cl 1  "int main(){int a[4]; *a=1; *a=1; return *a;}"
@@ -242,10 +245,17 @@ assert -cl 1  "typedef enum{RED,GREEN,BLUE,}COLOR; int main(void){COLOR c = GREE
 assert -cl 5  "typedef struct test{int a; int b;}Test; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 assert -cl 5  "typedef struct test Test; Test{int a; int b;}; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 
+assert -cl 1  "int main(){_Bool x = 3; return sizeof(x);}"
+assert -cl 1  "int main(){_Bool x = 3; return x;}"
+assert -cl 1  "int main(){_Bool x = 3; x++; return x;}"
+assert -cl 0  "int main(){_Bool x = 3; x--; return x;}"
+assert -cl 1  "int main(){_Bool x = 3; x+=3; return x;}"
+assert -cl 0  "int main(){_Bool x = 3; x-=1; return x;}"
+assert -cl 1  "int main(){_Bool x = 3; x-=4; return x;}"
+assert -cl 4  "int main(){_Bool x = 3; return x+3;}"
 
 assert -cl 5  "int main(){int x=5; ; return x;}"
 assert -cl 10 "int main(){int i=0; int x=0; for(;i<10;i++){x++;}return x ;}"
-
 
 
 echo OK

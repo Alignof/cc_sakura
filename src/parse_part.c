@@ -5,6 +5,24 @@
 // LVar *locals;
 // Func *func_list[100];
 
+Node *compiler_directive(){
+	Node *node;
+	
+	if(consume_reserved_word("__NULL", TK_COMPILER_DIRECTIVE)){
+		node = new_node_num(0);
+		node->type->ty    = PTR;
+		node->type->size  = 8;
+		node->type->align = 8;
+
+		node->type->ptr_to        = calloc(1, sizeof(Type));
+		node->type->ptr_to->ty    = VOID;
+		node->type->ptr_to->size  = 1;
+		node->type->ptr_to->align = 1;
+	}
+
+	return node;
+}
+
 Node *compound_assign(TypeKind type, Node *dst, Node *src){
 	Node *calc = new_node(type, dst, src);
 	Node *new  = new_node(ND_COMPOUND, dst, calc);
@@ -122,17 +140,17 @@ Node *array_str(Node *arr, Node *init_val){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
-			node->vector = dst;
+			node->block_code = dst;
 		}else{
-			dst->vector = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
-			dst = dst->vector;
+			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
+			dst = dst->block_code;
 		}
 		ctr++;
 	}
 
 	// '\0'
-	dst->vector = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->offset)), new_node_num('\0'));
-	dst = dst->vector;
+	dst->block_code = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->offset)), new_node_num('\0'));
+	dst = dst->block_code;
 	ctr++;
 
 	// ommitted
@@ -168,10 +186,10 @@ Node *array_block(Node *arr){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, expr());
-			node->vector = dst;
+			node->block_code = dst;
 		}else{
-			dst->vector = new_node(ND_ASSIGN, src, expr());
-			dst = dst->vector;
+			dst->block_code = new_node(ND_ASSIGN, src, expr());
+			dst = dst->block_code;
 		}
 		consume(",");
 		ctr++;
@@ -198,8 +216,8 @@ Node *array_block(Node *arr){
 	}else if(arr->type->index_size > ctr){
 		while(ctr != arr->type->index_size){
 			src = array_index(clone, new_node_num(ctr));
-			dst->vector = new_node(ND_ASSIGN, src, new_node_num(0));
-			dst = dst->vector;
+			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(0));
+			dst = dst->block_code;
 
 			ctr++;
 			consume(",");
@@ -213,26 +231,28 @@ Node *call_function(Node *node, Token *tok){
 	expect("(");
 
 	node->kind = ND_CALL_FUNC;
-	node->str = (char *)calloc(tok->len, sizeof(char));
-	strncpy(node->str, tok->str, tok->len);
+	node->str  = tok->str;
+	node->val  = tok->len;
 
 	int ctr = 0;
 	// have argument?
 	if(!(consume(")"))){
-		Node *now;
-		Node *prev = NULL;
+		Node *new = NULL;
 		while(token->kind == TK_NUM || token->kind == TK_IDENT || token->kind == TK_RESERVED ||
 			token->kind == TK_SIZEOF || token->kind == TK_STR){
 
-			now = logical();
-			now->next = prev;
-			prev = now;
+			if(new == NULL){
+				new        = logical();
+				node->next = new;
+			}else{
+				new->next  = logical();
+				new        = new->next;
+			}
+
 			ctr++;
 
 			if(!(consume(","))) break;
 		}
-		node->next = now;
-		node->val = ctr-1;
 		expect(")");
 	}
 
@@ -248,37 +268,40 @@ Node *array_index(Node *node, Node *index){
 }
 
 void get_argument(int func_index){
-	int arg_counter = 0;
-	Node *next;
-	Node **args_ptr;
-
 	if(consume_reserved_word("void", TK_TYPE)){
+		func_list[func_index]->args = NULL;
 		expect(")");
 		return;
 	}
 
 	// get argument
-	if(!(consume(")"))){
+	if(consume(")")){
+		func_list[func_index]->args = NULL;
+	}else{
 		// set args node
-		args_ptr = &(func_list[func_index]->args);
-		next = *args_ptr;
-		while(token->kind == TK_NUM || token->kind == TK_TYPE){
-			*args_ptr = (Node *)calloc(1, sizeof(Node));
-			(*args_ptr)->kind = ND_ARG;
-			(*args_ptr)->val  = arg_counter;
-			(*args_ptr)->next = expr();
-			(*args_ptr)->rhs  = next;
-			// go to next
-			next = *args_ptr;
+		Node *new_arg = NULL;
+		int arg_counter = 0;
 
+		while(token->kind == TK_NUM || token->kind == TK_TYPE){
+			if(new_arg == NULL){
+				new_arg       = calloc(1, sizeof(Node));
+				new_arg->kind = ND_ARG;
+				new_arg->val  = arg_counter;
+				new_arg->rhs  = expr();
+				func_list[func_index]->args = new_arg;
+			}else{
+				new_arg->next       = calloc(1, sizeof(Node));
+				new_arg->next->kind = ND_ARG;
+				new_arg->next->val  = arg_counter;
+				new_arg->next->rhs  = expr();
+				new_arg             = new_arg->next;
+			}
 			arg_counter++;
 
 			if(!(consume(","))){
 				break;
 			}
 		}
-		args_ptr = NULL;
-		func_list[func_index]->args->val = arg_counter-1;
 		expect(")");
 	}
 }

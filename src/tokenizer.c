@@ -132,6 +132,7 @@ Token *tokenize(char *p){
 		}
 
 		if(consume_reserved(&p, "void",     4, &now, TK_TYPE))	   continue;
+		if(consume_reserved(&p, "_Bool",    5, &now, TK_TYPE))	   continue;
 		if(consume_reserved(&p, "char",     4, &now, TK_TYPE))	   continue;
 		if(consume_reserved(&p, "int",	    3, &now, TK_TYPE))	   continue;
 		if(consume_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
@@ -149,6 +150,12 @@ Token *tokenize(char *p){
 		if(consume_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
 		if(consume_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
 		if(consume_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
+
+		// compiler directive
+		if(consume_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(consume_reserved(&p, "define",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(consume_reserved(&p, "include",  7, &now, TK_COMPILER_DIRECTIVE)) continue;
+
 
 		//Is block? '{' or '}'
 		if(isblock(p)){

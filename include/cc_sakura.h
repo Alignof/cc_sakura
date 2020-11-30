@@ -29,6 +29,7 @@ typedef enum{
 	TK_TYPEDEF,
 	TK_RETURN,
 	TK_EOF,
+	TK_COMPILER_DIRECTIVE,
 }TokenKind;
 
 typedef enum{
@@ -88,6 +89,7 @@ typedef enum{
 
 typedef enum{
 	VOID,
+	BOOL,
 	CHAR,
 	INT,
 	PTR,
@@ -157,7 +159,7 @@ struct Node{
 	Node *lhs;
 	Node *rhs;
 	Node *next;
-	Node *vector;
+	Node *block_code;
 	Type *type;
 	int  val;
 	char *str;
@@ -171,7 +173,7 @@ struct Func{
 	char *name;
 	Type *type;
 	Node *args;
-	Node *code[100];
+	Node *code[300];
 	Func *next;
 };
 
@@ -246,7 +248,7 @@ extern int      alloc_size;
 extern char     *user_input;
 extern char     filename[100];
 extern Token    *token;
-extern Func     *func_list[100];
+extern Func     *func_list[FUNC_NUM];
 extern LVar     *locals;
 extern GVar     *globals;
 extern Str      *strings;
@@ -323,6 +325,7 @@ Node *data(void);
 
 // parse_part.c
 void get_argument(int func_index);
+Node *compiler_directive();
 Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(NodeKind type, Node *node);
 Node *init_formula(Node *node, Node *init_val);
@@ -346,8 +349,8 @@ Member *register_enum_member(void);
 // codegan.c
 extern int label_if;
 extern int label_loop;
-extern int if_depth;
-extern int loop_depth;
+extern int label_if_num;
+extern int label_loop_num;
 void gen(Node *node);
 void gen_calc(Node *node);
 void gen_lvar(Node *node);
@@ -355,6 +358,6 @@ void gen_gvar(Node *node);
 void gen_struc(Node *node);
 void gen_address(Node *node);
 void expand_next(Node *node);
-void expand_vector(Node *node);
+void expand_block_code(Node *node);
 
 

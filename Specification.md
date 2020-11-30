@@ -123,19 +123,17 @@ struct of syntax tree node.
 | Node \*lhs    	| node of left hand side	| (left hand node address)	|
 | Node \*rhs    	| node of right hand side	| (right hand node address)	|
 | Node \*next   	| **see table below**		| (next argument chain)		|
-| Node \*vector 	| **see table below**		| NULL				|
+| Node \*block\_code 	| **see table below**		| NULL				|
 | Type type		| node type 			| (struct Type)			|
 | int val		| **see table below**		| 0				|
 | int offset		| local variable offset		| 0				|
 | char \*str    	| name  			| NULL				|
 
 
-#### node->vector
-| Nodekind		| node-\>vector means				|
+#### node->block\_code
+| Nodekind		| node-\>block\_code means			|
 | :--			| :--						|
-| ND\_FOR		| exit conditions -> code or block code		|
 | ND\_BLOCK		| chain of block code 				|
-| ND\_TERNARY		| else expression 				|
 
 
 
@@ -146,6 +144,8 @@ struct of syntax tree node.
 | ND\_ASSIGN		| chain of initialize formula		|
 | ND\_CALL\_FUNC	| head of argument chained lists	|
 | ND\_SWITCH		| chain of case condition		|
+| ND\_FOR		| exit conditions -> code or block code	|
+| ND\_TERNARY		| else expression 			|
 | ND\_AND		| chain of arguments			|
 | ND\_OR		| chain of arguments			|
 | ND\_EQ		| chain of arguments			|

@@ -1,10 +1,8 @@
 #include "cc_sakura.h"
 
 int   llid;
-int   label_loop;
-int   label_if;
-int   if_depth;
-int   loop_depth;
+int   label_if_num;
+int   label_loop_num;
 char  *user_input;
 char  filename[100];
 Func  *func_list[FUNC_NUM];
@@ -65,8 +63,6 @@ void get_code(int argc, char **argv){
 int main(int argc, char **argv){
 	int i, j;
 
-	char reg[6][4] = {"rdi","rsi","rdx","rcx","r8","r9"};
-
 	// get source code
 	get_code(argc, argv);
 
@@ -98,13 +94,11 @@ int main(int argc, char **argv){
 		printf("	.string \"%.*s\"\n", var->len, var->str);
 	}
 
-	llid        = 0;
-	label_loop  = 0;
-	loop_depth  = 0;
-	label_if    = 0;
-	if_depth    = 0;
-	labels_head = NULL;
-	labels_tail = NULL;
+	llid           = 0;
+	label_if_num   = 0;
+	label_loop_num = 0;
+	labels_head    = NULL;
+	labels_tail    = NULL;
 
 	//generate assembly at first expr
 	for(i = 0;func_list[i];i++){
@@ -114,9 +108,6 @@ int main(int argc, char **argv){
 		printf("	sub rsp,%d\n", func_list[i]->stack_size);
 
 		if(func_list[i]->args){
-			// push argument stack
-			for(j = func_list[i]->args->val;j >= 0;j--) printf("	push %s\n", reg[j]);
-
 			// set local variable
 			gen(func_list[i]->args);
 		}
@@ -130,17 +121,11 @@ int main(int argc, char **argv){
 		}
 
 		for(j = 0;func_list[i]->code[j] != NULL;j++){
-			if_depth   = 0;
-			loop_depth = 0;
-
 			// gen code
 			if(func_list[i]->code[j]->kind != ND_NULL_STMT){
 				gen(func_list[i]->code[j]);
 				printf("\n	pop rax\n");
 			}
-
-			label_if   += if_depth;
-			label_loop += loop_depth;
 		}
 
 		// epiroge

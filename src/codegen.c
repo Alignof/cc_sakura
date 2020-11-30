@@ -1,9 +1,9 @@
 #include "cc_sakura.h"
 
-// int label_if;
-// int if_depth;
-// int label_loop;
-// int loop_depth;
+//int label_if;
+//int label_loop;
+//int label_if_num;
+//int label_loop_num;
 
 void expand_next(Node *node){
 	while(node){
@@ -14,11 +14,11 @@ void expand_next(Node *node){
 	printf("	push rax\n");
 }
 
-void expand_vector(Node *node){
+void expand_block_code(Node *node){
 	while(node){
 		gen(node);
 		printf("	pop rax\n");
-		node=node->vector;
+		node=node->block_code;
 	}
 	printf("	push rax\n");
 }
@@ -73,10 +73,10 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	//                        void  char  int   ptr  array
-	const char reg_ax[5][4]={"eax","eax","eax","rax","rax"};
-	const char reg_dx[5][4]={"edx","edx","edx","rdx","rdx"};
-	const char reg_di[5][4]={"edi","edi","edi","rdi","rdi"};
+	//                        void _Bool  char  int   ptr  array
+	const char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
+	const char reg_dx[6][4]={"edx","edx","edx","edx","rdx","rdx"};
+	const char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
 	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
 
 	switch(node->kind){
@@ -140,9 +140,12 @@ void gen_calc(Node *node){
 }
 
 void gen(Node *node){
-	Node *tmp;
+	Node *args;
 	Node *cases;
-	int arg = 0;
+	int  arg_num    = 0;
+	int  label_if   = label_if_num;
+	int  label_loop = label_loop_num;
+	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
 
 
 	// generate assembly
@@ -165,7 +168,7 @@ void gen(Node *node){
 			gen_lvar(node);
 
 			printf("	pop rax\n");
-			if(node->type->ty == CHAR){
+			if(node->type->ty <= CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
 				printf("	movsx eax,al\n");
 			}else{
@@ -174,19 +177,19 @@ void gen(Node *node){
 			printf("	push rax\n");
 
 			// init formula
-			if(node->vector != NULL) gen(node->vector);
+			if(node->block_code != NULL) gen(node->block_code);
 			return;
 		case ND_GARRAY:
 			gen_gvar(node);
 
 			// init formula
-			if(node->vector != NULL) expand_next(node->vector);
+			if(node->block_code != NULL) expand_next(node->block_code);
 			return;
 		case ND_LARRAY:
 			gen_lvar(node);
 
 			// init formula
-			if(node->vector != NULL) expand_next(node->vector);
+			if(node->block_code != NULL) expand_next(node->block_code);
 			return;
 		case ND_PREID:
 			// ++p -> p += 1
@@ -210,7 +213,13 @@ void gen(Node *node){
 			// assign
 			printf("	pop rdi\n"); // src
 			printf("	pop rax\n"); // dst
-			if(node->lhs->type->ty == CHAR){
+			if(node->lhs->type->ty <= CHAR){
+				if(node->lhs->type->ty == BOOL){
+					printf("	mov R8B,dil\n");
+					printf("	cmp R8B,0\n");
+					printf("	setne dl\n");
+					printf("	movzb rdi,dl\n");
+				}
 				printf("	mov [rax],dil\n");
 			}else if(node->lhs->type->ty == INT){
 				printf("	mov [rax],edi\n");
@@ -229,7 +238,7 @@ void gen(Node *node){
 
 			printf("	pop rdi\n");
 			printf("	pop rax\n");
-			if(node->lhs->type->ty == CHAR){
+			if(node->lhs->type->ty <= CHAR){
 				printf("	mov [rax],dil\n");
 			}else if(node->lhs->type->ty == INT){
 				printf("	mov [rax],edi\n");
@@ -257,7 +266,13 @@ void gen(Node *node){
 			// assign
 			printf("	pop rdi\n"); // src
 			printf("	pop rax\n"); // dst
-			if(node->lhs->type->ty == CHAR){
+			if(node->lhs->type->ty <= CHAR){
+				if(node->lhs->type->ty == BOOL){
+					printf("	mov R8B,dil\n");
+					printf("	cmp R8B,0\n");
+					printf("	setne dl\n");
+					printf("	movzb rdi,dl\n");
+				}
 				printf("	mov [rax],dil\n");
 			}else if(node->lhs->type->ty == INT){
 				printf("	mov [rax],edi\n");
@@ -278,8 +293,7 @@ void gen(Node *node){
 			}
 			return;
 		case ND_TERNARY:
-			label_if++;
-			if_depth++;
+			label_if_num++;
 
 			// condition
 			gen(node->lhs);
@@ -293,14 +307,12 @@ void gen(Node *node){
 			printf(".Lelse%03d:\n", label_if);
 
 			// false
-			gen(node->vector);
+			gen(node->next);
 			printf(".LifEnd%03d:\n", label_if);
 
-			label_if--;
 			return;
 		case ND_IF:
-			label_if++;
-			if_depth++;
+			label_if_num++;
 
 			printf("	push rax\n");
 			gen(node->lhs);
@@ -312,11 +324,9 @@ void gen(Node *node){
 			gen(node->rhs);
 
 			printf(".LifEnd%03d:\n", label_if);
-			label_if--;
 			return;
 		case ND_IFELSE:
-			label_if++;
-			if_depth++;
+			label_if_num++;
 
 			// condition
 			gen(node->lhs);
@@ -333,11 +343,10 @@ void gen(Node *node){
 			gen(node->rhs->rhs);
 			printf(".LifEnd%03d:\n", label_if);
 
-			label_if--;
 			return;
 		case ND_SWITCH:
-			label_loop++;
-			loop_depth++;
+			label_if_num++;
+			label_loop_num++;
 
 			// gen cases condtion
 			cases = node->next;
@@ -360,7 +369,6 @@ void gen(Node *node){
 
 			printf(".LloopEnd%03d:\n", label_loop);
 			printf("	push rax\n");
-			label_loop--;
 			return;
 		case ND_CASE:
 			printf(".LcaseBegin%03d:\n", node->val);
@@ -373,12 +381,12 @@ void gen(Node *node){
 			// init
 			gen(node->lhs);
 
-			label_loop++;
-			loop_depth++;
+
+			label_loop_num++;
 
 			// condition
 			printf(".LloopBegin%03d:\n", label_loop);
-			gen(node->lhs->vector);
+			gen(node->lhs->next);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// if cond true then jump to  loop end.
@@ -389,7 +397,7 @@ void gen(Node *node){
 
 			// gen update expression
 			printf(".LloopCont%03d:\n", label_loop);
-			gen(node->lhs->vector->vector);
+			gen(node->lhs->next->next);
 			printf("	pop rax\n");
 
 			// continue
@@ -397,11 +405,9 @@ void gen(Node *node){
 			printf(".LloopEnd%03d:\n", label_loop);
 			printf("	push rax\n");
 
-			label_loop--;
 			return;
 		case ND_WHILE:
-			label_loop++;
-			loop_depth++;
+			label_loop = label_loop_num++;
 
 			// adjust rsp
 			printf("	push rax\n");
@@ -423,11 +429,9 @@ void gen(Node *node){
 			printf(".LloopEnd%03d:\n", label_loop);
 			printf("	push rax\n");
 
-			label_loop--;
 			return;
 		case ND_DOWHILE:
-			label_loop++;
-			loop_depth++;
+			label_loop_num++;
 
 			// adjust rsp
 			printf("	push rax\n");
@@ -449,35 +453,31 @@ void gen(Node *node){
 			printf(".LloopEnd%03d:\n", label_loop);
 			printf("	push rax\n");
 
-			label_loop--;
 			return;
 		case ND_CONTINUE:
-			printf("	jmp .LloopCont%03d\n", label_loop);
+			printf("	jmp .LloopCont%03d\n", label_loop-1);
 			return;
 		case ND_BREAK:
-			printf("	jmp .LloopEnd%03d\n", label_loop);
+			printf("	jmp .LloopEnd%03d\n", label_loop-1);
 			return;
 		case ND_BLOCK:
-			expand_vector(node->vector);
+			expand_block_code(node->block_code);
 			return;
 		case ND_CALL_FUNC:
-			tmp=node->next;
-			arg=node->val;
+			args    = node->next;
+			arg_num = 0;
 
-			if(tmp!=NULL){
-				while(tmp->next!=NULL){
-					gen_arg(arg, tmp);
-					tmp=tmp->next;
-					arg--;
-				}
-				gen_arg(arg, tmp);
+			while(args){
+				gen_arg(arg_num, args);
+				arg_num++;
+				args=args->next;
 			}
 
 			printf("	push rbp\n");
 			printf("	mov rbp,rsp\n");
 			printf("	and rsp,-16\n");
 
-			printf("	call %s\n", node->str);
+			printf("	call %.*s\n", node->val, node->str);
 
 			printf("	mov rsp,rbp\n");
 			printf("	pop rbp\n");
@@ -485,19 +485,17 @@ void gen(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_ARG:
-			tmp = node;
-			while(tmp){
-				// generate arg as lvar
-				gen(tmp->next);
-				printf("	pop rax\n");
-				gen_lvar(tmp->next);
+			while(node){
+				// push register argument saved
+				printf("	push %s\n", reg[node->val]);
+				gen_lvar(node->rhs);
 				printf("	pop rax\n");
 				printf("	pop rdi\n");
 				printf("	mov [rax],rdi\n");
 				printf("	push rdi\n");
-				tmp=tmp->rhs;
 				// pop stack top
 				printf("	pop rax\n");
+				node=node->next;
 			}
 
 			return;
@@ -515,7 +513,7 @@ void gen(Node *node){
 		case ND_DEREF:
 			gen(node->rhs);
 			printf("	pop rax\n");
-			if(node->type->ty == CHAR){
+			if(node->type->ty <= CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
 				printf("	movsx eax,al\n");
 			}else{

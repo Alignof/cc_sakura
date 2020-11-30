@@ -20,6 +20,12 @@ Node *data(void){
 		expect("'");
 		return node;
 	}
+	
+	// compiler directive
+	if(token->kind == TK_COMPILER_DIRECTIVE){
+		Node *node = compiler_directive();
+		return node;
+	}
 
 	// variable
 	int INSIDE_FUNC = 0;
@@ -74,7 +80,7 @@ Node *primary(void){
 
 	// Is array index
 	while(consume("[")){
-		node = array_index(node, mul());
+		node = array_index(node, add());
 		expect("]");
 	}
 
@@ -303,8 +309,8 @@ Node *ternary(void){
 		//                          cond  if true
 		node = new_node(ND_TERNARY, node, ternary());
 		expect(":");
-		//             if false
-		node->vector = ternary();
+		//           if false
+		node->next = ternary();
 	}
 
 	return node;
@@ -324,6 +330,7 @@ Node *assign(void){
 	}else if(consume("/=")){
 		node = compound_assign(ND_DIV, node, assign());
 	}
+
 
 	return node;
 }
@@ -360,10 +367,10 @@ Node *expr(void){
 		if(consume("=")){
 			if(consume("{")){
 				node = array_block(node);
-				//node->vector = array_block(node);
+				//node->block_code = array_block(node);
 			}else{
 				node = init_formula(node, assign());
-				//node->vector = init_formula(node, assign());
+				//node->block_code = init_formula(node, assign());
 			}
 		}
 	}else if(consume_reserved_word("break", TK_BREAK)){
@@ -507,7 +514,12 @@ Node *stmt(void){
 		node->rhs = stmt();
 		label_register(node, LB_DEFAULT);
 	}else if(consume_reserved_word("for", TK_FOR)){
+		outside_lvar   = locals;
+		outside_enum   = enumerations;
+		outside_struct = structs;
+		
 		node = new_node(ND_FOR, node, NULL);
+
 		if(consume("(")){
 			//jmp expr
 			Node *init = stmt();
@@ -520,9 +532,13 @@ Node *stmt(void){
 			// +-> (init->cond->loop)  +<-for->expr
 			node->rhs = stmt();
 			node->lhs = init;
-			node->lhs->vector = cond;
-			node->lhs->vector->vector = calc;
+			node->lhs->next = cond;
+			node->lhs->next->next = calc;
 		}
+
+		locals       = outside_lvar; 
+		enumerations = outside_enum; 
+		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
 		node = new_node(ND_DOWHILE, NULL, stmt());
@@ -554,12 +570,12 @@ Node *stmt(void){
 		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
 			//Is first?
-			if(node->vector){
-				block_code->vector = stmt();
-				block_code = block_code->vector;
+			if(node->block_code){
+				block_code->block_code = stmt();
+				block_code = block_code->block_code;
 			}else{
 				block_code = stmt();
-				node->vector = block_code;
+				node->block_code = block_code;
 			}
 		}
 		
