@@ -147,7 +147,12 @@ void gen(Node *node){
 	int  label_loop = label_loop_num;
 	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
 
+
+	// generate assembly
 	switch(node->kind){
+		case ND_NULL_STMT:
+			// NULL statement
+			return;
 		case ND_NUM:
 			printf("	push %d\n", node->val);
 			return;

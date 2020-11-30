@@ -389,7 +389,10 @@ Node *expr(void){
 Node *stmt(void){
 	Node *node = NULL;
 
-	if(consume_reserved_word("return", TK_RETURN)){
+	// NULL statement
+	if(consume(";")){
+		node = new_node(ND_NULL_STMT, NULL, NULL);
+	}else if(consume_reserved_word("return", TK_RETURN)){
 		node = new_node(ND_RETURN, node, NULL);
 		if(!consume(";")){
 			node->rhs = expr();
@@ -519,10 +522,8 @@ Node *stmt(void){
 
 		if(consume("(")){
 			//jmp expr
-			Node *init = expr();
-			expect(";");
-			Node *cond = expr();
-			expect(";");
+			Node *init = stmt();
+			Node *cond = stmt();
 			Node *calc = expr();
 			//check end of caret
 			expect(")");

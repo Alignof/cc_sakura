@@ -245,7 +245,6 @@ assert -cl 1  "typedef enum{RED,GREEN,BLUE,}COLOR; int main(void){COLOR c = GREE
 assert -cl 5  "typedef struct test{int a; int b;}Test; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 assert -cl 5  "typedef struct test Test; Test{int a; int b;}; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 
-
 assert -cl 1  "int main(){_Bool x = 3; return sizeof(x);}"
 assert -cl 1  "int main(){_Bool x = 3; return x;}"
 assert -cl 1  "int main(){_Bool x = 3; x++; return x;}"
@@ -254,6 +253,9 @@ assert -cl 1  "int main(){_Bool x = 3; x+=3; return x;}"
 assert -cl 0  "int main(){_Bool x = 3; x-=1; return x;}"
 assert -cl 1  "int main(){_Bool x = 3; x-=4; return x;}"
 assert -cl 4  "int main(){_Bool x = 3; return x+3;}"
+
+assert -cl 5  "int main(){int x=5; ; return x;}"
+assert -cl 10 "int main(){int i=0; int x=0; for(;i<10;i++){x++;}return x ;}"
 
 
 echo OK
