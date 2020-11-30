@@ -128,9 +128,6 @@ Node *unary(void){
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, NULL, unary());
-		node->type->ty    = PTR;
-		node->type->size  = type_size(node->type);
-		node->type->align = type_align(node->type);
 
 		return node;
 	}

@@ -1,7 +1,6 @@
-/*
 typedef struct test Test;
 
-struct Test{
+struct test{
 	int r;
 	int g;
 	int b;
@@ -25,7 +24,3 @@ int main(void){
 	// 4
 	return x.next->r;
 }
-*/
-
-
-enum Color{Red, Green, Blue}; int main(){return Blue;}

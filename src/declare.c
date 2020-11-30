@@ -28,6 +28,7 @@ Type *set_type(Type *type, Token *tok){
 		case ARRAY:
 			break;
 		case STRUCT:
+			// find with tag name
 			struc_found = find_struc(tok, INSIDE_SCOPE);
 			type->len   = tok->len;
 			type->name  = tok->str;
