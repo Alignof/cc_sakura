@@ -246,6 +246,14 @@ assert -cl 5  "typedef struct test{int a; int b;}Test; int main(){Test x; x.a=2;
 assert -cl 5  "typedef struct test Test; Test{int a; int b;}; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;}"
 
 
+assert -cl 1  "int main(){_Bool x = 3; return sizeof(x);}"
+assert -cl 1  "int main(){_Bool x = 3; return x;}"
+assert -cl 1  "int main(){_Bool x = 3; x++; return x;}"
+assert -cl 0  "int main(){_Bool x = 3; x--; return x;}"
+assert -cl 1  "int main(){_Bool x = 3; x+=3; return x;}"
+assert -cl 0  "int main(){_Bool x = 3; x-=1; return x;}"
+assert -cl 1  "int main(){_Bool x = 3; x-=4; return x;}"
+assert -cl 4  "int main(){_Bool x = 3; return x+3;}"
 
 
 echo OK

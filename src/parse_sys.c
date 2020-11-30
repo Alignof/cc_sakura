@@ -300,6 +300,12 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		}
 	}
 
+	if(kind == ND_ASSIGN){
+		if(lhs->type->ty == BOOL){
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
+		}
+	}
+
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
 		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}

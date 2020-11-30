@@ -209,6 +209,12 @@ void gen(Node *node){
 			printf("	pop rdi\n"); // src
 			printf("	pop rax\n"); // dst
 			if(node->lhs->type->ty <= CHAR){
+				if(node->lhs->type->ty == BOOL){
+					printf("	mov R8B,dil\n");
+					printf("	cmp R8B,0\n");
+					printf("	setne dl\n");
+					printf("	movzb rdi,dl\n");
+				}
 				printf("	mov [rax],dil\n");
 			}else if(node->lhs->type->ty == INT){
 				printf("	mov [rax],edi\n");
@@ -256,6 +262,12 @@ void gen(Node *node){
 			printf("	pop rdi\n"); // src
 			printf("	pop rax\n"); // dst
 			if(node->lhs->type->ty <= CHAR){
+				if(node->lhs->type->ty == BOOL){
+					printf("	mov R8B,dil\n");
+					printf("	cmp R8B,0\n");
+					printf("	setne dl\n");
+					printf("	movzb rdi,dl\n");
+				}
 				printf("	mov [rax],dil\n");
 			}else if(node->lhs->type->ty == INT){
 				printf("	mov [rax],edi\n");
