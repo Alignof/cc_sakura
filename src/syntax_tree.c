@@ -193,8 +193,8 @@ Node *unary(void){
 		// sizeof(&a)  = > 8
 
 		if(consume("(")){
-			int INSIDE_SCOPE = 1;
-			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE)){
+			int INSIDE_FILE = 0;
+			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
 				Type *target_type = parse_type();
 				node = new_node(ND_NUM, node, new_node_num(target_type->size));
 				node->val = target_type->size;

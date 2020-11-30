@@ -17,7 +17,7 @@ Def_Type *outside_deftype;
 Type *set_type(Type *type, Token *tok){
 	Enum  *enum_found;
 	Struc *struc_found;
-	int INSIDE_SCOPE = 1;
+	int INSIDE_FILE = 0;
 
 	switch(type->ty){
 		case VOID:
@@ -29,7 +29,7 @@ Type *set_type(Type *type, Token *tok){
 			break;
 		case STRUCT:
 			// find with tag name
-			struc_found = find_struc(tok, INSIDE_SCOPE);
+			struc_found = find_struc(tok, INSIDE_FILE);
 			type->len   = tok->len;
 			type->name  = tok->str;
 			if(struc_found){
@@ -59,7 +59,7 @@ Type *set_type(Type *type, Token *tok){
 			break;
 		case ENUM:
 			if(tok){
-				enum_found = find_enum(tok, INSIDE_SCOPE);
+				enum_found = find_enum(tok, INSIDE_FILE);
 			}
 
 			if(enum_found){
@@ -284,12 +284,12 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 Member *register_struc_member(int *asize_ptr){
 	int size_of_type;
-	int INSIDE_SCOPE  = 1;
+	int INSIDE_FILE   = 0;
 	Member *new_memb  = NULL;
 	Member *memb_head = NULL;
 
 	while(1){
-		if(!(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE))){
+		if(!(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE))){
 			error_at(token->str, "not a type.");
 		}
 
