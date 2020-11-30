@@ -13,6 +13,7 @@ Node *data(void){
 		return node;
 	}
 
+/*
 	// character literal
 	if(consume("'")){
 		Node *node=new_node_num((int)*(token->str));
@@ -20,6 +21,7 @@ Node *data(void){
 		expect("'");
 		return node;
 	}
+*/
 	
 	// compiler directive
 	if(token->kind == TK_COMPILER_DIRECTIVE){
