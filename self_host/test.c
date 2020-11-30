@@ -326,7 +326,7 @@ void error(char *loc, char *fmt){
 
 	int pos = loc-user_input;
 	fprintf(stderr, "%s\n", user_input);
-	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ ");
 	//vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
@@ -351,7 +351,7 @@ void error_at(char *loc, char *msg){
 	while(*start == '\t') start++;
 
 	int indent = fprintf(stderr, "%s:%d ", filename, line_num);
-	fprintf(stderr, "%.*s\n", (int)(end-start), start);
+	fprintf(stderr, "%.*s\n", (end-start), start);
 
 	int pos = indent+loc-start;
 	fprintf(stderr, "%*s", pos, "");

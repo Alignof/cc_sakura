@@ -125,14 +125,18 @@ Token *tokenize(char *p){
 			if(*p == '\\'){
 				p++;// consume back slash
 
-				//Is LF? (\n)
-				if(*p == 'n'){
-					now = new_token(TK_NUM, now, p++);
-					now->val = 10;
 				//Is NUL? (\0)
-				}else if(*p == '0'){
+				if(*p == '0'){
 					now = new_token(TK_NUM, now, p++);
 					now->val = 0;
+				//Is LF? (\n)
+				}else if(*p == 'n'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 10;
+				//Is HT? (\t)
+				}else if(*p == 't'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 9;
 				}else if(*p == '\\'){
 					now = new_token(TK_NUM, now, p++);
 					now->val = 92;
