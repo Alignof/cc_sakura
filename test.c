@@ -26,4 +26,15 @@ int main(void){
 	return x.next->r;
 }
 */
-int add(int a,int b){return a+b;} int main(){add(2,3);}
+
+int main(){
+	int i=1;
+
+	for(;;){
+		if(i == 5) break;
+
+		i++;
+	}
+
+	return i;
+}
