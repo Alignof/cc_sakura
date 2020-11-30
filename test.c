@@ -1,7 +1,4 @@
-int add(int x, int y){
-	return x+y;
-}
-
-int main(void){
-        return add(2, 3);
+int main(){
+        _Bool x = 3;
+        return x+3;
 }

@@ -269,12 +269,15 @@ Node *array_index(Node *node, Node *index){
 
 void get_argument(int func_index){
 	if(consume_reserved_word("void", TK_TYPE)){
+		func_list[func_index]->args = NULL;
 		expect(")");
 		return;
 	}
 
 	// get argument
-	if(!(consume(")"))){
+	if(consume(")")){
+		func_list[func_index]->args = NULL;
+	}else{
 		// set args node
 		Node *new_arg = NULL;
 		int arg_counter = 0;
