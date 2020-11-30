@@ -1,3 +1,4 @@
+/*
 typedef struct test Test;
 
 struct test{
@@ -23,4 +24,17 @@ int main(void){
 
 	// 4
 	return x.next->r;
+}
+*/
+
+int main(){
+	int i=1;
+
+	for(;;){
+		if(i == 5) break;
+
+		i++;
+	}
+
+	return i;
 }

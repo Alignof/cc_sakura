@@ -386,19 +386,23 @@ void gen(Node *node){
 
 			// condition
 			printf(".LloopBegin%03d:\n", label_loop);
-			gen(node->lhs->next);
-			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			// if cond true then jump to  loop end.
-			printf("	je .LloopEnd%03d\n", label_loop);
+			if(node->lhs->next->kind != ND_NULL_STMT){
+				gen(node->lhs->next);
+				printf("	pop rax\n");
+				printf("	cmp rax,0\n");
+				// if cond true then jump to  loop end.
+				printf("	je .LloopEnd%03d\n", label_loop);
+			}
 
 			// gen block
 			gen(node->rhs);
 
 			// gen update expression
 			printf(".LloopCont%03d:\n", label_loop);
-			gen(node->lhs->next->next);
-			printf("	pop rax\n");
+			if(node->lhs->next->next->kind != ND_NULL_STMT){
+				gen(node->lhs->next->next);
+				printf("	pop rax\n");
+			}
 
 			// continue
 			printf("	jmp .LloopBegin%03d\n", label_loop);

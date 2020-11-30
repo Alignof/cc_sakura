@@ -1,11 +1,325 @@
-#include "cc_sakura.h"
+typedef enum{
+	TK_TYPE,
+	TK_RESERVED,
+	TK_IDENT,
+	TK_NUM,
+	TK_IF,
+	TK_ELSE,
+	TK_SWITCH,
+	TK_CASE,
+	TK_DEFAULT,
+	TK_DO,
+	TK_WHILE,
+	TK_FOR,
+	TK_SIZEOF,
+	TK_BLOCK,
+	TK_STR,
+	TK_BREAK,
+	TK_CONTINUE,
+	TK_TYPEDEF,
+	TK_RETURN,
+	TK_EOF,
+	TK_COMPILER_DIRECTIVE,
+}TokenKind;
 
-int alloc_size;
-Token *token;
-Str *strings;
-//LVar *locals;
-//Func *func_list[100]; 
+typedef enum{
+	// lhs <-- symbol --> rhs
+	ND_ADD, 	//  +
+	ND_SUB, 	//  -
+	ND_MUL, 	//  *
+	ND_DIV, 	//  /
+	ND_MOD, 	//  %
+	ND_GT, 		//  >
+	ND_GE, 		//  >=
+	ND_LT, 		//  <
+	ND_LE, 		//  <=
+	ND_EQ, 		//  ==
+	ND_NE, 		//  !=
+	ND_AND, 	//  &&
+	ND_OR, 		//  ||
+	ND_ASSIGN, 	//  =
+	ND_COMPOUND, 	//  +=, -=, *=, /=
 
+	// symbol --> rhs
+	ND_POSTID, 	//  a++, a--
+	ND_DOT,		//  struc.member
+	ND_ARROW,	//  struc_ptr->member
+
+	// lhs <-- symbol
+	ND_PREID, 	//  ++a, --a
+	ND_NOT, 	//  !a
+	ND_ADDRESS, 	//  &a
+	ND_DEREF, 	//  *a
+
+	// other
+	ND_LVAR, 	//  local variable
+	ND_GVAR, 	//  global variable
+	ND_LARRAY, 	//  local array
+	ND_GARRAY, 	//  global array
+	ND_STR, 	//  "string"
+	ND_NUM, 	//  integer
+	ND_TERNARY,	//  cond ? if_true : if_false
+	ND_IF, 		//  if
+	ND_ELSE, 	//  else
+	ND_IFELSE, 	//  if-else
+	ND_SWITCH, 	//  switch
+	ND_CASE, 	//  case or default
+	ND_WHILE, 	//  while
+	ND_DOWHILE, 	//  do-while
+	ND_FOR, 	//  for
+	ND_BLOCK, 	//  {}
+	ND_ARG, 	//  function argument;
+	ND_CALL_FUNC, 	//  func();
+	ND_RETURN, 	//  return
+	ND_BREAK, 	//  break
+	ND_CONTINUE, 	//  continue
+	ND_TYPE, 	//  int, double, char...
+	ND_NULL_STMT, 	//  NULL statement (;) 
+}NodeKind;
+
+typedef enum{
+	VOID,
+	BOOL,
+	CHAR,
+	INT,
+	PTR,
+	ARRAY,
+	STRUCT,
+	ENUM,
+}TypeKind;
+
+typedef enum{
+	PRE_INC,
+	PRE_DEC,
+	POST_INC,
+	POST_DEC,
+}IncDecKind;
+
+typedef enum{
+	LB_LABEL,
+	LB_CASE,
+	LB_DEFAULT,
+}LabelKind;
+
+typedef struct Token  Token;
+typedef struct Node   Node;
+typedef struct LVar   LVar;
+typedef struct GVar   GVar;
+typedef struct Struc  Struc;
+typedef struct Enum   Enum;
+typedef struct Member Member;
+typedef struct Func   Func;
+typedef struct Label  Label;
+typedef struct Str    Str;
+typedef struct Type   Type;
+typedef struct Def_Type Def_Type;
+
+// code token
+struct Token{
+	TokenKind kind;
+	Token *next;
+	int val;
+	char *str;
+	int len;
+};
+
+// type of variable
+struct Type{
+	TypeKind ty;
+	Type	 *ptr_to;
+	int	 size;
+	int	 align;
+	int      index_size;
+	int      len;
+	char     *name;
+};
+
+// defined type
+struct Def_Type{
+	char     *name;
+	int      name_len;
+	char     *tag;
+	int      tag_len;
+	Type     *type;
+	Def_Type *next;
+};
+
+// tree object
+struct Node{
+	NodeKind kind;
+	Node *lhs;
+	Node *rhs;
+	Node *next;
+	Node *block_code;
+	Type *type;
+	int  val;
+	char *str;
+	int  offset;
+};
+
+// function
+struct Func{
+	//int argc;
+	int stack_size;
+	char *name;
+	Type *type;
+	Node *args;
+	Node *code[300];
+	Func *next;
+};
+
+// string
+struct Str{
+	int len;
+	int label_num;
+	char *str;
+	Str *next;
+};
+
+// global variable
+struct GVar{
+	int len;
+	int memsize;
+	char *name;
+	Type *type;
+	GVar *next;
+	Node *init;
+};
+
+// local variable
+struct LVar{
+	int len;
+	int offset;
+	char *name;
+	Type *type;
+	LVar *next;
+}; 
+
+// Labels
+struct Label{
+	int       id;
+	Node      *cond;
+	Label     *next;
+	LabelKind kind;
+}; 
+
+// struct
+struct Struc{
+	int    len;
+	int    memsize;
+	char   *name;
+	Member *member;
+	Struc  *next;
+};
+
+// enum
+struct Enum{
+	int    len;
+	char   *name;
+	Member *member;
+	Enum   *next;
+};
+
+// (struct|enum) member
+struct Member{
+	int    len;
+	int    offset;
+	int    memsize;
+	char   *name;
+	Type   *type;
+	Member *next;
+};
+
+
+
+// global variable
+int      llid;
+int      lvar_count;
+int      alloc_size;
+char     *user_input;
+char     filename[100];
+Token    *token;
+Func     *func_list[200];
+LVar     *locals;
+GVar     *globals;
+Str      *strings;
+Struc    *structs;
+Enum     *enumerations;
+Def_Type *defined_types;
+Label    *labels_head;
+Label    *labels_tail;
+LVar     *outside_lvar;
+Struc    *outside_struct;
+Enum     *outside_enum;
+Def_Type *outside_deftype;
+
+int label_if;
+int label_loop;
+int label_if_num;
+int label_loop_num;
+//================standard library=====================
+typedef struct _IO_FILE FILE;
+typedef void   _IO_lock_t;
+typedef void*  __off_t;
+
+struct _IO_FILE{
+	int _flags;           /* High-order word is _IO_MAGIC; rest is flags. */
+
+	/* The following pointers correspond to the C++ streambuf protocol. */
+	char *_IO_read_ptr;   /* Current read pointer */
+	char *_IO_read_end;   /* End of get area. */
+	char *_IO_read_base;  /* Start of putback+get area. */
+	char *_IO_write_base; /* Start of put area. */
+	char *_IO_write_ptr;  /* Current put pointer. */
+	char *_IO_write_end;  /* End of put area. */
+	char *_IO_buf_base;   /* Start of reserve area. */
+	char *_IO_buf_end;    /* End of reserve area. */
+
+	/* The following fields are used to support backing up and undo. */
+	char *_IO_save_base; /* Pointer to start of non-current get area. */
+	char *_IO_backup_base;  /* Pointer to first valid character of backup area */
+	char *_IO_save_end; /* Pointer to end of non-current get area. */
+
+	struct _IO_marker *_markers;
+
+	struct _IO_FILE *_chain;
+
+	int _fileno;
+	int _flags2;
+
+	__off_t _old_offset; /* This used to be _offset but it's too small.  */
+
+	/* 1+column number of pbase(); 0 is unknown. */
+	//unsigned short _cur_column;
+	//signed char _vtable_offset;
+	int  _cur_column;
+	char _vtable_offset;
+	char _shortbuf[1];
+
+	_IO_lock_t *_lock;
+};
+
+FILE *stderr;
+
+typedef _Bool bool;
+bool true  = 1;
+bool false = 0;
+//=========================================================
+
+
+
+//================temporary definition=====================
+typedef void* size_t;
+
+int  SEEK_SET = 0;
+int  SEEK_END = 2;
+char errno;
+//=========================================================
+
+
+
+
+//====================== syntax_tree.c===========================
 Node *data(void){
 	if(consume("(")){
 		Node *node = expr();
@@ -61,14 +375,10 @@ Node *data(void){
 		}
 
 		return node;
-	// return new num node
-	}else if(token->kind == TK_NUM){
-		return new_node_num(expect_number());
 	}
 
-
-	// NULL statement
-	return new_node(ND_NULL_STMT, NULL, NULL);
+	// return new num node
+	return new_node_num(expect_number());
 }
 
 Node *primary(void){
@@ -95,7 +405,7 @@ Node *primary(void){
 		// dot
 		if(consume(".")){
 			if(node->kind == ND_LVAR){
-				node = new_node(ND_ADDRESS, NULL, node);
+				node = new_node(ND_ADDRESS, __NULL, node);
 			}
 			node = dot_arrow(ND_DOT, node);
 		}
@@ -116,22 +426,22 @@ Node *primary(void){
 }
 
 Node *unary(void){
-	Node *node=NULL;
+	Node *node=__NULL;
 
 	// logical not
 	if(consume("!")){
-		node = new_node(ND_NOT, NULL, logical());
+		node = new_node(ND_NOT, __NULL, logical());
 		return node;
 	}
 
 	if(consume("*")){
-		node = new_node(ND_DEREF, NULL, unary());
+		node = new_node(ND_DEREF, __NULL, unary());
 
 		return node;
 	}
 
 	if(consume("&")){
-		node = new_node(ND_ADDRESS, NULL, unary());
+		node = new_node(ND_ADDRESS, __NULL, unary());
 
 		return node;
 	}
@@ -161,7 +471,7 @@ Node *unary(void){
 			node->offset = new->len;
 			node->val = new->label_num;
 
-			if(strings == NULL){
+			if(strings == __NULL){
 				strings = new;
 			}else{
 				new->next = strings;
@@ -380,10 +690,13 @@ Node *expr(void){
 }
 
 Node *stmt(void){
-	Node *node = NULL;
+	Node *node = __NULL;
 
-	if(consume_reserved_word("return", TK_RETURN)){
-		node = new_node(ND_RETURN, node, NULL);
+	// NULL statement
+	if(consume(";")){
+		node = new_node(ND_NULL_STMT, __NULL, __NULL);
+	}else if(consume_reserved_word("return", TK_RETURN)){
+		node = new_node(ND_RETURN, node, __NULL);
 		if(!consume(";")){
 			node->rhs = expr();
 			if(!consume(";")) error_at(token->str, "not a ';' token.");
@@ -400,7 +713,7 @@ Node *stmt(void){
 		 *                     | 
 		 *        if(cond)<--else-->expr
 		 */
-		node = new_node(ND_IF, node, NULL);
+		node = new_node(ND_IF, node, __NULL);
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -432,11 +745,11 @@ Node *stmt(void){
  		 *               +----->case->case->... 
  		 */
  
- 		Node  *cond = NULL;
+ 		Node  *cond = __NULL;
 		Label *before_switch = labels_tail;
-		Label *prev = NULL;
+		Label *prev = __NULL;
 
- 		node = new_node(ND_SWITCH, node, NULL);
+ 		node = new_node(ND_SWITCH, node, __NULL);
  		if(consume("(")){
  			//jmp expr
  			cond = expr();
@@ -450,7 +763,7 @@ Node *stmt(void){
 		node->rhs = stmt(); 
 
 		// register and remove case
-		Node *cond_cases = NULL;
+		Node *cond_cases = __NULL;
 		prev = before_switch;
 		Label *lb = (before_switch) ? prev->next : labels_head;
 		while(lb){
@@ -484,14 +797,14 @@ Node *stmt(void){
 				prev = lb;
 				//free(prev);
 				lb   = lb->next;
-				prev = NULL;
+				prev = __NULL;
 			}
 		}
 	}else if(consume_reserved_word("case", TK_CASE)){
 		/*
 		 *  (cond) <--- case ---> code
 		 */
-		node = new_node(ND_CASE, logical(), NULL);
+		node = new_node(ND_CASE, logical(), __NULL);
 		expect(":");
 		label_register(node, LB_CASE);
 		node->rhs = stmt();
@@ -499,7 +812,7 @@ Node *stmt(void){
 		/*
 		 *  (cond) <--- default ---> code
 		 */
-		node = new_node(ND_CASE, NULL, NULL);
+		node = new_node(ND_CASE, __NULL, __NULL);
 		expect(":");
 		node->rhs = stmt();
 		label_register(node, LB_DEFAULT);
@@ -508,14 +821,12 @@ Node *stmt(void){
 		outside_enum   = enumerations;
 		outside_struct = structs;
 		
-		node = new_node(ND_FOR, node, NULL);
+		node = new_node(ND_FOR, node, __NULL);
 
 		if(consume("(")){
 			//jmp expr
-			Node *init = expr();
-			expect(";");
-			Node *cond = expr();
-			expect(";");
+			Node *init = stmt();
+			Node *cond = stmt();
 			Node *calc = expr();
 			//check end of caret
 			expect(")");
@@ -533,7 +844,7 @@ Node *stmt(void){
 		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
-		node = new_node(ND_DOWHILE, NULL, stmt());
+		node = new_node(ND_DOWHILE, __NULL, stmt());
 
 		consume_reserved_word("while", TK_WHILE);
 		if(consume("(")){
@@ -542,7 +853,7 @@ Node *stmt(void){
 		}
 		expect(";");
 	}else if(consume_reserved_word("while", TK_WHILE)){
-		node = new_node(ND_WHILE, node, NULL);
+		node = new_node(ND_WHILE, node, __NULL);
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -554,7 +865,7 @@ Node *stmt(void){
 			node->rhs = stmt();
 		}
 	}else if(consume("{")){
-		node = new_node(ND_BLOCK, node, NULL);
+		node = new_node(ND_BLOCK, node, __NULL);
 		outside_lvar   = locals;
 		outside_enum   = enumerations;
 		outside_struct = structs;
@@ -599,7 +910,7 @@ void function(Func *func){
 	defined_types = stash_def_types;
 
 	func->stack_size = alloc_size;
-	func->code[i] = NULL;
+	func->code[i] = __NULL;
 }
 
 void program(void){
@@ -609,7 +920,7 @@ void program(void){
 
 	while(!at_eof()){
 		// reset lvar list
-		locals = NULL;
+		locals = __NULL;
 		// reset lvar counter
 		alloc_size = 0;
 		star_count = 0;
@@ -699,5 +1010,7 @@ void program(void){
 			expect(";");
 		}
 	}
-	func_list[func_index] = NULL;
+	func_list[func_index] = __NULL;
 }
+//====================================================
+
