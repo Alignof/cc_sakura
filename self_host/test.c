@@ -314,7 +314,7 @@ typedef void* size_t;
 int  SEEK_SET = 0;
 int  SEEK_END = 2;
 int  FUNC_NUM = 100;
-//extern int errno;
+//_Thread_local int errno;
 //=========================================================
 
 
