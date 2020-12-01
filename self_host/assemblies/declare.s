@@ -469,8 +469,9 @@ declare_global_variable:
 	sub	rsp, 72
 	.cfi_offset 3, -24
 	mov	DWORD PTR -52[rbp], edi
-	mov	QWORD PTR -64[rbp], rsi
-	mov	QWORD PTR -72[rbp], rdx
+	mov	DWORD PTR -56[rbp], esi
+	mov	QWORD PTR -64[rbp], rdx
+	mov	QWORD PTR -72[rbp], rcx
 	cmp	QWORD PTR -64[rbp], 0
 	jne	.L38
 	mov	rax, QWORD PTR token[rip]
@@ -485,44 +486,47 @@ declare_global_variable:
 	mov	QWORD PTR -32[rbp], rax
 	mov	rax, QWORD PTR -32[rbp]
 	mov	DWORD PTR [rax], 23
-	mov	esi, 40
+	mov	esi, 48
 	mov	edi, 1
 	call	calloc@PLT
 	mov	QWORD PTR -40[rbp], rax
 	mov	rdx, QWORD PTR globals[rip]
 	mov	rax, QWORD PTR -40[rbp]
-	mov	QWORD PTR 24[rax], rdx
-	mov	rax, QWORD PTR -64[rbp]
-	mov	rdx, QWORD PTR 24[rax]
-	mov	rax, QWORD PTR -40[rbp]
-	mov	QWORD PTR 8[rax], rdx
+	mov	QWORD PTR 32[rax], rdx
 	mov	rax, QWORD PTR -64[rbp]
 	mov	edx, DWORD PTR 32[rax]
 	mov	rax, QWORD PTR -40[rbp]
 	mov	DWORD PTR [rax], edx
+	mov	rax, QWORD PTR -64[rbp]
+	mov	rdx, QWORD PTR 24[rax]
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rdx, QWORD PTR -72[rbp]
 	mov	QWORD PTR 16[rax], rdx
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rbx, QWORD PTR 16[rax]
+	mov	rdx, QWORD PTR -72[rbp]
+	mov	QWORD PTR 24[rax], rdx
+	mov	rax, QWORD PTR -40[rbp]
+	mov	rbx, QWORD PTR 24[rax]
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rdi, rax
 	call	type_size@PLT
 	mov	DWORD PTR 16[rbx], eax
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rbx, QWORD PTR 16[rax]
+	mov	rbx, QWORD PTR 24[rax]
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rdi, rax
 	call	type_align@PLT
 	mov	DWORD PTR 20[rbx], eax
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rax, QWORD PTR 16[rax]
+	mov	edx, DWORD PTR -56[rbp]
+	mov	DWORD PTR 8[rax], edx
+	mov	rax, QWORD PTR -40[rbp]
+	mov	rax, QWORD PTR 24[rax]
 	mov	edx, DWORD PTR -52[rbp]
 	mov	esi, edx
 	mov	rdi, rax
 	call	insert_ptr_type
 	mov	rdx, QWORD PTR -40[rbp]
-	mov	QWORD PTR 16[rdx], rax
+	mov	QWORD PTR 24[rdx], rax
 	lea	rdi, .LC10[rip]
 	call	check@PLT
 	test	al, al
@@ -567,7 +571,7 @@ declare_global_variable:
 	mov	rax, QWORD PTR -48[rbp]
 	mov	DWORD PTR [rax], 5
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rdx, QWORD PTR 16[rax]
+	mov	rdx, QWORD PTR 24[rax]
 	mov	rax, QWORD PTR -48[rbp]
 	mov	QWORD PTR 8[rax], rdx
 	mov	rax, QWORD PTR -48[rbp]
@@ -585,7 +589,7 @@ declare_global_variable:
 	mov	DWORD PTR 20[rdx], eax
 	mov	rax, QWORD PTR -40[rbp]
 	mov	rdx, QWORD PTR -48[rbp]
-	mov	QWORD PTR 16[rax], rdx
+	mov	QWORD PTR 24[rax], rdx
 	lea	rdi, .LC11[rip]
 	call	expect@PLT
 .L40:
@@ -594,7 +598,7 @@ declare_global_variable:
 	test	al, al
 	jne	.L44
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rdx, QWORD PTR 16[rax]
+	mov	rdx, QWORD PTR 24[rax]
 	mov	eax, DWORD PTR -24[rbp]
 	mov	rsi, rdx
 	mov	edi, eax
@@ -604,7 +608,7 @@ declare_global_variable:
 	jmp	.L45
 .L39:
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rax, QWORD PTR 16[rax]
+	mov	rax, QWORD PTR 24[rax]
 	mov	rdi, rax
 	call	type_size@PLT
 	mov	rdx, QWORD PTR -40[rbp]
@@ -613,11 +617,11 @@ declare_global_variable:
 	mov	rax, QWORD PTR -40[rbp]
 	mov	QWORD PTR globals[rip], rax
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rdx, QWORD PTR 16[rax]
+	mov	rdx, QWORD PTR 24[rax]
 	mov	rax, QWORD PTR -32[rbp]
 	mov	QWORD PTR 40[rax], rdx
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rdx, QWORD PTR 8[rax]
+	mov	rdx, QWORD PTR 16[rax]
 	mov	rax, QWORD PTR -32[rbp]
 	mov	QWORD PTR 56[rax], rdx
 	mov	rax, QWORD PTR -40[rbp]

@@ -37,7 +37,7 @@ data:
 .L2:
 	mov	rax, QWORD PTR token[rip]
 	mov	eax, DWORD PTR [rax]
-	cmp	eax, 20
+	cmp	eax, 21
 	jne	.L4
 	mov	eax, 0
 	call	compiler_directive@PLT
@@ -125,7 +125,7 @@ data:
 	cmp	QWORD PTR -40[rbp], 0
 	je	.L13
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rax, QWORD PTR 16[rax]
+	mov	rax, QWORD PTR 24[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 5
 	jne	.L14
@@ -137,7 +137,7 @@ data:
 	mov	rax, QWORD PTR -8[rbp]
 	mov	DWORD PTR [rax], edx
 	mov	rax, QWORD PTR -40[rbp]
-	mov	rdx, QWORD PTR 16[rax]
+	mov	rdx, QWORD PTR 24[rax]
 	mov	rax, QWORD PTR -8[rbp]
 	mov	QWORD PTR 40[rax], rdx
 	mov	rax, QWORD PTR -24[rbp]
@@ -1220,7 +1220,7 @@ stmt:
 	.cfi_def_cfa_register 6
 	sub	rsp, 112
 	mov	QWORD PTR -8[rbp], 0
-	mov	esi, 18
+	mov	esi, 19
 	lea	rdi, .LC38[rip]
 	call	consume_reserved_word@PLT
 	test	al, al
@@ -1738,6 +1738,8 @@ function:
 .LC51:
 	.string	"typedef"
 .LC52:
+	.string	"extern"
+.LC53:
 	.string	"not a function."
 	.text
 	.globl	program
@@ -1754,47 +1756,48 @@ program:
 	sub	rsp, 72
 	.cfi_offset 3, -24
 	mov	DWORD PTR -20[rbp], 0
+	mov	DWORD PTR -24[rbp], 0
 	jmp	.L147
-.L159:
+.L160:
 	mov	QWORD PTR locals[rip], 0
 	mov	DWORD PTR alloc_size[rip], 0
-	mov	DWORD PTR -24[rbp], 0
+	mov	DWORD PTR -28[rbp], 0
 	mov	esi, 17
 	lea	rdi, .LC51[rip]
 	call	consume_reserved_word@PLT
 	test	al, al
 	je	.L148
 	call	parse_type@PLT
-	mov	QWORD PTR -56[rbp], rax
-	call	consume_ident@PLT
 	mov	QWORD PTR -64[rbp], rax
+	call	consume_ident@PLT
+	mov	QWORD PTR -72[rbp], rax
 	mov	esi, 48
 	mov	edi, 1
 	call	calloc@PLT
-	mov	QWORD PTR -72[rbp], rax
-	mov	rax, QWORD PTR -64[rbp]
+	mov	QWORD PTR -80[rbp], rax
+	mov	rax, QWORD PTR -72[rbp]
 	mov	rdx, QWORD PTR 24[rax]
-	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	QWORD PTR [rax], rdx
-	mov	rax, QWORD PTR -64[rbp]
-	mov	edx, DWORD PTR 32[rax]
 	mov	rax, QWORD PTR -72[rbp]
+	mov	edx, DWORD PTR 32[rax]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	DWORD PTR 8[rax], edx
-	mov	rax, QWORD PTR -56[rbp]
+	mov	rax, QWORD PTR -64[rbp]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 6
 	jne	.L149
 	mov	rax, QWORD PTR structs[rip]
 	mov	rdx, QWORD PTR 8[rax]
-	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	QWORD PTR 16[rax], rdx
 	mov	rax, QWORD PTR structs[rip]
 	mov	edx, DWORD PTR [rax]
-	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	DWORD PTR 24[rax], edx
 	jmp	.L150
 .L149:
-	mov	rax, QWORD PTR -56[rbp]
+	mov	rax, QWORD PTR -64[rbp]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 7
 	jne	.L150
@@ -1804,55 +1807,62 @@ program:
 	je	.L151
 	mov	rax, QWORD PTR enumerations[rip]
 	mov	rdx, QWORD PTR 8[rax]
-	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	QWORD PTR 16[rax], rdx
 	mov	rax, QWORD PTR enumerations[rip]
 	mov	edx, DWORD PTR [rax]
-	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	DWORD PTR 24[rax], edx
 	jmp	.L150
 .L151:
 	mov	rax, QWORD PTR enumerations[rip]
-	mov	rdx, QWORD PTR -64[rbp]
+	mov	rdx, QWORD PTR -72[rbp]
 	mov	rdx, QWORD PTR 24[rdx]
 	mov	QWORD PTR 8[rax], rdx
 	mov	rax, QWORD PTR enumerations[rip]
-	mov	rdx, QWORD PTR -64[rbp]
+	mov	rdx, QWORD PTR -72[rbp]
 	mov	edx, DWORD PTR 32[rdx]
 	mov	DWORD PTR [rax], edx
-	mov	rax, QWORD PTR -64[rbp]
+	mov	rax, QWORD PTR -72[rbp]
 	mov	rdx, QWORD PTR 24[rax]
-	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	QWORD PTR 16[rax], rdx
-	mov	rax, QWORD PTR -64[rbp]
-	mov	edx, DWORD PTR 32[rax]
 	mov	rax, QWORD PTR -72[rbp]
+	mov	edx, DWORD PTR 32[rax]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	DWORD PTR 24[rax], edx
 .L150:
-	mov	rax, QWORD PTR -72[rbp]
-	mov	rdx, QWORD PTR -56[rbp]
+	mov	rax, QWORD PTR -80[rbp]
+	mov	rdx, QWORD PTR -64[rbp]
 	mov	QWORD PTR 32[rax], rdx
 	mov	rdx, QWORD PTR defined_types[rip]
-	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	QWORD PTR 40[rax], rdx
-	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR -80[rbp]
 	mov	QWORD PTR defined_types[rip], rax
 	lea	rdi, .LC33[rip]
 	call	expect@PLT
 	jmp	.L147
 .L148:
+	mov	esi, 17
+	lea	rdi, .LC52[rip]
+	call	consume_reserved_word@PLT
+	test	al, al
+	je	.L152
+	mov	DWORD PTR -20[rbp], 1
+.L152:
 	call	parse_type@PLT
-	mov	QWORD PTR -32[rbp], rax
+	mov	QWORD PTR -40[rbp], rax
 	lea	rdi, .LC33[rip]
 	call	consume@PLT
 	test	al, al
-	je	.L152
+	je	.L153
 	jmp	.L147
-.L152:
+.L153:
 	mov	edi, 2440
 	call	malloc@PLT
 	mov	rcx, rax
-	mov	eax, DWORD PTR -20[rbp]
+	mov	eax, DWORD PTR -24[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
@@ -1860,7 +1870,7 @@ program:
 	mov	rax, QWORD PTR token[rip]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 2
-	jne	.L153
+	jne	.L154
 	mov	rax, QWORD PTR token[rip]
 	mov	rax, QWORD PTR 24[rax]
 	movzx	eax, BYTE PTR [rax]
@@ -1868,31 +1878,31 @@ program:
 	mov	edi, eax
 	call	is_alnum@PLT
 	test	eax, eax
-	jne	.L154
-.L153:
+	jne	.L155
+.L154:
 	mov	rax, QWORD PTR token[rip]
 	mov	rax, QWORD PTR 24[rax]
-	lea	rsi, .LC52[rip]
+	lea	rsi, .LC53[rip]
 	mov	rdi, rax
 	call	error_at@PLT
-.L154:
+.L155:
 	call	consume_ident@PLT
-	mov	QWORD PTR -40[rbp], rax
+	mov	QWORD PTR -48[rbp], rax
 	lea	rdi, .LC0[rip]
 	call	consume@PLT
 	test	al, al
-	je	.L155
-	mov	eax, DWORD PTR -20[rbp]
+	je	.L156
+	mov	eax, DWORD PTR -24[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
-	mov	rdx, QWORD PTR -32[rbp]
+	mov	rdx, QWORD PTR -40[rbp]
 	mov	QWORD PTR 16[rax], rdx
-	mov	rax, QWORD PTR -40[rbp]
+	mov	rax, QWORD PTR -48[rbp]
 	mov	eax, DWORD PTR 32[rax]
 	cdqe
-	mov	edx, DWORD PTR -20[rbp]
+	mov	edx, DWORD PTR -24[rbp]
 	movsx	rdx, edx
 	lea	rcx, 0[0+rdx*8]
 	lea	rdx, func_list[rip]
@@ -1901,12 +1911,12 @@ program:
 	mov	rdi, rax
 	call	calloc@PLT
 	mov	QWORD PTR 8[rbx], rax
-	mov	rax, QWORD PTR -40[rbp]
+	mov	rax, QWORD PTR -48[rbp]
 	mov	eax, DWORD PTR 32[rax]
 	movsx	rdx, eax
-	mov	rax, QWORD PTR -40[rbp]
+	mov	rax, QWORD PTR -48[rbp]
 	mov	rcx, QWORD PTR 24[rax]
-	mov	eax, DWORD PTR -20[rbp]
+	mov	eax, DWORD PTR -24[rbp]
 	cdqe
 	lea	rsi, 0[0+rax*8]
 	lea	rax, func_list[rip]
@@ -1915,30 +1925,30 @@ program:
 	mov	rsi, rcx
 	mov	rdi, rax
 	call	strncpy@PLT
-	mov	eax, DWORD PTR -20[rbp]
+	mov	eax, DWORD PTR -24[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
 	mov	rax, QWORD PTR 16[rax]
-	mov	edx, DWORD PTR -20[rbp]
+	mov	edx, DWORD PTR -24[rbp]
 	movsx	rdx, edx
 	lea	rcx, 0[0+rdx*8]
 	lea	rdx, func_list[rip]
 	mov	rbx, QWORD PTR [rcx+rdx]
-	mov	edx, DWORD PTR -24[rbp]
+	mov	edx, DWORD PTR -28[rbp]
 	mov	esi, edx
 	mov	rdi, rax
 	call	insert_ptr_type@PLT
 	mov	QWORD PTR 16[rbx], rax
-	mov	eax, DWORD PTR -20[rbp]
+	mov	eax, DWORD PTR -24[rbp]
 	mov	edi, eax
 	call	get_argument@PLT
 	lea	rdi, .LC35[rip]
 	call	consume@PLT
-	mov	eax, DWORD PTR -20[rbp]
+	mov	eax, DWORD PTR -24[rbp]
 	lea	edx, 1[rax]
-	mov	DWORD PTR -20[rbp], edx
+	mov	DWORD PTR -24[rbp], edx
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
@@ -1948,61 +1958,61 @@ program:
 	lea	rdi, .LC50[rip]
 	call	consume@PLT
 	jmp	.L147
-.L155:
-	mov	rdx, QWORD PTR -32[rbp]
+.L156:
 	mov	rcx, QWORD PTR -40[rbp]
-	mov	eax, DWORD PTR -24[rbp]
-	mov	rsi, rcx
+	mov	rdx, QWORD PTR -48[rbp]
+	mov	esi, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -20[rbp]
 	mov	edi, eax
 	call	declare_global_variable@PLT
-	mov	QWORD PTR -48[rbp], rax
+	mov	QWORD PTR -56[rbp], rax
 	lea	rdi, .LC28[rip]
 	call	consume@PLT
 	test	al, al
-	je	.L156
+	je	.L157
 	lea	rdi, .LC35[rip]
 	call	consume@PLT
 	test	al, al
-	je	.L157
+	je	.L158
 	mov	rbx, QWORD PTR globals[rip]
-	mov	rax, QWORD PTR -48[rbp]
+	mov	rax, QWORD PTR -56[rbp]
 	mov	rdi, rax
 	call	array_block@PLT
-	mov	QWORD PTR 32[rbx], rax
-	jmp	.L158
-.L157:
+	mov	QWORD PTR 40[rbx], rax
+	jmp	.L159
+.L158:
 	call	assign
 	mov	rdx, rax
 	mov	rbx, QWORD PTR globals[rip]
-	mov	rax, QWORD PTR -48[rbp]
+	mov	rax, QWORD PTR -56[rbp]
 	mov	rsi, rdx
 	mov	rdi, rax
 	call	init_formula@PLT
-	mov	QWORD PTR 32[rbx], rax
-	jmp	.L158
-.L156:
-	mov	rax, QWORD PTR -48[rbp]
+	mov	QWORD PTR 40[rbx], rax
+	jmp	.L159
+.L157:
+	mov	rax, QWORD PTR -56[rbp]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 23
-	jne	.L158
+	jne	.L159
 	mov	edi, 0
 	call	new_node_num@PLT
 	mov	rdx, rax
 	mov	rbx, QWORD PTR globals[rip]
-	mov	rax, QWORD PTR -48[rbp]
+	mov	rax, QWORD PTR -56[rbp]
 	mov	rsi, rdx
 	mov	rdi, rax
 	call	init_formula@PLT
-	mov	QWORD PTR 32[rbx], rax
-.L158:
+	mov	QWORD PTR 40[rbx], rax
+.L159:
 	lea	rdi, .LC33[rip]
 	call	expect@PLT
 .L147:
 	call	at_eof@PLT
 	xor	eax, 1
 	test	al, al
-	jne	.L159
-	mov	eax, DWORD PTR -20[rbp]
+	jne	.L160
+	mov	eax, DWORD PTR -24[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]

@@ -368,7 +368,7 @@ consume_ret:
 	.cfi_def_cfa_register 6
 	mov	rax, QWORD PTR token[rip]
 	mov	eax, DWORD PTR [rax]
-	cmp	eax, 18
+	cmp	eax, 19
 	jne	.L33
 	mov	rax, QWORD PTR token[rip]
 	mov	eax, DWORD PTR 32[rax]
@@ -822,7 +822,7 @@ find_gvar:
 	mov	eax, DWORD PTR [rax]
 	movsx	rdx, eax
 	mov	rax, QWORD PTR -8[rbp]
-	mov	rcx, QWORD PTR 8[rax]
+	mov	rcx, QWORD PTR 16[rax]
 	mov	rax, QWORD PTR -24[rbp]
 	mov	rax, QWORD PTR 24[rax]
 	mov	rsi, rcx
@@ -834,7 +834,7 @@ find_gvar:
 	jmp	.L76
 .L75:
 	mov	rax, QWORD PTR -8[rbp]
-	mov	rax, QWORD PTR 24[rax]
+	mov	rax, QWORD PTR 32[rax]
 	mov	QWORD PTR -8[rbp], rax
 .L74:
 	cmp	QWORD PTR -8[rbp], 0

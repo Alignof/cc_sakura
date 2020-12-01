@@ -603,6 +603,7 @@ void function(Func *func){
 }
 
 void program(void){
+	int is_extern = 0;
 	int func_index = 0;
 	int star_count;
 	Type *toplv_type;
@@ -646,6 +647,11 @@ void program(void){
 			continue;
 		}
 
+		// extern
+		if(consume_reserved_word("extern", TK_TYPEDEF)){
+			is_extern = 1;
+		}
+
 		// parsing type
 		toplv_type = parse_type();
 
@@ -681,7 +687,7 @@ void program(void){
 			consume("}");
 		// global variable
 		}else{
-			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
+			Node *init_gv = declare_global_variable(is_extern, star_count, def_name, toplv_type);
 
 			// initialize formula
 			if(consume("=")){

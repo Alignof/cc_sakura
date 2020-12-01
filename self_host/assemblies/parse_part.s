@@ -18,7 +18,7 @@ compiler_directive:
 	push	rbx
 	sub	rsp, 24
 	.cfi_offset 3, -24
-	mov	esi, 20
+	mov	esi, 21
 	lea	rdi, .LC0[rip]
 	call	consume_reserved_word@PLT
 	test	al, al
