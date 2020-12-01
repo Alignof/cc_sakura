@@ -468,7 +468,7 @@ void gen(Node *node){
 			expand_block_code(node->block_code);
 			return;
 		case ND_CALL_FUNC:
-			args    = node->next;
+			args    = node->rhs;
 			arg_num = 0;
 
 			while(args){
