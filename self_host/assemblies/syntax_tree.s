@@ -1844,7 +1844,7 @@ program:
 	call	expect@PLT
 	jmp	.L147
 .L148:
-	mov	esi, 17
+	mov	esi, 18
 	lea	rdi, .LC52[rip]
 	call	consume_reserved_word@PLT
 	test	al, al

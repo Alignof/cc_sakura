@@ -517,11 +517,11 @@ declare_global_variable:
 	call	type_align@PLT
 	mov	DWORD PTR 20[rbx], eax
 	mov	rax, QWORD PTR -40[rbp]
-	mov	edx, DWORD PTR -56[rbp]
+	mov	edx, DWORD PTR -52[rbp]
 	mov	DWORD PTR 8[rax], edx
 	mov	rax, QWORD PTR -40[rbp]
 	mov	rax, QWORD PTR 24[rax]
-	mov	edx, DWORD PTR -52[rbp]
+	mov	edx, DWORD PTR -56[rbp]
 	mov	esi, edx
 	mov	rdi, rax
 	call	insert_ptr_type
