@@ -17,9 +17,11 @@ typedef enum{
 	TK_BREAK,
 	TK_CONTINUE,
 	TK_TYPEDEF,
+	TK_EXTERN,
 	TK_RETURN,
-	TK_EOF,
+	TK_THREAD_LOCAL,
 	TK_COMPILER_DIRECTIVE,
+	TK_EOF,
 }TokenKind;
 
 typedef enum{
@@ -130,6 +132,8 @@ struct Type{
 	int	 size;
 	int	 align;
 	int      index_size;
+	int      is_extern;
+	int      is_thread_local;
 	int      len;
 	char     *name;
 };
@@ -231,7 +235,6 @@ struct Member{
 };
 
 
-
 // global variable
 int      llid;
 int      lvar_count;
@@ -314,7 +317,7 @@ typedef void* size_t;
 int  SEEK_SET = 0;
 int  SEEK_END = 2;
 int  FUNC_NUM = 100;
-//extern int errno;
+extern _Thread_local int errno;
 //=========================================================
 
 
@@ -332,13 +335,13 @@ char *read_file(char *path){
 
 	// get file size
 	if(fseek(fp, 0, SEEK_END) == -1){
-		//error("%s: fseek:%s", path, strerror(errno));
+		error("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 	
 	if(fseek(fp, 0, SEEK_SET) == -1){
-		//error("%s: fseek:%s", path, strerror(errno));
+		error("%s: fseek:%s", path, strerror(errno));
 	}
 
 	buf = calloc(1, size+2);
@@ -395,9 +398,14 @@ int main(int argc, char **argv){
 	// set global variable
 	GVar *start = globals;
 	for (GVar *var = start;var;var = var->next){
-		int comm_align = (var->memsize >=  32) ? 32 : var->memsize/8*8;
-		printf(".comm	_%.*s, %d, %d\n", var->len, var->name, var->memsize, comm_align);
-		//printf("_%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
+		if(var->type->is_extern == 0){
+			if(var->type->is_thread_local == 0){
+				printf(".comm	%.*s, %d, %d\n", var->len, var->name, var->memsize, var->type->align);
+			}else{
+				printf(".section .tbss,\"awT\",@nobits\n");
+				printf("%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
+			}
+		}
 	}
 
 	// set string
@@ -449,4 +457,6 @@ int main(int argc, char **argv){
 
 	return 0;
 }
+
+//=========================================================
 

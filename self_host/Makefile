@@ -27,7 +27,6 @@ franken:$(ASEMS)
 	rm -f $(EXCLUDEASM)
 	gcc $(ASMDIR)/*.s -static -o ./child
 	./child dummy.c || echo $$?
-	# remove duplicate asem
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 
 	@[ -d $(ASMDIR) ]

@@ -1,4 +1,3 @@
-
 typedef enum{
 	TK_TYPE,
 	TK_RESERVED,
@@ -18,9 +17,11 @@ typedef enum{
 	TK_BREAK,
 	TK_CONTINUE,
 	TK_TYPEDEF,
+	TK_EXTERN,
 	TK_RETURN,
-	TK_EOF,
+	TK_THREAD_LOCAL,
 	TK_COMPILER_DIRECTIVE,
+	TK_EOF,
 }TokenKind;
 
 typedef enum{
@@ -131,6 +132,8 @@ struct Type{
 	int	 size;
 	int	 align;
 	int      index_size;
+	int      is_extern;
+	int      is_thread_local;
 	int      len;
 	char     *name;
 };
@@ -232,7 +235,6 @@ struct Member{
 };
 
 
-
 // global variable
 int      llid;
 int      lvar_count;
@@ -315,8 +317,7 @@ typedef void* size_t;
 int  SEEK_SET = 0;
 int  SEEK_END = 2;
 int  FUNC_NUM = 100;
-_Thread_local int  errno;
-
+extern _Thread_local int errno;
 
 //=========================================================
 
@@ -3068,7 +3069,6 @@ void get_code(int argc, char **argv){
 	}
 }
 
-
 int main(int argc, char **argv){
 	int i;
 	int j;
@@ -3093,8 +3093,14 @@ int main(int argc, char **argv){
 	// set global variable
 	GVar *start = globals;
 	for (GVar *var = start;var;var = var->next){
-		int comm_align = (var->memsize >=  32) ? 32 : var->memsize/8*8;
-		printf(".comm	_%.*s, %d, %d\n", var->len, var->name, var->memsize, comm_align);
+		if(var->type->is_extern == 0){
+			if(var->type->is_thread_local == 0){
+				printf(".comm	%.*s, %d, %d\n", var->len, var->name, var->memsize, var->type->align);
+			}else{
+				printf(".section .tbss,\"awT\",@nobits\n");
+				printf("%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
+			}
+		}
 	}
 
 	// set string
@@ -3146,6 +3152,7 @@ int main(int argc, char **argv){
 
 	return 0;
 }
+
 //====================================================
 
 
