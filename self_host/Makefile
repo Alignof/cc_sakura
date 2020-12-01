@@ -12,6 +12,7 @@ ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
 OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 #ASEMS    := $(wildcard ./assemblies/*.s)
 #ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
+EXCLUDEASM := ./assemblies/main.s
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -21,8 +22,11 @@ $(OBJDIR)/%.o: $(ASMDIR)/%.s
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 # prepare franken 
-prepare:$(ASEMS)
+franken:$(ASEMS)
 	$(MOTHER) test.c > ./assemblies/tmp.s 
+	rm -f $(EXCLUDEASM)
+	gcc $(ASMDIR)/*.s -static -o ./child
+	./child dummy.c || echo $$?
 	# remove duplicate asem
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 

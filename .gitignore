@@ -7,6 +7,7 @@ cc_sakura
 testing/
 self_host/assemblies/*.s
 self_host/assemblies/obj/*.o
+self_host/child.s
 
 .gdb_history
 *.txt
