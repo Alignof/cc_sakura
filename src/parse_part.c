@@ -242,8 +242,8 @@ Node *call_function(Node *node, Token *tok){
 	Node *new = NULL;
 	while(1){
 		if(new == NULL){
-			new        = logical();
-			node->next = new;
+			new       = logical();
+			node->rhs = new;
 		}else{
 			new->next  = logical();
 			new        = new->next;
