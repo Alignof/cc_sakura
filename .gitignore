@@ -5,7 +5,7 @@ a.out
 cc_sakura
 
 testing/
-selfhost/assembly
+self_host/assemblies
 
 .gdb_history
 *.txt
