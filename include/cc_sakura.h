@@ -6,7 +6,7 @@
 #include <string.h>
 #include <errno.h>
 
-#define FUNC_NUM 100
+#define FUNC_NUM 300
 
 typedef enum{
 	TK_TYPE,
@@ -27,6 +27,7 @@ typedef enum{
 	TK_BREAK,
 	TK_CONTINUE,
 	TK_TYPEDEF,
+	TK_EXTERN,
 	TK_RETURN,
 	TK_EOF,
 	TK_COMPILER_DIRECTIVE,
@@ -190,6 +191,7 @@ struct Str{
 struct GVar{
 	int len;
 	int memsize;
+	int is_extern;
 	char *name;
 	Type *type;
 	GVar *next;
@@ -341,7 +343,7 @@ Node *array_index(Node *node, Node *index);
 Type *set_type(Type *type, Token *tok);
 Type *parse_type(void);
 Type *insert_ptr_type(Type *prev, int star_count);
-Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type);
+Node *declare_global_variable(int star_count, int is_extern, Token* def_name, Type *toplv_type);
 Node *declare_local_variable(Node *node, Token *tok, int star_count);
 void declare_struct(Struc *new_struc);
 void declare_enum(Enum *new_enum);

@@ -25,7 +25,8 @@ void expand_block_code(Node *node){
 
 
 void gen_gvar(Node *node){
-	printf("	lea rax,  _%.*s[rip]\n", node->val, node->str);
+	printf("	lea rax,  %.*s[rip]\n", node->val, node->str);
+	//printf("	lea rax,  _%.*s[rip]\n", node->val, node->str);
 	printf("	push rax\n");
 }
 

@@ -197,6 +197,7 @@ Token *tokenize(char *p){
 		if(consume_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;
 		if(consume_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
 		if(consume_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
+		if(consume_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
 		if(consume_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
 
 		// compiler directive

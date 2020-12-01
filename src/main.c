@@ -83,9 +83,10 @@ int main(int argc, char **argv){
 	// set global variable
 	GVar *start = globals;
 	for (GVar *var = start;var;var = var->next){
-		int comm_align = (var->memsize >=  32) ? 32 : var->memsize/8*8;
-		printf(".comm	_%.*s, %d, %d\n", var->len, var->name, var->memsize, comm_align);
-		//printf("_%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
+		if(var->is_extern == 0){
+			printf(".comm	%.*s, %d, %d\n", var->len, var->name, var->memsize, var->type->align);
+			//printf("%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
+		}
 	}
 
 	// set string
