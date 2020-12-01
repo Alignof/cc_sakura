@@ -199,6 +199,7 @@ Token *tokenize(char *p){
 		if(consume_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
 		if(consume_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
 		if(consume_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
+		if(consume_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
 
 		// compiler directive
 		if(consume_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;

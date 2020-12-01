@@ -26,4 +26,5 @@ int main(void){
 	return x.next->r;
 }
 */
+
 typedef enum{RED,GREEN,BLUE,}COLOR; int main(void){COLOR c = GREEN; return GREEN;} 
