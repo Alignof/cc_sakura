@@ -5,7 +5,8 @@ a.out
 cc_sakura
 
 testing/
-self_host/assemblies
+self_host/assemblies/*.s
+self_host/assemblies/obj/*.o
 
 .gdb_history
 *.txt
