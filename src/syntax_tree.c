@@ -603,8 +603,9 @@ void function(Func *func){
 }
 
 void program(void){
-	int is_extern = 0;
-	int func_index = 0;
+	int is_extern       = 0;
+	int is_thread_local = 0;
+	int func_index      = 0;
 	int star_count;
 	Type *toplv_type;
 
@@ -652,10 +653,16 @@ void program(void){
 			is_extern = 1;
 		}
 
+		// thread local
+		if(consume_reserved_word("_Thread_local", TK_THREAD_LOCAL)){
+			is_thread_local = 1;
+		}
+
 
 		// parsing type
 		toplv_type = parse_type();
-		toplv_type->is_extern = is_extern;
+		toplv_type->is_extern       = is_extern;
+		toplv_type->is_thread_local = is_thread_local;
 
 		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
 		if(consume(";")){
