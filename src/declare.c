@@ -158,7 +158,7 @@ Type *insert_ptr_type(Type *prev, int star_count){
 	}
 }
 
-Node *declare_global_variable(int star_count, int is_extern, Token* def_name, Type *toplv_type){
+Node *declare_global_variable(int is_extern, int star_count, Token* def_name, Type *toplv_type){
 	// if not token -> error
 	if(!def_name) error_at(token->str, "not a variable.");
 

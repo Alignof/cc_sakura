@@ -648,7 +648,7 @@ void program(void){
 		}
 
 		// extern
-		if(consume_reserved_word("extern", TK_TYPEDEF)){
+		if(consume_reserved_word("extern", TK_EXTERN)){
 			is_extern = 1;
 		}
 
