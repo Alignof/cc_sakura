@@ -603,18 +603,23 @@ void function(Func *func){
 }
 
 void program(void){
-	int is_extern       = 0;
-	int is_thread_local = 0;
-	int func_index      = 0;
+	int is_extern;
+	int is_thread_local;
+	int func_index;
 	int star_count;
 	Type *toplv_type;
 
 	while(!at_eof()){
 		// reset lvar list
 		locals = NULL;
+
 		// reset lvar counter
 		alloc_size = 0;
 		star_count = 0;
+
+		// reset flag
+		is_extern       = 0;
+		is_thread_local = 0;
 
 		// typedef
 		if(consume_reserved_word("typedef", TK_TYPEDEF)){
