@@ -19,8 +19,9 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 install: $(OBJECTS)
 	$(CC) -O2 -o $(TARGET) $^ $(LDFLAGS)
 
-test: $(TARGET)
-	../test.sh
+self_host: $(TARGET)
+	$(TARGET) self_host.c > tmp.s && gcc -static tmp.s -o tmp
+	./tmp || echo $$?
 
 file_test: $(TARGET)
 	$(TARGET) test.c > tmp.s && gcc -static tmp.s -o tmp
@@ -30,4 +31,4 @@ clean:
 	rm -f *.o *.s *~ tmp* *.txt *.out
 	rm -f $(OBJECTS) $(TARGET)
 
-.PHONY: test clean install
+.PHONY: self_host file_test clean install

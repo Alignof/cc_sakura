@@ -211,6 +211,7 @@ assert -cl 21 'int global = 7; int *f(int *x){*x += 4; global += 3; return x;} i
 
 assert -cl 97 "int main(){return 'a';}"
 assert -cl 0  "int main(){return '\0';}"
+assert -cl 9  "int main(){return '\t';}"
 assert -cl 10 "int main(){return '\n';}"
 assert -cl 92 "int main(){return '\\\\';}"
 assert -cl 1  "int main(){int flag; char *hello=\"hello\"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}"
