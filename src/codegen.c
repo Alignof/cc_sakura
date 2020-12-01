@@ -59,12 +59,24 @@ void gen_struc(Node *node){
 	printf("	push rax\n");
 }
 
-void gen_arg(int arg_num, Node *tmp){
+void gen_args(Node *args){
+	int reg_num;
+	int arg_count = 0;
 	const char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
-	gen(tmp);
-	printf("	pop rax\n");
-	printf("	mov %s,rax\n", reg[arg_num]);
+
+	while(args){
+		gen(args);
+		arg_count++;
+		args=args->next;
+	}
+
+	for(reg_num=arg_count;reg_num > 0;reg_num--){
+		printf("	pop rax\n");
+		printf("	mov %s,rax\n", reg[reg_num-1]);
+	}
+	printf("	mov rax,%d\n", arg_count);
+
 }
 
 void gen_address(Node *node){
@@ -146,7 +158,6 @@ void gen_calc(Node *node){
 }
 
 void gen(Node *node){
-	Node *args;
 	Node *cases;
 	int  arg_num    = 0;
 	int  label_if   = label_if_num;
@@ -474,14 +485,7 @@ void gen(Node *node){
 			expand_block_code(node->block_code);
 			return;
 		case ND_CALL_FUNC:
-			args    = node->rhs;
-			arg_num = 0;
-
-			while(args){
-				gen_arg(arg_num, args);
-				arg_num++;
-				args=args->next;
-			}
+			gen_args(node->rhs);
 
 			printf("	push rbp\n");
 			printf("	mov rbp,rsp\n");

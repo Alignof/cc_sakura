@@ -358,6 +358,7 @@ extern int label_loop;
 extern int label_if_num;
 extern int label_loop_num;
 void gen(Node *node);
+void gen_args(Node *args);
 void gen_calc(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
