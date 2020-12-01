@@ -1,7 +1,22 @@
-int main(void){
-	int a[]={0,1,2};
+void pow(int *numbers){
+	int i;
+	for(i = 0;i < 12;i++){
+		numbers[i] = i*i;
+	}
 
-	// 12
-	return sizeof(a);
+	return;
+}
+
+int main(){
+	int i;
+	int numbers[12];
+
+	pow(numbers);
+
+	for(i=0;i<12;i++){
+		printf("%d:%d\n", i, numbers[i]);
+	}
+
+	return 0;
 }
 
