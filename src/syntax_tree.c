@@ -603,10 +603,10 @@ void function(Func *func){
 }
 
 void program(void){
+	int func_index = 0;
+	int star_count;
 	int is_extern;
 	int is_thread_local;
-	int func_index;
-	int star_count;
 	Type *toplv_type;
 
 	while(!at_eof()){
