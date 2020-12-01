@@ -83,7 +83,7 @@ int main(int argc, char **argv){
 	// set global variable
 	GVar *start = globals;
 	for (GVar *var = start;var;var = var->next){
-		if(var->is_extern == 0){
+		if(var->type->is_extern == 0){
 			printf(".comm	%.*s, %d, %d\n", var->len, var->name, var->memsize, var->type->align);
 			//printf("%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
 		}

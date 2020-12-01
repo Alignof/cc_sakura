@@ -652,8 +652,10 @@ void program(void){
 			is_extern = 1;
 		}
 
+
 		// parsing type
 		toplv_type = parse_type();
+		toplv_type->is_extern = is_extern;
 
 		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
 		if(consume(";")){
@@ -687,7 +689,7 @@ void program(void){
 			consume("}");
 		// global variable
 		}else{
-			Node *init_gv = declare_global_variable(is_extern, star_count, def_name, toplv_type);
+			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
 
 			// initialize formula
 			if(consume("=")){
