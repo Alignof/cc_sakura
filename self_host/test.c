@@ -382,6 +382,7 @@ char errno;
 // 	return new;
 // }
 
+
 Node *incdec(Node *node, IncDecKind idtype){
 	/*
 	 * a++;
