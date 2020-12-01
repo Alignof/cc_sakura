@@ -1,16 +1,7 @@
-typedef struct test Test;
-
-struct test{
-	int r;
-	int g;
-	int b;
-	Test *next;
-};
-
 int main(void){
-	char str[] = "hello"; 
+	int a[]={0,1,2};
 
-	// 5
-	return sizeof(str);
+	// 12
+	return sizeof(a);
 }
 

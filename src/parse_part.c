@@ -159,10 +159,12 @@ Node *array_str(Node *arr, Node *init_val){
 		if(arr->kind == ND_LARRAY){
 			int asize = align_array_size(ctr, arr->type);
 			alloc_size+=asize;
-			arr->offset = ((locals)?(locals->offset):0) + asize;
-			clone->offset = arr->offset;
+			arr->offset    = ((locals)?(locals->offset):0) + asize;
+			clone->offset  = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
+			locals->type->size  = type_size(locals->type);
+			locals->type->align = type_size(locals->type);
 		}else{
 			globals->memsize = align_array_size(ctr, arr->type);
 		}
@@ -207,6 +209,8 @@ Node *array_block(Node *arr){
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
+			locals->type->size  = type_size(locals->type);
+			locals->type->align = type_size(locals->type);
 		}else{
 			globals->memsize = align_array_size(ctr, arr->type);
 		}
