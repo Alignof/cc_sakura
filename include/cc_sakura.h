@@ -29,8 +29,9 @@ typedef enum{
 	TK_TYPEDEF,
 	TK_EXTERN,
 	TK_RETURN,
-	TK_EOF,
+	TK_THREAD_LOCAL,
 	TK_COMPILER_DIRECTIVE,
+	TK_EOF,
 }TokenKind;
 
 typedef enum{
