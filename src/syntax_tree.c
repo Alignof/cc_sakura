@@ -468,7 +468,7 @@ Node *stmt(void){
 				if(node->lhs){
 					error_at(token->str, "multiple default labels in one switch");
 				}else{
-					node->lhs      = lb->cond;
+					node->lhs      = new_node(ND_CASE, NULL, lb->cond);
 					node->lhs->val = lb->id;
 				}
 			}
