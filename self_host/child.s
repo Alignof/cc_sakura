@@ -1,5 +1,6 @@
 .intel_syntax noprefix
 .globl main
+.comm	errno, 4, 4
 .comm	FUNC_NUM, 4, 4
 .comm	SEEK_END, 4, 4
 .comm	SEEK_SET, 4, 4

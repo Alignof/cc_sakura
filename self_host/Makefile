@@ -18,7 +18,7 @@ $(TARGET): $(OBJECTS)
 
 $(OBJDIR)/%.o: $(ASMDIR)/%.s 
 	@[ -d $(OBJDIR) ]
-	$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
 
 # prepare franken 
 prepare:$(ASEMS)
