@@ -6,7 +6,7 @@
 #include <string.h>
 #include <errno.h>
 
-#define FUNC_NUM 100
+#define FUNC_NUM 300
 
 typedef enum{
 	TK_TYPE,
