@@ -83,9 +83,8 @@ type_size:
 	call	error_at@PLT
 	mov	eax, -1
 .L12:
-	add	rsp, 24
-	pop	rbx
-	pop	rbp
+	mov	rbx, QWORD PTR -8[rbp]
+	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
@@ -103,8 +102,8 @@ type_align:
 	.cfi_def_cfa_register 6
 	sub	rsp, 48
 	mov	QWORD PTR -40[rbp], rdi
+	mov	DWORD PTR -16[rbp], 0
 	mov	DWORD PTR -20[rbp], 0
-	mov	DWORD PTR -4[rbp], 0
 	mov	rax, QWORD PTR -40[rbp]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 7
@@ -152,32 +151,32 @@ type_align:
 	call	type_align
 	jmp	.L24
 .L17:
-	mov	edx, DWORD PTR -20[rbp]
+	mov	edx, DWORD PTR -16[rbp]
 	mov	rax, QWORD PTR -40[rbp]
 	mov	esi, edx
 	mov	rdi, rax
 	call	find_struct_member@PLT
-	mov	QWORD PTR -16[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 	jmp	.L25
 .L27:
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rax, QWORD PTR 24[rax]
 	mov	rdi, rax
 	call	type_align
-	mov	DWORD PTR -24[rbp], eax
-	mov	eax, DWORD PTR -4[rbp]
-	cmp	eax, DWORD PTR -24[rbp]
+	mov	DWORD PTR -12[rbp], eax
+	mov	eax, DWORD PTR -20[rbp]
+	cmp	eax, DWORD PTR -12[rbp]
 	jge	.L26
-	mov	eax, DWORD PTR -24[rbp]
-	mov	DWORD PTR -4[rbp], eax
+	mov	eax, DWORD PTR -12[rbp]
+	mov	DWORD PTR -20[rbp], eax
 .L26:
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rax, QWORD PTR 32[rax]
-	mov	QWORD PTR -16[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 .L25:
-	cmp	QWORD PTR -16[rbp], 0
+	cmp	QWORD PTR -8[rbp], 0
 	jne	.L27
-	mov	eax, DWORD PTR -4[rbp]
+	mov	eax, DWORD PTR -20[rbp]
 	jmp	.L24
 .L15:
 	mov	eax, 4
@@ -292,28 +291,28 @@ pointer_calc:
 	mov	esi, 72
 	mov	edi, 1
 	call	calloc@PLT
-	mov	QWORD PTR -24[rbp], rax
-	mov	rax, QWORD PTR -24[rbp]
+	mov	QWORD PTR -32[rbp], rax
+	mov	rax, QWORD PTR -32[rbp]
 	mov	DWORD PTR [rax], 27
 	mov	esi, 40
 	mov	edi, 1
 	call	calloc@PLT
 	mov	rdx, rax
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -32[rbp]
 	mov	QWORD PTR 40[rax], rdx
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -32[rbp]
 	mov	rax, QWORD PTR 40[rax]
 	mov	DWORD PTR [rax], 3
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -32[rbp]
 	mov	rax, QWORD PTR 40[rax]
-	mov	rdx, QWORD PTR -24[rbp]
+	mov	rdx, QWORD PTR -32[rbp]
 	mov	rbx, QWORD PTR 40[rdx]
 	mov	rdi, rax
 	call	type_size
 	mov	DWORD PTR 16[rbx], eax
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -32[rbp]
 	mov	rax, QWORD PTR 40[rax]
-	mov	rdx, QWORD PTR -24[rbp]
+	mov	rdx, QWORD PTR -32[rbp]
 	mov	rbx, QWORD PTR 40[rdx]
 	mov	rdi, rax
 	call	type_align
@@ -328,14 +327,14 @@ pointer_calc:
 	je	.L39
 	mov	rax, QWORD PTR -48[rbp]
 	mov	rax, QWORD PTR 8[rax]
-	mov	QWORD PTR -32[rbp], rax
-	mov	rax, QWORD PTR -32[rbp]
-	mov	edx, DWORD PTR 16[rax]
+	mov	QWORD PTR -24[rbp], rax
 	mov	rax, QWORD PTR -24[rbp]
+	mov	edx, DWORD PTR 16[rax]
+	mov	rax, QWORD PTR -32[rbp]
 	mov	DWORD PTR 48[rax], edx
 	mov	rax, QWORD PTR -40[rbp]
 	mov	rax, QWORD PTR 16[rax]
-	mov	rdx, QWORD PTR -24[rbp]
+	mov	rdx, QWORD PTR -32[rbp]
 	mov	rsi, rax
 	mov	edi, 2
 	call	new_node@PLT
@@ -353,14 +352,14 @@ pointer_calc:
 	je	.L40
 	mov	rax, QWORD PTR -56[rbp]
 	mov	rax, QWORD PTR 8[rax]
-	mov	QWORD PTR -32[rbp], rax
-	mov	rax, QWORD PTR -32[rbp]
-	mov	edx, DWORD PTR 16[rax]
+	mov	QWORD PTR -24[rbp], rax
 	mov	rax, QWORD PTR -24[rbp]
+	mov	edx, DWORD PTR 16[rax]
+	mov	rax, QWORD PTR -32[rbp]
 	mov	DWORD PTR 48[rax], edx
 	mov	rax, QWORD PTR -40[rbp]
 	mov	rax, QWORD PTR 8[rax]
-	mov	rdx, QWORD PTR -24[rbp]
+	mov	rdx, QWORD PTR -32[rbp]
 	mov	rsi, rax
 	mov	edi, 2
 	call	new_node@PLT
@@ -368,13 +367,12 @@ pointer_calc:
 	mov	QWORD PTR 8[rdx], rax
 .L40:
 	mov	rax, QWORD PTR -40[rbp]
-	add	rsp, 56
-	pop	rbx
-	pop	rbp
+	mov	rbx, QWORD PTR -8[rbp]
+	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
 .LFE10:
 	.size	pointer_calc, .-pointer_calc
-	.ident	"GCC: (Debian 9.3.0-18) 9.3.0"
+	.ident	"GCC: (GNU) 10.2.0"
 	.section	.note.GNU-stack,"",@progbits

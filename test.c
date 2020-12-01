@@ -26,25 +26,4 @@ int main(void){
 	return x.next->r;
 }
 */
-
-int add(int a, int b,int c,int d){
-	return a+b+c+d;
-}
-int sum(int a, int b, int c){
-	return a+b+c;
-}
-int pow(int a){
-	return a*a;
-}
-int main(void){
-	int a=6;
-	int b=5;
-	int c=4;
-	int d=3;
-	int e=2;
-	int f=1;
-	int g=0;
-
-	// 21
-	return add(a, b, c, sum(d, e, pow(f)));
-}
+typedef enum{RED,GREEN,BLUE,}COLOR; int main(void){COLOR c = GREEN; return GREEN;} 

@@ -136,31 +136,35 @@ issymbol:
 	.cfi_offset 6, -16
 	mov	rbp, rsp
 	.cfi_def_cfa_register 6
+	sub	rsp, 80
 	mov	QWORD PTR -72[rbp], rdi
 	mov	QWORD PTR -80[rbp], rsi
+	mov	rax, QWORD PTR fs:40
+	mov	QWORD PTR -8[rbp], rax
+	xor	eax, eax
 	movabs	rax, 2965662295770410283
 	movabs	rdx, 6570253967572220967
 	mov	QWORD PTR -32[rbp], rax
 	mov	QWORD PTR -24[rbp], rdx
 	mov	DWORD PTR -16[rbp], 557465437
 	mov	BYTE PTR -12[rbp], 0
-	mov	DWORD PTR -39[rbp], 2082881084
-	mov	WORD PTR -35[rbp], 11563
-	mov	BYTE PTR -33[rbp], 0
-	mov	WORD PTR -42[rbp], 15917
-	mov	BYTE PTR -40[rbp], 0
+	mov	DWORD PTR -48[rbp], 2082881084
+	mov	WORD PTR -44[rbp], 11563
+	mov	BYTE PTR -42[rbp], 0
+	mov	WORD PTR -51[rbp], 15917
+	mov	BYTE PTR -49[rbp], 0
 	movabs	rax, 3399419658464279868
-	mov	QWORD PTR -51[rbp], rax
-	mov	BYTE PTR -43[rbp], 0
-	mov	DWORD PTR -8[rbp], 9
-	mov	DWORD PTR -4[rbp], 0
+	mov	QWORD PTR -41[rbp], rax
+	mov	BYTE PTR -33[rbp], 0
+	mov	DWORD PTR -56[rbp], 9
+	mov	DWORD PTR -60[rbp], 0
 	jmp	.L21
 .L24:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	edx, BYTE PTR [rax]
-	mov	eax, DWORD PTR -4[rbp]
+	mov	eax, DWORD PTR -60[rbp]
 	cdqe
-	movzx	eax, BYTE PTR -51[rbp+rax]
+	movzx	eax, BYTE PTR -41[rbp+rax]
 	cmp	dl, al
 	jne	.L22
 	mov	rax, QWORD PTR -72[rbp]
@@ -173,28 +177,28 @@ issymbol:
 	mov	eax, 1
 	jmp	.L34
 .L22:
-	add	DWORD PTR -4[rbp], 1
+	add	DWORD PTR -60[rbp], 1
 .L21:
-	mov	eax, DWORD PTR -4[rbp]
-	cmp	eax, DWORD PTR -8[rbp]
+	mov	eax, DWORD PTR -60[rbp]
+	cmp	eax, DWORD PTR -56[rbp]
 	jl	.L24
-	mov	DWORD PTR -8[rbp], 7
-	mov	DWORD PTR -4[rbp], 0
+	mov	DWORD PTR -56[rbp], 7
+	mov	DWORD PTR -60[rbp], 0
 	jmp	.L25
 .L27:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	edx, BYTE PTR [rax]
-	mov	eax, DWORD PTR -4[rbp]
+	mov	eax, DWORD PTR -60[rbp]
 	cdqe
-	movzx	eax, BYTE PTR -39[rbp+rax]
+	movzx	eax, BYTE PTR -48[rbp+rax]
 	cmp	dl, al
 	jne	.L26
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	movzx	edx, BYTE PTR [rax]
-	mov	eax, DWORD PTR -4[rbp]
+	mov	eax, DWORD PTR -60[rbp]
 	cdqe
-	movzx	eax, BYTE PTR -39[rbp+rax]
+	movzx	eax, BYTE PTR -48[rbp+rax]
 	cmp	dl, al
 	jne	.L26
 	mov	rax, QWORD PTR -80[rbp]
@@ -202,29 +206,29 @@ issymbol:
 	mov	eax, 1
 	jmp	.L34
 .L26:
-	add	DWORD PTR -4[rbp], 1
+	add	DWORD PTR -60[rbp], 1
 .L25:
-	mov	eax, DWORD PTR -4[rbp]
-	cmp	eax, DWORD PTR -8[rbp]
+	mov	eax, DWORD PTR -60[rbp]
+	cmp	eax, DWORD PTR -56[rbp]
 	jl	.L27
-	mov	DWORD PTR -8[rbp], 1
-	mov	DWORD PTR -4[rbp], 0
+	mov	DWORD PTR -56[rbp], 1
+	mov	DWORD PTR -60[rbp], 0
 	jmp	.L28
 .L30:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	edx, BYTE PTR [rax]
-	mov	eax, DWORD PTR -4[rbp]
+	mov	eax, DWORD PTR -60[rbp]
 	cdqe
-	movzx	eax, BYTE PTR -42[rbp+rax]
+	movzx	eax, BYTE PTR -51[rbp+rax]
 	cmp	dl, al
 	jne	.L29
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	movzx	edx, BYTE PTR [rax]
-	mov	eax, DWORD PTR -4[rbp]
+	mov	eax, DWORD PTR -60[rbp]
 	add	eax, 1
 	cdqe
-	movzx	eax, BYTE PTR -42[rbp+rax]
+	movzx	eax, BYTE PTR -51[rbp+rax]
 	cmp	dl, al
 	jne	.L29
 	mov	rax, QWORD PTR -80[rbp]
@@ -232,18 +236,18 @@ issymbol:
 	mov	eax, 1
 	jmp	.L34
 .L29:
-	add	DWORD PTR -4[rbp], 2
+	add	DWORD PTR -60[rbp], 2
 .L28:
-	mov	eax, DWORD PTR -4[rbp]
-	cmp	eax, DWORD PTR -8[rbp]
+	mov	eax, DWORD PTR -60[rbp]
+	cmp	eax, DWORD PTR -56[rbp]
 	jl	.L30
-	mov	DWORD PTR -8[rbp], 21
-	mov	DWORD PTR -4[rbp], 0
+	mov	DWORD PTR -56[rbp], 21
+	mov	DWORD PTR -60[rbp], 0
 	jmp	.L31
 .L33:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	edx, BYTE PTR [rax]
-	mov	eax, DWORD PTR -4[rbp]
+	mov	eax, DWORD PTR -60[rbp]
 	cdqe
 	movzx	eax, BYTE PTR -32[rbp+rax]
 	cmp	dl, al
@@ -253,14 +257,19 @@ issymbol:
 	mov	eax, 1
 	jmp	.L34
 .L32:
-	add	DWORD PTR -4[rbp], 1
+	add	DWORD PTR -60[rbp], 1
 .L31:
-	mov	eax, DWORD PTR -4[rbp]
-	cmp	eax, DWORD PTR -8[rbp]
+	mov	eax, DWORD PTR -60[rbp]
+	cmp	eax, DWORD PTR -56[rbp]
 	jl	.L33
 	mov	eax, 0
 .L34:
-	pop	rbp
+	mov	rcx, QWORD PTR -8[rbp]
+	sub	rcx, QWORD PTR fs:40
+	je	.L35
+	call	__stack_chk_fail@PLT
+.L35:
+	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
@@ -327,7 +336,7 @@ consume_reserved:
 	mov	rdi, rax
 	call	strncmp@PLT
 	test	eax, eax
-	jne	.L38
+	jne	.L39
 	mov	rax, QWORD PTR -8[rbp]
 	mov	rdx, QWORD PTR [rax]
 	mov	eax, DWORD PTR -20[rbp]
@@ -338,11 +347,11 @@ consume_reserved:
 	mov	edi, eax
 	call	is_alnum
 	test	eax, eax
-	je	.L39
-.L38:
-	mov	eax, 0
-	jmp	.L40
+	je	.L40
 .L39:
+	mov	eax, 0
+	jmp	.L41
+.L40:
 	mov	rax, QWORD PTR -8[rbp]
 	mov	rdx, QWORD PTR [rax]
 	mov	rax, QWORD PTR -32[rbp]
@@ -370,7 +379,7 @@ consume_reserved:
 	mov	rax, QWORD PTR -8[rbp]
 	mov	QWORD PTR [rax], rdx
 	mov	eax, 1
-.L40:
+.L41:
 	leave
 	.cfi_def_cfa 7, 8
 	ret
@@ -435,11 +444,14 @@ tokenize:
 	.cfi_def_cfa_register 6
 	sub	rsp, 80
 	mov	QWORD PTR -72[rbp], rdi
+	mov	rax, QWORD PTR fs:40
+	mov	QWORD PTR -8[rbp], rax
+	xor	eax, eax
 	mov	QWORD PTR -40[rbp], 0
 	lea	rax, -48[rbp]
 	mov	QWORD PTR -56[rbp], rax
-	jmp	.L42
-.L92:
+	jmp	.L43
+.L93:
 	call	__ctype_b_loc@PLT
 	mov	rdx, QWORD PTR [rax]
 	mov	rax, QWORD PTR -72[rbp]
@@ -451,147 +463,79 @@ tokenize:
 	movzx	eax, ax
 	and	eax, 8192
 	test	eax, eax
-	je	.L43
+	je	.L44
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
-	jmp	.L42
-.L43:
-	mov	rax, QWORD PTR -72[rbp]
-	movzx	eax, BYTE PTR [rax]
-	cmp	al, 47
-	jne	.L44
-	mov	rax, QWORD PTR -72[rbp]
-	add	rax, 1
-	movzx	eax, BYTE PTR [rax]
-	cmp	al, 47
-	jne	.L44
-	jmp	.L45
-.L46:
-	mov	rax, QWORD PTR -72[rbp]
-	add	rax, 1
-	mov	QWORD PTR -72[rbp], rax
-.L45:
-	mov	rax, QWORD PTR -72[rbp]
-	movzx	eax, BYTE PTR [rax]
-	cmp	al, 10
-	jne	.L46
-	jmp	.L42
+	jmp	.L43
 .L44:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 47
+	jne	.L45
+	mov	rax, QWORD PTR -72[rbp]
+	add	rax, 1
+	movzx	eax, BYTE PTR [rax]
+	cmp	al, 47
+	jne	.L45
+	jmp	.L46
+.L47:
+	mov	rax, QWORD PTR -72[rbp]
+	add	rax, 1
+	mov	QWORD PTR -72[rbp], rax
+.L46:
+	mov	rax, QWORD PTR -72[rbp]
+	movzx	eax, BYTE PTR [rax]
+	cmp	al, 10
 	jne	.L47
+	jmp	.L43
+.L45:
+	mov	rax, QWORD PTR -72[rbp]
+	movzx	eax, BYTE PTR [rax]
+	cmp	al, 47
+	jne	.L48
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 42
-	jne	.L47
-	jmp	.L48
-.L49:
+	jne	.L48
+	jmp	.L49
+.L50:
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
-.L48:
+.L49:
 	mov	rax, QWORD PTR -72[rbp]
 	sub	rax, 1
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 42
-	jne	.L49
+	jne	.L50
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 47
-	jne	.L49
-	mov	rax, QWORD PTR -72[rbp]
-	add	rax, 1
-	mov	QWORD PTR -72[rbp], rax
-	jmp	.L42
-.L47:
-	mov	rax, QWORD PTR -72[rbp]
-	movzx	eax, BYTE PTR [rax]
-	cmp	al, 39
 	jne	.L50
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
+	jmp	.L43
+.L48:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
-	cmp	al, 92
+	cmp	al, 39
 	jne	.L51
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
-	cmp	al, 48
+	cmp	al, 92
 	jne	.L52
 	mov	rax, QWORD PTR -72[rbp]
-	lea	rdx, 1[rax]
-	mov	QWORD PTR -72[rbp], rdx
-	mov	rcx, QWORD PTR -56[rbp]
-	mov	rdx, rax
-	mov	rsi, rcx
-	mov	edi, 3
-	call	new_token
-	mov	QWORD PTR -56[rbp], rax
-	mov	rax, QWORD PTR -56[rbp]
-	mov	DWORD PTR 16[rax], 0
-	jmp	.L53
-.L52:
+	add	rax, 1
+	mov	QWORD PTR -72[rbp], rax
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
-	cmp	al, 110
-	jne	.L54
-	mov	rax, QWORD PTR -72[rbp]
-	lea	rdx, 1[rax]
-	mov	QWORD PTR -72[rbp], rdx
-	mov	rcx, QWORD PTR -56[rbp]
-	mov	rdx, rax
-	mov	rsi, rcx
-	mov	edi, 3
-	call	new_token
-	mov	QWORD PTR -56[rbp], rax
-	mov	rax, QWORD PTR -56[rbp]
-	mov	DWORD PTR 16[rax], 10
-	jmp	.L53
-.L54:
-	mov	rax, QWORD PTR -72[rbp]
-	movzx	eax, BYTE PTR [rax]
-	cmp	al, 116
-	jne	.L55
-	mov	rax, QWORD PTR -72[rbp]
-	lea	rdx, 1[rax]
-	mov	QWORD PTR -72[rbp], rdx
-	mov	rcx, QWORD PTR -56[rbp]
-	mov	rdx, rax
-	mov	rsi, rcx
-	mov	edi, 3
-	call	new_token
-	mov	QWORD PTR -56[rbp], rax
-	mov	rax, QWORD PTR -56[rbp]
-	mov	DWORD PTR 16[rax], 9
-	jmp	.L53
-.L55:
-	mov	rax, QWORD PTR -72[rbp]
-	movzx	eax, BYTE PTR [rax]
-	cmp	al, 92
-	jne	.L56
-	mov	rax, QWORD PTR -72[rbp]
-	lea	rdx, 1[rax]
-	mov	QWORD PTR -72[rbp], rdx
-	mov	rcx, QWORD PTR -56[rbp]
-	mov	rdx, rax
-	mov	rsi, rcx
-	mov	edi, 3
-	call	new_token
-	mov	QWORD PTR -56[rbp], rax
-	mov	rax, QWORD PTR -56[rbp]
-	mov	DWORD PTR 16[rax], 92
-	jmp	.L53
-.L56:
-	mov	rax, QWORD PTR -72[rbp]
-	movzx	eax, BYTE PTR [rax]
-	cmp	al, 39
+	cmp	al, 48
 	jne	.L53
 	mov	rax, QWORD PTR -72[rbp]
 	lea	rdx, 1[rax]
@@ -603,9 +547,77 @@ tokenize:
 	call	new_token
 	mov	QWORD PTR -56[rbp], rax
 	mov	rax, QWORD PTR -56[rbp]
+	mov	DWORD PTR 16[rax], 0
+	jmp	.L54
+.L53:
+	mov	rax, QWORD PTR -72[rbp]
+	movzx	eax, BYTE PTR [rax]
+	cmp	al, 110
+	jne	.L55
+	mov	rax, QWORD PTR -72[rbp]
+	lea	rdx, 1[rax]
+	mov	QWORD PTR -72[rbp], rdx
+	mov	rcx, QWORD PTR -56[rbp]
+	mov	rdx, rax
+	mov	rsi, rcx
+	mov	edi, 3
+	call	new_token
+	mov	QWORD PTR -56[rbp], rax
+	mov	rax, QWORD PTR -56[rbp]
+	mov	DWORD PTR 16[rax], 10
+	jmp	.L54
+.L55:
+	mov	rax, QWORD PTR -72[rbp]
+	movzx	eax, BYTE PTR [rax]
+	cmp	al, 116
+	jne	.L56
+	mov	rax, QWORD PTR -72[rbp]
+	lea	rdx, 1[rax]
+	mov	QWORD PTR -72[rbp], rdx
+	mov	rcx, QWORD PTR -56[rbp]
+	mov	rdx, rax
+	mov	rsi, rcx
+	mov	edi, 3
+	call	new_token
+	mov	QWORD PTR -56[rbp], rax
+	mov	rax, QWORD PTR -56[rbp]
+	mov	DWORD PTR 16[rax], 9
+	jmp	.L54
+.L56:
+	mov	rax, QWORD PTR -72[rbp]
+	movzx	eax, BYTE PTR [rax]
+	cmp	al, 92
+	jne	.L57
+	mov	rax, QWORD PTR -72[rbp]
+	lea	rdx, 1[rax]
+	mov	QWORD PTR -72[rbp], rdx
+	mov	rcx, QWORD PTR -56[rbp]
+	mov	rdx, rax
+	mov	rsi, rcx
+	mov	edi, 3
+	call	new_token
+	mov	QWORD PTR -56[rbp], rax
+	mov	rax, QWORD PTR -56[rbp]
+	mov	DWORD PTR 16[rax], 92
+	jmp	.L54
+.L57:
+	mov	rax, QWORD PTR -72[rbp]
+	movzx	eax, BYTE PTR [rax]
+	cmp	al, 39
+	jne	.L54
+	mov	rax, QWORD PTR -72[rbp]
+	lea	rdx, 1[rax]
+	mov	QWORD PTR -72[rbp], rdx
+	mov	rcx, QWORD PTR -56[rbp]
+	mov	rdx, rax
+	mov	rsi, rcx
+	mov	edi, 3
+	call	new_token
+	mov	QWORD PTR -56[rbp], rax
+	mov	rax, QWORD PTR -56[rbp]
 	mov	DWORD PTR 16[rax], 39
-	jmp	.L53
-.L51:
+	jmp	.L54
+.L52:
 	mov	rdx, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR -56[rbp]
 	mov	rsi, rax
@@ -619,12 +631,12 @@ tokenize:
 	mov	rax, QWORD PTR -56[rbp]
 	movsx	edx, dl
 	mov	DWORD PTR 16[rax], edx
-.L53:
+.L54:
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
-	jmp	.L42
-.L50:
+	jmp	.L43
+.L51:
 	call	__ctype_b_loc@PLT
 	mov	rdx, QWORD PTR [rax]
 	mov	rax, QWORD PTR -72[rbp]
@@ -636,11 +648,11 @@ tokenize:
 	movzx	eax, ax
 	and	eax, 2048
 	test	eax, eax
-	je	.L57
+	je	.L58
 	mov	rax, QWORD PTR -56[rbp]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 2
-	jne	.L58
+	jne	.L59
 	mov	rax, QWORD PTR -72[rbp]
 	lea	rdx, 1[rax]
 	mov	QWORD PTR -72[rbp], rdx
@@ -652,8 +664,8 @@ tokenize:
 	mov	QWORD PTR -56[rbp], rax
 	mov	rax, QWORD PTR -56[rbp]
 	mov	DWORD PTR 32[rax], 1
-	jmp	.L42
-.L58:
+	jmp	.L43
+.L59:
 	mov	rdx, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR -56[rbp]
 	mov	rsi, rax
@@ -669,36 +681,36 @@ tokenize:
 	mov	rdx, rax
 	mov	rax, QWORD PTR -56[rbp]
 	mov	DWORD PTR 16[rax], edx
-	jmp	.L42
-.L57:
+	jmp	.L43
+.L58:
 	mov	rax, QWORD PTR -72[rbp]
-	lea	rdx, -1[rbp]
+	lea	rdx, -57[rbp]
 	mov	rsi, rdx
 	mov	rdi, rax
 	call	issymbol
 	test	al, al
-	je	.L60
+	je	.L61
 	mov	rdx, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR -56[rbp]
 	mov	rsi, rax
 	mov	edi, 1
 	call	new_token
 	mov	QWORD PTR -56[rbp], rax
-	movzx	eax, BYTE PTR -1[rbp]
+	movzx	eax, BYTE PTR -57[rbp]
 	test	al, al
-	je	.L61
+	je	.L62
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
-	jmp	.L42
-.L61:
+	jmp	.L43
+.L62:
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 2
 	mov	QWORD PTR -72[rbp], rax
 	mov	rax, QWORD PTR -56[rbp]
 	mov	DWORD PTR 32[rax], 2
-	jmp	.L42
-.L60:
+	jmp	.L43
+.L61:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 0
@@ -708,9 +720,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L63
-	jmp	.L42
-.L63:
+	je	.L64
+	jmp	.L43
+.L64:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 0
@@ -720,9 +732,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L64
-	jmp	.L42
-.L64:
+	je	.L65
+	jmp	.L43
+.L65:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 0
@@ -732,9 +744,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L65
-	jmp	.L42
-.L65:
+	je	.L66
+	jmp	.L43
+.L66:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 0
@@ -744,9 +756,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L66
-	jmp	.L42
-.L66:
+	je	.L67
+	jmp	.L43
+.L67:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 0
@@ -756,9 +768,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L67
-	jmp	.L42
-.L67:
+	je	.L68
+	jmp	.L43
+.L68:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 0
@@ -768,9 +780,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L68
-	jmp	.L42
-.L68:
+	je	.L69
+	jmp	.L43
+.L69:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 4
@@ -780,9 +792,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L69
-	jmp	.L42
-.L69:
+	je	.L70
+	jmp	.L43
+.L70:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 5
@@ -792,9 +804,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L70
-	jmp	.L42
-.L70:
+	je	.L71
+	jmp	.L43
+.L71:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 6
@@ -804,9 +816,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L71
-	jmp	.L42
-.L71:
+	je	.L72
+	jmp	.L43
+.L72:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 7
@@ -816,9 +828,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L72
-	jmp	.L42
-.L72:
+	je	.L73
+	jmp	.L43
+.L73:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 8
@@ -828,9 +840,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L73
-	jmp	.L42
-.L73:
+	je	.L74
+	jmp	.L43
+.L74:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 11
@@ -840,9 +852,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L74
-	jmp	.L42
-.L74:
+	je	.L75
+	jmp	.L43
+.L75:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 9
@@ -852,9 +864,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L75
-	jmp	.L42
-.L75:
+	je	.L76
+	jmp	.L43
+.L76:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 10
@@ -864,9 +876,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L76
-	jmp	.L42
-.L76:
+	je	.L77
+	jmp	.L43
+.L77:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 15
@@ -876,9 +888,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L77
-	jmp	.L42
-.L77:
+	je	.L78
+	jmp	.L43
+.L78:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 16
@@ -888,9 +900,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L78
-	jmp	.L42
-.L78:
+	je	.L79
+	jmp	.L43
+.L79:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 12
@@ -900,9 +912,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L79
-	jmp	.L42
-.L79:
+	je	.L80
+	jmp	.L43
+.L80:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 17
@@ -912,9 +924,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L80
-	jmp	.L42
-.L80:
+	je	.L81
+	jmp	.L43
+.L81:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 18
@@ -924,9 +936,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L81
-	jmp	.L42
-.L81:
+	je	.L82
+	jmp	.L43
+.L82:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 19
@@ -936,9 +948,9 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L82
-	jmp	.L42
-.L82:
+	je	.L83
+	jmp	.L43
+.L83:
 	lea	rdx, -56[rbp]
 	lea	rax, -72[rbp]
 	mov	r8d, 21
@@ -948,14 +960,14 @@ tokenize:
 	mov	rdi, rax
 	call	consume_reserved
 	test	al, al
-	je	.L83
-	jmp	.L42
-.L83:
+	je	.L84
+	jmp	.L43
+.L84:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rdi, rax
 	call	isblock
 	test	al, al
-	je	.L84
+	je	.L85
 	mov	rdx, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR -56[rbp]
 	mov	rsi, rax
@@ -970,17 +982,17 @@ tokenize:
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
-	jmp	.L42
-.L84:
+	jmp	.L43
+.L85:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 34
-	jne	.L85
+	jne	.L86
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
-	jmp	.L86
-.L87:
+	jmp	.L87
+.L88:
 	mov	rax, QWORD PTR -72[rbp]
 	lea	rdx, 1[rax]
 	mov	QWORD PTR -72[rbp], rdx
@@ -990,30 +1002,30 @@ tokenize:
 	mov	edi, 14
 	call	new_token
 	mov	QWORD PTR -56[rbp], rax
-.L86:
+.L87:
 	mov	rax, QWORD PTR -72[rbp]
 	sub	rax, 1
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 92
-	je	.L87
+	je	.L88
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 34
-	jne	.L87
+	jne	.L88
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
-	jmp	.L42
-.L85:
+	jmp	.L43
+.L86:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 92
-	jne	.L88
+	jne	.L89
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 92
-	jne	.L88
+	jne	.L89
 	mov	rax, QWORD PTR -72[rbp]
 	lea	rdx, 1[rax]
 	mov	QWORD PTR -72[rbp], rdx
@@ -1026,17 +1038,17 @@ tokenize:
 	mov	rax, QWORD PTR -72[rbp]
 	add	rax, 1
 	mov	QWORD PTR -72[rbp], rax
-	jmp	.L42
-.L88:
+	jmp	.L43
+.L89:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
 	movsx	eax, al
 	mov	edi, eax
 	call	is_alnum
 	test	eax, eax
-	je	.L89
-	jmp	.L90
-.L91:
+	je	.L90
+	jmp	.L91
+.L92:
 	mov	rax, QWORD PTR -72[rbp]
 	lea	rdx, 1[rax]
 	mov	QWORD PTR -72[rbp], rdx
@@ -1048,36 +1060,41 @@ tokenize:
 	mov	QWORD PTR -56[rbp], rax
 	mov	rax, QWORD PTR -56[rbp]
 	mov	DWORD PTR 32[rax], 1
-.L90:
+.L91:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
 	movsx	eax, al
 	mov	edi, eax
 	call	is_alnum
 	test	eax, eax
-	jne	.L91
-	jmp	.L42
-.L89:
+	jne	.L92
+	jmp	.L43
+.L90:
 	mov	rax, QWORD PTR -72[rbp]
 	lea	rsi, .LC21[rip]
 	mov	rdi, rax
 	call	error_at@PLT
-.L42:
+.L43:
 	mov	rax, QWORD PTR -72[rbp]
 	movzx	eax, BYTE PTR [rax]
 	test	al, al
-	jne	.L92
+	jne	.L93
 	mov	rdx, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR -56[rbp]
 	mov	rsi, rax
 	mov	edi, 20
 	call	new_token
 	mov	rax, QWORD PTR -40[rbp]
+	mov	rsi, QWORD PTR -8[rbp]
+	sub	rsi, QWORD PTR fs:40
+	je	.L95
+	call	__stack_chk_fail@PLT
+.L95:
 	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
 .LFE13:
 	.size	tokenize, .-tokenize
-	.ident	"GCC: (Debian 9.3.0-18) 9.3.0"
+	.ident	"GCC: (GNU) 10.2.0"
 	.section	.note.GNU-stack,"",@progbits

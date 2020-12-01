@@ -15,8 +15,8 @@ Def_Type *outside_deftype;
 // Func *func_list[100];
 
 Type *set_type(Type *type, Token *tok){
-	Enum  *enum_found;
-	Struc *struc_found;
+	Enum  *enum_found  = NULL;
+	Struc *struc_found = NULL;
 	int INSIDE_FILE = 0;
 
 	switch(type->ty){

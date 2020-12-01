@@ -237,6 +237,9 @@ gen_arg:
 	sub	rsp, 48
 	mov	DWORD PTR -36[rbp], edi
 	mov	QWORD PTR -48[rbp], rsi
+	mov	rax, QWORD PTR fs:40
+	mov	QWORD PTR -8[rbp], rax
+	xor	eax, eax
 	mov	DWORD PTR -32[rbp], 6906994
 	mov	DWORD PTR -28[rbp], 6910834
 	mov	DWORD PTR -24[rbp], 7890034
@@ -248,16 +251,21 @@ gen_arg:
 	call	gen
 	lea	rdi, .LC0[rip]
 	call	puts@PLT
-	lea	rax, -32[rbp]
-	mov	edx, DWORD PTR -36[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -36[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rdx
 	mov	rsi, rax
 	lea	rdi, .LC9[rip]
 	mov	eax, 0
 	call	printf@PLT
 	nop
+	mov	rax, QWORD PTR -8[rbp]
+	sub	rax, QWORD PTR fs:40
+	je	.L13
+	call	__stack_chk_fail@PLT
+.L13:
 	leave
 	.cfi_def_cfa 7, 8
 	ret
@@ -283,73 +291,73 @@ gen_address:
 	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 21
-	jne	.L14
+	jne	.L15
 	mov	rax, QWORD PTR -8[rbp]
 	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
 	call	gen
-	jmp	.L22
-.L14:
+	jmp	.L23
+.L15:
 	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 16
-	jne	.L16
-	mov	rax, QWORD PTR -8[rbp]
-	mov	rdi, rax
-	call	gen_struc
-	jmp	.L22
-.L16:
-	mov	rax, QWORD PTR -8[rbp]
-	mov	eax, DWORD PTR [rax]
-	cmp	eax, 17
 	jne	.L17
 	mov	rax, QWORD PTR -8[rbp]
 	mov	rdi, rax
 	call	gen_struc
-	jmp	.L22
+	jmp	.L23
 .L17:
 	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
-	cmp	eax, 23
+	cmp	eax, 17
 	jne	.L18
 	mov	rax, QWORD PTR -8[rbp]
 	mov	rdi, rax
-	call	gen_gvar
-	jmp	.L22
+	call	gen_struc
+	jmp	.L23
 .L18:
 	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
-	cmp	eax, 25
+	cmp	eax, 23
 	jne	.L19
 	mov	rax, QWORD PTR -8[rbp]
 	mov	rdi, rax
 	call	gen_gvar
-	jmp	.L22
+	jmp	.L23
 .L19:
 	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
-	cmp	eax, 22
+	cmp	eax, 25
 	jne	.L20
 	mov	rax, QWORD PTR -8[rbp]
 	mov	rdi, rax
-	call	gen_lvar
-	jmp	.L22
+	call	gen_gvar
+	jmp	.L23
 .L20:
 	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
-	cmp	eax, 24
+	cmp	eax, 22
 	jne	.L21
 	mov	rax, QWORD PTR -8[rbp]
 	mov	rdi, rax
 	call	gen_lvar
-	jmp	.L22
+	jmp	.L23
 .L21:
+	mov	rax, QWORD PTR -8[rbp]
+	mov	eax, DWORD PTR [rax]
+	cmp	eax, 24
+	jne	.L22
+	mov	rax, QWORD PTR -8[rbp]
+	mov	rdi, rax
+	call	gen_lvar
+	jmp	.L23
+.L22:
 	mov	rax, QWORD PTR token[rip]
 	mov	rax, QWORD PTR 24[rax]
 	lea	rsi, .LC10[rip]
 	mov	rdi, rax
 	call	error_at@PLT
-.L22:
+.L23:
 	nop
 	leave
 	.cfi_def_cfa 7, 8
@@ -397,217 +405,220 @@ gen_calc:
 	.cfi_offset 6, -16
 	mov	rbp, rsp
 	.cfi_def_cfa_register 6
-	sub	rsp, 112
-	mov	QWORD PTR -104[rbp], rdi
-	mov	DWORD PTR -32[rbp], 7889253
-	mov	DWORD PTR -28[rbp], 7889253
-	mov	DWORD PTR -24[rbp], 7889253
-	mov	DWORD PTR -20[rbp], 7889253
-	mov	DWORD PTR -16[rbp], 7889266
-	mov	DWORD PTR -12[rbp], 7889266
+	add	rsp, -128
+	mov	QWORD PTR -120[rbp], rdi
+	mov	rax, QWORD PTR fs:40
+	mov	QWORD PTR -8[rbp], rax
+	xor	eax, eax
+	mov	DWORD PTR -96[rbp], 7889253
+	mov	DWORD PTR -92[rbp], 7889253
+	mov	DWORD PTR -88[rbp], 7889253
+	mov	DWORD PTR -84[rbp], 7889253
+	mov	DWORD PTR -80[rbp], 7889266
+	mov	DWORD PTR -76[rbp], 7889266
 	mov	DWORD PTR -64[rbp], 7890021
 	mov	DWORD PTR -60[rbp], 7890021
 	mov	DWORD PTR -56[rbp], 7890021
 	mov	DWORD PTR -52[rbp], 7890021
 	mov	DWORD PTR -48[rbp], 7890034
 	mov	DWORD PTR -44[rbp], 7890034
-	mov	DWORD PTR -96[rbp], 6906981
-	mov	DWORD PTR -92[rbp], 6906981
-	mov	DWORD PTR -88[rbp], 6906981
-	mov	DWORD PTR -84[rbp], 6906981
-	mov	DWORD PTR -80[rbp], 6906994
-	mov	DWORD PTR -76[rbp], 6906994
-	mov	rax, QWORD PTR -104[rbp]
+	mov	DWORD PTR -32[rbp], 6906981
+	mov	DWORD PTR -28[rbp], 6906981
+	mov	DWORD PTR -24[rbp], 6906981
+	mov	DWORD PTR -20[rbp], 6906981
+	mov	DWORD PTR -16[rbp], 6906994
+	mov	DWORD PTR -12[rbp], 6906994
+	mov	rax, QWORD PTR -120[rbp]
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 7
-	je	.L24
-	mov	rax, QWORD PTR -104[rbp]
+	je	.L25
+	mov	rax, QWORD PTR -120[rbp]
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
-	jmp	.L25
-.L24:
-	mov	eax, 1
+	jmp	.L26
 .L25:
-	mov	DWORD PTR -4[rbp], eax
-	mov	rax, QWORD PTR -104[rbp]
+	mov	eax, 1
+.L26:
+	mov	DWORD PTR -100[rbp], eax
+	mov	rax, QWORD PTR -120[rbp]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 12
-	ja	.L41
+	ja	.L43
 	mov	eax, eax
 	lea	rdx, 0[0+rax*4]
-	lea	rax, .L28[rip]
+	lea	rax, .L29[rip]
 	mov	eax, DWORD PTR [rdx+rax]
 	cdqe
-	lea	rdx, .L28[rip]
+	lea	rdx, .L29[rip]
 	add	rax, rdx
 	jmp	rax
 	.section	.rodata
 	.align 4
 	.align 4
-.L28:
-	.long	.L40-.L28
-	.long	.L39-.L28
-	.long	.L38-.L28
-	.long	.L37-.L28
-	.long	.L36-.L28
-	.long	.L35-.L28
-	.long	.L34-.L28
-	.long	.L33-.L28
-	.long	.L32-.L28
-	.long	.L31-.L28
-	.long	.L30-.L28
-	.long	.L29-.L28
-	.long	.L27-.L28
+.L29:
+	.long	.L41-.L29
+	.long	.L40-.L29
+	.long	.L39-.L29
+	.long	.L38-.L29
+	.long	.L37-.L29
+	.long	.L36-.L29
+	.long	.L35-.L29
+	.long	.L34-.L29
+	.long	.L33-.L29
+	.long	.L32-.L29
+	.long	.L31-.L29
+	.long	.L30-.L29
+	.long	.L28-.L29
 	.text
-.L40:
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+.L41:
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC11[rip]
 	mov	eax, 0
 	call	printf@PLT
-	jmp	.L26
-.L39:
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	jmp	.L27
+.L40:
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC12[rip]
 	mov	eax, 0
 	call	printf@PLT
-	jmp	.L26
-.L38:
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	jmp	.L27
+.L39:
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC13[rip]
 	mov	eax, 0
 	call	printf@PLT
-	jmp	.L26
+	jmp	.L27
+.L38:
+	lea	rdi, .LC14[rip]
+	call	puts@PLT
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
+	add	rdx, rax
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
+	add	rax, rcx
+	mov	rsi, rax
+	lea	rdi, .LC15[rip]
+	mov	eax, 0
+	call	printf@PLT
+	jmp	.L27
 .L37:
 	lea	rdi, .LC14[rip]
 	call	puts@PLT
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC15[rip]
 	mov	eax, 0
 	call	printf@PLT
-	jmp	.L26
-.L36:
-	lea	rdi, .LC14[rip]
-	call	puts@PLT
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	lea	rdx, -64[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
-	add	rax, rcx
-	mov	rsi, rax
-	lea	rdi, .LC15[rip]
-	mov	eax, 0
-	call	printf@PLT
-	lea	rax, -64[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
-	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC16[rip]
 	mov	eax, 0
 	call	printf@PLT
-	jmp	.L26
+	jmp	.L27
+.L36:
+	lea	rdx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
+	add	rdx, rax
+	lea	rcx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
+	add	rax, rcx
+	mov	rsi, rax
+	lea	rdi, .LC17[rip]
+	mov	eax, 0
+	call	printf@PLT
+	lea	rdi, .LC18[rip]
+	call	puts@PLT
+	lea	rdi, .LC19[rip]
+	call	puts@PLT
+	jmp	.L27
 .L35:
-	lea	rax, -32[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	lea	rdx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -96[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC17[rip]
 	mov	eax, 0
 	call	printf@PLT
-	lea	rdi, .LC18[rip]
+	lea	rdi, .LC20[rip]
 	call	puts@PLT
 	lea	rdi, .LC19[rip]
 	call	puts@PLT
-	jmp	.L26
+	jmp	.L27
 .L34:
-	lea	rax, -32[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -96[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
-	add	rax, rcx
-	mov	rsi, rax
-	lea	rdi, .LC17[rip]
-	mov	eax, 0
-	call	printf@PLT
-	lea	rdi, .LC20[rip]
-	call	puts@PLT
-	lea	rdi, .LC19[rip]
-	call	puts@PLT
-	jmp	.L26
-.L33:
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
-	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC17[rip]
@@ -617,17 +628,17 @@ gen_calc:
 	call	puts@PLT
 	lea	rdi, .LC19[rip]
 	call	puts@PLT
-	jmp	.L26
-.L32:
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	jmp	.L27
+.L33:
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC17[rip]
@@ -637,17 +648,17 @@ gen_calc:
 	call	puts@PLT
 	lea	rdi, .LC19[rip]
 	call	puts@PLT
-	jmp	.L26
-.L31:
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	jmp	.L27
+.L32:
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC17[rip]
@@ -657,17 +668,17 @@ gen_calc:
 	call	puts@PLT
 	lea	rdi, .LC19[rip]
 	call	puts@PLT
-	jmp	.L26
-.L30:
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	jmp	.L27
+.L31:
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC17[rip]
@@ -677,17 +688,17 @@ gen_calc:
 	call	puts@PLT
 	lea	rdi, .LC19[rip]
 	call	puts@PLT
-	jmp	.L26
-.L29:
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	jmp	.L27
+.L30:
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC23[rip]
@@ -695,17 +706,17 @@ gen_calc:
 	call	printf@PLT
 	lea	rdi, .LC19[rip]
 	call	puts@PLT
-	jmp	.L26
-.L27:
-	lea	rax, -96[rbp]
-	mov	edx, DWORD PTR -4[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	jmp	.L27
+.L28:
+	lea	rdx, -32[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rdx, rax
-	lea	rax, -32[rbp]
-	mov	ecx, DWORD PTR -4[rbp]
-	movsx	rcx, ecx
-	sal	rcx, 2
+	lea	rcx, -96[rbp]
+	mov	eax, DWORD PTR -100[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rcx
 	mov	rsi, rax
 	lea	rdi, .LC24[rip]
@@ -714,9 +725,14 @@ gen_calc:
 	lea	rdi, .LC19[rip]
 	call	puts@PLT
 	nop
-.L26:
-.L41:
+.L27:
+.L43:
 	nop
+	mov	rax, QWORD PTR -8[rbp]
+	sub	rax, QWORD PTR fs:40
+	je	.L42
+	call	__stack_chk_fail@PLT
+.L42:
 	leave
 	.cfi_def_cfa 7, 8
 	ret
@@ -813,76 +829,79 @@ gen:
 	.cfi_def_cfa_register 6
 	sub	rsp, 80
 	mov	QWORD PTR -72[rbp], rdi
-	mov	DWORD PTR -20[rbp], 0
+	mov	rax, QWORD PTR fs:40
+	mov	QWORD PTR -8[rbp], rax
+	xor	eax, eax
+	mov	DWORD PTR -60[rbp], 0
 	mov	eax, DWORD PTR label_if_num[rip]
-	mov	DWORD PTR -24[rbp], eax
+	mov	DWORD PTR -56[rbp], eax
 	mov	eax, DWORD PTR label_loop_num[rip]
-	mov	DWORD PTR -28[rbp], eax
-	mov	DWORD PTR -64[rbp], 6906994
-	mov	DWORD PTR -60[rbp], 6910834
-	mov	DWORD PTR -56[rbp], 7890034
-	mov	DWORD PTR -52[rbp], 7889778
-	mov	DWORD PTR -48[rbp], 14450
-	mov	DWORD PTR -44[rbp], 14706
+	mov	DWORD PTR -52[rbp], eax
+	mov	DWORD PTR -32[rbp], 6906994
+	mov	DWORD PTR -28[rbp], 6910834
+	mov	DWORD PTR -24[rbp], 7890034
+	mov	DWORD PTR -20[rbp], 7889778
+	mov	DWORD PTR -16[rbp], 14450
+	mov	DWORD PTR -12[rbp], 14706
 	mov	rax, QWORD PTR -72[rbp]
 	mov	eax, DWORD PTR [rax]
 	sub	eax, 13
 	cmp	eax, 31
-	ja	.L43
+	ja	.L45
 	mov	eax, eax
 	lea	rdx, 0[0+rax*4]
-	lea	rax, .L45[rip]
+	lea	rax, .L47[rip]
 	mov	eax, DWORD PTR [rdx+rax]
 	cdqe
-	lea	rdx, .L45[rip]
+	lea	rdx, .L47[rip]
 	add	rax, rdx
 	jmp	rax
 	.section	.rodata
 	.align 4
 	.align 4
-.L45:
-	.long	.L73-.L45
-	.long	.L72-.L45
-	.long	.L71-.L45
-	.long	.L70-.L45
-	.long	.L70-.L45
-	.long	.L69-.L45
-	.long	.L68-.L45
-	.long	.L67-.L45
-	.long	.L66-.L45
-	.long	.L65-.L45
-	.long	.L64-.L45
-	.long	.L63-.L45
-	.long	.L62-.L45
-	.long	.L61-.L45
-	.long	.L60-.L45
-	.long	.L59-.L45
-	.long	.L58-.L45
-	.long	.L43-.L45
-	.long	.L57-.L45
-	.long	.L56-.L45
-	.long	.L55-.L45
-	.long	.L54-.L45
-	.long	.L53-.L45
-	.long	.L52-.L45
-	.long	.L51-.L45
-	.long	.L99-.L45
-	.long	.L49-.L45
-	.long	.L48-.L45
-	.long	.L47-.L45
-	.long	.L46-.L45
-	.long	.L43-.L45
-	.long	.L105-.L45
+.L47:
+	.long	.L75-.L47
+	.long	.L74-.L47
+	.long	.L73-.L47
+	.long	.L72-.L47
+	.long	.L72-.L47
+	.long	.L71-.L47
+	.long	.L70-.L47
+	.long	.L69-.L47
+	.long	.L68-.L47
+	.long	.L67-.L47
+	.long	.L66-.L47
+	.long	.L65-.L47
+	.long	.L64-.L47
+	.long	.L63-.L47
+	.long	.L62-.L47
+	.long	.L61-.L47
+	.long	.L60-.L47
+	.long	.L45-.L47
+	.long	.L59-.L47
+	.long	.L58-.L47
+	.long	.L57-.L47
+	.long	.L56-.L47
+	.long	.L55-.L47
+	.long	.L54-.L47
+	.long	.L53-.L47
+	.long	.L101-.L47
+	.long	.L51-.L47
+	.long	.L50-.L47
+	.long	.L49-.L47
+	.long	.L48-.L47
+	.long	.L45-.L47
+	.long	.L108-.L47
 	.text
-.L60:
+.L62:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	eax, DWORD PTR 48[rax]
 	mov	esi, eax
 	lea	rdi, .LC25[rip]
 	mov	eax, 0
 	call	printf@PLT
-	jmp	.L42
-.L64:
+	jmp	.L44
+.L66:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rdi, rax
 	call	gen_gvar
@@ -892,8 +911,8 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L65:
+	jmp	.L44
+.L67:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rdi, rax
 	call	gen_lvar
@@ -903,60 +922,60 @@ gen:
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 2
-	ja	.L75
+	ja	.L77
 	lea	rdi, .LC27[rip]
 	call	puts@PLT
 	lea	rdi, .LC28[rip]
 	call	puts@PLT
-	jmp	.L76
-.L75:
+	jmp	.L78
+.L77:
 	lea	rdi, .LC26[rip]
 	call	puts@PLT
-.L76:
+.L78:
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 32[rax]
 	test	rax, rax
-	je	.L106
+	je	.L109
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 32[rax]
 	mov	rdi, rax
 	call	gen
-	jmp	.L106
-.L62:
+	jmp	.L109
+.L64:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rdi, rax
 	call	gen_gvar
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 32[rax]
 	test	rax, rax
-	je	.L107
+	je	.L110
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 32[rax]
 	mov	rdi, rax
 	call	expand_next
-	jmp	.L107
-.L63:
+	jmp	.L110
+.L65:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rdi, rax
 	call	gen_lvar
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 32[rax]
 	test	rax, rax
-	je	.L108
+	je	.L111
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 32[rax]
 	mov	rdi, rax
 	call	expand_next
-	jmp	.L108
-.L69:
+	jmp	.L111
+.L71:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rdi, rax
 	call	gen
-	jmp	.L42
-.L71:
+	jmp	.L44
+.L73:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rdi, rax
@@ -993,13 +1012,13 @@ gen:
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 2
-	ja	.L80
+	ja	.L82
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 1
-	jne	.L81
+	jne	.L83
 	lea	rdi, .LC30[rip]
 	call	puts@PLT
 	lea	rdi, .LC31[rip]
@@ -1008,25 +1027,25 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC33[rip]
 	call	puts@PLT
-.L81:
+.L83:
 	lea	rdi, .LC34[rip]
 	call	puts@PLT
-	jmp	.L42
-.L80:
+	jmp	.L44
+.L82:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 3
-	jne	.L83
+	jne	.L85
 	lea	rdi, .LC35[rip]
 	call	puts@PLT
-	jmp	.L42
-.L83:
+	jmp	.L44
+.L85:
 	lea	rdi, .LC36[rip]
 	call	puts@PLT
-	jmp	.L42
-.L61:
+	jmp	.L44
+.L63:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	eax, DWORD PTR 48[rax]
 	mov	esi, eax
@@ -1035,8 +1054,8 @@ gen:
 	call	printf@PLT
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L73:
+	jmp	.L44
+.L75:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rdi, rax
@@ -1054,28 +1073,28 @@ gen:
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 2
-	ja	.L84
+	ja	.L86
 	lea	rdi, .LC34[rip]
 	call	puts@PLT
-	jmp	.L85
-.L84:
+	jmp	.L87
+.L86:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 3
-	jne	.L86
+	jne	.L88
 	lea	rdi, .LC35[rip]
 	call	puts@PLT
-	jmp	.L85
-.L86:
+	jmp	.L87
+.L88:
 	lea	rdi, .LC36[rip]
 	call	puts@PLT
-.L85:
+.L87:
 	lea	rdi, .LC38[rip]
 	call	puts@PLT
-	jmp	.L42
-.L72:
+	jmp	.L44
+.L74:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rdi, rax
@@ -1108,13 +1127,13 @@ gen:
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 2
-	ja	.L87
+	ja	.L89
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 1
-	jne	.L88
+	jne	.L90
 	lea	rdi, .LC30[rip]
 	call	puts@PLT
 	lea	rdi, .LC31[rip]
@@ -1123,28 +1142,28 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC33[rip]
 	call	puts@PLT
-.L88:
+.L90:
 	lea	rdi, .LC34[rip]
 	call	puts@PLT
-	jmp	.L89
-.L87:
+	jmp	.L91
+.L89:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 3
-	jne	.L90
+	jne	.L92
 	lea	rdi, .LC35[rip]
 	call	puts@PLT
-	jmp	.L89
-.L90:
+	jmp	.L91
+.L92:
 	lea	rdi, .LC36[rip]
 	call	puts@PLT
-.L89:
+.L91:
 	lea	rdi, .LC38[rip]
 	call	puts@PLT
-	jmp	.L42
-.L70:
+	jmp	.L44
+.L72:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rdi, rax
 	call	gen_struc
@@ -1152,17 +1171,89 @@ gen:
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 5
-	je	.L109
+	je	.L112
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 6
-	je	.L109
+	je	.L112
 	lea	rdi, .LC0[rip]
 	call	puts@PLT
 	lea	rdi, .LC29[rip]
 	call	puts@PLT
-	jmp	.L109
+	jmp	.L112
+.L61:
+	mov	eax, DWORD PTR label_if_num[rip]
+	add	eax, 1
+	mov	DWORD PTR label_if_num[rip], eax
+	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR 8[rax]
+	mov	rdi, rax
+	call	gen
+	lea	rdi, .LC0[rip]
+	call	puts@PLT
+	lea	rdi, .LC39[rip]
+	call	puts@PLT
+	mov	eax, DWORD PTR -56[rbp]
+	mov	esi, eax
+	lea	rdi, .LC40[rip]
+	mov	eax, 0
+	call	printf@PLT
+	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR 16[rax]
+	mov	rdi, rax
+	call	gen
+	mov	eax, DWORD PTR -56[rbp]
+	mov	esi, eax
+	lea	rdi, .LC41[rip]
+	mov	eax, 0
+	call	printf@PLT
+	mov	eax, DWORD PTR -56[rbp]
+	mov	esi, eax
+	lea	rdi, .LC42[rip]
+	mov	eax, 0
+	call	printf@PLT
+	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR 24[rax]
+	mov	rdi, rax
+	call	gen
+	mov	eax, DWORD PTR -56[rbp]
+	mov	esi, eax
+	lea	rdi, .LC43[rip]
+	mov	eax, 0
+	call	printf@PLT
+	jmp	.L44
+.L60:
+	mov	eax, DWORD PTR label_if_num[rip]
+	add	eax, 1
+	mov	DWORD PTR label_if_num[rip], eax
+	lea	rdi, .LC1[rip]
+	call	puts@PLT
+	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR 8[rax]
+	mov	rdi, rax
+	call	gen
+	lea	rdi, .LC0[rip]
+	call	puts@PLT
+	lea	rdi, .LC39[rip]
+	call	puts@PLT
+	mov	eax, DWORD PTR -56[rbp]
+	mov	esi, eax
+	lea	rdi, .LC44[rip]
+	mov	eax, 0
+	call	printf@PLT
+	lea	rdi, .LC0[rip]
+	call	puts@PLT
+	mov	rax, QWORD PTR -72[rbp]
+	mov	rax, QWORD PTR 16[rax]
+	mov	rdi, rax
+	call	gen
+	mov	eax, DWORD PTR -56[rbp]
+	mov	esi, eax
+	lea	rdi, .LC43[rip]
+	mov	eax, 0
+	call	printf@PLT
+	jmp	.L44
 .L59:
 	mov	eax, DWORD PTR label_if_num[rip]
 	add	eax, 1
@@ -1175,110 +1266,38 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC39[rip]
 	call	puts@PLT
-	mov	eax, DWORD PTR -24[rbp]
+	mov	eax, DWORD PTR -56[rbp]
 	mov	esi, eax
 	lea	rdi, .LC40[rip]
 	mov	eax, 0
 	call	printf@PLT
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 16[rax]
+	mov	rax, QWORD PTR 8[rax]
 	mov	rdi, rax
 	call	gen
-	mov	eax, DWORD PTR -24[rbp]
+	mov	eax, DWORD PTR -56[rbp]
 	mov	esi, eax
 	lea	rdi, .LC41[rip]
 	mov	eax, 0
 	call	printf@PLT
-	mov	eax, DWORD PTR -24[rbp]
+	mov	eax, DWORD PTR -56[rbp]
 	mov	esi, eax
 	lea	rdi, .LC42[rip]
 	mov	eax, 0
 	call	printf@PLT
 	mov	rax, QWORD PTR -72[rbp]
-	mov	rax, QWORD PTR 24[rax]
+	mov	rax, QWORD PTR 16[rax]
+	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
 	call	gen
-	mov	eax, DWORD PTR -24[rbp]
+	mov	eax, DWORD PTR -56[rbp]
 	mov	esi, eax
 	lea	rdi, .LC43[rip]
 	mov	eax, 0
 	call	printf@PLT
-	jmp	.L42
+	jmp	.L44
 .L58:
-	mov	eax, DWORD PTR label_if_num[rip]
-	add	eax, 1
-	mov	DWORD PTR label_if_num[rip], eax
-	lea	rdi, .LC1[rip]
-	call	puts@PLT
-	mov	rax, QWORD PTR -72[rbp]
-	mov	rax, QWORD PTR 8[rax]
-	mov	rdi, rax
-	call	gen
-	lea	rdi, .LC0[rip]
-	call	puts@PLT
-	lea	rdi, .LC39[rip]
-	call	puts@PLT
-	mov	eax, DWORD PTR -24[rbp]
-	mov	esi, eax
-	lea	rdi, .LC44[rip]
-	mov	eax, 0
-	call	printf@PLT
-	lea	rdi, .LC0[rip]
-	call	puts@PLT
-	mov	rax, QWORD PTR -72[rbp]
-	mov	rax, QWORD PTR 16[rax]
-	mov	rdi, rax
-	call	gen
-	mov	eax, DWORD PTR -24[rbp]
-	mov	esi, eax
-	lea	rdi, .LC43[rip]
-	mov	eax, 0
-	call	printf@PLT
-	jmp	.L42
-.L57:
-	mov	eax, DWORD PTR label_if_num[rip]
-	add	eax, 1
-	mov	DWORD PTR label_if_num[rip], eax
-	mov	rax, QWORD PTR -72[rbp]
-	mov	rax, QWORD PTR 8[rax]
-	mov	rdi, rax
-	call	gen
-	lea	rdi, .LC0[rip]
-	call	puts@PLT
-	lea	rdi, .LC39[rip]
-	call	puts@PLT
-	mov	eax, DWORD PTR -24[rbp]
-	mov	esi, eax
-	lea	rdi, .LC40[rip]
-	mov	eax, 0
-	call	printf@PLT
-	mov	rax, QWORD PTR -72[rbp]
-	mov	rax, QWORD PTR 16[rax]
-	mov	rax, QWORD PTR 8[rax]
-	mov	rdi, rax
-	call	gen
-	mov	eax, DWORD PTR -24[rbp]
-	mov	esi, eax
-	lea	rdi, .LC41[rip]
-	mov	eax, 0
-	call	printf@PLT
-	mov	eax, DWORD PTR -24[rbp]
-	mov	esi, eax
-	lea	rdi, .LC42[rip]
-	mov	eax, 0
-	call	printf@PLT
-	mov	rax, QWORD PTR -72[rbp]
-	mov	rax, QWORD PTR 16[rax]
-	mov	rax, QWORD PTR 16[rax]
-	mov	rdi, rax
-	call	gen
-	mov	eax, DWORD PTR -24[rbp]
-	mov	esi, eax
-	lea	rdi, .LC43[rip]
-	mov	eax, 0
-	call	printf@PLT
-	jmp	.L42
-.L56:
 	mov	eax, DWORD PTR label_if_num[rip]
 	add	eax, 1
 	mov	DWORD PTR label_if_num[rip], eax
@@ -1287,32 +1306,32 @@ gen:
 	mov	DWORD PTR label_loop_num[rip], eax
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 24[rax]
-	mov	QWORD PTR -16[rbp], rax
-	jmp	.L92
-.L93:
-	mov	rax, QWORD PTR -16[rbp]
+	mov	QWORD PTR -40[rbp], rax
+	jmp	.L94
+.L95:
+	mov	rax, QWORD PTR -40[rbp]
 	mov	rdi, rax
 	call	gen
 	lea	rdi, .LC0[rip]
 	call	puts@PLT
 	lea	rdi, .LC39[rip]
 	call	puts@PLT
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -40[rbp]
 	mov	eax, DWORD PTR 48[rax]
 	mov	esi, eax
 	lea	rdi, .LC45[rip]
 	mov	eax, 0
 	call	printf@PLT
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -40[rbp]
 	mov	rax, QWORD PTR 24[rax]
-	mov	QWORD PTR -16[rbp], rax
-.L92:
-	cmp	QWORD PTR -16[rbp], 0
-	jne	.L93
+	mov	QWORD PTR -40[rbp], rax
+.L94:
+	cmp	QWORD PTR -40[rbp], 0
+	jne	.L95
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	test	rax, rax
-	je	.L94
+	je	.L96
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	eax, DWORD PTR 48[rax]
@@ -1320,20 +1339,20 @@ gen:
 	lea	rdi, .LC46[rip]
 	mov	eax, 0
 	call	printf@PLT
-.L94:
+.L96:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
 	call	gen
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC47[rip]
 	mov	eax, 0
 	call	printf@PLT
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L55:
+	jmp	.L44
+.L57:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	eax, DWORD PTR 48[rax]
 	mov	esi, eax
@@ -1344,8 +1363,8 @@ gen:
 	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
 	call	gen
-	jmp	.L42
-.L52:
+	jmp	.L44
+.L54:
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
 	mov	rax, QWORD PTR -72[rbp]
@@ -1355,7 +1374,7 @@ gen:
 	mov	eax, DWORD PTR label_loop_num[rip]
 	add	eax, 1
 	mov	DWORD PTR label_loop_num[rip], eax
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC49[rip]
 	mov	eax, 0
@@ -1365,7 +1384,7 @@ gen:
 	mov	rax, QWORD PTR 24[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 44
-	je	.L95
+	je	.L97
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR 24[rax]
@@ -1375,17 +1394,17 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC39[rip]
 	call	puts@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC50[rip]
 	mov	eax, 0
 	call	printf@PLT
-.L95:
+.L97:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
 	call	gen
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC51[rip]
 	mov	eax, 0
@@ -1396,7 +1415,7 @@ gen:
 	mov	rax, QWORD PTR 24[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 44
-	je	.L96
+	je	.L98
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR 24[rax]
@@ -1405,28 +1424,28 @@ gen:
 	call	gen
 	lea	rdi, .LC0[rip]
 	call	puts@PLT
-.L96:
-	mov	eax, DWORD PTR -28[rbp]
+.L98:
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC52[rip]
 	mov	eax, 0
 	call	printf@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC47[rip]
 	mov	eax, 0
 	call	printf@PLT
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L54:
+	jmp	.L44
+.L56:
 	mov	eax, DWORD PTR label_loop_num[rip]
 	lea	edx, 1[rax]
 	mov	DWORD PTR label_loop_num[rip], edx
-	mov	DWORD PTR -28[rbp], eax
+	mov	DWORD PTR -52[rbp], eax
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC49[rip]
 	mov	eax, 0
@@ -1439,7 +1458,7 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC39[rip]
 	call	puts@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC50[rip]
 	mov	eax, 0
@@ -1448,31 +1467,31 @@ gen:
 	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
 	call	gen
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC51[rip]
 	mov	eax, 0
 	call	printf@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC52[rip]
 	mov	eax, 0
 	call	printf@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC47[rip]
 	mov	eax, 0
 	call	printf@PLT
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L53:
+	jmp	.L44
+.L55:
 	mov	eax, DWORD PTR label_loop_num[rip]
 	add	eax, 1
 	mov	DWORD PTR label_loop_num[rip], eax
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC49[rip]
 	mov	eax, 0
@@ -1489,70 +1508,70 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC39[rip]
 	call	puts@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC50[rip]
 	mov	eax, 0
 	call	printf@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC51[rip]
 	mov	eax, 0
 	call	printf@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC52[rip]
 	mov	eax, 0
 	call	printf@PLT
-	mov	eax, DWORD PTR -28[rbp]
+	mov	eax, DWORD PTR -52[rbp]
 	mov	esi, eax
 	lea	rdi, .LC47[rip]
 	mov	eax, 0
 	call	printf@PLT
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L46:
-	mov	eax, DWORD PTR -28[rbp]
+	jmp	.L44
+.L48:
+	mov	eax, DWORD PTR -52[rbp]
 	sub	eax, 1
 	mov	esi, eax
 	lea	rdi, .LC53[rip]
 	mov	eax, 0
 	call	printf@PLT
-	jmp	.L42
-.L47:
-	mov	eax, DWORD PTR -28[rbp]
+	jmp	.L44
+.L49:
+	mov	eax, DWORD PTR -52[rbp]
 	sub	eax, 1
 	mov	esi, eax
 	lea	rdi, .LC54[rip]
 	mov	eax, 0
 	call	printf@PLT
-	jmp	.L42
-.L51:
+	jmp	.L44
+.L53:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 32[rax]
 	mov	rdi, rax
 	call	expand_block_code
-	jmp	.L42
-.L49:
+	jmp	.L44
+.L51:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 16[rax]
-	mov	QWORD PTR -8[rbp], rax
-	mov	DWORD PTR -20[rbp], 0
-	jmp	.L97
-.L98:
-	mov	rdx, QWORD PTR -8[rbp]
-	mov	eax, DWORD PTR -20[rbp]
+	mov	QWORD PTR -48[rbp], rax
+	mov	DWORD PTR -60[rbp], 0
+	jmp	.L99
+.L100:
+	mov	rdx, QWORD PTR -48[rbp]
+	mov	eax, DWORD PTR -60[rbp]
 	mov	rsi, rdx
 	mov	edi, eax
 	call	gen_arg
-	add	DWORD PTR -20[rbp], 1
-	mov	rax, QWORD PTR -8[rbp]
+	add	DWORD PTR -60[rbp], 1
+	mov	rax, QWORD PTR -48[rbp]
 	mov	rax, QWORD PTR 24[rax]
-	mov	QWORD PTR -8[rbp], rax
-.L97:
-	cmp	QWORD PTR -8[rbp], 0
-	jne	.L98
+	mov	QWORD PTR -48[rbp], rax
+.L99:
+	cmp	QWORD PTR -48[rbp], 0
+	jne	.L100
 	lea	rdi, .LC55[rip]
 	call	puts@PLT
 	lea	rdi, .LC56[rip]
@@ -1573,13 +1592,13 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L100:
+	jmp	.L44
+.L102:
 	mov	rax, QWORD PTR -72[rbp]
-	mov	edx, DWORD PTR 48[rax]
-	lea	rax, -64[rbp]
-	movsx	rdx, edx
-	sal	rdx, 2
+	mov	eax, DWORD PTR 48[rax]
+	lea	rdx, -32[rbp]
+	cdqe
+	sal	rax, 2
 	add	rax, rdx
 	mov	rsi, rax
 	lea	rdi, .LC61[rip]
@@ -1602,11 +1621,11 @@ gen:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 24[rax]
 	mov	QWORD PTR -72[rbp], rax
-.L99:
+.L101:
 	cmp	QWORD PTR -72[rbp], 0
-	jne	.L100
-	jmp	.L42
-.L68:
+	jne	.L102
+	jmp	.L44
+.L70:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
@@ -1621,14 +1640,14 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L67:
+	jmp	.L44
+.L69:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
 	call	gen_address
-	jmp	.L42
-.L66:
+	jmp	.L44
+.L68:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
@@ -1639,29 +1658,29 @@ gen:
 	mov	rax, QWORD PTR 40[rax]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 2
-	ja	.L101
+	ja	.L103
 	lea	rdi, .LC27[rip]
 	call	puts@PLT
 	lea	rdi, .LC28[rip]
 	call	puts@PLT
-	jmp	.L102
-.L101:
+	jmp	.L104
+.L103:
 	lea	rdi, .LC26[rip]
 	call	puts@PLT
-.L102:
+.L104:
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L48:
+	jmp	.L44
+.L50:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 16[rax]
 	test	rax, rax
-	je	.L103
+	je	.L105
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 16[rax]
 	mov	rdi, rax
 	call	gen
-.L103:
+.L105:
 	lea	rdi, .LC0[rip]
 	call	puts@PLT
 	lea	rdi, .LC59[rip]
@@ -1670,8 +1689,8 @@ gen:
 	call	puts@PLT
 	lea	rdi, .LC62[rip]
 	call	puts@PLT
-	jmp	.L42
-.L43:
+	jmp	.L44
+.L45:
 	mov	rax, QWORD PTR -72[rbp]
 	mov	rax, QWORD PTR 8[rax]
 	mov	rdi, rax
@@ -1689,27 +1708,32 @@ gen:
 	call	gen_calc
 	lea	rdi, .LC1[rip]
 	call	puts@PLT
-	jmp	.L42
-.L105:
-	nop
-	jmp	.L42
-.L106:
-	nop
-	jmp	.L42
-.L107:
-	nop
-	jmp	.L42
+	jmp	.L44
 .L108:
 	nop
-	jmp	.L42
+	jmp	.L44
 .L109:
 	nop
-.L42:
+	jmp	.L44
+.L110:
+	nop
+	jmp	.L44
+.L111:
+	nop
+	jmp	.L44
+.L112:
+	nop
+.L44:
+	mov	rax, QWORD PTR -8[rbp]
+	sub	rax, QWORD PTR fs:40
+	je	.L107
+	call	__stack_chk_fail@PLT
+.L107:
 	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
 .LFE14:
 	.size	gen, .-gen
-	.ident	"GCC: (Debian 9.3.0-18) 9.3.0"
+	.ident	"GCC: (GNU) 10.2.0"
 	.section	.note.GNU-stack,"",@progbits

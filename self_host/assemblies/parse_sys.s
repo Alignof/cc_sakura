@@ -21,15 +21,15 @@ error:
 	.cfi_offset 6, -16
 	mov	rbp, rsp
 	.cfi_def_cfa_register 6
-	sub	rsp, 224
-	mov	QWORD PTR -216[rbp], rdi
-	mov	QWORD PTR -224[rbp], rsi
+	sub	rsp, 240
+	mov	QWORD PTR -232[rbp], rdi
+	mov	QWORD PTR -240[rbp], rsi
 	mov	QWORD PTR -160[rbp], rdx
 	mov	QWORD PTR -152[rbp], rcx
 	mov	QWORD PTR -144[rbp], r8
 	mov	QWORD PTR -136[rbp], r9
 	test	al, al
-	je	.L3
+	je	.L2
 	movaps	XMMWORD PTR -128[rbp], xmm0
 	movaps	XMMWORD PTR -112[rbp], xmm1
 	movaps	XMMWORD PTR -96[rbp], xmm2
@@ -38,18 +38,20 @@ error:
 	movaps	XMMWORD PTR -48[rbp], xmm5
 	movaps	XMMWORD PTR -32[rbp], xmm6
 	movaps	XMMWORD PTR -16[rbp], xmm7
-.L3:
+.L2:
+	mov	rax, QWORD PTR fs:40
+	mov	QWORD PTR -184[rbp], rax
+	xor	eax, eax
 	mov	DWORD PTR -208[rbp], 16
 	mov	DWORD PTR -204[rbp], 48
 	lea	rax, 16[rbp]
 	mov	QWORD PTR -200[rbp], rax
 	lea	rax, -176[rbp]
 	mov	QWORD PTR -192[rbp], rax
-	mov	rax, QWORD PTR user_input[rip]
-	mov	rdx, QWORD PTR -216[rbp]
-	sub	rdx, rax
-	mov	rax, rdx
-	mov	DWORD PTR -180[rbp], eax
+	mov	rdx, QWORD PTR user_input[rip]
+	mov	rax, QWORD PTR -232[rbp]
+	sub	rax, rdx
+	mov	DWORD PTR -212[rbp], eax
 	mov	rdx, QWORD PTR user_input[rip]
 	mov	rax, QWORD PTR stderr[rip]
 	lea	rsi, .LC0[rip]
@@ -57,7 +59,7 @@ error:
 	mov	eax, 0
 	call	fprintf@PLT
 	mov	rax, QWORD PTR stderr[rip]
-	mov	edx, DWORD PTR -180[rbp]
+	mov	edx, DWORD PTR -212[rbp]
 	lea	rcx, .LC1[rip]
 	lea	rsi, .LC2[rip]
 	mov	rdi, rax
@@ -71,7 +73,7 @@ error:
 	call	fwrite@PLT
 	mov	rax, QWORD PTR stderr[rip]
 	lea	rdx, -208[rbp]
-	mov	rcx, QWORD PTR -224[rbp]
+	mov	rcx, QWORD PTR -240[rbp]
 	mov	rsi, rcx
 	mov	rdi, rax
 	call	vfprintf@PLT
@@ -124,15 +126,15 @@ error_at:
 	je	.L7
 .L6:
 	mov	rax, QWORD PTR -56[rbp]
-	mov	QWORD PTR -8[rbp], rax
+	mov	QWORD PTR -24[rbp], rax
 	jmp	.L8
 .L10:
-	sub	QWORD PTR -8[rbp], 1
+	sub	QWORD PTR -24[rbp], 1
 .L8:
 	mov	rax, QWORD PTR user_input[rip]
-	cmp	QWORD PTR -8[rbp], rax
+	cmp	QWORD PTR -24[rbp], rax
 	jbe	.L9
-	mov	rax, QWORD PTR -8[rbp]
+	mov	rax, QWORD PTR -24[rbp]
 	sub	rax, 1
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 10
@@ -148,58 +150,58 @@ error_at:
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 10
 	jne	.L12
-	mov	DWORD PTR -20[rbp], 1
+	mov	DWORD PTR -36[rbp], 1
 	mov	rax, QWORD PTR user_input[rip]
-	mov	QWORD PTR -32[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 	jmp	.L13
 .L15:
-	mov	rax, QWORD PTR -32[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 10
 	jne	.L14
-	add	DWORD PTR -20[rbp], 1
+	add	DWORD PTR -36[rbp], 1
 .L14:
-	add	QWORD PTR -32[rbp], 1
+	add	QWORD PTR -8[rbp], 1
 .L13:
-	mov	rax, QWORD PTR -32[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	cmp	rax, QWORD PTR -56[rbp]
 	jb	.L15
 	jmp	.L16
 .L17:
-	add	QWORD PTR -8[rbp], 1
+	add	QWORD PTR -24[rbp], 1
 .L16:
-	mov	rax, QWORD PTR -8[rbp]
+	mov	rax, QWORD PTR -24[rbp]
 	movzx	eax, BYTE PTR [rax]
 	cmp	al, 9
 	je	.L17
 	mov	rax, QWORD PTR stderr[rip]
-	mov	edx, DWORD PTR -20[rbp]
+	mov	edx, DWORD PTR -36[rbp]
 	mov	ecx, edx
 	lea	rdx, filename[rip]
 	lea	rsi, .LC4[rip]
 	mov	rdi, rax
 	mov	eax, 0
 	call	fprintf@PLT
-	mov	DWORD PTR -36[rbp], eax
+	mov	DWORD PTR -32[rbp], eax
 	mov	rax, QWORD PTR -16[rbp]
-	sub	rax, QWORD PTR -8[rbp]
+	sub	rax, QWORD PTR -24[rbp]
 	mov	esi, eax
 	mov	rax, QWORD PTR stderr[rip]
-	mov	rdx, QWORD PTR -8[rbp]
+	mov	rdx, QWORD PTR -24[rbp]
 	mov	rcx, rdx
 	mov	edx, esi
 	lea	rsi, .LC5[rip]
 	mov	rdi, rax
 	mov	eax, 0
 	call	fprintf@PLT
-	mov	eax, DWORD PTR -36[rbp]
+	mov	eax, DWORD PTR -32[rbp]
 	movsx	rdx, eax
 	mov	rax, QWORD PTR -56[rbp]
 	add	rax, rdx
-	sub	rax, QWORD PTR -8[rbp]
-	mov	DWORD PTR -40[rbp], eax
+	sub	rax, QWORD PTR -24[rbp]
+	mov	DWORD PTR -28[rbp], eax
 	mov	rax, QWORD PTR stderr[rip]
-	mov	edx, DWORD PTR -40[rbp]
+	mov	edx, DWORD PTR -28[rbp]
 	lea	rcx, .LC1[rip]
 	lea	rsi, .LC2[rip]
 	mov	rdi, rax
@@ -446,9 +448,8 @@ consume_reserved_word:
 	mov	QWORD PTR token[rip], rax
 	mov	eax, 1
 .L39:
-	add	rsp, 24
-	pop	rbx
-	pop	rbp
+	mov	rbx, QWORD PTR -8[rbp]
+	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
@@ -478,11 +479,11 @@ consume_string:
 	jmp	.L43
 .L42:
 	mov	rax, QWORD PTR token[rip]
-	mov	QWORD PTR -16[rbp], rax
-	mov	DWORD PTR -4[rbp], 0
+	mov	QWORD PTR -8[rbp], rax
+	mov	DWORD PTR -12[rbp], 0
 	jmp	.L44
 .L45:
-	add	DWORD PTR -4[rbp], 1
+	add	DWORD PTR -12[rbp], 1
 	mov	rax, QWORD PTR token[rip]
 	mov	rax, QWORD PTR 8[rax]
 	mov	QWORD PTR token[rip], rax
@@ -491,10 +492,10 @@ consume_string:
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 14
 	je	.L45
-	mov	rax, QWORD PTR -16[rbp]
-	mov	edx, DWORD PTR -4[rbp]
+	mov	rax, QWORD PTR -8[rbp]
+	mov	edx, DWORD PTR -12[rbp]
 	mov	DWORD PTR 32[rax], edx
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 .L43:
 	pop	rbp
 	.cfi_def_cfa 7, 8
@@ -512,7 +513,7 @@ consume_ident:
 	.cfi_offset 6, -16
 	mov	rbp, rsp
 	.cfi_def_cfa_register 6
-	sub	rsp, 32
+	sub	rsp, 16
 	mov	rax, QWORD PTR token[rip]
 	mov	eax, DWORD PTR [rax]
 	cmp	eax, 2
@@ -530,27 +531,27 @@ consume_ident:
 	jmp	.L49
 .L48:
 	mov	rax, QWORD PTR token[rip]
-	mov	QWORD PTR -16[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 	mov	rax, QWORD PTR token[rip]
 	mov	rax, QWORD PTR 24[rax]
 	mov	rdi, rax
 	call	len_val@PLT
-	mov	DWORD PTR -20[rbp], eax
+	mov	DWORD PTR -12[rbp], eax
 	mov	rax, QWORD PTR token[rip]
-	mov	edx, DWORD PTR -20[rbp]
+	mov	edx, DWORD PTR -12[rbp]
 	mov	DWORD PTR 32[rax], edx
-	mov	DWORD PTR -4[rbp], 0
+	mov	DWORD PTR -16[rbp], 0
 	jmp	.L50
 .L51:
 	mov	rax, QWORD PTR token[rip]
 	mov	rax, QWORD PTR 8[rax]
 	mov	QWORD PTR token[rip], rax
-	add	DWORD PTR -4[rbp], 1
+	add	DWORD PTR -16[rbp], 1
 .L50:
-	mov	eax, DWORD PTR -4[rbp]
-	cmp	eax, DWORD PTR -20[rbp]
+	mov	eax, DWORD PTR -16[rbp]
+	cmp	eax, DWORD PTR -12[rbp]
 	jl	.L51
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 .L49:
 	leave
 	.cfi_def_cfa 7, 8
@@ -730,9 +731,8 @@ label_register:
 	mov	QWORD PTR 8[rax], rdx
 .L66:
 	nop
-	add	rsp, 40
-	pop	rbx
-	pop	rbp
+	mov	rbx, QWORD PTR -8[rbp]
+	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
@@ -860,31 +860,31 @@ find_lvar:
 	sub	rsp, 32
 	mov	QWORD PTR -24[rbp], rdi
 	mov	DWORD PTR -28[rbp], esi
-	mov	DWORD PTR -4[rbp], 0
+	mov	DWORD PTR -12[rbp], 0
 	mov	rax, QWORD PTR locals[rip]
-	mov	QWORD PTR -16[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 	jmp	.L79
 .L85:
 	mov	rax, QWORD PTR outside_lvar[rip]
-	cmp	QWORD PTR -16[rbp], rax
+	cmp	QWORD PTR -8[rbp], rax
 	jne	.L80
-	mov	DWORD PTR -4[rbp], 1
+	mov	DWORD PTR -12[rbp], 1
 .L80:
 	cmp	DWORD PTR -28[rbp], 0
 	je	.L81
-	cmp	DWORD PTR -4[rbp], 0
+	cmp	DWORD PTR -12[rbp], 0
 	jne	.L86
 .L81:
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	edx, DWORD PTR [rax]
 	mov	rax, QWORD PTR -24[rbp]
 	mov	eax, DWORD PTR 32[rax]
 	cmp	edx, eax
 	jne	.L83
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
 	movsx	rdx, eax
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rcx, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR -24[rbp]
 	mov	rax, QWORD PTR 24[rax]
@@ -893,14 +893,14 @@ find_lvar:
 	call	memcmp@PLT
 	test	eax, eax
 	jne	.L83
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	jmp	.L84
 .L83:
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rax, QWORD PTR 24[rax]
-	mov	QWORD PTR -16[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 .L79:
-	cmp	QWORD PTR -16[rbp], 0
+	cmp	QWORD PTR -8[rbp], 0
 	jne	.L85
 	jmp	.L82
 .L86:
@@ -978,31 +978,31 @@ find_struc:
 	sub	rsp, 32
 	mov	QWORD PTR -24[rbp], rdi
 	mov	DWORD PTR -28[rbp], esi
-	mov	DWORD PTR -4[rbp], 0
+	mov	DWORD PTR -12[rbp], 0
 	mov	rax, QWORD PTR structs[rip]
-	mov	QWORD PTR -16[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 	jmp	.L93
 .L99:
 	mov	rax, QWORD PTR outside_struct[rip]
-	cmp	QWORD PTR -16[rbp], rax
+	cmp	QWORD PTR -8[rbp], rax
 	jne	.L94
-	mov	DWORD PTR -4[rbp], 1
+	mov	DWORD PTR -12[rbp], 1
 .L94:
 	cmp	DWORD PTR -28[rbp], 0
 	je	.L95
-	cmp	DWORD PTR -4[rbp], 0
+	cmp	DWORD PTR -12[rbp], 0
 	jne	.L100
 .L95:
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	edx, DWORD PTR [rax]
 	mov	rax, QWORD PTR -24[rbp]
 	mov	eax, DWORD PTR 32[rax]
 	cmp	edx, eax
 	jne	.L97
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
 	movsx	rdx, eax
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rcx, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR -24[rbp]
 	mov	rax, QWORD PTR 24[rax]
@@ -1011,14 +1011,14 @@ find_struc:
 	call	memcmp@PLT
 	test	eax, eax
 	jne	.L97
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	jmp	.L98
 .L97:
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rax, QWORD PTR 24[rax]
-	mov	QWORD PTR -16[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 .L93:
-	cmp	QWORD PTR -16[rbp], 0
+	cmp	QWORD PTR -8[rbp], 0
 	jne	.L99
 	jmp	.L96
 .L100:
@@ -1047,11 +1047,11 @@ find_struct_member:
 	mov	DWORD PTR -44[rbp], esi
 	mov	rax, QWORD PTR -40[rbp]
 	mov	rax, QWORD PTR 32[rax]
-	mov	QWORD PTR -24[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 	mov	rax, QWORD PTR -40[rbp]
 	mov	eax, DWORD PTR 28[rax]
-	mov	DWORD PTR -28[rbp], eax
-	mov	DWORD PTR -4[rbp], 0
+	mov	DWORD PTR -20[rbp], eax
+	mov	DWORD PTR -24[rbp], 0
 	mov	rax, QWORD PTR structs[rip]
 	mov	QWORD PTR -16[rbp], rax
 	jmp	.L102
@@ -1059,23 +1059,23 @@ find_struct_member:
 	mov	rax, QWORD PTR outside_struct[rip]
 	cmp	QWORD PTR -16[rbp], rax
 	jne	.L103
-	mov	DWORD PTR -4[rbp], 1
+	mov	DWORD PTR -24[rbp], 1
 .L103:
 	cmp	DWORD PTR -44[rbp], 0
 	je	.L104
-	cmp	DWORD PTR -4[rbp], 0
+	cmp	DWORD PTR -24[rbp], 0
 	jne	.L109
 .L104:
 	mov	rax, QWORD PTR -16[rbp]
 	mov	eax, DWORD PTR [rax]
-	cmp	DWORD PTR -28[rbp], eax
+	cmp	DWORD PTR -20[rbp], eax
 	jne	.L106
 	mov	rax, QWORD PTR -16[rbp]
 	mov	eax, DWORD PTR [rax]
 	movsx	rdx, eax
 	mov	rax, QWORD PTR -16[rbp]
 	mov	rcx, QWORD PTR 8[rax]
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rsi, rcx
 	mov	rdi, rax
 	call	memcmp@PLT
@@ -1116,31 +1116,31 @@ find_enum:
 	sub	rsp, 32
 	mov	QWORD PTR -24[rbp], rdi
 	mov	DWORD PTR -28[rbp], esi
-	mov	DWORD PTR -4[rbp], 0
+	mov	DWORD PTR -12[rbp], 0
 	mov	rax, QWORD PTR enumerations[rip]
-	mov	QWORD PTR -16[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 	jmp	.L111
 .L117:
 	mov	rax, QWORD PTR outside_enum[rip]
-	cmp	QWORD PTR -16[rbp], rax
+	cmp	QWORD PTR -8[rbp], rax
 	jne	.L112
-	mov	DWORD PTR -4[rbp], 1
+	mov	DWORD PTR -12[rbp], 1
 .L112:
 	cmp	DWORD PTR -28[rbp], 0
 	je	.L113
-	cmp	DWORD PTR -4[rbp], 0
+	cmp	DWORD PTR -12[rbp], 0
 	jne	.L118
 .L113:
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	edx, DWORD PTR [rax]
 	mov	rax, QWORD PTR -24[rbp]
 	mov	eax, DWORD PTR 32[rax]
 	cmp	edx, eax
 	jne	.L115
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
 	movsx	rdx, eax
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rcx, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR -24[rbp]
 	mov	rax, QWORD PTR 24[rax]
@@ -1149,14 +1149,14 @@ find_enum:
 	call	memcmp@PLT
 	test	eax, eax
 	jne	.L115
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	jmp	.L116
 .L115:
-	mov	rax, QWORD PTR -16[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rax, QWORD PTR 24[rax]
-	mov	QWORD PTR -16[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 .L111:
-	cmp	QWORD PTR -16[rbp], 0
+	cmp	QWORD PTR -8[rbp], 0
 	jne	.L117
 	jmp	.L114
 .L118:
@@ -1183,7 +1183,7 @@ find_enumerator:
 	sub	rsp, 48
 	mov	QWORD PTR -40[rbp], rdi
 	mov	DWORD PTR -44[rbp], esi
-	mov	DWORD PTR -4[rbp], 0
+	mov	DWORD PTR -20[rbp], 0
 	mov	rax, QWORD PTR enumerations[rip]
 	mov	QWORD PTR -16[rbp], rax
 	jmp	.L120
@@ -1191,28 +1191,28 @@ find_enumerator:
 	mov	rax, QWORD PTR outside_enum[rip]
 	cmp	QWORD PTR -16[rbp], rax
 	jne	.L121
-	mov	DWORD PTR -4[rbp], 1
+	mov	DWORD PTR -20[rbp], 1
 .L121:
 	cmp	DWORD PTR -44[rbp], 0
 	je	.L122
-	cmp	DWORD PTR -4[rbp], 0
+	cmp	DWORD PTR -20[rbp], 0
 	jne	.L129
 .L122:
 	mov	rax, QWORD PTR -16[rbp]
 	mov	rax, QWORD PTR 16[rax]
-	mov	QWORD PTR -24[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 	jmp	.L124
 .L127:
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	edx, DWORD PTR [rax]
 	mov	rax, QWORD PTR -40[rbp]
 	mov	eax, DWORD PTR 32[rax]
 	cmp	edx, eax
 	jne	.L125
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	eax, DWORD PTR [rax]
 	movsx	rdx, eax
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rcx, QWORD PTR 16[rax]
 	mov	rax, QWORD PTR -40[rbp]
 	mov	rax, QWORD PTR 24[rax]
@@ -1221,14 +1221,14 @@ find_enumerator:
 	call	memcmp@PLT
 	test	eax, eax
 	jne	.L125
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	jmp	.L126
 .L125:
-	mov	rax, QWORD PTR -24[rbp]
+	mov	rax, QWORD PTR -8[rbp]
 	mov	rax, QWORD PTR 32[rax]
-	mov	QWORD PTR -24[rbp], rax
+	mov	QWORD PTR -8[rbp], rax
 .L124:
-	cmp	QWORD PTR -24[rbp], 0
+	cmp	QWORD PTR -8[rbp], 0
 	jne	.L127
 	mov	rax, QWORD PTR -16[rbp]
 	mov	rax, QWORD PTR 24[rax]
@@ -1263,19 +1263,19 @@ find_defined_type:
 	.cfi_offset 3, -24
 	mov	QWORD PTR -40[rbp], rdi
 	mov	DWORD PTR -44[rbp], esi
-	mov	DWORD PTR -20[rbp], 0
+	mov	DWORD PTR -28[rbp], 0
 	mov	rax, QWORD PTR defined_types[rip]
-	mov	QWORD PTR -32[rbp], rax
+	mov	QWORD PTR -24[rbp], rax
 	jmp	.L131
 .L137:
 	mov	rax, QWORD PTR outside_deftype[rip]
-	cmp	QWORD PTR -32[rbp], rax
+	cmp	QWORD PTR -24[rbp], rax
 	jne	.L132
-	mov	DWORD PTR -20[rbp], 1
+	mov	DWORD PTR -28[rbp], 1
 .L132:
-	cmp	DWORD PTR -20[rbp], 0
+	cmp	DWORD PTR -28[rbp], 0
 	jne	.L138
-	mov	rax, QWORD PTR -32[rbp]
+	mov	rax, QWORD PTR -24[rbp]
 	mov	ebx, DWORD PTR 8[rax]
 	mov	rax, QWORD PTR -40[rbp]
 	mov	rax, QWORD PTR 24[rax]
@@ -1283,10 +1283,10 @@ find_defined_type:
 	call	len_val@PLT
 	cmp	ebx, eax
 	jne	.L135
-	mov	rax, QWORD PTR -32[rbp]
+	mov	rax, QWORD PTR -24[rbp]
 	mov	eax, DWORD PTR 8[rax]
 	movsx	rdx, eax
-	mov	rax, QWORD PTR -32[rbp]
+	mov	rax, QWORD PTR -24[rbp]
 	mov	rcx, QWORD PTR [rax]
 	mov	rax, QWORD PTR -40[rbp]
 	mov	rax, QWORD PTR 24[rax]
@@ -1295,14 +1295,14 @@ find_defined_type:
 	call	memcmp@PLT
 	test	eax, eax
 	jne	.L135
-	mov	rax, QWORD PTR -32[rbp]
+	mov	rax, QWORD PTR -24[rbp]
 	jmp	.L136
 .L135:
-	mov	rax, QWORD PTR -32[rbp]
+	mov	rax, QWORD PTR -24[rbp]
 	mov	rax, QWORD PTR 40[rax]
-	mov	QWORD PTR -32[rbp], rax
+	mov	QWORD PTR -24[rbp], rax
 .L131:
-	cmp	QWORD PTR -32[rbp], 0
+	cmp	QWORD PTR -24[rbp], 0
 	jne	.L137
 	jmp	.L134
 .L138:
@@ -1310,9 +1310,8 @@ find_defined_type:
 .L134:
 	mov	eax, 0
 .L136:
-	add	rsp, 40
-	pop	rbx
-	pop	rbp
+	mov	rbx, QWORD PTR -8[rbp]
+	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
@@ -1491,9 +1490,8 @@ new_node:
 .L150:
 	mov	rax, QWORD PTR -24[rbp]
 .L153:
-	add	rsp, 56
-	pop	rbx
-	pop	rbp
+	mov	rbx, QWORD PTR -8[rbp]
+	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
@@ -1546,13 +1544,12 @@ new_node_num:
 	call	type_align@PLT
 	mov	DWORD PTR 20[rbx], eax
 	mov	rax, QWORD PTR -24[rbp]
-	add	rsp, 40
-	pop	rbx
-	pop	rbp
+	mov	rbx, QWORD PTR -8[rbp]
+	leave
 	.cfi_def_cfa 7, 8
 	ret
 	.cfi_endproc
 .LFE28:
 	.size	new_node_num, .-new_node_num
-	.ident	"GCC: (Debian 9.3.0-18) 9.3.0"
+	.ident	"GCC: (GNU) 10.2.0"
 	.section	.note.GNU-stack,"",@progbits
