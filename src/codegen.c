@@ -159,7 +159,6 @@ void gen_calc(Node *node){
 
 void gen(Node *node){
 	Node *cases;
-	int  arg_num    = 0;
 	int  label_if   = label_if_num;
 	int  label_loop = label_loop_num;
 	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};

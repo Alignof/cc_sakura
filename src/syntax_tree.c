@@ -19,6 +19,43 @@ Node *data(void){
 		return node;
 	}
 
+
+	if(token->kind == TK_STR){
+		consume("\"");
+		Node *node = calloc(1, sizeof(Node));
+		node->kind = ND_STR;
+		node->type = calloc(1, sizeof(Type));
+		node->type->ty = PTR;
+
+		Token *tok = consume_string();
+		Str *fstr = find_string(tok);
+
+		// has already
+		if(fstr){
+			node->str = fstr->str;
+			node->val = fstr->label_num;
+			node->offset = fstr->len;
+		// new one
+		}else{
+			Str *new = calloc(1, sizeof(Str));
+			new->len = tok->len;
+			new->str = tok->str;
+			new->label_num = strings ? strings->label_num+1 : 0;
+			node->str = new->str;
+			node->offset = new->len;
+			node->val = new->label_num;
+
+			if(strings == NULL){
+				strings = new;
+			}else{
+				new->next = strings;
+				strings = new;
+			}
+		}
+
+		return node;
+	}
+
 	// variable
 	int INSIDE_FUNC = 0;
 	Token *tok = consume_ident();
@@ -132,42 +169,6 @@ Node *unary(void){
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, NULL, unary());
-
-		return node;
-	}
-
-	if(token->kind == TK_STR){
-		consume("\"");
-		Node *node = calloc(1, sizeof(Node));
-		node->kind = ND_STR;
-		node->type = calloc(1, sizeof(Type));
-		node->type->ty = PTR;
-
-		Token *tok = consume_string();
-		Str *fstr = find_string(tok);
-
-		// has already
-		if(fstr){
-			node->str = fstr->str;
-			node->val = fstr->label_num;
-			node->offset = fstr->len;
-		// new one
-		}else{
-			Str *new = calloc(1, sizeof(Str));
-			new->len = tok->len;
-			new->str = tok->str;
-			new->label_num = strings ? strings->label_num+1 : 0;
-			node->str = new->str;
-			node->offset = new->len;
-			node->val = new->label_num;
-
-			if(strings == NULL){
-				strings = new;
-			}else{
-				new->next = strings;
-				strings = new;
-			}
-		}
 
 		return node;
 	}
