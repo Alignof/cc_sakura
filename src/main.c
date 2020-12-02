@@ -128,7 +128,6 @@ int main(int argc, char **argv){
 		for(j = 0;func_list[i]->code[j] != NULL;j++){
 			// gen code
 			gen(func_list[i]->code[j]);
-			printf("\n	pop rax\n");
 		}
 
 		// epiroge

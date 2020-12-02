@@ -360,6 +360,7 @@ Member *register_enum_member(void);
 extern int label_num;
 extern int label_loop_end;
 void gen(Node *node);
+void gen_expr(Node *node);
 void gen_args(Node *args);
 void gen_calc(Node *node);
 void gen_lvar(Node *node);

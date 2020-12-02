@@ -153,17 +153,8 @@ void gen_calc(Node *node){
 	}
 }
 
-void gen(Node *node){
-	Node *cases;
-	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
-
-
-	// generate assembly
+void gen_expr(Node *node){
 	switch(node->kind){
-		case ND_NULL_STMT:
-			// NULL statement
-			printf("	push rax\n");
-			return;
 		case ND_NUM:
 			printf("	push %d\n", node->val);
 			return;
@@ -204,13 +195,13 @@ void gen(Node *node){
 			return;
 		case ND_PREID:
 			// ++p -> p += 1
-			gen(node->lhs);
+			gen_expr(node->lhs);
 			printf("	push rax\n");
 			return;
 		case ND_POSTID:
 			// push
 			gen_address(node->lhs); // push lhs
-			gen(node->rhs->rhs->rhs);          // push rhs
+			gen_expr(node->rhs->rhs->rhs);          // push rhs
 			
 			// calc
 			printf("	pop rdi\n");    // rhs
@@ -247,7 +238,7 @@ void gen(Node *node){
 			return;
 		case ND_ASSIGN:
 			gen_address(node->lhs);
-			gen(node->rhs);
+			gen_expr(node->rhs);
 
 			printf("	pop rdi\n");
 			printf("	pop rax\n");
@@ -264,7 +255,7 @@ void gen(Node *node){
 		case ND_COMPOUND:
 			// push
 			gen_address(node->lhs); // push lhs
-			gen(node->rhs->rhs);  // push rhs
+			gen_expr(node->rhs->rhs);  // push rhs
 
 			// calc
 			printf("	pop rdi\n");  // rhs
@@ -305,23 +296,23 @@ void gen(Node *node){
 			return;
 		case ND_TERNARY:
 			// condition
-			gen(node->lhs);
+			gen_expr(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			printf("	je .Lelse%03d\n", node->val);
 
 			// true
-			gen(node->rhs);
+			gen_expr(node->rhs);
 			printf("	jmp .LifEnd%03d\n", node->val);
 			printf(".Lelse%03d:\n", node->val);
 
 			// false
-			gen(node->next);
+			gen_expr(node->next);
 			printf(".LifEnd%03d:\n", node->val);
 			printf("	push rax\n");
 			return;
 		case ND_NOT:
-			gen(node->rhs);
+			gen_expr(node->rhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			printf("	sete al\n");
@@ -333,7 +324,7 @@ void gen(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_DEREF:
-			gen(node->rhs);
+			gen_expr(node->rhs);
 			printf("	pop rax\n");
 			if(node->type->ty <= CHAR){
 				printf("	movzx eax,BYTE PTR [rax]\n");
@@ -342,7 +333,46 @@ void gen(Node *node){
 				printf("	mov rax,[rax]\n");
 			}
 			printf("	push rax\n");
+			return;
+		case ND_CALL_FUNC:
+			gen_args(node->rhs);
 
+			printf("	push rbp\n");
+			printf("	mov rbp,rsp\n");
+			printf("	and rsp,-16\n");
+
+			printf("	call %.*s\n", node->val, node->str);
+
+			printf("	mov rsp,rbp\n");
+			printf("	pop rbp\n");
+
+			printf("	push rax\n");
+			return;
+		default:
+			// check left hand side
+			gen_expr(node->lhs);
+			// check right hand side
+			gen_expr(node->rhs);
+
+			// pop two value
+			printf("	pop rdi\n");
+			printf("	pop rax\n");
+			// calculation lhs and rhs
+			gen_calc(node);
+			// push result
+			printf("	push rax\n");
+	}
+}
+
+void gen(Node *node){
+	Node *cases;
+	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
+
+	// generate assembly
+	switch(node->kind){
+		case ND_NULL_STMT:
+			// NULL statement
+			printf("	push rax\n");
 			return;
 		case ND_IF:
 			gen(node->lhs);
@@ -398,7 +428,7 @@ void gen(Node *node){
 			return;
 		case ND_FOR:
 			// init
-			gen(node->lhs);
+			gen_expr(node->lhs);
 
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
@@ -412,7 +442,6 @@ void gen(Node *node){
 
 			// gen block
 			gen(node->rhs);
-			printf("	pop rax\n");
 
 			// gen update expression
 			printf(".LloopCont%03d:\n", node->val);
@@ -435,7 +464,6 @@ void gen(Node *node){
 
 			// else expression
 			gen(node->rhs);
-			printf("	pop rax\n");
 
 			// continue
 			printf(".LloopCont%03d:\n", node->val);
@@ -449,7 +477,7 @@ void gen(Node *node){
 
 			// condition
 			gen(node->lhs);
-			printf("	pop rax\n");
+			//printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// break loop
 			printf("	je .LloopEnd%03d\n", node->val);
@@ -468,20 +496,6 @@ void gen(Node *node){
 		case ND_BLOCK:
 			expand_block_code(node->block_code);
 			return;
-		case ND_CALL_FUNC:
-			gen_args(node->rhs);
-
-			printf("	push rbp\n");
-			printf("	mov rbp,rsp\n");
-			printf("	and rsp,-16\n");
-
-			printf("	call %.*s\n", node->val, node->str);
-
-			printf("	mov rsp,rbp\n");
-			printf("	pop rbp\n");
-
-			printf("	push rax\n");
-			return;
 		case ND_ARG:
 			while(node){
 				// push register argument saved
@@ -499,28 +513,16 @@ void gen(Node *node){
 			return;
 		case ND_RETURN:
 			if(node->rhs){
-				gen(node->rhs);
-				printf("	pop rax\n");
+				gen_expr(node->rhs);
 			}
+			printf("	pop rax\n");
 			printf("	mov rsp,rbp\n");
 			printf("	pop rbp\n");
 			printf("	ret\n");
 			return;
 		default:
-			// check left hand side
-			gen(node->lhs);
-			// check right hand side
-			gen(node->rhs);
-
-			// pop two value
-			printf("	pop rdi\n");
+			gen_expr(node);
 			printf("	pop rax\n");
-			// calculation lhs and rhs
-			gen_calc(node);
-			// push result
-			printf("	push rax\n");
 	}
-
-
 }
 
