@@ -3,8 +3,10 @@
 void expand_next(Node *node){
 	while(node){
 		gen(node);
-		printf("	pop rax\n");
-		node=node->next;
+		node=node->block_code;
+		if(node && !(ND_NULL_STMT <= node->kind && node->kind <= ND_RETURN)){
+			printf("\n	pop rax\n");
+		}
 	}
 	printf("	push rax\n");
 }
@@ -12,9 +14,12 @@ void expand_next(Node *node){
 void expand_block_code(Node *node){
 	while(node){
 		gen(node);
-		printf("	pop rax\n");
 		node=node->block_code;
+		if(node && !(ND_NULL_STMT <= node->kind && node->kind <= ND_RETURN)){
+			printf("\n	pop rax\n");
+		}
 	}
+	printf("	push rax\n");
 }
 
 
@@ -347,6 +352,7 @@ void gen(Node *node){
 			printf("	cmp rax,0\n");
 			printf("	je .LifEnd%03d\n", node->val);
 			gen(node->rhs);
+			printf("	pop rax\n");
 
 			printf(".LifEnd%03d:\n", node->val);
 			return;
@@ -364,6 +370,7 @@ void gen(Node *node){
 
 			// expr in else
 			gen(node->rhs->rhs);
+			printf("	pop rax\n");
 			printf(".LifEnd%03d:\n", node->val);
 			return;
 		case ND_SWITCH:
@@ -393,9 +400,6 @@ void gen(Node *node){
 			gen(node->rhs);
 			return;
 		case ND_FOR:
-			// adjust rsp
-			//printf("	push rax\n");
-
 			// init
 			gen(node->lhs);
 
@@ -411,6 +415,7 @@ void gen(Node *node){
 
 			// gen block
 			gen(node->rhs);
+			printf("	pop rax\n");
 
 			// gen update expression
 			printf(".LloopCont%03d:\n", node->val);
@@ -424,19 +429,16 @@ void gen(Node *node){
 			printf(".LloopEnd%03d:\n", node->val);
 			return;
 		case ND_WHILE:
-			// adjust rsp
-			//printf("	push rax\n");
-
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			// if cond true then loop end.
 			printf("	je .LloopEnd%03d\n", node->val);
 
 			// else expression
 			gen(node->rhs);
+			printf("	pop rax\n");
 
 			// continue
 			printf(".LloopCont%03d:\n", node->val);
@@ -504,8 +506,8 @@ void gen(Node *node){
 		case ND_RETURN:
 			if(node->rhs){
 				gen(node->rhs);
+				printf("	pop rax\n");
 			}
-			printf("	pop rax\n");
 			printf("	mov rsp,rbp\n");
 			printf("	pop rbp\n");
 			printf("	ret\n");

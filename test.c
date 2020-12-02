@@ -1,12 +1,1 @@
-int main(){
-	int x = 0;
-
-	if(x == 0){
-		if(1);
-		if(1);
-		if(1);
-		if(1){;}else if(1){;}else if(1){;}else{;}
-	}
-
-	return 0;
-}
+int main(){int i=0; while(i<10){if(i==5){break;}i++;} return i;}

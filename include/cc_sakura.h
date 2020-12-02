@@ -73,6 +73,7 @@ typedef enum{
 	ND_CALL_FUNC, 	//  func();
 	ND_CASE, 	//  case or default(has code after label)
 	ND_TERNARY,	//  cond ? if_true : if_false
+	ND_BLOCK, 	//  {}
 
 	// statement(does not push value to stack)
 	ND_NULL_STMT, 	//  NULL statement (;) 
@@ -80,12 +81,11 @@ typedef enum{
 	ND_ELSE, 	//  else
 	ND_IFELSE, 	//  if-else
 	ND_SWITCH, 	//  switch
-	ND_BREAK, 	//  break
-	ND_CONTINUE, 	//  continue
 	ND_FOR, 	//  for
 	ND_WHILE, 	//  while
 	ND_DOWHILE, 	//  do-while
-	ND_BLOCK, 	//  {}
+	ND_BREAK, 	//  break
+	ND_CONTINUE, 	//  continue
 	ND_RETURN, 	//  return
 
 	//virtual type
