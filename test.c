@@ -4,12 +4,16 @@ int solve(int n, int col, int *hist){
 	int i = 0;
 	int j = 0;
 	for (; i < n; i++) {
-		for (j = 0; j < col && hist[j] != i && (hist[j] - i) != col - j &&
-		            (hist[j] - i) != j - col; j++) {
+		for (j = 0; j < col && hist[j] != i && (hist[j] - i) != col - j && (hist[j] - i) != j - col; j++) {
 		}
 
+		if (j >= col){
+			hist[col] = i; solve(n, col + 1, hist);
+		}
+	/*
 		if (j < col) continue;
 		hist[col] = i; solve(n, col + 1, hist);
+	*/
 	}
 	return 0;
 }
@@ -22,7 +26,6 @@ int main(){
 	}
 	return 0;
 }
-
 /*
 void pow(int *numbers){
 	int i;
