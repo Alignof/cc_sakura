@@ -21,16 +21,3 @@ int main(){
 	}
 	return 0;
 }
-
-/*
-int main(){
-	int i;
-	for(i=0;i<12;i++){//  0
-		while(i<0);// 1
-		while(i<0);// 2
-		if(i==6) break;// 3
-	}
-
-	return i;
-}
-*/
