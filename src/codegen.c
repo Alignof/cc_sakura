@@ -326,7 +326,6 @@ void gen(Node *node){
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			printf("	je .LifEnd%03d\n", node->val);
-			//printf("	pop rax\n");
 			gen(node->rhs);
 
 			printf(".LifEnd%03d:\n", node->val);
