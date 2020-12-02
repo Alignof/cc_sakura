@@ -179,6 +179,12 @@ struct of syntax tree node.
 | ND\_GVAR		| length of name			|
 | ND\_CASE		| label id				|
 | ND\_CALL\_FUNC	| number of argument 			|
+| ND\_FOR		| assembly label			|
+| ND\_SWITCH		| assembly label			|
+| ND\_WHILE		| assembly label			|
+| ND\_TERNARY		| assembly label			|
+| ND\_IF		| assembly label			|
+| ND\_IFLESE		| assembly label			|
 
 
 
