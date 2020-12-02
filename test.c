@@ -1,1 +1,1 @@
-int main(){int x=3; int a=++x; return a+x;}
+int main(){int i=0; int x=0; for(;i<10;i++){x++;}return x ;}

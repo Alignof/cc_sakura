@@ -370,7 +370,6 @@ void gen(Node *node){
 	switch(node->kind){
 		case ND_NULL_STMT:
 			// NULL statement
-			printf("	push rax\n");
 			return;
 		case ND_IF:
 			gen(node->lhs);
@@ -422,7 +421,7 @@ void gen(Node *node){
 			return;
 		case ND_FOR:
 			// init
-			gen_expr(node->lhs);
+			gen(node->lhs);
 
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
