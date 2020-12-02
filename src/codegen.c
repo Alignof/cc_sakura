@@ -355,8 +355,10 @@ void gen_expr(Node *node){
 			// pop two value
 			printf("	pop rdi\n");
 			printf("	pop rax\n");
+
 			// calculation lhs and rhs
 			gen_calc(node);
+
 			// push result
 			printf("	push rax\n");
 	}
@@ -414,10 +416,6 @@ void gen(Node *node){
 			gen(node->rhs);
 
 			printf(".LloopEnd%03d:\n", node->val);
-			return;
-		case ND_CASE:
-			printf(".LcaseBegin%03d:\n", node->val);
-			gen(node->rhs);
 			return;
 		case ND_FOR:
 			// init
@@ -479,6 +477,10 @@ void gen(Node *node){
 			return;
 		case ND_BLOCK:
 			expand_block_code(node->block_code);
+			return;
+		case ND_CASE:
+			printf(".LcaseBegin%03d:\n", node->val);
+			gen(node->rhs);
 			return;
 		case ND_ARG:
 			while(node){

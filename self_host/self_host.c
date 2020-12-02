@@ -1414,7 +1414,7 @@ void error_at(char *loc, char *msg){
 	fprintf(stderr, "%.*s\n", (end-start), start);
 
 	int pos = indent+loc-start;
-	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ %s\n", msg);
 	exit(1);
 }
