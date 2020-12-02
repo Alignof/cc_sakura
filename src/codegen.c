@@ -15,7 +15,6 @@ void expand_block_code(Node *node){
 		printf("	pop rax\n");
 		node=node->block_code;
 	}
-	printf("	push rax\n");
 }
 
 
@@ -25,7 +24,6 @@ void gen_gvar(Node *node){
 		printf("	add rax, fs:%.*s@tpoff\n", node->val, node->str);
 	}else{
 		printf("	lea rax,  %.*s[rip]\n", node->val, node->str);
-		//printf("	lea rax,  _%.*s[rip]\n", node->val, node->str);
 	}
 	printf("	push rax\n");
 }
@@ -161,7 +159,6 @@ void gen(Node *node){
 	switch(node->kind){
 		case ND_NULL_STMT:
 			// NULL statement
-			printf("	push rax\n");
 			return;
 		case ND_NUM:
 			printf("	push %d\n", node->val);
@@ -204,6 +201,7 @@ void gen(Node *node){
 		case ND_PREID:
 			// ++p -> p += 1
 			gen(node->lhs);
+			printf("	push rax\n");
 			return;
 		case ND_POSTID:
 			// push
@@ -237,6 +235,7 @@ void gen(Node *node){
 				printf("	mov [rax],rdi\n");
 			}
 
+			printf("	push rax\n");
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n", node->val);
@@ -257,7 +256,6 @@ void gen(Node *node){
 			}
 
 			printf("	push rdi\n");
-
 			return;
 		case ND_COMPOUND:
 			// push
@@ -291,7 +289,6 @@ void gen(Node *node){
 			}
 
 			printf("	push rdi\n");
-
 			return;
 		case ND_DOT:
 		case ND_ARROW:
@@ -317,10 +314,33 @@ void gen(Node *node){
 			// false
 			gen(node->next);
 			printf(".LifEnd%03d:\n", node->val);
+			printf("	push rax\n");
+			return;
+		case ND_NOT:
+			gen(node->rhs);
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			printf("	sete al\n");
+			printf("	movzb rax,al\n");
+			printf("	push rax\n");
+			return;
+		case ND_ADDRESS:
+			gen_address(node->rhs);
+			printf("	push rax\n");
+			return;
+		case ND_DEREF:
+			gen(node->rhs);
+			printf("	pop rax\n");
+			if(node->type->ty <= CHAR){
+				printf("	movzx eax,BYTE PTR [rax]\n");
+				printf("	movsx eax,al\n");
+			}else{
+				printf("	mov rax,[rax]\n");
+			}
+			printf("	push rax\n");
 
 			return;
 		case ND_IF:
-			//printf("	push rax\n");
 			gen(node->lhs);
 
 			printf("	pop rax\n");
@@ -345,7 +365,6 @@ void gen(Node *node){
 			// expr in else
 			gen(node->rhs->rhs);
 			printf(".LifEnd%03d:\n", node->val);
-
 			return;
 		case ND_SWITCH:
 			// gen cases condtion
@@ -368,7 +387,6 @@ void gen(Node *node){
 			gen(node->rhs);
 
 			printf(".LloopEnd%03d:\n", node->val);
-			printf("	push rax\n");
 			return;
 		case ND_CASE:
 			printf(".LcaseBegin%03d:\n", node->val);
@@ -376,7 +394,7 @@ void gen(Node *node){
 			return;
 		case ND_FOR:
 			// adjust rsp
-			printf("	push rax\n");
+			//printf("	push rax\n");
 
 			// init
 			gen(node->lhs);
@@ -404,12 +422,10 @@ void gen(Node *node){
 			// continue
 			printf("	jmp .LloopBegin%03d\n", node->val);
 			printf(".LloopEnd%03d:\n", node->val);
-			printf("	push rax\n");
-
 			return;
 		case ND_WHILE:
 			// adjust rsp
-			printf("	push rax\n");
+			//printf("	push rax\n");
 
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
@@ -426,8 +442,6 @@ void gen(Node *node){
 			printf(".LloopCont%03d:\n", node->val);
 			printf("	jmp .LloopBegin%03d\n", node->val);
 			printf(".LloopEnd%03d:\n", node->val);
-			printf("	push rax\n");
-
 			return;
 		case ND_DOWHILE:
 			// adjust rsp
@@ -448,8 +462,6 @@ void gen(Node *node){
 			printf(".LloopCont%03d:\n", node->val);
 			printf("	jmp .LloopBegin%03d\n", node->val);
 			printf(".LloopEnd%03d:\n", node->val);
-			printf("	push rax\n");
-
 			return;
 		case ND_CONTINUE:
 			printf("	jmp .LloopCont%03d\n", node->val);
@@ -487,29 +499,6 @@ void gen(Node *node){
 				printf("	pop rax\n");
 				node=node->next;
 			}
-
-			return;
-		case ND_NOT:
-			gen(node->rhs);
-			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			printf("	sete al\n");
-			printf("	movzb rax,al\n");
-			printf("	push rax\n");
-			return;
-		case ND_ADDRESS:
-			gen_address(node->rhs);
-			return;
-		case ND_DEREF:
-			gen(node->rhs);
-			printf("	pop rax\n");
-			if(node->type->ty <= CHAR){
-				printf("	movzx eax,BYTE PTR [rax]\n");
-				printf("	movsx eax,al\n");
-			}else{
-				printf("	mov rax,[rax]\n");
-			}
-			printf("	push rax\n");
 
 			return;
 		case ND_RETURN:
