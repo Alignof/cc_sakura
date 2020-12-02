@@ -161,6 +161,7 @@ void gen(Node *node){
 	switch(node->kind){
 		case ND_NULL_STMT:
 			// NULL statement
+			printf("	push rax\n");
 			return;
 		case ND_NUM:
 			printf("	push %d\n", node->val);
@@ -319,13 +320,13 @@ void gen(Node *node){
 
 			return;
 		case ND_IF:
-			printf("	push rax\n");
+			//printf("	push rax\n");
 			gen(node->lhs);
 
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			printf("	je .LifEnd%03d\n", node->val);
-			printf("	pop rax\n");
+			//printf("	pop rax\n");
 			gen(node->rhs);
 
 			printf(".LifEnd%03d:\n", node->val);
