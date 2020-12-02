@@ -3,10 +3,8 @@
 void expand_next(Node *node){
 	while(node){
 		gen(node);
+		printf("\n	pop rax\n");
 		node=node->block_code;
-		if(node && !(ND_NULL_STMT <= node->kind && node->kind <= ND_RETURN)){
-			printf("\n	pop rax\n");
-		}
 	}
 	printf("	push rax\n");
 }
@@ -14,10 +12,8 @@ void expand_next(Node *node){
 void expand_block_code(Node *node){
 	while(node){
 		gen(node);
+		printf("\n	pop rax\n");
 		node=node->block_code;
-		if(node && !(ND_NULL_STMT <= node->kind && node->kind <= ND_RETURN)){
-			printf("\n	pop rax\n");
-		}
 	}
 	printf("	push rax\n");
 }
@@ -152,6 +148,8 @@ void gen_calc(Node *node){
 			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	movzb rax,al\n");
 			break;
+		default:
+			error_at(token->str, "cannot code gen");
 	}
 }
 
@@ -164,6 +162,7 @@ void gen(Node *node){
 	switch(node->kind){
 		case ND_NULL_STMT:
 			// NULL statement
+			printf("	push rax\n");
 			return;
 		case ND_NUM:
 			printf("	push %d\n", node->val);
@@ -352,7 +351,6 @@ void gen(Node *node){
 			printf("	cmp rax,0\n");
 			printf("	je .LifEnd%03d\n", node->val);
 			gen(node->rhs);
-			printf("	pop rax\n");
 
 			printf(".LifEnd%03d:\n", node->val);
 			return;
@@ -370,7 +368,6 @@ void gen(Node *node){
 
 			// expr in else
 			gen(node->rhs->rhs);
-			printf("	pop rax\n");
 			printf(".LifEnd%03d:\n", node->val);
 			return;
 		case ND_SWITCH:
@@ -446,9 +443,6 @@ void gen(Node *node){
 			printf(".LloopEnd%03d:\n", node->val);
 			return;
 		case ND_DOWHILE:
-			// adjust rsp
-			printf("	push rax\n");
-
 			// codeblock
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->rhs);
@@ -512,20 +506,21 @@ void gen(Node *node){
 			printf("	pop rbp\n");
 			printf("	ret\n");
 			return;
+		default:
+			// check left hand side
+			gen(node->lhs);
+			// check right hand side
+			gen(node->rhs);
+
+			// pop two value
+			printf("	pop rdi\n");
+			printf("	pop rax\n");
+			// calculation lhs and rhs
+			gen_calc(node);
+			// push result
+			printf("	push rax\n");
 	}
 
 
-	// check left hand side
-	gen(node->lhs);
-	// check right hand side
-	gen(node->rhs);
-
-	// pop two value
-	printf("	pop rdi\n");
-	printf("	pop rax\n");
-	// calculation lhs and rhs
-	gen_calc(node);
-	// push result
-	printf("	push rax\n");
 }
 
