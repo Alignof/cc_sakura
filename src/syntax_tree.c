@@ -301,7 +301,8 @@ Node *ternary(void){
 	Node *node = logical();
 	if(consume("?")){
 		//                          cond  if true
-		node = new_node(ND_TERNARY, node, ternary());
+		node      = new_node(ND_TERNARY, node, ternary());
+		node->val = label_num++;
 		expect(":");
 		//           if false
 		node->next = ternary();
@@ -370,9 +371,11 @@ Node *expr(void){
 	}else if(consume_reserved_word("break", TK_BREAK)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_BREAK;
+		node->val  = label_loop_end;
 	}else if(consume_reserved_word("continue", TK_CONTINUE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_CONTINUE;
+		node->val  = label_loop_end;
 	}else{
 		node = assign();
 	}
@@ -381,6 +384,7 @@ Node *expr(void){
 }
 
 Node *stmt(void){
+	int stash_loop_end = label_loop_end;
 	Node *node = NULL;
 
 	if(consume_reserved_word("return", TK_RETURN)){
@@ -440,6 +444,8 @@ Node *stmt(void){
 
  		node      = new_node(ND_SWITCH, node, NULL);
 		node->val = label_num++;
+		label_loop_end = node->val;
+
  		if(consume("(")){
  			//jmp expr
  			cond = expr();
@@ -513,6 +519,7 @@ Node *stmt(void){
 		
 		node      = new_node(ND_FOR, node, NULL);
 		node->val = label_num++;
+		label_loop_end = node->val;
 
 		if(consume("(")){
 			//jmp expr
@@ -532,10 +539,6 @@ Node *stmt(void){
 			node->lhs->next->next = calc;
 		}
 
-		if(node->rhs->kind == ND_BREAK || node->rhs->kind == ND_CONTINUE){
-			node->rhs->val = node->val;
-		}
-
 		locals       = outside_lvar; 
 		enumerations = outside_enum; 
 		structs      = outside_struct; 
@@ -543,9 +546,7 @@ Node *stmt(void){
 		// (cond)<-- do-while -->block
 		node      = new_node(ND_DOWHILE, NULL, stmt());
 		node->val = label_num++;
-		if(node->rhs->kind == ND_BREAK || node->rhs->kind == ND_CONTINUE){
-			node->rhs->val = node->val;
-		}
+		label_loop_end = node->val;
 
 		consume_reserved_word("while", TK_WHILE);
 		if(consume("(")){
@@ -565,9 +566,6 @@ Node *stmt(void){
 			// (cond)<-while->expr
 			node->lhs = cond;
 			node->rhs = stmt();
-			if(node->rhs->kind == ND_BREAK || node->rhs->kind == ND_CONTINUE){
-				node->rhs->val = node->val;
-			}
 		}
 	}else if(consume("{")){
 		node = new_node(ND_BLOCK, node, NULL);
@@ -581,15 +579,9 @@ Node *stmt(void){
 			if(node->block_code){
 				block_code->block_code = stmt();
 				block_code = block_code->block_code;
-				if(block_code->kind == ND_BREAK || block_code->kind == ND_CONTINUE){
-					block_code->val = node->lhs->val;
-				}
 			}else{
 				block_code = stmt();
 				node->block_code = block_code;
-				if(node->block_code->kind == ND_BREAK || node->block_code->kind == ND_CONTINUE){
-					block_code->val = node->lhs->val;
-				}
 			}
 		}
 		
@@ -605,6 +597,8 @@ Node *stmt(void){
 		}
 	}
 
+	// revert loop end
+	label_loop_end = stash_loop_end;
 	return node;
 }
 

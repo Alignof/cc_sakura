@@ -2,6 +2,7 @@
 
 int   llid;
 int   label_num;
+int   label_loop_end;
 char  *user_input;
 char  filename[100];
 Func  *func_list[FUNC_NUM];
@@ -100,6 +101,7 @@ int main(int argc, char **argv){
 
 	llid           = 0;
 	label_num      = 0;
+	label_loop_end = 0;
 	labels_head    = NULL;
 	labels_tail    = NULL;
 

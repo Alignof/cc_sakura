@@ -354,6 +354,7 @@ Member *register_enum_member(void);
 
 // codegan.c
 extern int label_num;
+extern int label_loop_end;
 void gen(Node *node);
 void gen_args(Node *args);
 void gen_calc(Node *node);

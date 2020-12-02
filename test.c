@@ -7,13 +7,8 @@ int solve(int n, int col, int *hist){
 		for (j = 0; j < col && hist[j] != i && (hist[j] - i) != col - j && (hist[j] - i) != j - col; j++) {
 		}
 
-		if (j >= col){
-			hist[col] = i; solve(n, col + 1, hist);
-		}
-	/*
 		if (j < col) continue;
 		hist[col] = i; solve(n, col + 1, hist);
-	*/
 	}
 	return 0;
 }
@@ -26,26 +21,16 @@ int main(){
 	}
 	return 0;
 }
+
 /*
-void pow(int *numbers){
-	int i;
-	for(i = 0;i < 12;i++){
-		numbers[i] = i*i;
-	}
-
-	return;
-}
-
 int main(){
 	int i;
-	int numbers[12];
-
-	pow(numbers);
-
-	for(i=0;i<12;i++){
-		printf("%d:%d\n", i, numbers[i]);
+	for(i=0;i<12;i++){//  0
+		while(i<0);// 1
+		while(i<0);// 2
+		if(i==6) break;// 3
 	}
 
-	return 0;
+	return i;
 }
 */
