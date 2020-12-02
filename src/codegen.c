@@ -3,7 +3,6 @@
 void expand_next(Node *node){
 	while(node){
 		gen(node);
-		printf("\n	pop rax\n");
 		node=node->block_code;
 	}
 	printf("	push rax\n");
@@ -12,7 +11,6 @@ void expand_next(Node *node){
 void expand_block_code(Node *node){
 	while(node){
 		gen(node);
-		printf("\n	pop rax\n");
 		node=node->block_code;
 	}
 	printf("	push rax\n");
@@ -44,8 +42,8 @@ void gen_struc(Node *node){
 		error_at(token->str, "not a struct");
 	}
 
-	gen(node->lhs);
-	gen(node->rhs);
+	gen_expr(node->lhs);
+	gen_expr(node->rhs);
 
 	printf("	pop rdi\n");
 	printf("	pop rax\n");
@@ -60,7 +58,7 @@ void gen_args(Node *args){
 
 
 	while(args){
-		gen(args);
+		gen_expr(args);
 		arg_count++;
 		args=args->next;
 	}
@@ -74,7 +72,7 @@ void gen_args(Node *args){
 }
 
 void gen_address(Node *node){
-	/**/ if(node->kind == ND_DEREF)   gen(node->rhs);
+	/**/ if(node->kind == ND_DEREF)   gen_expr(node->rhs);
 	else if(node->kind == ND_DOT)     gen_struc(node);
 	else if(node->kind == ND_ARROW)   gen_struc(node);
 	else if(node->kind == ND_GVAR)    gen_gvar(node);
@@ -195,7 +193,7 @@ void gen_expr(Node *node){
 			return;
 		case ND_PREID:
 			// ++p -> p += 1
-			gen_expr(node->lhs);
+			gen(node->lhs);
 			printf("	push rax\n");
 			return;
 		case ND_POSTID:
@@ -230,7 +228,8 @@ void gen_expr(Node *node){
 				printf("	mov [rax],rdi\n");
 			}
 
-			printf("	push rax\n");
+			// already evacuation
+			//printf("	push rax\n");
 			return;
 		case ND_STR:
 			printf("	lea rax, .LC%d[rip]\n", node->val);
@@ -302,12 +301,12 @@ void gen_expr(Node *node){
 			printf("	je .Lelse%03d\n", node->val);
 
 			// true
-			gen_expr(node->rhs);
+			gen(node->rhs);
 			printf("	jmp .LifEnd%03d\n", node->val);
 			printf(".Lelse%03d:\n", node->val);
 
 			// false
-			gen_expr(node->next);
+			gen(node->next);
 			printf(".LifEnd%03d:\n", node->val);
 			printf("	push rax\n");
 			return;
@@ -320,8 +319,7 @@ void gen_expr(Node *node){
 			printf("	push rax\n");
 			return;
 		case ND_ADDRESS:
-			gen_address(node->rhs);
-			printf("	push rax\n");
+			gen_address(node->rhs);// printf("	push rax\n");
 			return;
 		case ND_DEREF:
 			gen_expr(node->rhs);
@@ -376,8 +374,6 @@ void gen(Node *node){
 			return;
 		case ND_IF:
 			gen(node->lhs);
-
-			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			printf("	je .LifEnd%03d\n", node->val);
 			gen(node->rhs);
@@ -387,7 +383,6 @@ void gen(Node *node){
 		case ND_IFELSE:
 			// condition
 			gen(node->lhs);
-			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			printf("	je .Lelse%03d\n", node->val);
 
@@ -406,7 +401,6 @@ void gen(Node *node){
 			while(cases){
 				gen(cases);
 
-				printf("	pop rax\n");
 				printf("	cmp rax,0\n");
 				printf("	jne .LcaseBegin%03d\n", cases->val);
 				cases = cases->next;
@@ -432,23 +426,16 @@ void gen(Node *node){
 
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
-			if(node->lhs->next->kind != ND_NULL_STMT){
-				gen(node->lhs->next);
-				printf("	pop rax\n");
-				printf("	cmp rax,0\n");
-				// if cond true then jump to  loop end.
-				printf("	je .LloopEnd%03d\n", node->val);
-			}
+			gen(node->lhs->next);
+			printf("	cmp rax,0\n");
+			printf("	je .LloopEnd%03d\n", node->val);
 
 			// gen block
 			gen(node->rhs);
 
 			// gen update expression
 			printf(".LloopCont%03d:\n", node->val);
-			if(node->lhs->next->next->kind != ND_NULL_STMT){
-				gen(node->lhs->next->next);
-				printf("	pop rax\n");
-			}
+			gen(node->lhs->next->next);
 
 			// continue
 			printf("	jmp .LloopBegin%03d\n", node->val);
@@ -458,7 +445,6 @@ void gen(Node *node){
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs);
-			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			printf("	je .LloopEnd%03d\n", node->val);
 
@@ -477,7 +463,6 @@ void gen(Node *node){
 
 			// condition
 			gen(node->lhs);
-			//printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// break loop
 			printf("	je .LloopEnd%03d\n", node->val);
