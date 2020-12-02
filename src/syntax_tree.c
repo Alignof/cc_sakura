@@ -362,10 +362,8 @@ Node *expr(void){
 		if(consume("=")){
 			if(consume("{")){
 				node = array_block(node);
-				//node->block_code = array_block(node);
 			}else{
 				node = init_formula(node, assign());
-				//node->block_code = init_formula(node, assign());
 			}
 		}
 	}else if(consume_reserved_word("break", TK_BREAK)){
@@ -576,12 +574,12 @@ Node *stmt(void){
 		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
 			//Is first?
-			if(node->block_code){
+			if(node->rhs){
 				block_code->block_code = stmt();
 				block_code = block_code->block_code;
 			}else{
 				block_code = stmt();
-				node->block_code = block_code;
+				node->rhs = block_code;
 			}
 		}
 		

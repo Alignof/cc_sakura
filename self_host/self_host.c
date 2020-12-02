@@ -912,7 +912,7 @@ Member *register_struc_member(int *asize_ptr){
 		memb_head      = new_memb;
 
 		expect(";");
-		if(consume("}")) break;
+		if(consume("}"))break;
 	}
 
 	(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
@@ -1414,7 +1414,7 @@ void error_at(char *loc, char *msg){
 	fprintf(stderr, "%.*s\n", (end-start), start);
 
 	int pos = indent+loc-start;
-	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ %s\n", msg);
 	exit(1);
 }
