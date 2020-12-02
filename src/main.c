@@ -1,8 +1,7 @@
 #include "cc_sakura.h"
 
 int   llid;
-int   label_if_num;
-int   label_loop_num;
+int   label_num;
 char  *user_input;
 char  filename[100];
 Func  *func_list[FUNC_NUM];
@@ -100,8 +99,7 @@ int main(int argc, char **argv){
 	}
 
 	llid           = 0;
-	label_if_num   = 0;
-	label_loop_num = 0;
+	label_num      = 0;
 	labels_head    = NULL;
 	labels_tail    = NULL;
 

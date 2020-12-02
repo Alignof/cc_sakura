@@ -401,7 +401,8 @@ Node *stmt(void){
 		 *                     | 
 		 *        if(cond)<--else-->expr
 		 */
-		node = new_node(ND_IF, node, NULL);
+		node      = new_node(ND_IF, node, NULL);
+		node->val = label_num++;
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -437,7 +438,8 @@ Node *stmt(void){
 		Label *before_switch = labels_tail;
 		Label *prev = NULL;
 
- 		node = new_node(ND_SWITCH, node, NULL);
+ 		node      = new_node(ND_SWITCH, node, NULL);
+		node->val = label_num++;
  		if(consume("(")){
  			//jmp expr
  			cond = expr();
@@ -509,7 +511,8 @@ Node *stmt(void){
 		outside_enum   = enumerations;
 		outside_struct = structs;
 		
-		node = new_node(ND_FOR, node, NULL);
+		node      = new_node(ND_FOR, node, NULL);
+		node->val = label_num++;
 
 		if(consume("(")){
 			//jmp expr
@@ -529,12 +532,20 @@ Node *stmt(void){
 			node->lhs->next->next = calc;
 		}
 
+		if(node->rhs->kind == ND_BREAK || node->rhs->kind == ND_CONTINUE){
+			node->rhs->val = node->val;
+		}
+
 		locals       = outside_lvar; 
 		enumerations = outside_enum; 
 		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
-		node = new_node(ND_DOWHILE, NULL, stmt());
+		node      = new_node(ND_DOWHILE, NULL, stmt());
+		node->val = label_num++;
+		if(node->rhs->kind == ND_BREAK || node->rhs->kind == ND_CONTINUE){
+			node->rhs->val = node->val;
+		}
 
 		consume_reserved_word("while", TK_WHILE);
 		if(consume("(")){
@@ -543,7 +554,8 @@ Node *stmt(void){
 		}
 		expect(";");
 	}else if(consume_reserved_word("while", TK_WHILE)){
-		node = new_node(ND_WHILE, node, NULL);
+		node      = new_node(ND_WHILE, node, NULL);
+		node->val = label_num++;
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -553,6 +565,9 @@ Node *stmt(void){
 			// (cond)<-while->expr
 			node->lhs = cond;
 			node->rhs = stmt();
+			if(node->rhs->kind == ND_BREAK || node->rhs->kind == ND_CONTINUE){
+				node->rhs->val = node->val;
+			}
 		}
 	}else if(consume("{")){
 		node = new_node(ND_BLOCK, node, NULL);
@@ -566,9 +581,15 @@ Node *stmt(void){
 			if(node->block_code){
 				block_code->block_code = stmt();
 				block_code = block_code->block_code;
+				if(block_code->kind == ND_BREAK || block_code->kind == ND_CONTINUE){
+					block_code->val = node->lhs->val;
+				}
 			}else{
 				block_code = stmt();
 				node->block_code = block_code;
+				if(node->block_code->kind == ND_BREAK || node->block_code->kind == ND_CONTINUE){
+					block_code->val = node->lhs->val;
+				}
 			}
 		}
 		
