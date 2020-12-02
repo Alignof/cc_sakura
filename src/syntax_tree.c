@@ -19,6 +19,43 @@ Node *data(void){
 		return node;
 	}
 
+
+	if(token->kind == TK_STR){
+		consume("\"");
+		Node *node = calloc(1, sizeof(Node));
+		node->kind = ND_STR;
+		node->type = calloc(1, sizeof(Type));
+		node->type->ty = PTR;
+
+		Token *tok = consume_string();
+		Str *fstr = find_string(tok);
+
+		// has already
+		if(fstr){
+			node->str = fstr->str;
+			node->val = fstr->label_num;
+			node->offset = fstr->len;
+		// new one
+		}else{
+			Str *new = calloc(1, sizeof(Str));
+			new->len = tok->len;
+			new->str = tok->str;
+			new->label_num = strings ? strings->label_num+1 : 0;
+			node->str = new->str;
+			node->offset = new->len;
+			node->val = new->label_num;
+
+			if(strings == NULL){
+				strings = new;
+			}else{
+				new->next = strings;
+				strings = new;
+			}
+		}
+
+		return node;
+	}
+
 	// variable
 	int INSIDE_FUNC = 0;
 	Token *tok = consume_ident();
@@ -132,42 +169,6 @@ Node *unary(void){
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, NULL, unary());
-
-		return node;
-	}
-
-	if(token->kind == TK_STR){
-		consume("\"");
-		Node *node = calloc(1, sizeof(Node));
-		node->kind = ND_STR;
-		node->type = calloc(1, sizeof(Type));
-		node->type->ty = PTR;
-
-		Token *tok = consume_string();
-		Str *fstr = find_string(tok);
-
-		// has already
-		if(fstr){
-			node->str = fstr->str;
-			node->val = fstr->label_num;
-			node->offset = fstr->len;
-		// new one
-		}else{
-			Str *new = calloc(1, sizeof(Str));
-			new->len = tok->len;
-			new->str = tok->str;
-			new->label_num = strings ? strings->label_num+1 : 0;
-			node->str = new->str;
-			node->offset = new->len;
-			node->val = new->label_num;
-
-			if(strings == NULL){
-				strings = new;
-			}else{
-				new->next = strings;
-				strings = new;
-			}
-		}
 
 		return node;
 	}
@@ -300,7 +301,8 @@ Node *ternary(void){
 	Node *node = logical();
 	if(consume("?")){
 		//                          cond  if true
-		node = new_node(ND_TERNARY, node, ternary());
+		node      = new_node(ND_TERNARY, node, ternary());
+		node->val = label_num++;
 		expect(":");
 		//           if false
 		node->next = ternary();
@@ -369,9 +371,11 @@ Node *expr(void){
 	}else if(consume_reserved_word("break", TK_BREAK)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_BREAK;
+		node->val  = label_loop_end;
 	}else if(consume_reserved_word("continue", TK_CONTINUE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_CONTINUE;
+		node->val  = label_loop_end;
 	}else{
 		node = assign();
 	}
@@ -380,6 +384,7 @@ Node *expr(void){
 }
 
 Node *stmt(void){
+	int stash_loop_end = label_loop_end;
 	Node *node = NULL;
 
 	if(consume_reserved_word("return", TK_RETURN)){
@@ -400,7 +405,8 @@ Node *stmt(void){
 		 *                     | 
 		 *        if(cond)<--else-->expr
 		 */
-		node = new_node(ND_IF, node, NULL);
+		node      = new_node(ND_IF, node, NULL);
+		node->val = label_num++;
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -436,7 +442,10 @@ Node *stmt(void){
 		Label *before_switch = labels_tail;
 		Label *prev = NULL;
 
- 		node = new_node(ND_SWITCH, node, NULL);
+ 		node      = new_node(ND_SWITCH, node, NULL);
+		node->val = label_num++;
+		label_loop_end = node->val;
+
  		if(consume("(")){
  			//jmp expr
  			cond = expr();
@@ -508,7 +517,9 @@ Node *stmt(void){
 		outside_enum   = enumerations;
 		outside_struct = structs;
 		
-		node = new_node(ND_FOR, node, NULL);
+		node      = new_node(ND_FOR, node, NULL);
+		node->val = label_num++;
+		label_loop_end = node->val;
 
 		if(consume("(")){
 			//jmp expr
@@ -533,7 +544,9 @@ Node *stmt(void){
 		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
-		node = new_node(ND_DOWHILE, NULL, stmt());
+		node      = new_node(ND_DOWHILE, NULL, stmt());
+		node->val = label_num++;
+		label_loop_end = node->val;
 
 		consume_reserved_word("while", TK_WHILE);
 		if(consume("(")){
@@ -542,7 +555,8 @@ Node *stmt(void){
 		}
 		expect(";");
 	}else if(consume_reserved_word("while", TK_WHILE)){
-		node = new_node(ND_WHILE, node, NULL);
+		node      = new_node(ND_WHILE, node, NULL);
+		node->val = label_num++;
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -583,6 +597,8 @@ Node *stmt(void){
 		}
 	}
 
+	// revert loop end
+	label_loop_end = stash_loop_end;
 	return node;
 }
 

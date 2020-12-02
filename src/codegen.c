@@ -1,10 +1,5 @@
 #include "cc_sakura.h"
 
-//int label_if;
-//int label_loop;
-//int label_if_num;
-//int label_loop_num;
-
 void expand_next(Node *node){
 	while(node){
 		gen(node);
@@ -159,9 +154,6 @@ void gen_calc(Node *node){
 
 void gen(Node *node){
 	Node *cases;
-	int  arg_num    = 0;
-	int  label_if   = label_if_num;
-	int  label_loop = label_loop_num;
 	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
 
 
@@ -310,61 +302,52 @@ void gen(Node *node){
 			}
 			return;
 		case ND_TERNARY:
-			label_if_num++;
-
 			// condition
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lelse%03d\n", label_if);
+			printf("	je .Lelse%03d\n", node->val);
 
 			// true
 			gen(node->rhs);
-			printf("	jmp .LifEnd%03d\n", label_if);
-			printf(".Lelse%03d:\n", label_if);
+			printf("	jmp .LifEnd%03d\n", node->val);
+			printf(".Lelse%03d:\n", node->val);
 
 			// false
 			gen(node->next);
-			printf(".LifEnd%03d:\n", label_if);
+			printf(".LifEnd%03d:\n", node->val);
 
 			return;
 		case ND_IF:
-			label_if_num++;
-
 			printf("	push rax\n");
 			gen(node->lhs);
 
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .LifEnd%03d\n", label_if);
+			printf("	je .LifEnd%03d\n", node->val);
 			printf("	pop rax\n");
 			gen(node->rhs);
 
-			printf(".LifEnd%03d:\n", label_if);
+			printf(".LifEnd%03d:\n", node->val);
 			return;
 		case ND_IFELSE:
-			label_if_num++;
-
 			// condition
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
-			printf("	je .Lelse%03d\n", label_if);
+			printf("	je .Lelse%03d\n", node->val);
 
 			// expr in if
 			gen(node->rhs->lhs);
-			printf("	jmp .LifEnd%03d\n", label_if);
-			printf(".Lelse%03d:\n", label_if);
+			printf("	jmp .LifEnd%03d\n", node->val);
+			printf(".Lelse%03d:\n", node->val);
 
 			// expr in else
 			gen(node->rhs->rhs);
-			printf(".LifEnd%03d:\n", label_if);
+			printf(".LifEnd%03d:\n", node->val);
 
 			return;
 		case ND_SWITCH:
-			label_if_num++;
-			label_loop_num++;
-
 			// gen cases condtion
 			cases = node->next;
 			while(cases){
@@ -384,7 +367,7 @@ void gen(Node *node){
 			// gen code block
 			gen(node->rhs);
 
-			printf(".LloopEnd%03d:\n", label_loop);
+			printf(".LloopEnd%03d:\n", node->val);
 			printf("	push rax\n");
 			return;
 		case ND_CASE:
@@ -398,67 +381,60 @@ void gen(Node *node){
 			// init
 			gen(node->lhs);
 
-
-			label_loop_num++;
-
 			// condition
-			printf(".LloopBegin%03d:\n", label_loop);
+			printf(".LloopBegin%03d:\n", node->val);
 			if(node->lhs->next->kind != ND_NULL_STMT){
 				gen(node->lhs->next);
 				printf("	pop rax\n");
 				printf("	cmp rax,0\n");
 				// if cond true then jump to  loop end.
-				printf("	je .LloopEnd%03d\n", label_loop);
+				printf("	je .LloopEnd%03d\n", node->val);
 			}
 
 			// gen block
 			gen(node->rhs);
 
 			// gen update expression
-			printf(".LloopCont%03d:\n", label_loop);
+			printf(".LloopCont%03d:\n", node->val);
 			if(node->lhs->next->next->kind != ND_NULL_STMT){
 				gen(node->lhs->next->next);
 				printf("	pop rax\n");
 			}
 
 			// continue
-			printf("	jmp .LloopBegin%03d\n", label_loop);
-			printf(".LloopEnd%03d:\n", label_loop);
+			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf(".LloopEnd%03d:\n", node->val);
 			printf("	push rax\n");
 
 			return;
 		case ND_WHILE:
-			label_loop = label_loop_num++;
-
 			// adjust rsp
 			printf("	push rax\n");
 
 			// condition
-			printf(".LloopBegin%03d:\n", label_loop);
+			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs);
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// if cond true then loop end.
-			printf("	je .LloopEnd%03d\n", label_loop);
+			printf("	je .LloopEnd%03d\n", node->val);
 
 			// else expression
 			gen(node->rhs);
 
 			// continue
-			printf(".LloopCont%03d:\n", label_loop);
-			printf("	jmp .LloopBegin%03d\n", label_loop);
-			printf(".LloopEnd%03d:\n", label_loop);
+			printf(".LloopCont%03d:\n", node->val);
+			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf(".LloopEnd%03d:\n", node->val);
 			printf("	push rax\n");
 
 			return;
 		case ND_DOWHILE:
-			label_loop_num++;
-
 			// adjust rsp
 			printf("	push rax\n");
 
 			// codeblock
-			printf(".LloopBegin%03d:\n", label_loop);
+			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->rhs);
 
 			// condition
@@ -466,20 +442,20 @@ void gen(Node *node){
 			printf("	pop rax\n");
 			printf("	cmp rax,0\n");
 			// break loop
-			printf("	je .LloopEnd%03d\n", label_loop);
+			printf("	je .LloopEnd%03d\n", node->val);
 
 			// continue
-			printf(".LloopCont%03d:\n", label_loop);
-			printf("	jmp .LloopBegin%03d\n", label_loop);
-			printf(".LloopEnd%03d:\n", label_loop);
+			printf(".LloopCont%03d:\n", node->val);
+			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf(".LloopEnd%03d:\n", node->val);
 			printf("	push rax\n");
 
 			return;
 		case ND_CONTINUE:
-			printf("	jmp .LloopCont%03d\n", label_loop-1);
+			printf("	jmp .LloopCont%03d\n", node->val);
 			return;
 		case ND_BREAK:
-			printf("	jmp .LloopEnd%03d\n", label_loop-1);
+			printf("	jmp .LloopEnd%03d\n", node->val);
 			return;
 		case ND_BLOCK:
 			expand_block_code(node->block_code);
