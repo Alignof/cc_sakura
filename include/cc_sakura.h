@@ -70,23 +70,27 @@ typedef enum{
 	ND_GARRAY, 	//  global array
 	ND_STR, 	//  "string"
 	ND_NUM, 	//  integer
+	ND_CALL_FUNC, 	//  func();
+	ND_CASE, 	//  case or default(has code after label)
 	ND_TERNARY,	//  cond ? if_true : if_false
+	ND_BLOCK, 	//  {}
+
+	// statement(does not push value to stack)
+	ND_NULL_STMT, 	//  NULL statement (;) 
 	ND_IF, 		//  if
 	ND_ELSE, 	//  else
 	ND_IFELSE, 	//  if-else
 	ND_SWITCH, 	//  switch
-	ND_CASE, 	//  case or default
+	ND_FOR, 	//  for
 	ND_WHILE, 	//  while
 	ND_DOWHILE, 	//  do-while
-	ND_FOR, 	//  for
-	ND_BLOCK, 	//  {}
-	ND_ARG, 	//  function argument;
-	ND_CALL_FUNC, 	//  func();
-	ND_RETURN, 	//  return
 	ND_BREAK, 	//  break
 	ND_CONTINUE, 	//  continue
+	ND_RETURN, 	//  return
+
+	//virtual type
+	ND_ARG, 	//  function argument;
 	ND_TYPE, 	//  int, double, char...
-	ND_NULL_STMT, 	//  NULL statement (;) 
 }NodeKind;
 
 typedef enum{
@@ -356,6 +360,7 @@ Member *register_enum_member(void);
 extern int label_num;
 extern int label_loop_end;
 void gen(Node *node);
+void gen_expr(Node *node);
 void gen_args(Node *args);
 void gen_calc(Node *node);
 void gen_lvar(Node *node);
