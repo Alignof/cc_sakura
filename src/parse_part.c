@@ -141,7 +141,7 @@ Node *array_str(Node *arr, Node *init_val){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
-			node->block_code = dst;
+			node->rhs = dst;
 		}else{
 			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
 			dst = dst->block_code;
@@ -189,7 +189,7 @@ Node *array_block(Node *arr){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, expr());
-			node->block_code = dst;
+			node->rhs = dst;
 		}else{
 			dst->block_code = new_node(ND_ASSIGN, src, expr());
 			dst = dst->block_code;

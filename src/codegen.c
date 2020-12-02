@@ -3,7 +3,7 @@
 void expand_next(Node *node){
 	while(node){
 		gen(node);
-		node=node->block_code;
+		node=node->next;
 	}
 	printf("	push rax\n");
 }
@@ -175,21 +175,12 @@ void gen_expr(Node *node){
 				printf("	mov rax,[rax]\n");
 			}
 			printf("	push rax\n");
-
-			// init formula
-			if(node->block_code != NULL) gen(node->block_code);
 			return;
 		case ND_GARRAY:
 			gen_gvar(node);
-
-			// init formula
-			if(node->block_code != NULL) expand_next(node->block_code);
 			return;
 		case ND_LARRAY:
 			gen_lvar(node);
-
-			// init formula
-			if(node->block_code != NULL) expand_next(node->block_code);
 			return;
 		case ND_PREID:
 			// ++p -> p += 1
@@ -476,7 +467,7 @@ void gen(Node *node){
 			printf("	jmp .LloopEnd%03d\n", node->val);
 			return;
 		case ND_BLOCK:
-			expand_block_code(node->block_code);
+			expand_block_code(node->rhs);
 			return;
 		case ND_CASE:
 			printf(".LcaseBegin%03d:\n", node->val);
