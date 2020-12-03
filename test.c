@@ -1,4 +1,4 @@
-typedef struct Token  Token;
+typedef struct Token Token;
 typedef _Bool bool;
 typedef enum{
 	TK_TYPE,
@@ -26,6 +26,11 @@ typedef enum{
 	TK_EOF,
 }TokenKind;
 
+Token *token;
+bool true  = 1;
+bool false = 0;
+char *__NULL = 0;
+
 // code token
 struct Token{
 	TokenKind kind;
@@ -35,7 +40,6 @@ struct Token{
 	int len;
 };
 
-Token token;
 bool consume_reserved_word(char *keyword, TokenKind kind){
 	if(token->kind != kind ||
 	   token->len != strlen(keyword) ||
@@ -48,10 +52,13 @@ bool consume_reserved_word(char *keyword, TokenKind kind){
 }
 
 int main(){
+	Token tok;
+	token = &tok;
 	token->kind = TK_RETURN;
 	token->str  = "return";
 	token->len  = 6;
 	token->next = __NULL;
+	//token->next = __NULL;
 
-	return consume_reserved_word("return", TK_RETURN);
+	return consume_reserved_word("retern", TK_RETURN);
 }
