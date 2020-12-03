@@ -60,23 +60,27 @@ typedef enum{
 	ND_GARRAY, 	//  global array
 	ND_STR, 	//  "string"
 	ND_NUM, 	//  integer
+	ND_CALL_FUNC, 	//  func();
+	ND_CASE, 	//  case or default(has code after label)
 	ND_TERNARY,	//  cond ? if_true : if_false
+	ND_BLOCK, 	//  {}
+
+	// statement(does not push value to stack)
+	ND_NULL_STMT, 	//  NULL statement (;) 
 	ND_IF, 		//  if
 	ND_ELSE, 	//  else
 	ND_IFELSE, 	//  if-else
 	ND_SWITCH, 	//  switch
-	ND_CASE, 	//  case or default
+	ND_FOR, 	//  for
 	ND_WHILE, 	//  while
 	ND_DOWHILE, 	//  do-while
-	ND_FOR, 	//  for
-	ND_BLOCK, 	//  {}
-	ND_ARG, 	//  function argument;
-	ND_CALL_FUNC, 	//  func();
-	ND_RETURN, 	//  return
 	ND_BREAK, 	//  break
 	ND_CONTINUE, 	//  continue
+	ND_RETURN, 	//  return
+
+	//virtual type
+	ND_ARG, 	//  function argument;
 	ND_TYPE, 	//  int, double, char...
-	ND_NULL_STMT, 	//  NULL statement (;) 
 }NodeKind;
 
 typedef enum{
@@ -235,14 +239,15 @@ struct Member{
 };
 
 
-// global variable
+
+//================= global variable ===================
 int      llid;
 int      lvar_count;
 int      alloc_size;
 char     *user_input;
 char     filename[100];
 Token    *token;
-Func     *func_list[200];
+Func     *func_list[300];
 LVar     *locals;
 GVar     *globals;
 Str      *strings;
@@ -255,11 +260,11 @@ LVar     *outside_lvar;
 Struc    *outside_struct;
 Enum     *outside_enum;
 Def_Type *outside_deftype;
+int label_num;
+int label_loop_end;
+//=====================================================
 
-int label_if;
-int label_loop;
-int label_if_num;
-int label_loop_num;
+
 //================standard library=====================
 typedef struct _IO_FILE FILE;
 typedef void   _IO_lock_t;
@@ -302,8 +307,6 @@ struct _IO_FILE{
 	_IO_lock_t *_lock;
 };
 
-FILE *stderr;
-
 typedef _Bool bool;
 bool true  = 1;
 bool false = 0;
@@ -316,13 +319,17 @@ typedef void* size_t;
 
 int  SEEK_SET = 0;
 int  SEEK_END = 2;
-int  FUNC_NUM = 100;
+int  FUNC_NUM = 300;
+
+extern FILE *stdin;		/* Standard input stream.  */
+extern FILE *stdout;		/* Standard output stream.  */
+extern FILE *stderr;		/* Standard error output stream.  */
+
 extern _Thread_local int errno;
 //=========================================================
 
 
-
-//========================= main.c ===============================
+//======================= main.c ==========================
 char *read_file(char *path){
 	FILE *fp;
 	char *buf;
@@ -415,8 +422,8 @@ int main(int argc, char **argv){
 	}
 
 	llid           = 0;
-	label_if_num   = 0;
-	label_loop_num = 0;
+	label_num      = 0;
+	label_loop_end = 0;
 	labels_head    = __NULL;
 	labels_tail    = __NULL;
 
@@ -442,10 +449,7 @@ int main(int argc, char **argv){
 
 		for(j = 0;func_list[i]->code[j] != __NULL;j++){
 			// gen code
-			if(func_list[i]->code[j]->kind != ND_NULL_STMT){
-				gen(func_list[i]->code[j]);
-				printf("\n	pop rax\n");
-			}
+			gen(func_list[i]->code[j]);
 		}
 
 		// epiroge
@@ -459,4 +463,3 @@ int main(int argc, char **argv){
 }
 
 //=========================================================
-

@@ -30,8 +30,7 @@ franken:$(ASEMS)
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 
 	@[ -d $(ASMDIR) ]
-	$(CC) $(INCLUDE) -S -masm=intel $< -o $@
-	#$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	$(CC) $(INCLUDE) -static -S -masm=intel $< -o $@
 
 # build child by mother
 build: $(MOTHER)

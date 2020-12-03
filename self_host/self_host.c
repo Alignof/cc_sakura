@@ -307,8 +307,6 @@ struct _IO_FILE{
 	_IO_lock_t *_lock;
 };
 
-FILE *stderr;
-
 typedef _Bool bool;
 bool true  = 1;
 bool false = 0;
@@ -322,6 +320,11 @@ typedef void* size_t;
 int  SEEK_SET = 0;
 int  SEEK_END = 2;
 int  FUNC_NUM = 300;
+
+extern FILE *stdin;		/* Standard input stream.  */
+extern FILE *stdout;		/* Standard output stream.  */
+extern FILE *stderr;		/* Standard error output stream.  */
+
 extern _Thread_local int errno;
 //=========================================================
 
