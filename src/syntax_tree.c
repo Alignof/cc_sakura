@@ -688,7 +688,7 @@ void program(void){
 			continue;
 		}
 
-		func_list[func_index] = (Func *)malloc(sizeof(Func));
+		func_list[func_index] = calloc(1, sizeof(Func));
 
 		// Is function?
 		if(token->kind != TK_IDENT ||!(is_alnum(*token->str))){

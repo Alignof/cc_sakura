@@ -1,5 +1,3 @@
-#include "cc_sakura.h"
-
 bool isblock(char *str){
 	return (*str == '{') || (*str == '}');
 }
@@ -97,7 +95,7 @@ bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_ki
 Token *tokenize(char *p){
 	bool is_single_token;
 	Token head;
-	head.next = NULL;
+	head.next = __NULL;
 
 	//set head pointer to cur
 	Token *now = &head;

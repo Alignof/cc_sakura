@@ -1,5 +1,3 @@
-#include "cc_sakura.h"
-
 void expand_next(Node *node){
 	while(node){
 		gen(node);

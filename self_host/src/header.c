@@ -247,7 +247,7 @@ int      alloc_size;
 char     *user_input;
 char     filename[100];
 Token    *token;
-Func     *func_list[FUNC_NUM];
+Func     *func_list[300];
 LVar     *locals;
 GVar     *globals;
 Str      *strings;
@@ -321,7 +321,7 @@ typedef void* size_t;
 
 int  SEEK_SET = 0;
 int  SEEK_END = 2;
-int  FUNC_NUM = 100;
+int  FUNC_NUM = 300;
 extern _Thread_local int errno;
 //=========================================================
 

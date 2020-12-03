@@ -9,7 +9,7 @@ void error(char *loc, char *fmt, ...){
 
 	int pos = loc-user_input;
 	fprintf(stderr, "%s\n", user_input);
-	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ ");
 	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
@@ -37,7 +37,7 @@ void error_at(char *loc, char *msg){
 	fprintf(stderr, "%.*s\n", (int)(end-start), start);
 
 	int pos = indent+loc-start;
-	fprintf(stderr, "%*s", pos, "");
+	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ %s\n", msg);
 	exit(1);
 }

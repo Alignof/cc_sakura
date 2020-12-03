@@ -60,23 +60,27 @@ typedef enum{
 	ND_GARRAY, 	//  global array
 	ND_STR, 	//  "string"
 	ND_NUM, 	//  integer
+	ND_CALL_FUNC, 	//  func();
+	ND_CASE, 	//  case or default(has code after label)
 	ND_TERNARY,	//  cond ? if_true : if_false
+	ND_BLOCK, 	//  {}
+
+	// statement(does not push value to stack)
+	ND_NULL_STMT, 	//  NULL statement (;) 
 	ND_IF, 		//  if
 	ND_ELSE, 	//  else
 	ND_IFELSE, 	//  if-else
 	ND_SWITCH, 	//  switch
-	ND_CASE, 	//  case or default
+	ND_FOR, 	//  for
 	ND_WHILE, 	//  while
 	ND_DOWHILE, 	//  do-while
-	ND_FOR, 	//  for
-	ND_BLOCK, 	//  {}
-	ND_ARG, 	//  function argument;
-	ND_CALL_FUNC, 	//  func();
-	ND_RETURN, 	//  return
 	ND_BREAK, 	//  break
 	ND_CONTINUE, 	//  continue
+	ND_RETURN, 	//  return
+
+	//virtual type
+	ND_ARG, 	//  function argument;
 	ND_TYPE, 	//  int, double, char...
-	ND_NULL_STMT, 	//  NULL statement (;) 
 }NodeKind;
 
 typedef enum{
@@ -235,14 +239,15 @@ struct Member{
 };
 
 
-// global variable
+
+//================= global variable ===================
 int      llid;
 int      lvar_count;
 int      alloc_size;
 char     *user_input;
 char     filename[100];
 Token    *token;
-Func     *func_list[200];
+Func     *func_list[300];
 LVar     *locals;
 GVar     *globals;
 Str      *strings;
@@ -255,11 +260,11 @@ LVar     *outside_lvar;
 Struc    *outside_struct;
 Enum     *outside_enum;
 Def_Type *outside_deftype;
+int label_num;
+int label_loop_end;
+//=====================================================
 
-int label_if;
-int label_loop;
-int label_if_num;
-int label_loop_num;
+
 //================standard library=====================
 typedef struct _IO_FILE FILE;
 typedef void   _IO_lock_t;
@@ -316,267 +321,563 @@ typedef void* size_t;
 
 int  SEEK_SET = 0;
 int  SEEK_END = 2;
-int  FUNC_NUM = 100;
+int  FUNC_NUM = 300;
 extern _Thread_local int errno;
-
 //=========================================================
 
 
 
 
 
-//==================== tokenizer.c ========================
-bool isblock(char *str){
-	return (*str == '{') || (*str == '}');
+//==================== codegen.c ==========================
+void expand_next(Node *node){
+	while(node){
+		gen(node);
+		node=node->next;
+	}
+	printf("	push rax\n");
 }
 
-bool at_eof(void){
-	return token->kind == TK_EOF;
+void expand_block_code(Node *node){
+	while(node){
+		gen(node);
+		node=node->block_code;
+	}
+	printf("	push rax\n");
 }
 
-int is_alnum(char c){
-	return	(('a' <=  c) && (c <=  'z')) ||
-		(('A' <=  c) && (c <=  'Z')) ||
-		(('0' <=  c) && (c <=  '9')) ||
-		(c == '_');
+
+void gen_gvar(Node *node){
+	if(node->type->is_thread_local){
+		printf("	mov rax, fs:0\n");
+		printf("	add rax, fs:%.*s@tpoff\n", node->val, node->str);
+	}else{
+		printf("	lea rax,  %.*s[rip]\n", node->val, node->str);
+	}
+	printf("	push rax\n");
 }
 
-int len_val(char *str){
-	int counter = 0;
-	for(;is_alnum(*str);str++){
-		counter++;
+void gen_lvar(Node *node){
+	if(node->kind != ND_LVAR && node->kind != ND_LARRAY && node->kind != ND_CALL_FUNC){
+		error_at(token->str,"not a variable");
 	}
 
-	return counter;
+	printf("	mov rax,rbp\n");
+	printf("	sub rax,%d\n", node->offset);
+	printf("	push rax\n");
 }
 
-bool issymbol(char *str,  bool *single_flag){
-	int i;
-	int size;
-	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
-	char repeat_symbol[] = "<>&|+-";
-	char multi_symbol[]  = "->";
-	char multi_eq[]      = "<=>!+*-/";
-	
-	//Is multi equal? (<=,==,!=,>=)
-	size = sizeof(multi_eq)/sizeof(char);
-	for(i = 0;i < size;i++){
-		if((*str == multi_eq[i]) && (*(str+1) == '=')){
-			*single_flag = false;
-			return true;
-		}
-	}
-	
-	//Is repeat symbol? (<<,>>,&&,||,++,--)
-	size = sizeof(repeat_symbol)/sizeof(char);
-	for(i = 0;i < size;i++){
-		if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
-			*single_flag = false;
-			return true;
-		}
+void gen_struc(Node *node){
+	if(node->kind != ND_DOT && node->kind != ND_ARROW){
+		error_at(token->str, "not a struct");
 	}
 
-	//Is multi symbol? (->)
-	size = sizeof(multi_symbol)/sizeof(char)/2;
-	for(i = 0;i < size;i += 2){
-		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
-			*single_flag = false;
-			return true;
-		}
-	}
+	gen_expr(node->lhs);
+	gen_expr(node->rhs);
 
-	//Is single symbol? (+,-,*,/,%,<,>,',.)
-	size = sizeof(single_symbol)/sizeof(char);
-	for(i = 0;i < size;i++){
-		if(*str == single_symbol[i]){
-			*single_flag = true;
-			return true;
-		}
-	}
-
-	return false;
+	printf("	pop rdi\n");
+	printf("	pop rax\n");
+	printf("	add rax,rdi\n");
+	printf("	push rax\n");
 }
 
-Token *new_token(TokenKind kind, Token *cur, char *str){
-	Token *new = calloc(1, sizeof(Token));
-	new->kind = kind;
-	//Remaining characters
-	new->str = str;
-	new->len = 1;
-	cur->next = new;
-	return new;
-}
+void gen_args(Node *args){
+	int reg_num;
+	int arg_count = 0;
+	//const char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
+	char *reg[6];
+	reg[0] = "rdi";
+	reg[1] = "rsi";
+	reg[2] = "rdx";
+	reg[3] = "rcx";
+	reg[4] = "r8";
+	reg[5] = "r9";
 
-bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
-	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len])){
-		return false;
+
+
+	while(args){
+		gen_expr(args);
+		arg_count++;
+		args=args->next;
 	}
 
-	*now = new_token(tk_kind, *now, *p);
-	(*now)->len = len;
-	(*now)->str = *p;
-	*p += len;
+	for(reg_num=arg_count;reg_num > 0;reg_num--){
+		printf("	pop rax\n");
+		printf("	mov %s,rax\n", reg[reg_num-1]);
+	}
+	printf("	mov rax,%d\n", arg_count);
 
-	return true;
 }
 
-Token *tokenize(char *p){
-	bool is_single_token;
-	Token head;
-	head.next = __NULL;
+void gen_address(Node *node){
+	/**/ if(node->kind == ND_DEREF)   gen_expr(node->rhs);
+	else if(node->kind == ND_DOT)     gen_struc(node);
+	else if(node->kind == ND_ARROW)   gen_struc(node);
+	else if(node->kind == ND_GVAR)    gen_gvar(node);
+	else if(node->kind == ND_GARRAY)  gen_gvar(node);
+	else if(node->kind == ND_LVAR)    gen_lvar(node);
+	else if(node->kind == ND_LARRAY)  gen_lvar(node);
+	else error_at(token->str, "can not assign");
+}
 
-	//set head pointer to cur
-	Token *now = &head;
+void gen_calc(Node *node){
+	//                          void _Bool  char  int   ptr  array
+	//const char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
+	//const char reg_dx[6][4]={"edx","edx","edx","edx","rdx","rdx"};
+	//const char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
 
-	while(*p){
-		if(isspace(*p)){
-			p++;
-			continue;
-		}
+	int reg_ty = (node->type->ty == ENUM) ? 1 : node->type->ty;
+	char *reg_ax[6];
+	char *reg_dx[6];
+	char *reg_di[6];
 
-		if((*p == '/') && (*(p+1) == '/')){
-			while(*p != '\n') p++;
-			continue;
-		}
+	reg_ax[0] = "eax";
+	reg_ax[1] = "eax";
+	reg_ax[2] = "eax";
+	reg_ax[3] = "eax";
+	reg_ax[4] = "rax";
+	reg_ax[5] = "rax";
 
-		if((*p == '/') && (*(p+1) == '*')){
-			while(!((*(p-1) == '*') && (*p == '/'))) p++;
-			p++;
-			continue;
-		}
+	reg_dx[0] = "edx";
+	reg_dx[1] = "edx";
+	reg_dx[2] = "edx";
+	reg_dx[3] = "edx";
+	reg_dx[4] = "rdx";
+	reg_dx[5] = "rdx";
 
-		//Is character literal?
-		if(*p == '\''){
-			p++;// consume single quote
-			if(*p == '\\'){
-				p++;// consume back slash
+	reg_di[0] = "edi";
+	reg_di[1] = "edi";
+	reg_di[2] = "edi";
+	reg_di[3] = "edi";
+	reg_di[4] = "rdi";
+	reg_di[5] = "rdi";
 
-				//Is LF? (\n)
-				if(*p == 'n'){
-					now = new_token(TK_NUM, now, p++);
-					now->val = 10;
-				//Is NUL? (\0)
-				}else if(*p == '0'){
-					now = new_token(TK_NUM, now, p++);
-					now->val = 0;
-				}else if(*p == '\\'){
-					now = new_token(TK_NUM, now, p++);
-					now->val = 92;
+	switch(node->kind){
+		case ND_ADD:
+			printf("	add %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			break;
+		case ND_SUB:
+			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			break;
+		case ND_MUL:
+			printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			break;
+		case ND_DIV:
+			printf("	cqo\n");
+			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			break;
+		case ND_MOD:
+			printf("	cqo\n");
+			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	mov %s,%s\n", reg_ax[reg_ty], reg_dx[reg_ty]);
+			break;
+		case ND_GT:
+			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
+			printf("	setl al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_GE:
+			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
+			printf("	setle al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_LT:
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	setl al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_LE:
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	setle al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_EQ:
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	sete al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_NE:
+			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	setne al\n");
+			printf("	movzb rax,al\n");
+			break;
+		case ND_AND:
+			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	movzb rax,al\n");
+			break;
+		case ND_OR:
+			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	movzb rax,al\n");
+			break;
+		default:
+			error_at(token->str, "cannot code gen");
+	}
+}
+
+void gen_expr(Node *node){
+	switch(node->kind){
+		case ND_NUM:
+			printf("	push %d\n", node->val);
+			return;
+		case ND_GVAR:
+			gen_gvar(node);
+
+			printf("	pop rax\n");
+			printf("	mov rax,[rax]\n");
+			printf("	push rax\n");
+
+			return;
+		case ND_LVAR:
+			gen_lvar(node);
+
+			printf("	pop rax\n");
+			if(node->type->ty <= CHAR){
+				printf("	movzx eax,BYTE PTR [rax]\n");
+				printf("	movsx eax,al\n");
+			}else{
+				printf("	mov rax,[rax]\n");
+			}
+			printf("	push rax\n");
+			return;
+		case ND_GARRAY:
+			gen_gvar(node);
+			return;
+		case ND_LARRAY:
+			gen_lvar(node);
+			return;
+		case ND_PREID:
+			// ++p -> p += 1
+			gen(node->lhs);
+			printf("	push rax\n");
+			return;
+		case ND_POSTID:
+			// push
+			gen_address(node->lhs); // push lhs
+			gen_expr(node->rhs->rhs->rhs);          // push rhs
+			
+			// calc
+			printf("	pop rdi\n");    // rhs
+			printf("	pop rax\n");    // lhs
+			printf("	push [rax]\n"); // Evacuation lhs data
+			printf("	push rax\n");   // Evacuation lhs address
+			printf("	mov rax,[rax]\n"); // deref lhs
+
+			gen_calc(node->rhs->rhs);
+			printf("	push rax\n"); // rhs op lhs
+
+			// assign
+			printf("	pop rdi\n"); // src
+			printf("	pop rax\n"); // dst
+			if(node->lhs->type->ty <= CHAR){
+				if(node->lhs->type->ty == BOOL){
+					printf("	mov R8B,dil\n");
+					printf("	cmp R8B,0\n");
+					printf("	setne dl\n");
+					printf("	movzb rdi,dl\n");
 				}
+				printf("	mov [rax],dil\n");
+			}else if(node->lhs->type->ty == INT){
+				printf("	mov [rax],edi\n");
 			}else{
-				now = new_token(TK_NUM, now, p);
-				now->val = *p++;
+				printf("	mov [rax],rdi\n");
 			}
-			// consume single quote
-			p++;
-			continue;
-		}
 
-		//Is number?
-		if(isdigit(*p)){
-			if(now->kind == TK_IDENT){
-				now = new_token(TK_IDENT, now, p++);
-				now->len = 1;
+			// already evacuation
+			//printf("	push rax\n");
+			return;
+		case ND_STR:
+			printf("	lea rax, .LC%d[rip]\n", node->val);
+			printf("	push rax\n");
+			return;
+		case ND_ASSIGN:
+			gen_address(node->lhs);
+			gen_expr(node->rhs);
+
+			printf("	pop rdi\n");
+			printf("	pop rax\n");
+			if(node->lhs->type->ty <= CHAR){
+				printf("	mov [rax],dil\n");
+			}else if(node->lhs->type->ty == INT){
+				printf("	mov [rax],edi\n");
 			}else{
-				//add number token
-				now = new_token(TK_NUM, now, p);
-				//set number
-				now->val = strtol(p, &p, 10);
+				printf("	mov [rax],rdi\n");
 			}
-			continue;
-		}
 
-		//judge single token or multi token or isn't token
-		if(issymbol(p, &is_single_token)){
-			now = new_token(TK_RESERVED, now, p);
-			if(is_single_token){
-				p++;
-			}else{
-				p += 2;
-				now->len = 2;
-			}
-			continue;
-		}
+			printf("	push rdi\n");
+			return;
+		case ND_COMPOUND:
+			// push
+			gen_address(node->lhs); // push lhs
+			gen_expr(node->rhs->rhs);  // push rhs
 
-		if(consume_reserved(&p, "void",     4, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "_Bool",    5, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "char",     4, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "int",	    3, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
-		if(consume_reserved(&p, "enum",     4, &now, TK_TYPE))     continue;
-		if(consume_reserved(&p, "if",	    2, &now, TK_IF))	   continue;
-		if(consume_reserved(&p, "else",	    4, &now, TK_ELSE))	   continue;
-		if(consume_reserved(&p, "switch",   6, &now, TK_SWITCH))   continue;
-		if(consume_reserved(&p, "case",     4, &now, TK_CASE))	   continue;
-		if(consume_reserved(&p, "default",  7, &now, TK_DEFAULT))  continue;
-		if(consume_reserved(&p, "for",	    3, &now, TK_FOR))	   continue;
-		if(consume_reserved(&p, "do",	    2, &now, TK_DO))       continue;
-		if(consume_reserved(&p, "while",    5, &now, TK_WHILE))    continue;
-		if(consume_reserved(&p, "break",    5, &now, TK_BREAK))    continue;
-		if(consume_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;
-		if(consume_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
-		if(consume_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
-		if(consume_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
+			// calc
+			printf("	pop rdi\n");  // rhs
+			printf("	pop rax\n");  // lhs
+			printf("	push rax\n"); // Evacuation lhs
+			printf("	mov rax,[rax]\n"); // deref lhs
 
-		// compiler directive
-		if(consume_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
-		//if(consume_reserved(&p, "define",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
-		//if(consume_reserved(&p, "include",  7, &now, TK_COMPILER_DIRECTIVE)) continue;
+			gen_calc(node->rhs);
+			printf("	push rax\n"); // rhs op lhs
 
-
-		//Is block? '{' or '}'
-		if(isblock(p)){
-			now = new_token(TK_BLOCK, now, p);
-			now->len = 1;
-			now->str = p;
-			p++;
-			continue;
-		}
-
-		//Is string?
-		if(*p == '"'){
-			if(*(p-1) == '\''){
-				now = new_token(TK_RESERVED, now, p++);
-			}else{
-				p++;
-				while(!(*(p-1) != '\\' && *p == '"')){
-					now = new_token(TK_STR, now, p++);
+			// assign
+			printf("	pop rdi\n"); // src
+			printf("	pop rax\n"); // dst
+			if(node->lhs->type->ty <= CHAR){
+				if(node->lhs->type->ty == BOOL){
+					printf("	mov R8B,dil\n");
+					printf("	cmp R8B,0\n");
+					printf("	setne dl\n");
+					printf("	movzb rdi,dl\n");
 				}
-				p++;
+				printf("	mov [rax],dil\n");
+			}else if(node->lhs->type->ty == INT){
+				printf("	mov [rax],edi\n");
+			}else{
+				printf("	mov [rax],rdi\n");
 			}
-			continue;
-		}
 
-		//Is escape?
-		if(*p == '\\' && *(p+1) == '\\'){
-			now = new_token(TK_IDENT, now, p++);
-			p++;
-			continue;
-		}
-		
-		//Is valiable?
-		if(is_alnum(*p)){
-			while(is_alnum(*p)){
-				now = new_token(TK_IDENT, now, p++);
-				now->len = 1;
+			printf("	push rdi\n");
+			return;
+		case ND_DOT:
+		case ND_ARROW:
+			gen_struc(node);
+			// if it's an array or struct, ignore the deref
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
+				printf("	pop rax\n");
+				printf("	push [rax]\n");
 			}
-			continue;
-		}
+			return;
+		case ND_TERNARY:
+			// condition
+			gen_expr(node->lhs);
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			printf("	je .Lelse%03d\n", node->val);
 
-		error_at(p, "can not tokenize.");
+			// true
+			gen(node->rhs);
+			printf("	jmp .LifEnd%03d\n", node->val);
+			printf(".Lelse%03d:\n", node->val);
+
+			// false
+			gen(node->next);
+			printf(".LifEnd%03d:\n", node->val);
+			printf("	push rax\n");
+			return;
+		case ND_NOT:
+			gen_expr(node->rhs);
+			printf("	pop rax\n");
+			printf("	cmp rax,0\n");
+			printf("	sete al\n");
+			printf("	movzb rax,al\n");
+			printf("	push rax\n");
+			return;
+		case ND_ADDRESS:
+			gen_address(node->rhs);// printf("	push rax\n");
+			return;
+		case ND_DEREF:
+			gen_expr(node->rhs);
+			printf("	pop rax\n");
+			if(node->type->ty <= CHAR){
+				printf("	movzx eax,BYTE PTR [rax]\n");
+				printf("	movsx eax,al\n");
+			}else{
+				printf("	mov rax,[rax]\n");
+			}
+			printf("	push rax\n");
+			return;
+		case ND_CALL_FUNC:
+			gen_args(node->rhs);
+
+			printf("	push rbp\n");
+			printf("	mov rbp,rsp\n");
+			printf("	and rsp,-16\n");
+
+			printf("	call %.*s\n", node->val, node->str);
+
+			printf("	mov rsp,rbp\n");
+			printf("	pop rbp\n");
+
+			printf("	push rax\n");
+			return;
+		default:
+			// check left hand side
+			gen_expr(node->lhs);
+			// check right hand side
+			gen_expr(node->rhs);
+
+			// pop two value
+			printf("	pop rdi\n");
+			printf("	pop rax\n");
+
+			// calculation lhs and rhs
+			gen_calc(node);
+
+			// push result
+			printf("	push rax\n");
 	}
-
-	//add EOF token
-	new_token(TK_EOF, now, p);
-	return head.next;
 }
-//====================================================
+
+void gen(Node *node){
+	Node *cases;
+	char *reg[6];
+	reg[0] = "rdi";
+	reg[1] = "rsi";
+	reg[2] = "rdx";
+	reg[3] = "rcx";
+	reg[4] = "r8";
+	reg[5] = "r9";
+
+	// generate assembly
+	switch(node->kind){
+		case ND_NULL_STMT:
+			// NULL statement
+			return;
+		case ND_IF:
+			gen(node->lhs);
+			printf("	cmp rax,0\n");
+			printf("	je .LifEnd%03d\n", node->val);
+			gen(node->rhs);
+
+			printf(".LifEnd%03d:\n", node->val);
+			return;
+		case ND_IFELSE:
+			// condition
+			gen(node->lhs);
+			printf("	cmp rax,0\n");
+			printf("	je .Lelse%03d\n", node->val);
+
+			// expr in if
+			gen(node->rhs->lhs);
+			printf("	jmp .LifEnd%03d\n", node->val);
+			printf(".Lelse%03d:\n", node->val);
+
+			// expr in else
+			gen(node->rhs->rhs);
+			printf(".LifEnd%03d:\n", node->val);
+			return;
+		case ND_SWITCH:
+			// gen cases condtion
+			cases = node->next;
+			while(cases){
+				gen(cases);
+
+				printf("	cmp rax,0\n");
+				printf("	jne .LcaseBegin%03d\n", cases->val);
+				cases = cases->next;
+			}
+
+			// gen default condtion
+			if(node->lhs){
+				printf("	jmp .LcaseBegin%03d\n", node->lhs->val);
+			}
+
+			// gen code block
+			gen(node->rhs);
+
+			printf(".LloopEnd%03d:\n", node->val);
+			return;
+		case ND_FOR:
+			// init
+			gen(node->lhs);
+
+			// condition
+			printf(".LloopBegin%03d:\n", node->val);
+			gen(node->lhs->next);
+			printf("	cmp rax,0\n");
+			printf("	je .LloopEnd%03d\n", node->val);
+
+			// gen block
+			gen(node->rhs);
+
+			// gen update expression
+			printf(".LloopCont%03d:\n", node->val);
+			gen(node->lhs->next->next);
+
+			// continue
+			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf(".LloopEnd%03d:\n", node->val);
+			return;
+		case ND_WHILE:
+			// condition
+			printf(".LloopBegin%03d:\n", node->val);
+			gen(node->lhs);
+			printf("	cmp rax,0\n");
+			printf("	je .LloopEnd%03d\n", node->val);
+
+			// else expression
+			gen(node->rhs);
+
+			// continue
+			printf(".LloopCont%03d:\n", node->val);
+			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf(".LloopEnd%03d:\n", node->val);
+			return;
+		case ND_DOWHILE:
+			// codeblock
+			printf(".LloopBegin%03d:\n", node->val);
+			gen(node->rhs);
+
+			// condition
+			gen(node->lhs);
+			printf("	cmp rax,0\n");
+			// break loop
+			printf("	je .LloopEnd%03d\n", node->val);
+
+			// continue
+			printf(".LloopCont%03d:\n", node->val);
+			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf(".LloopEnd%03d:\n", node->val);
+			return;
+		case ND_CONTINUE:
+			printf("	jmp .LloopCont%03d\n", node->val);
+			return;
+		case ND_BREAK:
+			printf("	jmp .LloopEnd%03d\n", node->val);
+			return;
+		case ND_BLOCK:
+			expand_block_code(node->rhs);
+			return;
+		case ND_CASE:
+			printf(".LcaseBegin%03d:\n", node->val);
+			gen(node->rhs);
+			return;
+		case ND_ARG:
+			while(node){
+				// push register argument saved
+				printf("	push %s\n", reg[node->val]);
+				gen_lvar(node->rhs);
+				printf("	pop rax\n");
+				printf("	pop rdi\n");
+				printf("	mov [rax],rdi\n");
+				printf("	push rdi\n");
+				// pop stack top
+				printf("	pop rax\n");
+				node=node->next;
+			}
+
+			return;
+		case ND_RETURN:
+			if(node->rhs){
+				gen_expr(node->rhs);
+			}
+			printf("	pop rax\n");
+			printf("	mov rsp,rbp\n");
+			printf("	pop rbp\n");
+			printf("	ret\n");
+			return;
+		default:
+			gen_expr(node);
+			printf("	pop rax\n");
+	}
+}
+//=========================================================
 
 
-//======================= declare.c ===============================
+//===================== declare.c =========================
 Type *set_type(Type *type, Token *tok){
-	Enum  *enum_found;
-	Struc *struc_found;
+	Enum  *enum_found  = __NULL;
+	Struc *struc_found = __NULL;
 	int INSIDE_FILE = 0;
 
 	switch(type->ty){
@@ -729,8 +1030,8 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 
 	GVar *gvar = calloc(1, sizeof(GVar));
 	gvar->next = globals;
-	gvar->name = def_name->str;
 	gvar->len  = def_name->len;
+	gvar->name = def_name->str;
 	gvar->type = toplv_type;
 	gvar->type->size  = type_size(toplv_type);
 	gvar->type->align = type_align(toplv_type);
@@ -912,7 +1213,7 @@ Member *register_struc_member(int *asize_ptr){
 		memb_head      = new_memb;
 
 		expect(";");
-		if(consume("}"))break;
+		if(consume("}")) break;
 	}
 
 	(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
@@ -970,10 +1271,11 @@ void declare_enum(Enum *new_enum){
 	new_enum->next   = enumerations;
 	enumerations     = new_enum;
 }
-
 //=========================================================
 
-//===================== parse_part.c ==============================
+
+
+//===================== parse_part.c ======================
 Node *compiler_directive(){
 	Node *node;
 	
@@ -1035,7 +1337,6 @@ Node *dot_arrow(NodeKind type, Node *node){
 
 	return new;
 }
-
 
 Node *incdec(Node *node, IncDecKind idtype){
 	/*
@@ -1111,7 +1412,7 @@ Node *array_str(Node *arr, Node *init_val){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
-			node->block_code = dst;
+			node->rhs = dst;
 		}else{
 			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
 			dst = dst->block_code;
@@ -1129,10 +1430,12 @@ Node *array_str(Node *arr, Node *init_val){
 		if(arr->kind == ND_LARRAY){
 			int asize = align_array_size(ctr, arr->type);
 			alloc_size+=asize;
-			arr->offset = ((locals)?(locals->offset):0) + asize;
-			clone->offset = arr->offset;
+			arr->offset    = ((locals)?(locals->offset):0) + asize;
+			clone->offset  = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
+			locals->type->size  = type_size(locals->type);
+			locals->type->align = type_size(locals->type);
 		}else{
 			globals->memsize = align_array_size(ctr, arr->type);
 		}
@@ -1157,7 +1460,7 @@ Node *array_block(Node *arr){
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, expr());
-			node->block_code = dst;
+			node->rhs = dst;
 		}else{
 			dst->block_code = new_node(ND_ASSIGN, src, expr());
 			dst = dst->block_code;
@@ -1177,6 +1480,8 @@ Node *array_block(Node *arr){
 			clone->offset = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
+			locals->type->size  = type_size(locals->type);
+			locals->type->align = type_size(locals->type);
 		}else{
 			globals->memsize = align_array_size(ctr, arr->type);
 		}
@@ -1212,8 +1517,8 @@ Node *call_function(Node *node, Token *tok){
 	Node *new = __NULL;
 	while(1){
 		if(new == __NULL){
-			new        = logical();
-			node->next = new;
+			new       = logical();
+			node->rhs = new;
 		}else{
 			new->next  = logical();
 			new        = new->next;
@@ -1276,7 +1581,10 @@ void get_argument(int func_index){
 }
 //=========================================================
 
-//========================= parse_util.c =============================
+
+
+
+//==================== parse_util.c =======================
 int type_size(Type *type){
 	switch(type->ty){
 		case VOID:
@@ -1354,7 +1662,6 @@ Type *get_pointer_type(Type *given){
 Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	Type *ptrtype;
 
-
 	node->type = (lhs_type->ty > rhs_type->ty)? lhs_type : rhs_type;
 	Node *pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
@@ -1364,22 +1671,22 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	pointer_size->type->align = type_align(pointer_size->type);
 
 
-	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to!=__NULL){
-		ptrtype = lhs_type->ptr_to;
-		pointer_size->val = ptrtype->size;
-		node->rhs = new_node(ND_MUL, node->rhs, pointer_size);
-	}else if(rhs_type->ty >= PTR  &&  rhs_type->ptr_to!=__NULL){
-		ptrtype = rhs_type->ptr_to;
-		pointer_size->val = ptrtype->size;
-		node->lhs = new_node(ND_MUL, node->lhs, pointer_size);
-	}
+	 if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to != __NULL){
+	 	ptrtype = lhs_type->ptr_to;
+	 	pointer_size->val = ptrtype->size;
+	 	node->rhs = new_node(ND_MUL, node->rhs, pointer_size);
+	 }else if(rhs_type->ty >= PTR  &&  rhs_type->ptr_to != __NULL){
+	 	ptrtype = rhs_type->ptr_to;
+	 	pointer_size->val = ptrtype->size;
+	 	node->lhs = new_node(ND_MUL, node->lhs, pointer_size);
+	 }
 
 	return node;
 }
+//=========================================================
 
 
-
-//======================== parse_sys.c ===============================
+//====================== parse_sys.c ======================
 void error(char *loc, char *fmt){
 	//va_list ap;
 	//va_start(ap, fmt);
@@ -1565,7 +1872,7 @@ Func *find_func(Token *tok){
 }
 
 GVar *find_gvar(Token *tok){
-	//while var not equal NULL
+	//while var not equal __NULL
 	for (GVar *var = globals;var;var = var->next){
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
@@ -1581,7 +1888,7 @@ LVar *find_lvar(Token *tok, int find_range){
 	 */
 
 	int out_of_scope = 0;
-	//while var not equal NULL
+	//while var not equal __NULL
 	for (LVar *var = locals;var;var = var->next){
 		if(var == outside_lvar) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
@@ -1727,10 +2034,10 @@ Node *new_node_num(int val){
 	node->type->align = type_align(node->type);
 	return node;
 }
+//=========================================================
 
 
-
-//====================== syntax_tree.c===========================
+//==================== syntax_tree.c ======================
 Node *data(void){
 	if(consume("(")){
 		Node *node = expr();
@@ -1741,6 +2048,43 @@ Node *data(void){
 	// compiler directive
 	if(token->kind == TK_COMPILER_DIRECTIVE){
 		Node *node = compiler_directive();
+		return node;
+	}
+
+
+	if(token->kind == TK_STR){
+		consume("\"");
+		Node *node = calloc(1, sizeof(Node));
+		node->kind = ND_STR;
+		node->type = calloc(1, sizeof(Type));
+		node->type->ty = PTR;
+
+		Token *tok = consume_string();
+		Str *fstr = find_string(tok);
+
+		// has already
+		if(fstr){
+			node->str = fstr->str;
+			node->val = fstr->label_num;
+			node->offset = fstr->len;
+		// new one
+		}else{
+			Str *new = calloc(1, sizeof(Str));
+			new->len = tok->len;
+			new->str = tok->str;
+			new->label_num = strings ? strings->label_num+1 : 0;
+			node->str = new->str;
+			node->offset = new->len;
+			node->val = new->label_num;
+
+			if(strings == __NULL){
+				strings = new;
+			}else{
+				new->next = strings;
+				strings = new;
+			}
+		}
+
 		return node;
 	}
 
@@ -1786,10 +2130,14 @@ Node *data(void){
 		}
 
 		return node;
+	// return new num node
+	}else if(token->kind == TK_NUM){
+		return new_node_num(expect_number());
 	}
 
-	// return new num node
-	return new_node_num(expect_number());
+
+	// __NULL statement
+	return new_node(ND_NULL_STMT, __NULL, __NULL);
 }
 
 Node *primary(void){
@@ -1837,7 +2185,7 @@ Node *primary(void){
 }
 
 Node *unary(void){
-	Node *node=__NULL;
+	Node *node = __NULL;
 
 	// logical not
 	if(consume("!")){
@@ -1853,42 +2201,6 @@ Node *unary(void){
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, __NULL, unary());
-
-		return node;
-	}
-
-	if(token->kind == TK_STR){
-		consume("\"");
-		Node *node = calloc(1, sizeof(Node));
-		node->kind = ND_STR;
-		node->type = calloc(1, sizeof(Type));
-		node->type->ty = PTR;
-
-		Token *tok = consume_string();
-		Str *fstr = find_string(tok);
-
-		// has already
-		if(fstr){
-			node->str = fstr->str;
-			node->val = fstr->label_num;
-			node->offset = fstr->len;
-		// new one
-		}else{
-			Str *new = calloc(1, sizeof(Str));
-			new->len = tok->len;
-			new->str = tok->str;
-			new->label_num = strings ? strings->label_num+1 : 0;
-			node->str = new->str;
-			node->offset = new->len;
-			node->val = new->label_num;
-
-			if(strings == __NULL){
-				strings = new;
-			}else{
-				new->next = strings;
-				strings = new;
-			}
-		}
 
 		return node;
 	}
@@ -2021,7 +2333,8 @@ Node *ternary(void){
 	Node *node = logical();
 	if(consume("?")){
 		//                          cond  if true
-		node = new_node(ND_TERNARY, node, ternary());
+		node      = new_node(ND_TERNARY, node, ternary());
+		node->val = label_num++;
 		expect(":");
 		//           if false
 		node->next = ternary();
@@ -2081,18 +2394,18 @@ Node *expr(void){
 		if(consume("=")){
 			if(consume("{")){
 				node = array_block(node);
-				//node->block_code = array_block(node);
 			}else{
 				node = init_formula(node, assign());
-				//node->block_code = init_formula(node, assign());
 			}
 		}
 	}else if(consume_reserved_word("break", TK_BREAK)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_BREAK;
+		node->val  = label_loop_end;
 	}else if(consume_reserved_word("continue", TK_CONTINUE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_CONTINUE;
+		node->val  = label_loop_end;
 	}else{
 		node = assign();
 	}
@@ -2101,12 +2414,10 @@ Node *expr(void){
 }
 
 Node *stmt(void){
+	int stash_loop_end = label_loop_end;
 	Node *node = __NULL;
 
-	// NULL statement
-	if(consume(";")){
-		node = new_node(ND_NULL_STMT, __NULL, __NULL);
-	}else if(consume_reserved_word("return", TK_RETURN)){
+	if(consume_reserved_word("return", TK_RETURN)){
 		node = new_node(ND_RETURN, node, __NULL);
 		if(!consume(";")){
 			node->rhs = expr();
@@ -2124,7 +2435,8 @@ Node *stmt(void){
 		 *                     | 
 		 *        if(cond)<--else-->expr
 		 */
-		node = new_node(ND_IF, node, __NULL);
+		node      = new_node(ND_IF, node, __NULL);
+		node->val = label_num++;
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -2160,7 +2472,10 @@ Node *stmt(void){
 		Label *before_switch = labels_tail;
 		Label *prev = __NULL;
 
- 		node = new_node(ND_SWITCH, node, __NULL);
+ 		node      = new_node(ND_SWITCH, node, __NULL);
+		node->val = label_num++;
+		label_loop_end = node->val;
+
  		if(consume("(")){
  			//jmp expr
  			cond = expr();
@@ -2192,7 +2507,7 @@ Node *stmt(void){
 				if(node->lhs){
 					error_at(token->str, "multiple default labels in one switch");
 				}else{
-					node->lhs      = lb->cond;
+					node->lhs      = new_node(ND_CASE, __NULL, lb->cond);
 					node->lhs->val = lb->id;
 				}
 			}
@@ -2232,12 +2547,16 @@ Node *stmt(void){
 		outside_enum   = enumerations;
 		outside_struct = structs;
 		
-		node = new_node(ND_FOR, node, __NULL);
+		node      = new_node(ND_FOR, node, __NULL);
+		node->val = label_num++;
+		label_loop_end = node->val;
 
 		if(consume("(")){
 			//jmp expr
-			Node *init = stmt();
-			Node *cond = stmt();
+			Node *init = expr();
+			expect(";");
+			Node *cond = expr();
+			expect(";");
 			Node *calc = expr();
 			//check end of caret
 			expect(")");
@@ -2255,7 +2574,9 @@ Node *stmt(void){
 		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
-		node = new_node(ND_DOWHILE, __NULL, stmt());
+		node      = new_node(ND_DOWHILE, __NULL, stmt());
+		node->val = label_num++;
+		label_loop_end = node->val;
 
 		consume_reserved_word("while", TK_WHILE);
 		if(consume("(")){
@@ -2264,7 +2585,8 @@ Node *stmt(void){
 		}
 		expect(";");
 	}else if(consume_reserved_word("while", TK_WHILE)){
-		node = new_node(ND_WHILE, node, __NULL);
+		node      = new_node(ND_WHILE, node, __NULL);
+		node->val = label_num++;
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -2284,12 +2606,12 @@ Node *stmt(void){
 		Node *block_code = calloc(1, sizeof(Node));
 		while(token->kind!=TK_BLOCK){
 			//Is first?
-			if(node->block_code){
+			if(node->rhs){
 				block_code->block_code = stmt();
 				block_code = block_code->block_code;
 			}else{
 				block_code = stmt();
-				node->block_code = block_code;
+				node->rhs = block_code;
 			}
 		}
 		
@@ -2305,6 +2627,8 @@ Node *stmt(void){
 		}
 	}
 
+	// revert loop end
+	label_loop_end = stash_loop_end;
 	return node;
 }
 
@@ -2327,14 +2651,21 @@ void function(Func *func){
 void program(void){
 	int func_index = 0;
 	int star_count;
+	int is_extern;
+	int is_thread_local;
 	Type *toplv_type;
 
 	while(!at_eof()){
 		// reset lvar list
 		locals = __NULL;
+
 		// reset lvar counter
 		alloc_size = 0;
 		star_count = 0;
+
+		// reset flag
+		is_extern       = 0;
+		is_thread_local = 0;
 
 		// typedef
 		if(consume_reserved_word("typedef", TK_TYPEDEF)){
@@ -2368,8 +2699,21 @@ void program(void){
 			continue;
 		}
 
+		// extern
+		if(consume_reserved_word("extern", TK_EXTERN)){
+			is_extern = 1;
+		}
+
+		// thread local
+		if(consume_reserved_word("_Thread_local", TK_THREAD_LOCAL)){
+			is_thread_local = 1;
+		}
+
+
 		// parsing type
 		toplv_type = parse_type();
+		toplv_type->is_extern       = is_extern;
+		toplv_type->is_thread_local = is_thread_local;
 
 		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
 		if(consume(";")){
@@ -2423,601 +2767,265 @@ void program(void){
 	}
 	func_list[func_index] = __NULL;
 }
-//====================================================
+//=========================================================
 
 
-//========================= codegen.c ===============================
-void expand_next(Node *node){
-	while(node){
-		gen(node);
-		printf("	pop rax\n");
-		node=node->next;
-	}
-	printf("	push rax\n");
+//==================== tokenizer.c ========================
+bool isblock(char *str){
+	return (*str == '{') || (*str == '}');
 }
 
-void expand_block_code(Node *node){
-	while(node){
-		gen(node);
-		printf("	pop rax\n");
-		node=node->block_code;
-	}
-	printf("	push rax\n");
+bool at_eof(void){
+	return token->kind == TK_EOF;
 }
 
-
-void gen_gvar(Node *node){
-	printf("	lea rax,  _%.*s[rip]\n", node->val, node->str);
-	printf("	push rax\n");
+int is_alnum(char c){
+	return	(('a' <=  c) && (c <=  'z')) ||
+		(('A' <=  c) && (c <=  'Z')) ||
+		(('0' <=  c) && (c <=  '9')) ||
+		(c == '_');
 }
 
-void gen_lvar(Node *node){
-	if(node->kind != ND_LVAR && node->kind != ND_LARRAY && node->kind != ND_CALL_FUNC){
-		error_at(token->str,"not a variable");
+int len_val(char *str){
+	int counter = 0;
+	for(;is_alnum(*str);str++){
+		counter++;
 	}
 
-	printf("	mov rax,rbp\n");
-	printf("	sub rax,%d\n", node->offset);
-	printf("	push rax\n");
+	return counter;
 }
 
-void gen_struc(Node *node){
-	if(node->kind != ND_DOT && node->kind != ND_ARROW){
-		error_at(token->str, "not a struct");
+bool issymbol(char *str,  bool *single_flag){
+	int i;
+	int size;
+	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
+	char repeat_symbol[] = "<>&|+-";
+	char multi_symbol[]  = "->";
+	char multi_eq[]      = "<=>!+*-/";
+	
+	//Is multi equal? (<=,==,!=,>=)
+	size = sizeof(multi_eq)/sizeof(char);
+	for(i = 0;i < size;i++){
+		if((*str == multi_eq[i]) && (*(str+1) == '=')){
+			*single_flag = false;
+			return true;
+		}
+	}
+	
+	//Is repeat symbol? (<<,>>,&&,||,++,--)
+	size = sizeof(repeat_symbol)/sizeof(char);
+	for(i = 0;i < size;i++){
+		if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
+			*single_flag = false;
+			return true;
+		}
 	}
 
-	gen(node->lhs);
-	gen(node->rhs);
-
-	printf("	pop rdi\n");
-	printf("	pop rax\n");
-	printf("	add rax,rdi\n");
-	printf("	push rax\n");
-}
-
-void gen_arg(int arg_num, Node *tmp){
-	//char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
-
-	char *reg[6];
-	reg[0] = "rdi";
-	reg[1] = "rsi";
-	reg[2] = "rdx";
-	reg[3] = "rcx";
-	reg[4] = "r8";
-	reg[5] = "r9";
-
-	gen(tmp);
-	printf("	pop rax\n");
-	printf("	mov %s,rax\n", reg[arg_num]);
-}
-
-void gen_address(Node *node){
-	/**/ if(node->kind == ND_DEREF)   gen(node->rhs);
-	else if(node->kind == ND_DOT)     gen_struc(node);
-	else if(node->kind == ND_ARROW)   gen_struc(node);
-	else if(node->kind == ND_GVAR)    gen_gvar(node);
-	else if(node->kind == ND_GARRAY)  gen_gvar(node);
-	else if(node->kind == ND_LVAR)    gen_lvar(node);
-	else if(node->kind == ND_LARRAY)  gen_lvar(node);
-	else error_at(token->str, "can not assign");
-}
-
-void gen_calc(Node *node){
-	//                   void _Bool  char  int   ptr  array
-	//char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
-	//char reg_dx[6][4]={"edx","edx","edx","edx","rdx","rdx"};
-	//char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
-
-	char *reg_ax[6];
-	char *reg_dx[6];
-	char *reg_di[6];
-
-	reg_ax[0] = "eax";
-	reg_ax[1] = "eax";
-	reg_ax[2] = "eax";
-	reg_ax[3] = "eax";
-	reg_ax[4] = "rax";
-	reg_ax[5] = "rax";
-
-	reg_dx[0] = "edx";
-	reg_dx[1] = "edx";
-	reg_dx[2] = "edx";
-	reg_dx[3] = "edx";
-	reg_dx[4] = "rdx";
-	reg_dx[5] = "rdx";
-
-	reg_di[0] = "edi";
-	reg_di[1] = "edi";
-	reg_di[2] = "edi";
-	reg_di[3] = "edi";
-	reg_di[4] = "rdi";
-	reg_di[5] = "rdi";
-
-	int reg_ty = (node->type->ty == ENUM) ? 1 : node->type->ty;
-
-	switch(node->kind){
-		case ND_ADD:
-			printf("	add %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			break;
-		case ND_SUB:
-			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			break;
-		case ND_MUL:
-			printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			break;
-		case ND_DIV:
-			printf("	cqo\n");
-			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			break;
-		case ND_MOD:
-			printf("	cqo\n");
-			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	mov %s,%s\n", reg_ax[reg_ty], reg_dx[reg_ty]);
-			break;
-		case ND_GT:
-			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
-			printf("	setl al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_GE:
-			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
-			printf("	setle al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_LT:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	setl al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_LE:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	setle al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_EQ:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	sete al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_NE:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	setne al\n");
-			printf("	movzb rax,al\n");
-			break;
-		case ND_AND:
-			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	movzb rax,al\n");
-			break;
-		case ND_OR:
-			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	movzb rax,al\n");
-			break;
+	//Is multi symbol? (->)
+	size = sizeof(multi_symbol)/sizeof(char)/2;
+	for(i = 0;i < size;i += 2){
+		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
+			*single_flag = false;
+			return true;
+		}
 	}
+
+	//Is single symbol? (+,-,*,/,%,<,>,',.)
+	size = sizeof(single_symbol)/sizeof(char);
+	for(i = 0;i < size;i++){
+		if(*str == single_symbol[i]){
+			*single_flag = true;
+			return true;
+		}
+	}
+
+	return false;
 }
 
-void gen(Node *node){
-	Node *args;
-	Node *cases;
-	int  arg_num    = 0;
-	int  label_if   = label_if_num;
-	int  label_loop = label_loop_num;
-	char *reg[6];
-	reg[0] = "rdi";
-	reg[1] = "rsi";
-	reg[2] = "rdx";
-	reg[3] = "rcx";
-	reg[4] = "r8";
-	reg[5] = "r9";
+Token *new_token(TokenKind kind, Token *cur, char *str){
+	Token *new = calloc(1, sizeof(Token));
+	new->kind = kind;
+	//Remaining characters
+	new->str = str;
+	new->len = 1;
+	cur->next = new;
+	return new;
+}
 
+bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
+	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len])){
+		return false;
+	}
 
+	*now = new_token(tk_kind, *now, *p);
+	(*now)->len = len;
+	(*now)->str = *p;
+	*p += len;
 
-	// generate assembly
-	switch(node->kind){
-		case ND_NULL_STMT:
-			// NULL statement
-			return;
-		case ND_NUM:
-			printf("	push %d\n", node->val);
-			return;
-		case ND_GVAR:
-			gen_gvar(node);
+	return true;
+}
 
-			printf("	pop rax\n");
-			printf("	mov rax,[rax]\n");
-			printf("	push rax\n");
+Token *tokenize(char *p){
+	bool is_single_token;
+	Token head;
+	head.next = __NULL;
 
-			return;
-		case ND_LVAR:
-			gen_lvar(node);
+	//set head pointer to cur
+	Token *now = &head;
 
-			printf("	pop rax\n");
-			if(node->type->ty <= CHAR){
-				printf("	movzx eax,BYTE PTR [rax]\n");
-				printf("	movsx eax,al\n");
-			}else{
-				printf("	mov rax,[rax]\n");
-			}
-			printf("	push rax\n");
+	while(*p){
+		if(isspace(*p)){
+			p++;
+			continue;
+		}
 
-			// init formula
-			if(node->block_code != __NULL) gen(node->block_code);
-			return;
-		case ND_GARRAY:
-			gen_gvar(node);
+		if((*p == '/') && (*(p+1) == '/')){
+			while(*p != '\n') p++;
+			continue;
+		}
 
-			// init formula
-			if(node->block_code != __NULL) expand_next(node->block_code);
-			return;
-		case ND_LARRAY:
-			gen_lvar(node);
+		if((*p == '/') && (*(p+1) == '*')){
+			while(!((*(p-1) == '*') && (*p == '/'))) p++;
+			p++;
+			continue;
+		}
 
-			// init formula
-			if(node->block_code != __NULL) expand_next(node->block_code);
-			return;
-		case ND_PREID:
-			// ++p -> p += 1
-			gen(node->lhs);
-			return;
-		case ND_POSTID:
-			// push
-			gen_address(node->lhs); // push lhs
-			gen(node->rhs->rhs->rhs);          // push rhs
-			
-			// calc
-			printf("	pop rdi\n");    // rhs
-			printf("	pop rax\n");    // lhs
-			printf("	push [rax]\n"); // Evacuation lhs data
-			printf("	push rax\n");   // Evacuation lhs address
-			printf("	mov rax,[rax]\n"); // deref lhs
+		//Is character literal?
+		if(*p == '\''){
+			p++;// consume single quote
+			if(*p == '\\'){
+				p++;// consume back slash
 
-			gen_calc(node->rhs->rhs);
-			printf("	push rax\n"); // rhs op lhs
-
-			// assign
-			printf("	pop rdi\n"); // src
-			printf("	pop rax\n"); // dst
-			if(node->lhs->type->ty <= CHAR){
-				if(node->lhs->type->ty == BOOL){
-					printf("	mov R8B,dil\n");
-					printf("	cmp R8B,0\n");
-					printf("	setne dl\n");
-					printf("	movzb rdi,dl\n");
+				//Is NUL? (\0)
+				if(*p == '0'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 0;
+				//Is LF? (\n)
+				}else if(*p == 'n'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 10;
+				//Is HT? (\t)
+				}else if(*p == 't'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 9;
+				}else if(*p == '\\'){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 92;
+				}else if(*p == '\''){
+					now = new_token(TK_NUM, now, p++);
+					now->val = 39;
 				}
-				printf("	mov [rax],dil\n");
-			}else if(node->lhs->type->ty == INT){
-				printf("	mov [rax],edi\n");
 			}else{
-				printf("	mov [rax],rdi\n");
+				now = new_token(TK_NUM, now, p);
+				now->val = *p++;
 			}
+			// consume single quote
+			p++;
+			continue;
+		}
 
-			return;
-		case ND_STR:
-			printf("	lea rax, .LC%d[rip]\n", node->val);
-			printf("	push rax\n");
-			return;
-		case ND_ASSIGN:
-			gen_address(node->lhs);
-			gen(node->rhs);
-
-			printf("	pop rdi\n");
-			printf("	pop rax\n");
-			if(node->lhs->type->ty <= CHAR){
-				printf("	mov [rax],dil\n");
-			}else if(node->lhs->type->ty == INT){
-				printf("	mov [rax],edi\n");
+		//Is number?
+		if(isdigit(*p)){
+			if(now->kind == TK_IDENT){
+				now = new_token(TK_IDENT, now, p++);
+				now->len = 1;
 			}else{
-				printf("	mov [rax],rdi\n");
+				//add number token
+				now = new_token(TK_NUM, now, p);
+				//set number
+				now->val = strtol(p, &p, 10);
 			}
+			continue;
+		}
 
-			printf("	push rdi\n");
-
-			return;
-		case ND_COMPOUND:
-			// push
-			gen_address(node->lhs); // push lhs
-			gen(node->rhs->rhs);  // push rhs
-
-			// calc
-			printf("	pop rdi\n");  // rhs
-			printf("	pop rax\n");  // lhs
-			printf("	push rax\n"); // Evacuation lhs
-			printf("	mov rax,[rax]\n"); // deref lhs
-
-			gen_calc(node->rhs);
-			printf("	push rax\n"); // rhs op lhs
-
-			// assign
-			printf("	pop rdi\n"); // src
-			printf("	pop rax\n"); // dst
-			if(node->lhs->type->ty <= CHAR){
-				if(node->lhs->type->ty == BOOL){
-					printf("	mov R8B,dil\n");
-					printf("	cmp R8B,0\n");
-					printf("	setne dl\n");
-					printf("	movzb rdi,dl\n");
-				}
-				printf("	mov [rax],dil\n");
-			}else if(node->lhs->type->ty == INT){
-				printf("	mov [rax],edi\n");
+		//judge single token or multi token or isn't token
+		if(issymbol(p, &is_single_token)){
+			now = new_token(TK_RESERVED, now, p);
+			if(is_single_token){
+				p++;
 			}else{
-				printf("	mov [rax],rdi\n");
+				p += 2;
+				now->len = 2;
 			}
+			continue;
+		}
 
-			printf("	push rdi\n");
+		if(consume_reserved(&p, "void",     4, &now, TK_TYPE))	   continue;
+		if(consume_reserved(&p, "_Bool",    5, &now, TK_TYPE))	   continue;
+		if(consume_reserved(&p, "char",     4, &now, TK_TYPE))	   continue;
+		if(consume_reserved(&p, "int",	    3, &now, TK_TYPE))	   continue;
+		if(consume_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
+		if(consume_reserved(&p, "enum",     4, &now, TK_TYPE))     continue;
+		if(consume_reserved(&p, "if",	    2, &now, TK_IF))	   continue;
+		if(consume_reserved(&p, "else",	    4, &now, TK_ELSE))	   continue;
+		if(consume_reserved(&p, "switch",   6, &now, TK_SWITCH))   continue;
+		if(consume_reserved(&p, "case",     4, &now, TK_CASE))	   continue;
+		if(consume_reserved(&p, "default",  7, &now, TK_DEFAULT))  continue;
+		if(consume_reserved(&p, "for",	    3, &now, TK_FOR))	   continue;
+		if(consume_reserved(&p, "do",	    2, &now, TK_DO))       continue;
+		if(consume_reserved(&p, "while",    5, &now, TK_WHILE))    continue;
+		if(consume_reserved(&p, "break",    5, &now, TK_BREAK))    continue;
+		if(consume_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;
+		if(consume_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
+		if(consume_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
+		if(consume_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
+		if(consume_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
+		if(consume_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
 
-			return;
-		case ND_DOT:
-		case ND_ARROW:
-			gen_struc(node);
-			// if it's an array or struct, ignore the deref
-			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-				printf("	pop rax\n");
-				printf("	push [rax]\n");
+		// compiler directive
+		if(consume_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(consume_reserved(&p, "define",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(consume_reserved(&p, "include",  7, &now, TK_COMPILER_DIRECTIVE)) continue;
+
+
+		//Is block? '{' or '}'
+		if(isblock(p)){
+			now = new_token(TK_BLOCK, now, p);
+			now->len = 1;
+			now->str = p;
+			p++;
+			continue;
+		}
+
+		//Is string?
+		if(*p == '"'){
+			p++;
+			while(!(*(p-1) != '\\' && *p == '"')){
+				now = new_token(TK_STR, now, p++);
 			}
-			return;
-		case ND_TERNARY:
-			label_if_num++;
+			p++;
+			continue;
+		}
 
-			// condition
-			gen(node->lhs);
-			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			printf("	je .Lelse%03d\n", label_if);
-
-			// true
-			gen(node->rhs);
-			printf("	jmp .LifEnd%03d\n", label_if);
-			printf(".Lelse%03d:\n", label_if);
-
-			// false
-			gen(node->next);
-			printf(".LifEnd%03d:\n", label_if);
-
-			return;
-		case ND_IF:
-			label_if_num++;
-
-			printf("	push rax\n");
-			gen(node->lhs);
-
-			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			printf("	je .LifEnd%03d\n", label_if);
-			printf("	pop rax\n");
-			gen(node->rhs);
-
-			printf(".LifEnd%03d:\n", label_if);
-			return;
-		case ND_IFELSE:
-			label_if_num++;
-
-			// condition
-			gen(node->lhs);
-			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			printf("	je .Lelse%03d\n", label_if);
-
-			// expr in if
-			gen(node->rhs->lhs);
-			printf("	jmp .LifEnd%03d\n", label_if);
-			printf(".Lelse%03d:\n", label_if);
-
-			// expr in else
-			gen(node->rhs->rhs);
-			printf(".LifEnd%03d:\n", label_if);
-
-			return;
-		case ND_SWITCH:
-			label_if_num++;
-			label_loop_num++;
-
-			// gen cases condtion
-			cases = node->next;
-			while(cases){
-				gen(cases);
-
-				printf("	pop rax\n");
-				printf("	cmp rax,0\n");
-				printf("	jne .LcaseBegin%03d\n", cases->val);
-				cases = cases->next;
+		//Is escape?
+		if(*p == '\\' && *(p+1) == '\\'){
+			now = new_token(TK_IDENT, now, p++);
+			p++;
+			continue;
+		}
+		
+		//Is valiable?
+		if(is_alnum(*p)){
+			while(is_alnum(*p)){
+				now = new_token(TK_IDENT, now, p++);
+				now->len = 1;
 			}
+			continue;
+		}
 
-			// gen default condtion
-			if(node->lhs){
-				printf("	jmp .LcaseBegin%03d\n", node->lhs->val);
-			}
-
-			// gen code block
-			gen(node->rhs);
-
-			printf(".LloopEnd%03d:\n", label_loop);
-			printf("	push rax\n");
-			return;
-		case ND_CASE:
-			printf(".LcaseBegin%03d:\n", node->val);
-			gen(node->rhs);
-			return;
-		case ND_FOR:
-			// adjust rsp
-			printf("	push rax\n");
-
-			// init
-			gen(node->lhs);
-
-
-			label_loop_num++;
-
-			// condition
-			printf(".LloopBegin%03d:\n", label_loop);
-			if(node->lhs->next->kind != ND_NULL_STMT){
-				gen(node->lhs->next);
-				printf("	pop rax\n");
-				printf("	cmp rax,0\n");
-				// if cond true then jump to  loop end.
-				printf("	je .LloopEnd%03d\n", label_loop);
-			}
-
-			// gen block
-			gen(node->rhs);
-
-			// gen update expression
-			printf(".LloopCont%03d:\n", label_loop);
-			if(node->lhs->next->next->kind != ND_NULL_STMT){
-				gen(node->lhs->next->next);
-				printf("	pop rax\n");
-			}
-
-			// continue
-			printf("	jmp .LloopBegin%03d\n", label_loop);
-			printf(".LloopEnd%03d:\n", label_loop);
-			printf("	push rax\n");
-
-			return;
-		case ND_WHILE:
-			label_loop = label_loop_num++;
-
-			// adjust rsp
-			printf("	push rax\n");
-
-			// condition
-			printf(".LloopBegin%03d:\n", label_loop);
-			gen(node->lhs);
-			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			// if cond true then loop end.
-			printf("	je .LloopEnd%03d\n", label_loop);
-
-			// else expression
-			gen(node->rhs);
-
-			// continue
-			printf(".LloopCont%03d:\n", label_loop);
-			printf("	jmp .LloopBegin%03d\n", label_loop);
-			printf(".LloopEnd%03d:\n", label_loop);
-			printf("	push rax\n");
-
-			return;
-		case ND_DOWHILE:
-			label_loop_num++;
-
-			// adjust rsp
-			printf("	push rax\n");
-
-			// codeblock
-			printf(".LloopBegin%03d:\n", label_loop);
-			gen(node->rhs);
-
-			// condition
-			gen(node->lhs);
-			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			// break loop
-			printf("	je .LloopEnd%03d\n", label_loop);
-
-			// continue
-			printf(".LloopCont%03d:\n", label_loop);
-			printf("	jmp .LloopBegin%03d\n", label_loop);
-			printf(".LloopEnd%03d:\n", label_loop);
-			printf("	push rax\n");
-
-			return;
-		case ND_CONTINUE:
-			printf("	jmp .LloopCont%03d\n", label_loop-1);
-			return;
-		case ND_BREAK:
-			printf("	jmp .LloopEnd%03d\n", label_loop-1);
-			return;
-		case ND_BLOCK:
-			expand_block_code(node->block_code);
-			return;
-		case ND_CALL_FUNC:
-			args    = node->rhs;
-			arg_num = 0;
-
-			while(args){
-				gen_arg(arg_num, args);
-				arg_num++;
-				args=args->next;
-			}
-
-			printf("	push rbp\n");
-			printf("	mov rbp,rsp\n");
-			printf("	and rsp,-16\n");
-
-			printf("	call %.*s\n", node->val, node->str);
-
-			printf("	mov rsp,rbp\n");
-			printf("	pop rbp\n");
-
-			printf("	push rax\n");
-			return;
-		case ND_ARG:
-			while(node){
-				// push register argument saved
-				printf("	push %s\n", reg[node->val]);
-				gen_lvar(node->rhs);
-				printf("	pop rax\n");
-				printf("	pop rdi\n");
-				printf("	mov [rax],rdi\n");
-				printf("	push rdi\n");
-				// pop stack top
-				printf("	pop rax\n");
-				node=node->next;
-			}
-
-			return;
-		case ND_NOT:
-			gen(node->rhs);
-			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			printf("	sete al\n");
-			printf("	movzb rax,al\n");
-			printf("	push rax\n");
-			return;
-		case ND_ADDRESS:
-			gen_address(node->rhs);
-			return;
-		case ND_DEREF:
-			gen(node->rhs);
-			printf("	pop rax\n");
-			if(node->type->ty <= CHAR){
-				printf("	movzx eax,BYTE PTR [rax]\n");
-				printf("	movsx eax,al\n");
-			}else{
-				printf("	mov rax,[rax]\n");
-			}
-			printf("	push rax\n");
-
-			return;
-		case ND_RETURN:
-			if(node->rhs){
-				gen(node->rhs);
-			}
-			printf("	pop rax\n");
-			printf("	mov rsp,rbp\n");
-			printf("	pop rbp\n");
-			printf("	ret\n");
-			return;
+		error_at(p, "can not tokenize.");
 	}
 
-
-	// check left hand side
-	gen(node->lhs);
-	// check right hand side
-	gen(node->rhs);
-
-	// pop two value
-	printf("	pop rdi\n");
-	printf("	pop rax\n");
-	// calculation lhs and rhs
-	gen_calc(node);
-	// push result
-	printf("	push rax\n");
+	//add EOF token
+	new_token(TK_EOF, now, p);
+	return head.next;
 }
 //=========================================================
 
 
-//==================== main.c ========================
+
+
+//======================= main.c ==========================
 char *read_file(char *path){
 	FILE *fp;
 	char *buf;
@@ -3110,8 +3118,8 @@ int main(int argc, char **argv){
 	}
 
 	llid           = 0;
-	label_if_num   = 0;
-	label_loop_num = 0;
+	label_num      = 0;
+	label_loop_end = 0;
 	labels_head    = __NULL;
 	labels_tail    = __NULL;
 
@@ -3137,10 +3145,7 @@ int main(int argc, char **argv){
 
 		for(j = 0;func_list[i]->code[j] != __NULL;j++){
 			// gen code
-			if(func_list[i]->code[j]->kind != ND_NULL_STMT){
-				gen(func_list[i]->code[j]);
-				printf("\n	pop rax\n");
-			}
+			gen(func_list[i]->code[j]);
 		}
 
 		// epiroge
@@ -3153,6 +3158,8 @@ int main(int argc, char **argv){
 	return 0;
 }
 
-//====================================================
+//=========================================================
+
+
 
 
