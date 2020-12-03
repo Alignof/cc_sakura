@@ -5,8 +5,8 @@ INCLUDE  := -I ../include
 MOTHER   := ../cc_sakura
 TARGET   := ./child
 SRCDIR   := ../src
-ASMDIR   := ./assemblies
-OBJDIR   := ./assemblies/obj
+ASMDIR   := ./asem
+OBJDIR   := ./asem/obj
 SOURCES  := $(wildcard ../src/*.c)
 ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
 OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
@@ -24,18 +24,21 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 EXCLUDEFILE := codegen
 franken:$(ASEMS)
 	cat src/header.c src/$(EXCLUDEFILE).c > tmp.c
-	$(MOTHER) tmp.c > ./assemblies/tmp.s 
-	rm -f ./assemblies/$(EXCLUDEFILE).s tmp.c
+	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
+	rm -f $(ASMDIR)/$(EXCLUDEFILE).s tmp.c
 	gcc $(ASMDIR)/*.s -static -o ./child
 	./child dummy.c || echo $$?
 
+
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 
 	@[ -d $(ASMDIR) ]
-	$(CC) $(INCLUDE) -static -S -masm=intel $< -o $@
+	$(CC) $(INCLUDE) -S -masm=intel $< -o $@
+
 
 # build child by mother
 build: $(MOTHER)
 	$(MOTHER) self_host.c > child.s && gcc -static child.s -o child
+
 
 # run test.sh
 test:
