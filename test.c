@@ -29,7 +29,7 @@ typedef enum{
 Token *token;
 bool true  = 1;
 bool false = 0;
-char *__NULL = 0;
+//char *__NULL = 0;
 
 // code token
 struct Token{
@@ -52,13 +52,20 @@ bool consume_reserved_word(char *keyword, TokenKind kind){
 }
 
 int main(){
-	Token tok;
-	token = &tok;
-	token->kind = TK_RETURN;
-	token->str  = "return";
-	token->len  = 6;
-	token->next = __NULL;
-	//token->next = __NULL;
+	char *str = "return";
+	for(int i=0;i < 10;i++){
+		Token *new = calloc(1, sizeof(Token));
+		new->kind  = TK_RETURN;
+		new->str   = str;
+		new->len   = 6;
+		new->val   = i;
+		new->next  = token;
+		token = new;
+	}
+
+	for(Token *tok = token;tok;tok = tok->next){
+		printf("%*.s val:%d\n",tok->len, tok->str, tok->val);
+	}
 
 	return consume_reserved_word("retern", TK_RETURN);
 }
