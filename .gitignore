@@ -15,5 +15,6 @@ self_host/*.o
 self_host/tmp*
 self_host/a.out
 self_host/*.txt
+self_host/gen*
 
 .gdb_history
