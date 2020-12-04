@@ -12,6 +12,7 @@ self_host/child.s
 self_host/child
 self_host/*~
 self_host/*.o
+self_host/*.s
 self_host/tmp*
 self_host/a.out
 self_host/*.txt

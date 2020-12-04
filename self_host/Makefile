@@ -24,9 +24,21 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 # prepare franken 
 EXCLUDEFILE := codegen
 franken:$(ASEMS)
+	# prepare
 	cat src/header.c src/$(EXCLUDEFILE).c > tmp.c
+	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
+	# gen2
+	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
+	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen2
+	# gen3
+	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
+	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen3
+	# check
+	diff gen2 gen3
 
 gentest:
 	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
