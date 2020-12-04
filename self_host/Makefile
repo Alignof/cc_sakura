@@ -5,37 +5,48 @@ INCLUDE  := -I ../include
 MOTHER   := ../cc_sakura
 TARGET   := ./child
 SRCDIR   := ../src
-ASMDIR   := ./assemblies
-OBJDIR   := ./assemblies/obj
+ASMDIR   := ./asem
+OBJDIR   := ./asem/obj
 SOURCES  := $(wildcard ../src/*.c)
 ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
 OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 #ASEMS    := $(wildcard ./assemblies/*.s)
-#ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
-EXCLUDEASM := ./assemblies/main.s
 
-$(TARGET): $(OBJECTS)
-	$(CC) -o $@ $^ $(LDFLAGS)
+# $(TARGET): $(OBJECTS)
+# 	$(CC) -o $@ $^ $(LDFLAGS)
+# 
+# $(OBJDIR)/%.o: $(ASMDIR)/%.s 
+# 	@[ -d $(OBJDIR) ]
+# 	$(CC) $(CFLAGS) -o $@ -c $<
 
-$(OBJDIR)/%.o: $(ASMDIR)/%.s 
-	@[ -d $(OBJDIR) ]
-	$(CC) $(CFLAGS) -o $@ -c $<
 
 # prepare franken 
+EXCLUDEFILE := codegen
 franken:$(ASEMS)
-	$(MOTHER) test.c > ./assemblies/tmp.s 
-	rm -f $(EXCLUDEASM)
+	cat src/header.c src/$(EXCLUDEFILE).c > tmp.c
+	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
+	rm -f $(ASMDIR)/$(EXCLUDEFILE).s tmp.c
+	gcc $(ASMDIR)/*.s -static -o ./child
+	./child self_host.c || echo $$?
+
+tmp:$(ASEMS)
+	$(MOTHER) test.c > $(ASMDIR)/test.s
 	gcc $(ASMDIR)/*.s -static -o ./child
 	./child dummy.c || echo $$?
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 
 	@[ -d $(ASMDIR) ]
-	$(CC) $(INCLUDE) -S -masm=intel $< -o $@
-	#$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	$(CC) $(INCLUDE) $(CFLAGS) -S -masm=intel $< -o $@
+
 
 # build child by mother
 build: $(MOTHER)
 	$(MOTHER) self_host.c > child.s && gcc -static child.s -o child
+
+
+# run test.sh
+test:
+	./test.sh
 
 # self hosting
 self_host:

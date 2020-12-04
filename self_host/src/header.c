@@ -168,7 +168,7 @@ struct Node{
 // function
 struct Func{
 	//int argc;
-	int stack_size;
+	int  stack_size;
 	char *name;
 	Type *type;
 	Node *args;
@@ -328,24 +328,7 @@ extern FILE *stderr;		/* Standard error output stream.  */
 extern _Thread_local int errno;
 //=========================================================
 
-Func *func_list[100];
-int main(void){
-	Node nd;
-	Func fn;
-	char *lvname = "lvar name";
-	char *fnname = "func name";
 
-	nd.val    = 1;
-	nd.str    = name;
-	nd.offset = 8;
 
-	fn.stack_size = 8;
-	fn.name = fnname;
-	fn.code[0] = nd;
 
-	for(int i = 0;i < 10;i++){
-		func_list[i] = fn;
-	} 
 
-	return 0;
-}

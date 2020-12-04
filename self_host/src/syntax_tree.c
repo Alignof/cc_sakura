@@ -1,10 +1,6 @@
-#include "cc_sakura.h"
-
 int alloc_size;
 Token *token;
 Str *strings;
-//LVar *locals;
-//Func *func_list[100]; 
 
 Node *data(void){
 	if(consume("(")){
@@ -45,7 +41,7 @@ Node *data(void){
 			node->offset = new->len;
 			node->val = new->label_num;
 
-			if(strings == NULL){
+			if(strings == __NULL){
 				strings = new;
 			}else{
 				new->next = strings;
@@ -104,8 +100,8 @@ Node *data(void){
 	}
 
 
-	// NULL statement
-	return new_node(ND_NULL_STMT, NULL, NULL);
+	// __NULL statement
+	return new_node(ND_NULL_STMT, __NULL, __NULL);
 }
 
 Node *primary(void){
@@ -132,7 +128,7 @@ Node *primary(void){
 		// dot
 		if(consume(".")){
 			if(node->kind == ND_LVAR){
-				node = new_node(ND_ADDRESS, NULL, node);
+				node = new_node(ND_ADDRESS, __NULL, node);
 			}
 			node = dot_arrow(ND_DOT, node);
 		}
@@ -153,22 +149,22 @@ Node *primary(void){
 }
 
 Node *unary(void){
-	Node *node=NULL;
+	Node *node = __NULL;
 
 	// logical not
 	if(consume("!")){
-		node = new_node(ND_NOT, NULL, logical());
+		node = new_node(ND_NOT, __NULL, logical());
 		return node;
 	}
 
 	if(consume("*")){
-		node = new_node(ND_DEREF, NULL, unary());
+		node = new_node(ND_DEREF, __NULL, unary());
 
 		return node;
 	}
 
 	if(consume("&")){
-		node = new_node(ND_ADDRESS, NULL, unary());
+		node = new_node(ND_ADDRESS, __NULL, unary());
 
 		return node;
 	}
@@ -383,10 +379,10 @@ Node *expr(void){
 
 Node *stmt(void){
 	int stash_loop_end = label_loop_end;
-	Node *node = NULL;
+	Node *node = __NULL;
 
 	if(consume_reserved_word("return", TK_RETURN)){
-		node = new_node(ND_RETURN, node, NULL);
+		node = new_node(ND_RETURN, node, __NULL);
 		if(!consume(";")){
 			node->rhs = expr();
 			if(!consume(";")) error_at(token->str, "not a ';' token.");
@@ -403,7 +399,7 @@ Node *stmt(void){
 		 *                     | 
 		 *        if(cond)<--else-->expr
 		 */
-		node      = new_node(ND_IF, node, NULL);
+		node      = new_node(ND_IF, node, __NULL);
 		node->val = label_num++;
 		if(consume("(")){
 			//jmp expr
@@ -436,11 +432,11 @@ Node *stmt(void){
  		 *               +----->case->case->... 
  		 */
  
- 		Node  *cond = NULL;
+ 		Node  *cond = __NULL;
 		Label *before_switch = labels_tail;
-		Label *prev = NULL;
+		Label *prev = __NULL;
 
- 		node      = new_node(ND_SWITCH, node, NULL);
+ 		node      = new_node(ND_SWITCH, node, __NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
 
@@ -457,7 +453,7 @@ Node *stmt(void){
 		node->rhs = stmt(); 
 
 		// register and remove case
-		Node *cond_cases = NULL;
+		Node *cond_cases = __NULL;
 		prev = before_switch;
 		Label *lb = (before_switch) ? prev->next : labels_head;
 		while(lb){
@@ -475,7 +471,7 @@ Node *stmt(void){
 				if(node->lhs){
 					error_at(token->str, "multiple default labels in one switch");
 				}else{
-					node->lhs      = new_node(ND_CASE, NULL, lb->cond);
+					node->lhs      = new_node(ND_CASE, __NULL, lb->cond);
 					node->lhs->val = lb->id;
 				}
 			}
@@ -491,14 +487,14 @@ Node *stmt(void){
 				prev = lb;
 				//free(prev);
 				lb   = lb->next;
-				prev = NULL;
+				prev = __NULL;
 			}
 		}
 	}else if(consume_reserved_word("case", TK_CASE)){
 		/*
 		 *  (cond) <--- case ---> code
 		 */
-		node = new_node(ND_CASE, logical(), NULL);
+		node = new_node(ND_CASE, logical(), __NULL);
 		expect(":");
 		label_register(node, LB_CASE);
 		node->rhs = stmt();
@@ -506,7 +502,7 @@ Node *stmt(void){
 		/*
 		 *  (cond) <--- default ---> code
 		 */
-		node = new_node(ND_CASE, NULL, NULL);
+		node = new_node(ND_CASE, __NULL, __NULL);
 		expect(":");
 		node->rhs = stmt();
 		label_register(node, LB_DEFAULT);
@@ -515,7 +511,7 @@ Node *stmt(void){
 		outside_enum   = enumerations;
 		outside_struct = structs;
 		
-		node      = new_node(ND_FOR, node, NULL);
+		node      = new_node(ND_FOR, node, __NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
 
@@ -542,7 +538,7 @@ Node *stmt(void){
 		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
-		node      = new_node(ND_DOWHILE, NULL, stmt());
+		node      = new_node(ND_DOWHILE, __NULL, stmt());
 		node->val = label_num++;
 		label_loop_end = node->val;
 
@@ -553,7 +549,7 @@ Node *stmt(void){
 		}
 		expect(";");
 	}else if(consume_reserved_word("while", TK_WHILE)){
-		node      = new_node(ND_WHILE, node, NULL);
+		node      = new_node(ND_WHILE, node, __NULL);
 		node->val = label_num++;
 		if(consume("(")){
 			//jmp expr
@@ -566,7 +562,7 @@ Node *stmt(void){
 			node->rhs = stmt();
 		}
 	}else if(consume("{")){
-		node = new_node(ND_BLOCK, node, NULL);
+		node = new_node(ND_BLOCK, node, __NULL);
 		outside_lvar   = locals;
 		outside_enum   = enumerations;
 		outside_struct = structs;
@@ -613,7 +609,7 @@ void function(Func *func){
 	defined_types = stash_def_types;
 
 	func->stack_size = alloc_size;
-	func->code[i] = NULL;
+	func->code[i] = __NULL;
 }
 
 void program(void){
@@ -625,7 +621,7 @@ void program(void){
 
 	while(!at_eof()){
 		// reset lvar list
-		locals = NULL;
+		locals = __NULL;
 
 		// reset lvar counter
 		alloc_size = 0;
@@ -733,5 +729,5 @@ void program(void){
 			expect(";");
 		}
 	}
-	func_list[func_index] = NULL;
+	func_list[func_index] = __NULL;
 }
