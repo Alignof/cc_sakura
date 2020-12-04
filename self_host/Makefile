@@ -27,7 +27,7 @@ franken:$(ASEMS)
 	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
 	rm -f $(ASMDIR)/$(EXCLUDEFILE).s tmp.c
 	gcc $(ASMDIR)/*.s -static -o ./child
-	./child dummy.c || echo $$?
+	./child self_host.c || echo $$?
 
 tmp:$(ASEMS)
 	$(MOTHER) test.c > $(ASMDIR)/test.s

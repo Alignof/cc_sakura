@@ -261,17 +261,17 @@ get_code:
 .LC6:
 	.string	".intel_syntax noprefix"
 .LC7:
-	.string	".globl main"
-.LC8:
 	.string	".comm\t%.*s, %d, %d\n"
-.LC9:
+.LC8:
 	.string	".section .tbss,\"awT\",@nobits"
-.LC10:
+.LC9:
 	.string	"%.*s:\n\t.zero %d\n"
-.LC11:
+.LC10:
 	.string	".LC%d:\n"
-.LC12:
+.LC11:
 	.string	"\t.string \"%.*s\"\n"
+.LC12:
+	.string	".globl %s\n"
 .LC13:
 	.string	"%s:\n"
 .LC14:
@@ -303,60 +303,53 @@ main:
 	sub	rsp, 64
 	mov	DWORD PTR -52[rbp], edi
 	mov	QWORD PTR -64[rbp], rsi
-	.loc 1 66 6
-	mov	eax, 0
-	call	three@PLT
-	mov	DWORD PTR -4[rbp], eax
-	.loc 1 69 2
+	.loc 1 67 2
 	mov	rdx, QWORD PTR -64[rbp]
 	mov	eax, DWORD PTR -52[rbp]
 	mov	rsi, rdx
 	mov	edi, eax
 	call	get_code
-	.loc 1 72 10
+	.loc 1 70 10
 	mov	rax, QWORD PTR user_input[rip]
 	mov	rdi, rax
 	call	tokenize@PLT
-	.loc 1 72 8
+	.loc 1 70 8
 	mov	QWORD PTR token[rip], rax
-	.loc 1 74 2
+	.loc 1 72 2
 	call	program@PLT
-	.loc 1 82 2
+	.loc 1 80 2
 	lea	rdi, .LC6[rip]
 	call	puts@PLT
-	.loc 1 83 2
-	lea	rdi, .LC7[rip]
-	call	puts@PLT
-	.loc 1 86 8
+	.loc 1 83 8
 	mov	rax, QWORD PTR globals[rip]
 	mov	QWORD PTR -40[rbp], rax
 .LBB2:
-	.loc 1 87 13
+	.loc 1 84 13
 	mov	rax, QWORD PTR -40[rbp]
 	mov	QWORD PTR -16[rbp], rax
-	.loc 1 87 2
+	.loc 1 84 2
 	jmp	.L14
 .L17:
-	.loc 1 88 9
+	.loc 1 85 9
 	mov	rax, QWORD PTR -16[rbp]
 	mov	rax, QWORD PTR 16[rax]
-	.loc 1 88 15
+	.loc 1 85 15
 	mov	eax, DWORD PTR 28[rax]
-	.loc 1 88 5
+	.loc 1 85 5
 	test	eax, eax
 	jne	.L15
-	.loc 1 89 10
+	.loc 1 86 10
 	mov	rax, QWORD PTR -16[rbp]
 	mov	rax, QWORD PTR 16[rax]
-	.loc 1 89 16
+	.loc 1 86 16
 	mov	eax, DWORD PTR 32[rax]
-	.loc 1 89 6
+	.loc 1 86 6
 	test	eax, eax
 	jne	.L16
-	.loc 1 90 74
+	.loc 1 87 74
 	mov	rax, QWORD PTR -16[rbp]
 	mov	rax, QWORD PTR 16[rax]
-	.loc 1 90 5
+	.loc 1 87 5
 	mov	esi, DWORD PTR 20[rax]
 	mov	rax, QWORD PTR -16[rbp]
 	mov	ecx, DWORD PTR 4[rax]
@@ -366,15 +359,15 @@ main:
 	mov	eax, DWORD PTR [rax]
 	mov	r8d, esi
 	mov	esi, eax
-	lea	rdi, .LC8[rip]
+	lea	rdi, .LC7[rip]
 	mov	eax, 0
 	call	printf@PLT
 	jmp	.L15
 .L16:
-	.loc 1 92 5
-	lea	rdi, .LC9[rip]
+	.loc 1 89 5
+	lea	rdi, .LC8[rip]
 	call	puts@PLT
-	.loc 1 93 5
+	.loc 1 90 5
 	mov	rax, QWORD PTR -16[rbp]
 	mov	ecx, DWORD PTR 4[rax]
 	mov	rax, QWORD PTR -16[rbp]
@@ -382,227 +375,239 @@ main:
 	mov	rax, QWORD PTR -16[rbp]
 	mov	eax, DWORD PTR [rax]
 	mov	esi, eax
-	lea	rdi, .LC10[rip]
+	lea	rdi, .LC9[rip]
 	mov	eax, 0
 	call	printf@PLT
 .L15:
-	.loc 1 87 33 discriminator 2
+	.loc 1 84 33 discriminator 2
 	mov	rax, QWORD PTR -16[rbp]
 	mov	rax, QWORD PTR 24[rax]
 	mov	QWORD PTR -16[rbp], rax
 .L14:
-	.loc 1 87 2 discriminator 1
+	.loc 1 84 2 discriminator 1
 	cmp	QWORD PTR -16[rbp], 0
 	jne	.L17
 .LBE2:
 .LBB3:
-	.loc 1 99 12
+	.loc 1 96 12
 	mov	rax, QWORD PTR strings[rip]
 	mov	QWORD PTR -24[rbp], rax
-	.loc 1 99 2
+	.loc 1 96 2
 	jmp	.L18
 .L19:
-	.loc 1 100 3 discriminator 3
+	.loc 1 97 3 discriminator 3
 	mov	rax, QWORD PTR -24[rbp]
 	mov	eax, DWORD PTR 4[rax]
 	mov	esi, eax
-	lea	rdi, .LC11[rip]
+	lea	rdi, .LC10[rip]
 	mov	eax, 0
 	call	printf@PLT
-	.loc 1 101 3 discriminator 3
+	.loc 1 98 3 discriminator 3
 	mov	rax, QWORD PTR -24[rbp]
 	mov	rdx, QWORD PTR 8[rax]
 	mov	rax, QWORD PTR -24[rbp]
 	mov	eax, DWORD PTR [rax]
 	mov	esi, eax
-	lea	rdi, .LC12[rip]
+	lea	rdi, .LC11[rip]
 	mov	eax, 0
 	call	printf@PLT
-	.loc 1 99 34 discriminator 3
+	.loc 1 96 34 discriminator 3
 	mov	rax, QWORD PTR -24[rbp]
 	mov	rax, QWORD PTR 16[rax]
 	mov	QWORD PTR -24[rbp], rax
 .L18:
-	.loc 1 99 2 discriminator 1
+	.loc 1 96 2 discriminator 1
 	cmp	QWORD PTR -24[rbp], 0
 	jne	.L19
 .LBE3:
-	.loc 1 104 17
+	.loc 1 101 17
 	mov	DWORD PTR llid[rip], 0
-	.loc 1 105 17
+	.loc 1 102 17
 	mov	DWORD PTR label_num[rip], 0
-	.loc 1 106 17
+	.loc 1 103 17
 	mov	DWORD PTR label_loop_end[rip], 0
-	.loc 1 107 17
+	.loc 1 104 17
 	mov	QWORD PTR labels_head[rip], 0
-	.loc 1 108 17
+	.loc 1 105 17
 	mov	QWORD PTR labels_tail[rip], 0
-	.loc 1 111 8
+	.loc 1 108 8
 	mov	DWORD PTR -4[rbp], 0
-	.loc 1 111 2
+	.loc 1 108 2
 	jmp	.L20
 .L28:
-	.loc 1 112 28
+	.loc 1 109 34
 	mov	eax, DWORD PTR -4[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
-	.loc 1 112 3
+	.loc 1 109 3
+	mov	rax, QWORD PTR 8[rax]
+	mov	rsi, rax
+	lea	rdi, .LC12[rip]
+	mov	eax, 0
+	call	printf@PLT
+	.loc 1 110 28
+	mov	eax, DWORD PTR -4[rbp]
+	cdqe
+	lea	rdx, 0[0+rax*8]
+	lea	rax, func_list[rip]
+	mov	rax, QWORD PTR [rdx+rax]
+	.loc 1 110 3
 	mov	rax, QWORD PTR 8[rax]
 	mov	rsi, rax
 	lea	rdi, .LC13[rip]
 	mov	eax, 0
 	call	printf@PLT
-	.loc 1 113 3
+	.loc 1 111 3
 	lea	rdi, .LC14[rip]
 	call	puts@PLT
-	.loc 1 114 3
+	.loc 1 112 3
 	lea	rdi, .LC15[rip]
 	call	puts@PLT
-	.loc 1 115 36
+	.loc 1 113 36
 	mov	eax, DWORD PTR -4[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
-	.loc 1 115 3
+	.loc 1 113 3
 	mov	eax, DWORD PTR [rax]
 	mov	esi, eax
 	lea	rdi, .LC16[rip]
 	mov	eax, 0
 	call	printf@PLT
-	.loc 1 117 15
+	.loc 1 115 15
 	mov	eax, DWORD PTR -4[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
-	.loc 1 117 18
+	.loc 1 115 18
 	mov	rax, QWORD PTR 24[rax]
-	.loc 1 117 5
+	.loc 1 115 5
 	test	rax, rax
 	je	.L21
-	.loc 1 119 17
+	.loc 1 117 17
 	mov	eax, DWORD PTR -4[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
-	.loc 1 119 4
+	.loc 1 117 4
 	mov	rax, QWORD PTR 24[rax]
 	mov	rdi, rax
 	call	gen@PLT
 .L21:
-	.loc 1 123 23
+	.loc 1 121 23
 	mov	eax, DWORD PTR -4[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
-	.loc 1 123 26
+	.loc 1 121 26
 	mov	rax, QWORD PTR 8[rax]
-	.loc 1 123 6
+	.loc 1 121 6
 	mov	edx, 4
 	lea	rsi, .LC17[rip]
 	mov	rdi, rax
 	call	strncmp@PLT
-	.loc 1 123 5
+	.loc 1 121 5
 	test	eax, eax
 	jne	.L22
 .LBB4:
-	.loc 1 124 10
+	.loc 1 122 10
 	mov	rax, QWORD PTR globals[rip]
 	mov	QWORD PTR -48[rbp], rax
 .LBB5:
-	.loc 1 125 15
+	.loc 1 123 15
 	mov	rax, QWORD PTR -48[rbp]
 	mov	QWORD PTR -32[rbp], rax
-	.loc 1 125 4
+	.loc 1 123 4
 	jmp	.L23
 .L25:
-	.loc 1 126 11
+	.loc 1 124 11
 	mov	rax, QWORD PTR -32[rbp]
 	mov	rax, QWORD PTR 32[rax]
-	.loc 1 126 7
+	.loc 1 124 7
 	test	rax, rax
 	je	.L24
-	.loc 1 126 19 discriminator 1
+	.loc 1 124 19 discriminator 1
 	mov	rax, QWORD PTR -32[rbp]
 	mov	rax, QWORD PTR 32[rax]
 	mov	rdi, rax
 	call	expand_next@PLT
 .L24:
-	.loc 1 125 35 discriminator 2
+	.loc 1 123 35 discriminator 2
 	mov	rax, QWORD PTR -32[rbp]
 	mov	rax, QWORD PTR 24[rax]
 	mov	QWORD PTR -32[rbp], rax
 .L23:
-	.loc 1 125 4 discriminator 1
+	.loc 1 123 4 discriminator 1
 	cmp	QWORD PTR -32[rbp], 0
 	jne	.L25
 .L22:
 .LBE5:
 .LBE4:
-	.loc 1 130 9
+	.loc 1 128 9
 	mov	DWORD PTR -8[rbp], 0
-	.loc 1 130 3
+	.loc 1 128 3
 	jmp	.L26
 .L27:
-	.loc 1 132 17 discriminator 3
+	.loc 1 130 17 discriminator 3
 	mov	eax, DWORD PTR -4[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
-	.loc 1 132 4 discriminator 3
+	.loc 1 130 4 discriminator 3
 	mov	edx, DWORD PTR -8[rbp]
 	movsx	rdx, edx
 	add	rdx, 4
 	mov	rax, QWORD PTR [rax+rdx*8]
 	mov	rdi, rax
 	call	gen@PLT
-	.loc 1 130 44 discriminator 3
+	.loc 1 128 44 discriminator 3
 	add	DWORD PTR -8[rbp], 1
 .L26:
-	.loc 1 130 22 discriminator 1
+	.loc 1 128 22 discriminator 1
 	mov	eax, DWORD PTR -4[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
-	.loc 1 130 31 discriminator 1
+	.loc 1 128 31 discriminator 1
 	mov	edx, DWORD PTR -8[rbp]
 	movsx	rdx, edx
 	add	rdx, 4
 	mov	rax, QWORD PTR [rax+rdx*8]
-	.loc 1 130 3 discriminator 1
+	.loc 1 128 3 discriminator 1
 	test	rax, rax
 	jne	.L27
-	.loc 1 137 3 discriminator 2
+	.loc 1 135 3 discriminator 2
 	lea	rdi, .LC18[rip]
 	call	puts@PLT
-	.loc 1 138 3 discriminator 2
+	.loc 1 136 3 discriminator 2
 	lea	rdi, .LC19[rip]
 	call	puts@PLT
-	.loc 1 139 3 discriminator 2
+	.loc 1 137 3 discriminator 2
 	lea	rdi, .LC20[rip]
 	call	puts@PLT
-	.loc 1 111 26 discriminator 2
+	.loc 1 108 26 discriminator 2
 	add	DWORD PTR -4[rbp], 1
 .L20:
-	.loc 1 111 21 discriminator 1
+	.loc 1 108 21 discriminator 1
 	mov	eax, DWORD PTR -4[rbp]
 	cdqe
 	lea	rdx, 0[0+rax*8]
 	lea	rax, func_list[rip]
 	mov	rax, QWORD PTR [rdx+rax]
-	.loc 1 111 2 discriminator 1
+	.loc 1 108 2 discriminator 1
 	test	rax, rax
 	jne	.L28
-	.loc 1 142 9
+	.loc 1 140 9
 	mov	eax, 0
-	.loc 1 143 1
+	.loc 1 141 1
 	leave
 	.cfi_def_cfa 7, 8
 	ret
@@ -618,7 +623,7 @@ main:
 	.file 7 "../include/cc_sakura.h"
 	.section	.debug_info,"",@progbits
 .Ldebug_info0:
-	.long	0xd6d
+	.long	0xd5b
 	.value	0x4
 	.long	.Ldebug_abbrev0
 	.byte	0x8
@@ -2176,7 +2181,7 @@ main:
 	.quad	.LFE2-.LFB2
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0xcd3
+	.long	0xcc1
 	.uleb128 0x1a
 	.long	.LASF183
 	.byte	0x1
@@ -2191,7 +2196,7 @@ main:
 	.byte	0x1
 	.byte	0x3f
 	.byte	0x1b
-	.long	0xcd3
+	.long	0xcc1
 	.uleb128 0x3
 	.byte	0x91
 	.sleb128 -80
@@ -2214,70 +2219,61 @@ main:
 	.byte	0x91
 	.sleb128 -24
 	.uleb128 0x1c
-	.long	.LASF194
-	.byte	0x1
-	.byte	0x42
-	.byte	0x6
-	.long	0x65
-	.long	0xc37
-	.uleb128 0x1d
-	.byte	0
-	.uleb128 0x1e
 	.long	.LASF185
 	.byte	0x1
-	.byte	0x56
+	.byte	0x53
 	.byte	0x8
 	.long	0x9e5
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -56
-	.uleb128 0x1f
+	.uleb128 0x1d
 	.quad	.LBB2
 	.quad	.LBE2-.LBB2
-	.long	0xc6b
+	.long	0xc59
 	.uleb128 0x1b
 	.string	"var"
 	.byte	0x1
-	.byte	0x57
+	.byte	0x54
 	.byte	0xd
 	.long	0x9e5
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -32
 	.byte	0
-	.uleb128 0x1f
+	.uleb128 0x1d
 	.quad	.LBB3
 	.quad	.LBE3-.LBB3
-	.long	0xc90
+	.long	0xc7e
 	.uleb128 0x1b
 	.string	"var"
 	.byte	0x1
-	.byte	0x63
+	.byte	0x60
 	.byte	0xc
 	.long	0x9df
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -40
 	.byte	0
-	.uleb128 0x20
+	.uleb128 0x1e
 	.quad	.LBB4
 	.quad	.LBE4-.LBB4
-	.uleb128 0x1e
+	.uleb128 0x1c
 	.long	.LASF185
 	.byte	0x1
-	.byte	0x7c
+	.byte	0x7a
 	.byte	0xa
 	.long	0x9e5
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -64
-	.uleb128 0x20
+	.uleb128 0x1e
 	.quad	.LBB5
 	.quad	.LBE5-.LBB5
 	.uleb128 0x1b
 	.string	"var"
 	.byte	0x1
-	.byte	0x7d
+	.byte	0x7b
 	.byte	0xf
 	.long	0x9e5
 	.uleb128 0x2
@@ -2289,7 +2285,7 @@ main:
 	.uleb128 0x6
 	.byte	0x8
 	.long	0x8b
-	.uleb128 0x21
+	.uleb128 0x1f
 	.long	.LASF186
 	.byte	0x1
 	.byte	0x2e
@@ -2298,7 +2294,7 @@ main:
 	.quad	.LFE1-.LFB1
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0xd16
+	.long	0xd04
 	.uleb128 0x1a
 	.long	.LASF183
 	.byte	0x1
@@ -2313,12 +2309,12 @@ main:
 	.byte	0x1
 	.byte	0x2e
 	.byte	0x20
-	.long	0xcd3
+	.long	0xcc1
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -32
 	.byte	0
-	.uleb128 0x22
+	.uleb128 0x20
 	.long	.LASF187
 	.byte	0x1
 	.byte	0xc
@@ -2355,7 +2351,7 @@ main:
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -40
-	.uleb128 0x1e
+	.uleb128 0x1c
 	.long	.LASF155
 	.byte	0x1
 	.byte	0x1b
@@ -2760,32 +2756,6 @@ main:
 	.byte	0
 	.byte	0
 	.uleb128 0x1c
-	.uleb128 0x2e
-	.byte	0x1
-	.uleb128 0x3f
-	.uleb128 0x19
-	.uleb128 0x3
-	.uleb128 0xe
-	.uleb128 0x3a
-	.uleb128 0xb
-	.uleb128 0x3b
-	.uleb128 0xb
-	.uleb128 0x39
-	.uleb128 0xb
-	.uleb128 0x49
-	.uleb128 0x13
-	.uleb128 0x3c
-	.uleb128 0x19
-	.uleb128 0x1
-	.uleb128 0x13
-	.byte	0
-	.byte	0
-	.uleb128 0x1d
-	.uleb128 0x18
-	.byte	0
-	.byte	0
-	.byte	0
-	.uleb128 0x1e
 	.uleb128 0x34
 	.byte	0
 	.uleb128 0x3
@@ -2802,7 +2772,7 @@ main:
 	.uleb128 0x18
 	.byte	0
 	.byte	0
-	.uleb128 0x1f
+	.uleb128 0x1d
 	.uleb128 0xb
 	.byte	0x1
 	.uleb128 0x11
@@ -2813,7 +2783,7 @@ main:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x20
+	.uleb128 0x1e
 	.uleb128 0xb
 	.byte	0x1
 	.uleb128 0x11
@@ -2822,7 +2792,7 @@ main:
 	.uleb128 0x7
 	.byte	0
 	.byte	0
-	.uleb128 0x21
+	.uleb128 0x1f
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
@@ -2849,7 +2819,7 @@ main:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x22
+	.uleb128 0x20
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
@@ -2922,8 +2892,6 @@ main:
 	.string	"_IO_buf_base"
 .LASF137:
 	.string	"LVar"
-.LASF194:
-	.string	"three"
 .LASF139:
 	.string	"GVar"
 .LASF120:

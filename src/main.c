@@ -63,8 +63,6 @@ void get_code(int argc, char **argv){
 int main(int argc, char **argv){
 	int i, j;
 
-	i = three();
-
 	// get source code
 	get_code(argc, argv);
 
@@ -80,7 +78,6 @@ int main(int argc, char **argv){
 
 	// generate code
 	printf(".intel_syntax noprefix\n");
-	printf(".globl main\n");
 
 	// set global variable
 	GVar *start = globals;
@@ -109,6 +106,7 @@ int main(int argc, char **argv){
 
 	//generate assembly at first expr
 	for(i = 0;func_list[i];i++){
+		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	push rbp\n");
 		printf("	mov rbp,rsp\n");
