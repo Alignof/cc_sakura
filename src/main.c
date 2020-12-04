@@ -121,7 +121,7 @@ int main(int argc, char **argv){
 		if(strncmp(func_list[i]->name, "main", 4) == 0){
 			GVar *start = globals;
 			for (GVar *var = start;var;var = var->next){
-				if(var->init) expand_next(var->init);
+				if(var->init && var->type->is_extern == 0) expand_next(var->init);
 			}
 		}
 
