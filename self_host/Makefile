@@ -6,6 +6,7 @@ MOTHER   := ../cc_sakura
 TARGET   := ./child
 SRCDIR   := ../src
 ASMDIR   := ./asem
+GEN2DIR  := ./gen2
 OBJDIR   := ./asem/obj
 SOURCES  := $(wildcard ../src/*.c)
 ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
@@ -24,15 +25,16 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 EXCLUDEFILE := codegen
 franken:$(ASEMS)
 	cat src/header.c src/$(EXCLUDEFILE).c > tmp.c
-	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
-	rm -f $(ASMDIR)/$(EXCLUDEFILE).s tmp.c
+	$(MOTHER) tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	./child self_host.c || echo $$?
 
-tmp:$(ASEMS)
-	$(MOTHER) test.c > $(ASMDIR)/test.s
+gentest:
+	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen2
 	gcc $(ASMDIR)/*.s -static -o ./child
-	./child dummy.c || echo $$?
+	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen3
+	diff gen2 gen3
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 
 	@[ -d $(ASMDIR) ]
@@ -58,6 +60,6 @@ file_test:$(TARGET)
 
 clean:
 	rm -f *.o *.s *~ child* *.txt *.out
-	rm -f $(OBJECTS) ./assemblies/*.s
+	rm -f $(OBJECTS) ./asem/*.s
 
 .PHONY: self_host file_test clean install
