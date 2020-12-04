@@ -1,3 +1,7 @@
+int alloc_size;
+Token *token;
+Str *strings;
+
 Node *data(void){
 	if(consume("(")){
 		Node *node = expr();

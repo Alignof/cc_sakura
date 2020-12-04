@@ -63,6 +63,8 @@ void get_code(int argc, char **argv){
 int main(int argc, char **argv){
 	int i, j;
 
+	i = three();
+
 	// get source code
 	get_code(argc, argv);
 

@@ -6,8 +6,8 @@ cc_sakura
 *.txt
 
 testing/
-self_host/assemblies/*.s
-self_host/assemblies/obj/*.o
+self_host/asem/*.s
+self_host/asem/obj/*.o
 self_host/child.s
 self_host/child
 self_host/*~

@@ -168,7 +168,7 @@ struct Node{
 // function
 struct Func{
 	//int argc;
-	int stack_size;
+	int  stack_size;
 	char *name;
 	Type *type;
 	Node *args;
@@ -241,27 +241,27 @@ struct Member{
 
 
 //================= global variable ===================
-int      llid;
-int      lvar_count;
-int      alloc_size;
-char     *user_input;
-char     filename[100];
-Token    *token;
-Func     *func_list[300];
-LVar     *locals;
-GVar     *globals;
-Str      *strings;
-Struc    *structs;
-Enum     *enumerations;
-Def_Type *defined_types;
-Label    *labels_head;
-Label    *labels_tail;
-LVar     *outside_lvar;
-Struc    *outside_struct;
-Enum     *outside_enum;
-Def_Type *outside_deftype;
-int label_num;
-int label_loop_end;
+extern int      llid;
+extern int      lvar_count;
+extern int      alloc_size;
+extern char     *user_input;
+extern char     filename[100];
+extern Token    *token;
+extern Func     *func_list[300];
+extern LVar     *locals;
+extern GVar     *globals;
+extern Str      *strings;
+extern Struc    *structs;
+extern Enum     *enumerations;
+extern Def_Type *defined_types;
+extern Label    *labels_head;
+extern Label    *labels_tail;
+extern LVar     *outside_lvar;
+extern Struc    *outside_struct;
+extern Enum     *outside_enum;
+extern Def_Type *outside_deftype;
+extern int label_num;
+extern int label_loop_end;
 //=====================================================
 
 

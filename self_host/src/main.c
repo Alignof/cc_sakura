@@ -1,3 +1,12 @@
+int   llid;
+int   label_num;
+int   label_loop_end;
+char  *user_input;
+char  filename[100];
+Func  *func_list[FUNC_NUM];
+Label *labels_head;
+Label *labels_tail;
+
 char *read_file(char *path){
 	FILE *fp;
 	char *buf;

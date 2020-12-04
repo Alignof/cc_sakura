@@ -29,10 +29,14 @@ franken:$(ASEMS)
 	gcc $(ASMDIR)/*.s -static -o ./child
 	./child dummy.c || echo $$?
 
+tmp:$(ASEMS)
+	$(MOTHER) test.c > $(ASMDIR)/test.s
+	gcc $(ASMDIR)/*.s -static -o ./child
+	./child dummy.c || echo $$?
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 
 	@[ -d $(ASMDIR) ]
-	$(CC) $(INCLUDE) -S -masm=intel $< -o $@
+	$(CC) $(INCLUDE) $(CFLAGS) -S -masm=intel $< -o $@
 
 
 # build child by mother

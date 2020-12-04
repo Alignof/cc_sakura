@@ -1,3 +1,13 @@
+LVar     *locals;
+GVar     *globals;
+Struc    *structs;
+Enum     *enumerations;
+Def_Type *defined_types;
+LVar     *outside_lvar;
+Struc    *outside_struct;
+Enum     *outside_enum;
+Def_Type *outside_deftype;
+
 Type *set_type(Type *type, Token *tok){
 	Enum  *enum_found  = __NULL;
 	Struc *struc_found = __NULL;
