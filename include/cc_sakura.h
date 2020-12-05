@@ -276,14 +276,15 @@ char *read_file(char *path);
 void get_code(int argc, char **argv);
 
 // tokenizer.c
-int len_val(char *str);
-int is_alnum(char c);
+int  len_val(char *str);
+int  is_alnum(char c);
 bool issymbol(char *str,  bool *single_flag);
 bool isblock(char *str);
 bool at_eof(void);
 Token *tokenize(char *p);
 Token *new_token(TokenKind kind, Token *cur, char *str);
-bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
+bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
+
 
 // parse_sys.c
 void error(char *loc, char *fmt,  ...);
