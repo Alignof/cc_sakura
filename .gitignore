@@ -6,6 +6,11 @@ cc_sakura
 *.txt
 
 testing/
+
+test/hsjoihs_tmp/*.c
+test/hsjoihs_tmp/*.s
+test/hsjoihs_tmp/*.out
+
 self_host/asem/*.s
 self_host/asem/obj/*.o
 self_host/child.s
@@ -17,5 +22,6 @@ self_host/tmp*
 self_host/a.out
 self_host/*.txt
 self_host/gen*
+
 
 .gdb_history
