@@ -60,6 +60,31 @@ void get_code(int argc, char **argv){
 	}
 }
 
+void set_gvar(GVar *gvar){
+	TypeKind ty = gvar->type->ty;
+	if(gvar->type->is_extern == 0){
+		if(gvar->type->is_thread_local == 0){
+			if(gvar->init){
+				printf("%.*s:\n", gvar->len, gvar->name);
+				Node *init = gvar->init;
+				while(init){
+					if(ty < INT){
+						printf("	.byte	%d\n", init->rhs->val);
+					}else{
+						printf("	.long	%d\n", init->rhs->val);
+					}
+					init = init->next;
+				}
+			}else{
+				printf(".comm	%.*s, %d, %d\n", gvar->len, gvar->name, gvar->memsize, gvar->type->align);
+			}
+		}else{
+			printf(".section .tbss,\"awT\",@nobits\n");
+			printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+		}
+	}
+}
+
 int main(int argc, char **argv){
 	int i, j;
 
@@ -82,14 +107,7 @@ int main(int argc, char **argv){
 	// set global variable
 	GVar *start = globals;
 	for (GVar *var = start;var;var = var->next){
-		if(var->type->is_extern == 0){
-			if(var->type->is_thread_local == 0){
-				printf(".comm	%.*s, %d, %d\n", var->len, var->name, var->memsize, var->type->align);
-			}else{
-				printf(".section .tbss,\"awT\",@nobits\n");
-				printf("%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
-			}
-		}
+		set_gvar(var);
 	}
 
 	// set string
@@ -118,12 +136,14 @@ int main(int argc, char **argv){
 		}
 
 		// global init (main)
+		/*
 		if(strncmp(func_list[i]->name, "main", 4) == 0){
 			GVar *start = globals;
 			for (GVar *var = start;var;var = var->next){
 				if(var->init && var->type->is_extern == 0) gen(var->init);
 			}
 		}
+		*/
 
 		for(j = 0;func_list[i]->code[j] != NULL;j++){
 			// gen code

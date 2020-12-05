@@ -273,6 +273,7 @@ extern Def_Type *outside_deftype;
 // main.c
 char *read_file(char *path);
 void get_code(int argc, char **argv);
+void set_gvar(GVar *gvar);
 
 // tokenizer.c
 int  len_val(char *str);
