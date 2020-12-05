@@ -277,9 +277,11 @@ void get_code(int argc, char **argv);
 
 // tokenizer.c
 int  len_val(char *str);
-int  is_alnum(char c);
-bool issymbol(char *str,  bool *single_flag);
-bool isblock(char *str);
+bool is_alnum(char c);
+bool is_space(char c);
+bool is_digit(char c);
+bool is_symbol(char *str,  bool *single_flag);
+bool is_block(char *str);
 bool at_eof(void);
 Token *tokenize(char *p);
 Token *new_token(TokenKind kind, Token *cur, char *str);

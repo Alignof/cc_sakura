@@ -1,6 +1,6 @@
 #include "cc_sakura.h"
 
-bool isblock(char *str){
+bool is_block(char *str){
 	return (*str == '{') || (*str == '}');
 }
 
@@ -8,7 +8,15 @@ bool at_eof(void){
 	return token->kind == TK_EOF;
 }
 
-int is_alnum(char c){
+bool is_space(char c){
+	return  c == '\n' || c == '\t' || c == ' ';  
+}
+
+bool is_digit(char c){
+	return  (('0' <=  c) && (c <=  '9'));
+}
+
+bool is_alnum(char c){
 	return	(('a' <=  c) && (c <=  'z')) ||
 		(('A' <=  c) && (c <=  'Z')) ||
 		(('0' <=  c) && (c <=  '9')) ||
@@ -24,7 +32,7 @@ int len_val(char *str){
 	return counter;
 }
 
-bool issymbol(char *str,  bool *single_flag){
+bool is_symbol(char *str,  bool *single_flag){
 	int i;
 	int size;
 	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
@@ -103,7 +111,7 @@ Token *tokenize(char *p){
 	Token *now = &head;
 
 	while(*p){
-		if(isspace(*p)){
+		if(is_space(*p)){
 			p++;
 			continue;
 		}
@@ -154,7 +162,7 @@ Token *tokenize(char *p){
 		}
 
 		//Is number?
-		if(isdigit(*p)){
+		if(is_digit(*p)){
 			if(now->kind == TK_IDENT){
 				now = new_token(TK_IDENT, now, p++);
 				now->len = 1;
@@ -168,7 +176,7 @@ Token *tokenize(char *p){
 		}
 
 		//judge single token or multi token or isn't token
-		if(issymbol(p, &is_single_token)){
+		if(is_symbol(p, &is_single_token)){
 			now = new_token(TK_RESERVED, now, p);
 			if(is_single_token){
 				p++;
@@ -208,7 +216,7 @@ Token *tokenize(char *p){
 
 
 		//Is block? '{' or '}'
-		if(isblock(p)){
+		if(is_block(p)){
 			now = new_token(TK_BLOCK, now, p);
 			now->len = 1;
 			now->str = p;

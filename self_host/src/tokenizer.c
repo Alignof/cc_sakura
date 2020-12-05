@@ -1,4 +1,4 @@
-bool isblock(char *str){
+bool is_block(char *str){
 	return (*str == '{') || (*str == '}');
 }
 
@@ -6,7 +6,15 @@ bool at_eof(void){
 	return token->kind == TK_EOF;
 }
 
-int is_alnum(char c){
+bool is_space(char c){
+	return  c == '\n' || c == '\t' || c == ' ';  
+}
+
+bool is_digit(char c){
+	return  (('0' <=  c) && (c <=  '9'));
+}
+
+bool is_alnum(char c){
 	return	(('a' <=  c) && (c <=  'z')) ||
 		(('A' <=  c) && (c <=  'Z')) ||
 		(('0' <=  c) && (c <=  '9')) ||
@@ -22,7 +30,7 @@ int len_val(char *str){
 	return counter;
 }
 
-bool issymbol(char *str,  bool *single_flag){
+bool is_symbol(char *str,  bool *single_flag){
 	int i;
 	int size;
 	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
@@ -79,7 +87,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str){
 	return new;
 }
 
-bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
+bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
 	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len])){
 		return false;
 	}
@@ -101,7 +109,7 @@ Token *tokenize(char *p){
 	Token *now = &head;
 
 	while(*p){
-		if(isspace(*p)){
+		if(is_space(*p)){
 			p++;
 			continue;
 		}
@@ -152,7 +160,7 @@ Token *tokenize(char *p){
 		}
 
 		//Is number?
-		if(isdigit(*p)){
+		if(is_digit(*p)){
 			if(now->kind == TK_IDENT){
 				now = new_token(TK_IDENT, now, p++);
 				now->len = 1;
@@ -166,7 +174,7 @@ Token *tokenize(char *p){
 		}
 
 		//judge single token or multi token or isn't token
-		if(issymbol(p, &is_single_token)){
+		if(is_symbol(p, &is_single_token)){
 			now = new_token(TK_RESERVED, now, p);
 			if(is_single_token){
 				p++;
@@ -177,36 +185,36 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		if(consume_reserved(&p, "void",     4, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "_Bool",    5, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "char",     4, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "int",	    3, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
-		if(consume_reserved(&p, "enum",     4, &now, TK_TYPE))     continue;
-		if(consume_reserved(&p, "if",	    2, &now, TK_IF))	   continue;
-		if(consume_reserved(&p, "else",	    4, &now, TK_ELSE))	   continue;
-		if(consume_reserved(&p, "switch",   6, &now, TK_SWITCH))   continue;
-		if(consume_reserved(&p, "case",     4, &now, TK_CASE))	   continue;
-		if(consume_reserved(&p, "default",  7, &now, TK_DEFAULT))  continue;
-		if(consume_reserved(&p, "for",	    3, &now, TK_FOR))	   continue;
-		if(consume_reserved(&p, "do",	    2, &now, TK_DO))       continue;
-		if(consume_reserved(&p, "while",    5, &now, TK_WHILE))    continue;
-		if(consume_reserved(&p, "break",    5, &now, TK_BREAK))    continue;
-		if(consume_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;
-		if(consume_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
-		if(consume_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
-		if(consume_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
-		if(consume_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
-		if(consume_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
+		if(tokenize_reserved(&p, "void",    4, &now, TK_TYPE))	   continue;
+		if(tokenize_reserved(&p, "_Bool",   5, &now, TK_TYPE))	   continue;
+		if(tokenize_reserved(&p, "char",    4, &now, TK_TYPE))	   continue;
+		if(tokenize_reserved(&p, "int",	    3, &now, TK_TYPE))	   continue;
+		if(tokenize_reserved(&p, "struct",  6, &now, TK_TYPE))     continue;
+		if(tokenize_reserved(&p, "enum",    4, &now, TK_TYPE))     continue;
+		if(tokenize_reserved(&p, "if",	    2, &now, TK_IF))	   continue;
+		if(tokenize_reserved(&p, "else",    4, &now, TK_ELSE))	   continue;
+		if(tokenize_reserved(&p, "switch",  6, &now, TK_SWITCH))   continue;
+		if(tokenize_reserved(&p, "case",    4, &now, TK_CASE))	   continue;
+		if(tokenize_reserved(&p, "default", 7, &now, TK_DEFAULT))  continue;
+		if(tokenize_reserved(&p, "for",	    3, &now, TK_FOR))	   continue;
+		if(tokenize_reserved(&p, "do",	    2, &now, TK_DO))       continue;
+		if(tokenize_reserved(&p, "while",   5, &now, TK_WHILE))    continue;
+		if(tokenize_reserved(&p, "break",   5, &now, TK_BREAK))    continue;
+		if(tokenize_reserved(&p, "continue",8, &now, TK_CONTINUE)) continue;
+		if(tokenize_reserved(&p, "sizeof",  6, &now, TK_SIZEOF))   continue;
+		if(tokenize_reserved(&p, "typedef", 7, &now, TK_TYPEDEF))  continue;
+		if(tokenize_reserved(&p, "extern",  6, &now, TK_EXTERN))   continue;
+		if(tokenize_reserved(&p, "return",  6, &now, TK_RETURN))   continue;
+		if(tokenize_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
 
 		// compiler directive
-		if(consume_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
-		//if(consume_reserved(&p, "define",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
-		//if(consume_reserved(&p, "include",  7, &now, TK_COMPILER_DIRECTIVE)) continue;
+		if(tokenize_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(tokenize_reserved(&p, "define",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(tokenize_reserved(&p, "include",  7, &now, TK_COMPILER_DIRECTIVE)) continue;
 
 
 		//Is block? '{' or '}'
-		if(isblock(p)){
+		if(is_block(p)){
 			now = new_token(TK_BLOCK, now, p);
 			now->len = 1;
 			now->str = p;
@@ -247,3 +255,4 @@ Token *tokenize(char *p){
 	new_token(TK_EOF, now, p);
 	return head.next;
 }
+
