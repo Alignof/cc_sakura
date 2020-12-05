@@ -33,8 +33,8 @@ Type *set_type(Type *type, Token *tok){
 			type->len   = tok->len;
 			type->name  = tok->str;
 			if(struc_found){
-				type->ty = STRUCT;
-				type->size   = struc_found->memsize;
+				type->ty   = STRUCT;
+				type->size = struc_found->memsize;
 				// unname enum
 				if(struc_found->member == NULL && consume("{")){
 					struc_found->member = register_struc_member(&(struc_found->memsize));
@@ -90,8 +90,8 @@ Type *set_type(Type *type, Token *tok){
 }
 
 Type *parse_type(void){
-	Type *type     = calloc(1, sizeof(Type));
-	int star_count = 0;
+	Type *type = calloc(1, sizeof(Type));
+	int star_count  = 0;
 	int INSIDE_FILE = 0;
 
 	// check type
@@ -277,7 +277,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 	node->type = lvar->type;
 	node->offset = lvar->offset;
-	// locals == new lvar
 	locals = lvar;
 
 	return node;

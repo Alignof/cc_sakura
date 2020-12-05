@@ -87,11 +87,11 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	pointer_size->type->align = type_align(pointer_size->type);
 
 
-	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to!=NULL){
+	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to != NULL){
 		ptrtype = lhs_type->ptr_to;
 		pointer_size->val = ptrtype->size;
 		node->rhs = new_node(ND_MUL, node->rhs, pointer_size);
-	}else if(rhs_type->ty >= PTR  &&  rhs_type->ptr_to!=NULL){
+	}else if(rhs_type->ty >= PTR  &&  rhs_type->ptr_to != NULL){
 		ptrtype = rhs_type->ptr_to;
 		pointer_size->val = ptrtype->size;
 		node->lhs = new_node(ND_MUL, node->lhs, pointer_size);

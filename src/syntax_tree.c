@@ -218,7 +218,6 @@ Node *unary(void){
 }
 
 Node *mul(void){
-	//jmp unary()
 	Node *node = unary();
 
 	for(;;){
@@ -237,7 +236,6 @@ Node *mul(void){
 }
 
 Node *add(void){
-	//jmp mul()
 	Node *node = mul();
 
 	for(;;){
@@ -300,7 +298,7 @@ Node *logical(void){
 Node *ternary(void){
 	Node *node = logical();
 	if(consume("?")){
-		//                          cond  if true
+		//                               cond  if true
 		node      = new_node(ND_TERNARY, node, ternary());
 		node->val = label_num++;
 		expect(":");

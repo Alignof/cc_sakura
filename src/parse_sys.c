@@ -45,7 +45,7 @@ void error_at(char *loc, char *msg){
 bool check(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-			strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -55,7 +55,7 @@ bool check(char *op){
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-			strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -75,7 +75,7 @@ int string_len(void){
 
 bool consume_ret(void){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
-			memcmp(token->str, "return", token->len)){
+	    memcmp(token->str, "return", token->len)){
 		return false;
 	}
 
@@ -84,9 +84,9 @@ bool consume_ret(void){
 }
 
 bool consume_reserved_word(char *keyword, TokenKind kind){
-	if( token->kind != kind ||
-			token->len != strlen(keyword) ||
-			memcmp(token->str, keyword, token->len)){
+	if(token->kind != kind ||
+	   token->len != strlen(keyword) ||
+	   memcmp(token->str, keyword, token->len)){
 		return false;
 	}
 
@@ -135,8 +135,8 @@ Token *consume_ident(void){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-			strlen(op) != token->len||
-			memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len||
+	    memcmp(token->str, op, token->len)){
 		error_at(token->str, "not a charctor.");
 	}
 	token = token->next;
@@ -149,7 +149,7 @@ int expect_number(void){
 	}
 
 	int val = token->val;
-	token = token->next;
+	token   = token->next;
 	return val;
 }
 
@@ -169,7 +169,6 @@ void label_register(Node *node, LabelKind kind){
 	labels_tail      = (labels_tail) ? labels_tail->next : labels_head;
 
 	llid++;
-
 
 	if(kind == LB_CASE){
 		new_label->cond = node->lhs;

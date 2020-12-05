@@ -148,16 +148,6 @@ int main(int argc, char **argv){
 			gen(func_list[i]->args);
 		}
 
-		// global init (main)
-		/*
-		if(strncmp(func_list[i]->name, "main", 4) == 0){
-			GVar *start = globals;
-			for (GVar *var = start;var;var = var->next){
-				if(var->init && var->type->is_extern == 0) gen(var->init);
-			}
-		}
-		*/
-
 		for(j = 0;func_list[i]->code[j] != NULL;j++){
 			// gen code
 			gen(func_list[i]->code[j]);
