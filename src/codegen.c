@@ -22,7 +22,7 @@ void gen_gvar(Node *node){
 		printf("	mov rax, fs:0\n");
 		printf("	add rax, fs:%.*s@tpoff\n", node->val, node->str);
 	}else{
-		printf("	lea rax,  %.*s[rip]\n", node->val, node->str);
+		printf("	lea rax,%.*s[rip]\n", node->val, node->str);
 	}
 	printf("	push rax\n");
 }

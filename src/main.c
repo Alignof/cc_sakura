@@ -76,7 +76,7 @@ void set_gvar(GVar *gvar){
 					init = init->next;
 				}
 			}else{
-				printf(".comm	%.*s, %d, %d\n", gvar->len, gvar->name, gvar->memsize, gvar->type->align);
+				printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
 			}
 		}else{
 			printf(".section .tbss,\"awT\",@nobits\n");
@@ -105,6 +105,7 @@ int main(int argc, char **argv){
 	printf(".intel_syntax noprefix\n");
 
 	// set global variable
+	printf(".data\n");
 	GVar *start = globals;
 	for (GVar *var = start;var;var = var->next){
 		set_gvar(var);
@@ -123,6 +124,7 @@ int main(int argc, char **argv){
 	labels_tail    = NULL;
 
 	//generate assembly at first expr
+	printf(".text\n");
 	for(i = 0;func_list[i];i++){
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);

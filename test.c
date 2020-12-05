@@ -1,1 +1,1 @@
-int i=0; void increment(void){i++; return;} int main(){increment(); return i;}
+char *x="hello"; int main(){*(x+2);}
