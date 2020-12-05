@@ -29,10 +29,11 @@ franken:$(ASEMS)
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen1.s
 	# gen2
 	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen2
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen2.s
 	# gen3
 	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
@@ -48,14 +49,15 @@ patch:$(ASEMS)
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/$(PATCHFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(PATCHFILE).s ./gen1.s
 	# gen2
 	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/$(PATCHFILE).s ./gen2
+	cp $(ASMDIR)/$(PATCHFILE).s ./gen2.s
 	# gen3
 	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/$(PATCHFILE).s ./gen3
+	cp $(ASMDIR)/$(PATCHFILE).s ./gen3.s
 	# check
 	diff gen2 gen3
 
@@ -82,7 +84,7 @@ simple_test:$(TARGET)
 	./child dummy.c || echo $$?
 
 clean:
-	rm -f *.o *.s *~ child* *.txt *.out
+	rm -f *.o *.s *~ child* *.txt *.out gen*
 	rm -f $(OBJECTS) ./asem/*.s
 
 .PHONY: self_host file_test clean install

@@ -371,7 +371,6 @@ int main(){
 	token.str  = str;
 
 	ptr = &token;
-	//if(consume_reserved(&p, "void", 4, &now, TK_TYPE))	   continue;
 	if(consume_reserved(&p, "void", 4, &ptr, TK_RETURN)){
 		printf("%s\n", p);
 	}
