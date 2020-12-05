@@ -177,7 +177,7 @@ Node *array_block(Node *arr){
 	int ctr = 0;
 	int isize = arr->type->index_size;
 	Node *src;
-	Node *dst = calloc(1, sizeof(Node));
+	Node *dst  = calloc(1, sizeof(Node));
 	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
@@ -203,10 +203,10 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type);
-			alloc_size+=asize;
-			arr->offset = ((locals)?(locals->offset):0) + asize;
-			clone->offset = arr->offset;
+			int asize  = align_array_size(ctr, arr->type);
+			alloc_size += asize;
+			arr->offset    = ((locals)?(locals->offset):0) + asize;
+			clone->offset  = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 			locals->type->size  = type_size(locals->type);

@@ -21,32 +21,45 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 # 	$(CC) $(CFLAGS) -o $@ -c $<
 
 
-# prepare franken 
-EXCLUDEFILE := codegen
+# franken 
+EXCLUDEFILE := tokenizer
 franken:$(ASEMS)
-	# prepare
+	# target:$(EXCLUDEFILE)
 	cat src/header.c src/$(EXCLUDEFILE).c > tmp.c
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen1.s
 	# gen2
 	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen2
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen2.s
 	# gen3
 	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen3
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen3.s
 	# check
-	diff gen2 gen3
+	diff gen2.s gen3.s
 
-gentest:
-	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
-	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen2
+# fix franken 
+PATCHFILE := replaced
+patch:$(ASEMS)
+	# patch target:$(PATCHFILE)
+	cat src/header.c src/$(PATCHFILE).c > tmp.c
+	# gen1
+	$(MOTHER) tmp.c > $(ASMDIR)/$(PATCHFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
-	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen3
-	diff gen2 gen3
+	cp $(ASMDIR)/$(PATCHFILE).s ./gen1.s
+	# gen2
+	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
+	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(PATCHFILE).s ./gen2.s
+	# gen3
+	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
+	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(PATCHFILE).s ./gen3.s
+	# check
+	diff gen2.s gen3.s
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 
 	@[ -d $(ASMDIR) ]
@@ -67,11 +80,11 @@ self_host:
 	$(MOTHER) self_host.c > child.s && gcc -static child.s -o child
 	./child self_host.c
 
-file_test:$(TARGET)
+simple_test:$(TARGET)
 	./child dummy.c || echo $$?
 
 clean:
-	rm -f *.o *.s *~ child* *.txt *.out
+	rm -f *.o *.s *~ child* *.txt *.out gen*
 	rm -f $(OBJECTS) ./asem/*.s
 
 .PHONY: self_host file_test clean install

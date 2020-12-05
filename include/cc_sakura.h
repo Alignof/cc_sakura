@@ -252,7 +252,6 @@ struct Member{
 
 // global variable
 extern int      llid;
-extern int      lvar_count;
 extern int      alloc_size;
 extern char     *user_input;
 extern char     filename[100];
@@ -274,16 +273,20 @@ extern Def_Type *outside_deftype;
 // main.c
 char *read_file(char *path);
 void get_code(int argc, char **argv);
+void set_gvar(GVar *gvar);
 
 // tokenizer.c
-int len_val(char *str);
-int is_alnum(char c);
-bool issymbol(char *str,  bool *single_flag);
-bool isblock(char *str);
+int  len_val(char *str);
+bool is_alnum(char c);
+bool is_space(char c);
+bool is_digit(char c);
+bool is_block(char c);
+bool is_symbol(char *str,  bool *single_flag);
 bool at_eof(void);
 Token *tokenize(char *p);
 Token *new_token(TokenKind kind, Token *cur, char *str);
-bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
+bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
+
 
 // parse_sys.c
 void error(char *loc, char *fmt,  ...);

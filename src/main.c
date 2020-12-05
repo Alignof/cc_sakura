@@ -60,6 +60,42 @@ void get_code(int argc, char **argv){
 	}
 }
 
+void set_gvar(GVar *gvar){
+	Node *init;
+	Type *type = get_pointer_type(gvar->type);
+	if(gvar->type->is_extern == 0){
+		if(gvar->type->is_thread_local == 0){
+			if(gvar->init){
+				printf("%.*s:\n", gvar->len, gvar->name);
+				init = gvar->init->rhs;
+				if(gvar->init->kind == ND_BLOCK){
+					while(init){
+						if(type->ty < INT){
+							printf("	.byte	%d\n", init->rhs->val);
+						}else{
+							printf("	.long	%d\n", init->rhs->val);
+						}
+						init = init->block_code;
+					}
+				}else if(gvar->init->rhs->kind == ND_STR){
+					printf("	.quad	.LC%d\n", init->val);
+				}else{
+					if(type->ty < INT){
+						printf("	.byte	%d\n", init->val);
+					}else{
+						printf("	.long	%d\n", init->val);
+					}
+				}
+			}else{
+				printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+			}
+		}else{
+			printf(".section .tbss,\"awT\",@nobits\n");
+			printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+		}
+	}
+}
+
 int main(int argc, char **argv){
 	int i, j;
 
@@ -80,16 +116,10 @@ int main(int argc, char **argv){
 	printf(".intel_syntax noprefix\n");
 
 	// set global variable
+	printf(".data\n");
 	GVar *start = globals;
 	for (GVar *var = start;var;var = var->next){
-		if(var->type->is_extern == 0){
-			if(var->type->is_thread_local == 0){
-				printf(".comm	%.*s, %d, %d\n", var->len, var->name, var->memsize, var->type->align);
-			}else{
-				printf(".section .tbss,\"awT\",@nobits\n");
-				printf("%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
-			}
-		}
+		set_gvar(var);
 	}
 
 	// set string
@@ -105,6 +135,7 @@ int main(int argc, char **argv){
 	labels_tail    = NULL;
 
 	//generate assembly at first expr
+	printf(".text\n");
 	for(i = 0;func_list[i];i++){
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
@@ -115,14 +146,6 @@ int main(int argc, char **argv){
 		if(func_list[i]->args){
 			// set local variable
 			gen(func_list[i]->args);
-		}
-
-		// global init (main)
-		if(strncmp(func_list[i]->name, "main", 4) == 0){
-			GVar *start = globals;
-			for (GVar *var = start;var;var = var->next){
-				if(var->init) expand_next(var->init);
-			}
 		}
 
 		for(j = 0;func_list[i]->code[j] != NULL;j++){
