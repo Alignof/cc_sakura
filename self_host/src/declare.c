@@ -1,5 +1,3 @@
-#include "cc_sakura.h"
-
 LVar     *locals;
 GVar     *globals;
 Struc    *structs;
@@ -9,14 +7,10 @@ LVar     *outside_lvar;
 Struc    *outside_struct;
 Enum     *outside_enum;
 Def_Type *outside_deftype;
-// int alloc_size;
-// Token *token;
-// LVar *locals;
-// Func *func_list[100];
 
 Type *set_type(Type *type, Token *tok){
-	Enum  *enum_found  = NULL;
-	Struc *struc_found = NULL;
+	Enum  *enum_found  = __NULL;
+	Struc *struc_found = __NULL;
 	int INSIDE_FILE = 0;
 
 	switch(type->ty){
@@ -33,10 +27,10 @@ Type *set_type(Type *type, Token *tok){
 			type->len   = tok->len;
 			type->name  = tok->str;
 			if(struc_found){
-				type->ty   = STRUCT;
-				type->size = struc_found->memsize;
+				type->ty = STRUCT;
+				type->size   = struc_found->memsize;
 				// unname enum
-				if(struc_found->member == NULL && consume("{")){
+				if(struc_found->member == __NULL && consume("{")){
 					struc_found->member = register_struc_member(&(struc_found->memsize));
 				}
 			}else{
@@ -64,7 +58,7 @@ Type *set_type(Type *type, Token *tok){
 
 			if(enum_found){
 				type->ty = ENUM;
-				if(enum_found->member == NULL && consume("{")){
+				if(enum_found->member == __NULL && consume("{")){
 					enum_found->member = register_enum_member();
 				}
 			}else{
@@ -90,23 +84,23 @@ Type *set_type(Type *type, Token *tok){
 }
 
 Type *parse_type(void){
-	Type *type = calloc(1, sizeof(Type));
-	int star_count  = 0;
+	Type *type     = calloc(1, sizeof(Type));
+	int star_count = 0;
 	int INSIDE_FILE = 0;
 
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
 		type->ty = VOID;
-		type = set_type(type, NULL);
+		type = set_type(type, __NULL);
 	}else if(consume_reserved_word("_Bool", TK_TYPE)){
 		type->ty = BOOL;
-		type = set_type(type, NULL);
+		type = set_type(type, __NULL);
 	}else if(consume_reserved_word("char", TK_TYPE)){
 		type->ty = CHAR;
-		type = set_type(type, NULL);
+		type = set_type(type, __NULL);
 	}else if(consume_reserved_word("int", TK_TYPE)){
 		type->ty = INT;
-		type = set_type(type, NULL);
+		type = set_type(type, __NULL);
 	}else if(consume_reserved_word("struct", TK_TYPE)){
 		type->ty = STRUCT;
 		type = set_type(type, consume_ident());
@@ -277,6 +271,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 	node->type = lvar->type;
 	node->offset = lvar->offset;
+	// locals == new lvar
 	locals = lvar;
 
 	return node;
@@ -285,8 +280,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 Member *register_struc_member(int *asize_ptr){
 	int size_of_type;
 	int INSIDE_FILE   = 0;
-	Member *new_memb  = NULL;
-	Member *memb_head = NULL;
+	Member *new_memb  = __NULL;
+	Member *memb_head = __NULL;
 
 	while(1){
 		if(!(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE))){
@@ -369,8 +364,8 @@ void declare_struct(Struc *new_struc){
 
 Member *register_enum_member(void){
 	int counter = 0;
-	Member *new_memb  = NULL;
-	Member *memb_head = NULL;
+	Member *new_memb  = __NULL;
+	Member *memb_head = __NULL;
 
 	while(1){
 		new_memb = calloc(1,sizeof(Member));

@@ -1,5 +1,3 @@
-#include "cc_sakura.h"
-
 void expand_next(Node *node){
 	while(node){
 		gen(node);
@@ -22,7 +20,7 @@ void gen_gvar(Node *node){
 		printf("	mov rax, fs:0\n");
 		printf("	add rax, fs:%.*s@tpoff\n", node->val, node->str);
 	}else{
-		printf("	lea rax,%.*s[rip]\n", node->val, node->str);
+		printf("	lea rax,  %.*s[rip]\n", node->val, node->str);
 	}
 	printf("	push rax\n");
 }
@@ -54,7 +52,15 @@ void gen_struc(Node *node){
 void gen_args(Node *args){
 	int reg_num;
 	int arg_count = 0;
-	const char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
+	//const char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
+	char *reg[6];
+	reg[0] = "rdi";
+	reg[1] = "rsi";
+	reg[2] = "rdx";
+	reg[3] = "rcx";
+	reg[4] = "r8";
+	reg[5] = "r9";
+
 
 
 	while(args){
@@ -83,11 +89,36 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	//                        void _Bool  char  int   ptr  array
-	const char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
-	const char reg_dx[6][4]={"edx","edx","edx","edx","rdx","rdx"};
-	const char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
-	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
+	//                          void _Bool  char  int   ptr  array
+	//const char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
+	//const char reg_dx[6][4]={"edx","edx","edx","edx","rdx","rdx"};
+	//const char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
+
+	int reg_ty = (node->type->ty == ENUM) ? 1 : node->type->ty;
+	char *reg_ax[6];
+	char *reg_dx[6];
+	char *reg_di[6];
+
+	reg_ax[0] = "eax";
+	reg_ax[1] = "eax";
+	reg_ax[2] = "eax";
+	reg_ax[3] = "eax";
+	reg_ax[4] = "rax";
+	reg_ax[5] = "rax";
+
+	reg_dx[0] = "edx";
+	reg_dx[1] = "edx";
+	reg_dx[2] = "edx";
+	reg_dx[3] = "edx";
+	reg_dx[4] = "rdx";
+	reg_dx[5] = "rdx";
+
+	reg_di[0] = "edi";
+	reg_di[1] = "edi";
+	reg_di[2] = "edi";
+	reg_di[3] = "edi";
+	reg_di[4] = "rdi";
+	reg_di[5] = "rdi";
 
 	switch(node->kind){
 		case ND_ADD:
@@ -357,7 +388,13 @@ void gen_expr(Node *node){
 
 void gen(Node *node){
 	Node *cases;
-	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
+	char *reg[6];
+	reg[0] = "rdi";
+	reg[1] = "rsi";
+	reg[2] = "rdx";
+	reg[3] = "rcx";
+	reg[4] = "r8";
+	reg[5] = "r9";
 
 	// generate assembly
 	switch(node->kind){

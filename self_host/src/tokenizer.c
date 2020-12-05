@@ -1,5 +1,3 @@
-#include "cc_sakura.h"
-
 int len_val(char *str){
 	int counter = 0;
 	for(;is_alnum(*str);str++){
@@ -33,52 +31,51 @@ bool is_alnum(char c){
 }
 
 bool is_symbol(char *str,  bool *single_flag){
-     int i;
-     int size;
-     char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
-     char repeat_symbol[] = "<>&|+-";
-     char multi_symbol[]  = "->";
-     char multi_eq[]      = "<=>!+*-/";
-     
-     //Is multi equal? (<=,==,!=,>=)
-     size = sizeof(multi_eq)/sizeof(char);
-     for(i = 0;i < size;i++){
-     	if((*str == multi_eq[i]) && (*(str+1) == '=')){
-     		*single_flag = false;
-     		return true;
-     	}
-     }
-     
-     //Is repeat symbol? (<<,>>,&&,||,++,--)
-     size = sizeof(repeat_symbol)/sizeof(char);
-     for(i = 0;i < size;i++){
-     	if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
-     		*single_flag = false;
-     		return true;
-     	}
-     }
+	int i;
+	int size;
+	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
+	char repeat_symbol[] = "<>&|+-";
+	char multi_symbol[]  = "->";
+	char multi_eq[]      = "<=>!+*-/";
+	
+	//Is multi equal? (<=,==,!=,>=)
+	size = sizeof(multi_eq)/sizeof(char);
+	for(i = 0;i < size;i++){
+		if((*str == multi_eq[i]) && (*(str+1) == '=')){
+			*single_flag = false;
+			return true;
+		}
+	}
+	
+	//Is repeat symbol? (<<,>>,&&,||,++,--)
+	size = sizeof(repeat_symbol)/sizeof(char);
+	for(i = 0;i < size;i++){
+		if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
+			*single_flag = false;
+			return true;
+		}
+	}
 
-     //Is multi symbol? (->)
-     size = sizeof(multi_symbol)/sizeof(char)/2;
-     for(i = 0;i < size;i += 2){
-     	if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
-     		*single_flag = false;
-     		return true;
-     	}
-     }
+	//Is multi symbol? (->)
+	size = sizeof(multi_symbol)/sizeof(char)/2;
+	for(i = 0;i < size;i += 2){
+		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
+			*single_flag = false;
+			return true;
+		}
+	}
 
-     //Is single symbol? (+,-,*,/,%,<,>,',.)
-     size = sizeof(single_symbol)/sizeof(char);
-     for(i = 0;i < size;i++){
-     	if(*str == single_symbol[i]){
-     		*single_flag = true;
-     		return true;
-     	}
-     }
+	//Is single symbol? (+,-,*,/,%,<,>,',.)
+	size = sizeof(single_symbol)/sizeof(char);
+	for(i = 0;i < size;i++){
+		if(*str == single_symbol[i]){
+			*single_flag = true;
+			return true;
+		}
+	}
 
-     return false;
+	return false;
 }
-
 
 Token *new_token(TokenKind kind, Token *cur, char *str){
 	Token *new = calloc(1, sizeof(Token));
@@ -106,7 +103,7 @@ bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_k
 Token *tokenize(char *p){
 	bool is_single_token;
 	Token head;
-	head.next = NULL;
+	head.next = __NULL;
 
 	//set head pointer to cur
 	Token *now = &head;
@@ -188,26 +185,26 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		if(tokenize_reserved(&p, "void",     4, &now, TK_TYPE))	   continue;
-		if(tokenize_reserved(&p, "_Bool",    5, &now, TK_TYPE))	   continue;
-		if(tokenize_reserved(&p, "char",     4, &now, TK_TYPE))	   continue;
-		if(tokenize_reserved(&p, "int",	     3, &now, TK_TYPE))	   continue;
-		if(tokenize_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
-		if(tokenize_reserved(&p, "enum",     4, &now, TK_TYPE))     continue;
-		if(tokenize_reserved(&p, "if",	     2, &now, TK_IF))	   continue;
-		if(tokenize_reserved(&p, "else",     4, &now, TK_ELSE))	   continue;
-		if(tokenize_reserved(&p, "switch",   6, &now, TK_SWITCH))   continue;
-		if(tokenize_reserved(&p, "case",     4, &now, TK_CASE))	   continue;
-		if(tokenize_reserved(&p, "default",  7, &now, TK_DEFAULT))  continue;
-		if(tokenize_reserved(&p, "for",	     3, &now, TK_FOR))	   continue;
-		if(tokenize_reserved(&p, "do",	     2, &now, TK_DO))       continue;
-		if(tokenize_reserved(&p, "while",    5, &now, TK_WHILE))    continue;
-		if(tokenize_reserved(&p, "break",    5, &now, TK_BREAK))    continue;
-		if(tokenize_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;
-		if(tokenize_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
-		if(tokenize_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
-		if(tokenize_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
-		if(tokenize_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
+		if(tokenize_reserved(&p, "void",    4, &now, TK_TYPE))	   continue;
+		if(tokenize_reserved(&p, "_Bool",   5, &now, TK_TYPE))	   continue;
+		if(tokenize_reserved(&p, "char",    4, &now, TK_TYPE))	   continue;
+		if(tokenize_reserved(&p, "int",	    3, &now, TK_TYPE))	   continue;
+		if(tokenize_reserved(&p, "struct",  6, &now, TK_TYPE))     continue;
+		if(tokenize_reserved(&p, "enum",    4, &now, TK_TYPE))     continue;
+		if(tokenize_reserved(&p, "if",	    2, &now, TK_IF))	   continue;
+		if(tokenize_reserved(&p, "else",    4, &now, TK_ELSE))	   continue;
+		if(tokenize_reserved(&p, "switch",  6, &now, TK_SWITCH))   continue;
+		if(tokenize_reserved(&p, "case",    4, &now, TK_CASE))	   continue;
+		if(tokenize_reserved(&p, "default", 7, &now, TK_DEFAULT))  continue;
+		if(tokenize_reserved(&p, "for",	    3, &now, TK_FOR))	   continue;
+		if(tokenize_reserved(&p, "do",	    2, &now, TK_DO))       continue;
+		if(tokenize_reserved(&p, "while",   5, &now, TK_WHILE))    continue;
+		if(tokenize_reserved(&p, "break",   5, &now, TK_BREAK))    continue;
+		if(tokenize_reserved(&p, "continue",8, &now, TK_CONTINUE)) continue;
+		if(tokenize_reserved(&p, "sizeof",  6, &now, TK_SIZEOF))   continue;
+		if(tokenize_reserved(&p, "typedef", 7, &now, TK_TYPEDEF))  continue;
+		if(tokenize_reserved(&p, "extern",  6, &now, TK_EXTERN))   continue;
+		if(tokenize_reserved(&p, "return",  6, &now, TK_RETURN))   continue;
 		if(tokenize_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
 
 		// compiler directive
@@ -258,3 +255,4 @@ Token *tokenize(char *p){
 	new_token(TK_EOF, now, p);
 	return head.next;
 }
+

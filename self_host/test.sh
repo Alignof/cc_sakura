@@ -4,11 +4,11 @@ assert() {
 		option="$1"
 		expected="$2"
 		input="$3"
-		./cc_sakura "$option" "$input" > tmp.s
+		./child "$option" "$input" > tmp.s
 	else
 		expected="$1"
 		input="$2"
-		./cc_sakura "$input" > tmp.s
+		./child "$input" > tmp.s
 	fi
 
 	gcc -c tmp.s 
@@ -268,3 +268,4 @@ assert -cl 10 "int main(){int i=0; int x=0; for(;i<10;i++){x++;}return x ;}"
 
 
 echo OK
+

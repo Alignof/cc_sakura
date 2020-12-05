@@ -1,10 +1,3 @@
-#include "cc_sakura.h"
-
-// int alloc_size;
-// Token *token;
-// LVar *locals;
-// Func *func_list[100];
-
 Node *compiler_directive(){
 	Node *node;
 	
@@ -35,7 +28,7 @@ Node *dot_arrow(NodeKind type, Node *node){
 	// (lvar <- node -> dot) <- node -> dot
 	int INSIDE_FILE = 0;
 	Type *struc_type;
-	Node *new = new_node(type, node, NULL);
+	Node *new = new_node(type, node, __NULL);
 	Token *memb_name  = consume_ident();
 	Member *memb_list;
 
@@ -130,7 +123,7 @@ Node *array_str(Node *arr, Node *init_val){
 	int isize = arr->type->index_size;
 	Node *src;
 	Node *dst  = calloc(1, sizeof(Node));
-	Node *node = new_node(ND_BLOCK, NULL, NULL);
+	Node *node = new_node(ND_BLOCK, __NULL, __NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
 	memcpy(clone, arr, sizeof(Node));
@@ -177,8 +170,8 @@ Node *array_block(Node *arr){
 	int ctr = 0;
 	int isize = arr->type->index_size;
 	Node *src;
-	Node *dst  = calloc(1, sizeof(Node));
-	Node *node = new_node(ND_BLOCK, NULL, NULL);
+	Node *dst = calloc(1, sizeof(Node));
+	Node *node = new_node(ND_BLOCK, __NULL, __NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
 	memcpy(clone, arr, sizeof(Node));
@@ -203,10 +196,10 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize  = align_array_size(ctr, arr->type);
-			alloc_size += asize;
-			arr->offset    = ((locals)?(locals->offset):0) + asize;
-			clone->offset  = arr->offset;
+			int asize = align_array_size(ctr, arr->type);
+			alloc_size+=asize;
+			arr->offset = ((locals)?(locals->offset):0) + asize;
+			clone->offset = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 			locals->type->size  = type_size(locals->type);
@@ -243,9 +236,9 @@ Node *call_function(Node *node, Token *tok){
 	if(consume(")")) return node;
 
 	int ctr = 0;
-	Node *new = NULL;
+	Node *new = __NULL;
 	while(1){
-		if(new == NULL){
+		if(new == __NULL){
 			new       = logical();
 			node->rhs = new;
 		}else{
@@ -265,28 +258,28 @@ Node *call_function(Node *node, Token *tok){
 Node *array_index(Node *node, Node *index){
 	// a[1] == *(a+1)
 	node = new_node(ND_ADD, node, index);
-	node = new_node(ND_DEREF, NULL, node);
+	node = new_node(ND_DEREF, __NULL, node);
 
 	return node;
 }
 
 void get_argument(int func_index){
 	if(consume_reserved_word("void", TK_TYPE)){
-		func_list[func_index]->args = NULL;
+		func_list[func_index]->args = __NULL;
 		expect(")");
 		return;
 	}
 
 	// get argument
 	if(consume(")")){
-		func_list[func_index]->args = NULL;
+		func_list[func_index]->args = __NULL;
 	}else{
 		// set args node
-		Node *new_arg = NULL;
+		Node *new_arg = __NULL;
 		int arg_counter = 0;
 
 		while(token->kind == TK_NUM || token->kind == TK_TYPE  || find_defined_type(token, 0)){
-			if(new_arg == NULL){
+			if(new_arg == __NULL){
 				new_arg       = calloc(1, sizeof(Node));
 				new_arg->kind = ND_ARG;
 				new_arg->val  = arg_counter;

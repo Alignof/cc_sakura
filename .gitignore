@@ -3,11 +3,25 @@
 tmp*
 a.out
 cc_sakura
+*.txt
 
 testing/
+
 test/hsjoihs_tmp/*.c
 test/hsjoihs_tmp/*.s
 test/hsjoihs_tmp/*.out
 
+self_host/asem/*.s
+self_host/asem/obj/*.o
+self_host/child.s
+self_host/child
+self_host/*~
+self_host/*.o
+self_host/*.s
+self_host/tmp*
+self_host/a.out
+self_host/*.txt
+self_host/gen*
+
+
 .gdb_history
-*.txt

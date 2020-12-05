@@ -1,17 +1,12 @@
-#include "cc_sakura.h"
-
-// GVar *globals;
-// char filename[100];
-
-void error(char *loc, char *fmt, ...){
-	va_list ap;
-	va_start(ap, fmt);
+void error(char *loc, char *fmt){
+	//va_list ap;
+	//va_start(ap, fmt);
 
 	int pos = loc-user_input;
 	fprintf(stderr, "%s\n", user_input);
 	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ ");
-	vfprintf(stderr, fmt, ap);
+	//vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit(1);
 }
@@ -34,7 +29,7 @@ void error_at(char *loc, char *msg){
 	while(*start == '\t') start++;
 
 	int indent = fprintf(stderr, "%s:%d ", filename, line_num);
-	fprintf(stderr, "%.*s\n", (int)(end-start), start);
+	fprintf(stderr, "%.*s\n", (end-start), start);
 
 	int pos = indent+loc-start;
 	fprintf(stderr, "%*s", pos, " ");
@@ -45,7 +40,7 @@ void error_at(char *loc, char *msg){
 bool check(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+			strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -55,7 +50,7 @@ bool check(char *op){
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+			strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -75,7 +70,7 @@ int string_len(void){
 
 bool consume_ret(void){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
-	    memcmp(token->str, "return", token->len)){
+			memcmp(token->str, "return", token->len)){
 		return false;
 	}
 
@@ -84,9 +79,9 @@ bool consume_ret(void){
 }
 
 bool consume_reserved_word(char *keyword, TokenKind kind){
-	if(token->kind != kind ||
-	   token->len != strlen(keyword) ||
-	   memcmp(token->str, keyword, token->len)){
+	if( token->kind != kind ||
+			token->len != strlen(keyword) ||
+			memcmp(token->str, keyword, token->len)){
 		return false;
 	}
 
@@ -116,7 +111,7 @@ Token *consume_string(void){
 Token *consume_ident(void){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||!(is_alnum(*(token->str)))){
-		return NULL;
+		return __NULL;
 	}
 
 	Token *ret = token;
@@ -135,8 +130,8 @@ Token *consume_ident(void){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-	    strlen(op) != token->len||
-	    memcmp(token->str, op, token->len)){
+			strlen(op) != token->len||
+			memcmp(token->str, op, token->len)){
 		error_at(token->str, "not a charctor.");
 	}
 	token = token->next;
@@ -149,7 +144,7 @@ int expect_number(void){
 	}
 
 	int val = token->val;
-	token   = token->next;
+	token = token->next;
 	return val;
 }
 
@@ -170,6 +165,7 @@ void label_register(Node *node, LabelKind kind){
 
 	llid++;
 
+
 	if(kind == LB_CASE){
 		new_label->cond = node->lhs;
 	}else if(kind == LB_DEFAULT){
@@ -183,17 +179,17 @@ Func *find_func(Token *tok){
 			return func_list[i];
 		}
 	}
-	return NULL;
+	return __NULL;
 }
 
 GVar *find_gvar(Token *tok){
-	//while var not equal NULL
+	//while var not equal __NULL
 	for (GVar *var = globals;var;var = var->next){
 		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
 			return var;
 		}
 	}
-	return NULL;
+	return __NULL;
 }
 
 LVar *find_lvar(Token *tok, int find_range){
@@ -203,7 +199,7 @@ LVar *find_lvar(Token *tok, int find_range){
 	 */
 
 	int out_of_scope = 0;
-	//while var not equal NULL
+	//while var not equal __NULL
 	for (LVar *var = locals;var;var = var->next){
 		if(var == outside_lvar) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
@@ -211,7 +207,7 @@ LVar *find_lvar(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return NULL;
+	return __NULL;
 }
 
 Str *find_string(Token *tok){
@@ -220,7 +216,7 @@ Str *find_string(Token *tok){
 			return var;
 		}
 	}
-	return NULL;
+	return __NULL;
 }
 
 Struc *find_struc(Token *tok, int find_range){
@@ -232,7 +228,7 @@ Struc *find_struc(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return NULL;
+	return __NULL;
 }
 
 Member *find_struct_member(Type *type, int find_range){
@@ -247,7 +243,7 @@ Member *find_struct_member(Type *type, int find_range){
 			return var->member;
 		}
 	}
-	return NULL;
+	return __NULL;
 }
 
 Enum *find_enum(Token *tok, int find_range){
@@ -260,7 +256,7 @@ Enum *find_enum(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return NULL;
+	return __NULL;
 }
 
 Member *find_enumerator(Token *tok, int find_range){
@@ -274,7 +270,7 @@ Member *find_enumerator(Token *tok, int find_range){
 			}
 		}
 	}
-	return NULL;
+	return __NULL;
 }
 
 Def_Type *find_defined_type(Token *tok, int find_range){
@@ -286,7 +282,7 @@ Def_Type *find_defined_type(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return NULL;
+	return __NULL;
 }
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
@@ -325,7 +321,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	}
 
 	if(kind == ND_DEREF){
-		if(rhs->type->ptr_to == NULL || rhs->type->ptr_to->ty != ARRAY){
+		if(rhs->type->ptr_to == __NULL || rhs->type->ptr_to->ty != ARRAY){
 			node->type = node->rhs->type->ptr_to;
 		}else{
 			free(node->type);
