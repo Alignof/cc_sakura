@@ -5,6 +5,9 @@ a.out
 cc_sakura
 
 testing/
+test/hsjoihs_tmp/*.c
+test/hsjoihs_tmp/*.s
+test/hsjoihs_tmp/*.out
 
 .gdb_history
 *.txt
