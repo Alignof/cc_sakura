@@ -242,7 +242,6 @@ struct Member{
 
 //================= global variable ===================
 extern int      llid;
-extern int      lvar_count;
 extern int      alloc_size;
 extern char     *user_input;
 extern char     filename[100];
@@ -307,7 +306,7 @@ struct _IO_FILE{
 	_IO_lock_t *_lock;
 };
 
-typedef _Bool bool;
+typedef int bool;
 bool true  = 1;
 bool false = 0;
 //=========================================================

@@ -6,6 +6,7 @@ MOTHER   := ../cc_sakura
 TARGET   := ./child
 SRCDIR   := ../src
 ASMDIR   := ./asem
+GEN2DIR  := ./gen2
 OBJDIR   := ./asem/obj
 SOURCES  := $(wildcard ../src/*.c)
 ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
@@ -20,19 +21,45 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 # 	$(CC) $(CFLAGS) -o $@ -c $<
 
 
-# prepare franken 
-EXCLUDEFILE := codegen
+# franken 
+EXCLUDEFILE := tokenizer
 franken:$(ASEMS)
+	# target:$(EXCLUDEFILE)
 	cat src/header.c src/$(EXCLUDEFILE).c > tmp.c
-	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
-	rm -f $(ASMDIR)/$(EXCLUDEFILE).s tmp.c
+	# gen1
+	$(MOTHER) tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	./child self_host.c || echo $$?
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen1.s
+	# gen2
+	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
+	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen2.s
+	# gen3
+	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
+	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen3
+	# check
+	diff gen2 gen3
 
-tmp:$(ASEMS)
-	$(MOTHER) test.c > $(ASMDIR)/test.s
+# fix franken 
+PATCHFILE := replaced
+patch:$(ASEMS)
+	# patch target:$(PATCHFILE)
+	cat src/header.c src/$(PATCHFILE).c > tmp.c
+	# gen1
+	$(MOTHER) tmp.c > $(ASMDIR)/$(PATCHFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	./child dummy.c || echo $$?
+	cp $(ASMDIR)/$(PATCHFILE).s ./gen1.s
+	# gen2
+	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
+	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(PATCHFILE).s ./gen2.s
+	# gen3
+	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
+	gcc $(ASMDIR)/*.s -static -o ./child
+	cp $(ASMDIR)/$(PATCHFILE).s ./gen3.s
+	# check
+	diff gen2 gen3
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 
 	@[ -d $(ASMDIR) ]
@@ -53,11 +80,11 @@ self_host:
 	$(MOTHER) self_host.c > child.s && gcc -static child.s -o child
 	./child self_host.c
 
-file_test:$(TARGET)
+simple_test:$(TARGET)
 	./child dummy.c || echo $$?
 
 clean:
-	rm -f *.o *.s *~ child* *.txt *.out
-	rm -f $(OBJECTS) ./assemblies/*.s
+	rm -f *.o *.s *~ child* *.txt *.out gen*
+	rm -f $(OBJECTS) ./asem/*.s
 
 .PHONY: self_host file_test clean install

@@ -3,7 +3,7 @@ int   label_num;
 int   label_loop_end;
 char  *user_input;
 char  filename[100];
-Func  *func_list[FUNC_NUM];
+Func  *func_list[300];
 Label *labels_head;
 Label *labels_tail;
 

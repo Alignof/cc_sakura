@@ -168,7 +168,7 @@ struct Node{
 // function
 struct Func{
 	//int argc;
-	int stack_size;
+	int  stack_size;
 	char *name;
 	Type *type;
 	Node *args;
@@ -242,7 +242,6 @@ struct Member{
 
 //================= global variable ===================
 extern int      llid;
-extern int      lvar_count;
 extern int      alloc_size;
 extern char     *user_input;
 extern char     filename[100];
@@ -307,7 +306,7 @@ struct _IO_FILE{
 	_IO_lock_t *_lock;
 };
 
-typedef _Bool bool;
+typedef int bool;
 bool true  = 1;
 bool false = 0;
 //=========================================================
@@ -328,24 +327,54 @@ extern FILE *stderr;		/* Standard error output stream.  */
 extern _Thread_local int errno;
 //=========================================================
 
-Func *func_list[100];
-int main(void){
-	Node nd;
-	Func fn;
-	char *lvname = "lvar name";
-	char *fnname = "func name";
 
-	nd.val    = 1;
-	nd.str    = name;
-	nd.offset = 8;
 
-	fn.stack_size = 8;
-	fn.name = fnname;
-	fn.code[0] = nd;
-
-	for(int i = 0;i < 10;i++){
-		func_list[i] = fn;
-	} 
-
-	return 0;
+int is_alnum(char c){
+	return	(('a' <=  c) && (c <=  'z')) ||
+		(('A' <=  c) && (c <=  'Z')) ||
+		(('0' <=  c) && (c <=  '9')) ||
+		(c == '_');
 }
+
+Token *new_token(TokenKind kind, Token *cur, char *str){
+	Token *new = calloc(1, sizeof(Token));
+	new->kind = kind;
+	//Remaining characters
+	new->str = str;
+	new->len = 1;
+	cur->next = new;
+	return new;
+}
+
+bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
+	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len])){
+		return false;
+	}
+
+	*now = new_token(tk_kind, *now, *p);
+	(*now)->len = len;
+	(*now)->str = *p;
+	*p += len;
+
+	return true;
+}
+
+int main(){
+	char  *p   = "void){return 0;}";
+	char  *str = "void";
+	int   len  = 4;
+	Token token;
+	Token *ptr;
+
+	token.kind = TK_RETURN;
+	token.len  = 0;
+	token.str  = str;
+
+	ptr = &token;
+	if(consume_reserved(&p, "void", 4, &ptr, TK_RETURN)){
+		printf("%s\n", p);
+	}
+
+	return ptr->len;
+}
+
