@@ -22,7 +22,7 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
 
 # franken 
-EXCLUDEFILE := tokenizer
+EXCLUDEFILE := declare
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILE)
 	cat src/header.c src/$(EXCLUDEFILE).c > tmp.c

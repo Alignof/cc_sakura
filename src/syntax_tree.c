@@ -553,6 +553,7 @@ Node *stmt(void){
 	}else if(consume_reserved_word("while", TK_WHILE)){
 		node      = new_node(ND_WHILE, node, NULL);
 		node->val = label_num++;
+		label_loop_end = node->val;
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -721,10 +722,6 @@ void program(void){
 					globals->init = array_block(init_gv);
 				}else{
 					globals->init = init_formula(init_gv, assign());
-				}
-			}else{
-				if(init_gv->kind == ND_GVAR){
-					globals->init = init_formula(init_gv, new_node_num(0));
 				}
 			}
 
