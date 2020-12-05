@@ -37,9 +37,9 @@ franken:$(ASEMS)
 	# gen3
 	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen3
+	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen3.s
 	# check
-	diff gen2 gen3
+	diff gen2.s gen3.s
 
 # fix franken 
 PATCHFILE := replaced
@@ -59,7 +59,7 @@ patch:$(ASEMS)
 	gcc $(ASMDIR)/*.s -static -o ./child
 	cp $(ASMDIR)/$(PATCHFILE).s ./gen3.s
 	# check
-	diff gen2 gen3
+	diff gen2.s gen3.s
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c 
 	@[ -d $(ASMDIR) ]
