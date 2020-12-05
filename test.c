@@ -1,1 +1,1 @@
-char *x="hello"; int main(){*(x+2);}
+int a=8; int main(){a=a-3;a;}
