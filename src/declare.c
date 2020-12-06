@@ -301,7 +301,6 @@ Member *register_struc_member(int *asize_ptr){
 
 		// parse member type
 		new_memb->type    = parse_type();
-		new_memb->memsize = new_memb->type->size;
 
 		// add member name
 		Token *def_name  = consume_ident();
@@ -332,15 +331,10 @@ Member *register_struc_member(int *asize_ptr){
 			expect("]");
 		}
 
-		// align member offset
 		int padding = 0;
-		if(new_memb->type->ty == ARRAY){
-			size_of_type = 8;
-		}else if (new_memb->type->ty == STRUCT){
-			size_of_type = new_memb->memsize;
-		}else{
-			size_of_type = new_memb->type->size;
-		}
+		new_memb->memsize = new_memb->type->size;
+		size_of_type      = new_memb->memsize;
+
 
 		if(memb_head){
 			int prev_tail    = (memb_head) ? (memb_head->offset + memb_head->type->size) : 0;

@@ -1,1 +1,1 @@
-int func(int a){return a;} int main(){int b;b=func(1);b;}
+struct A {int k[15]; int a;}; int main(){return sizeof(struct A);}
