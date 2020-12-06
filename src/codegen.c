@@ -146,6 +146,11 @@ void gen_calc(Node *node){
 			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	movzb rax,al\n");
 			break;
+		case ND_NOT:
+			printf("	cmp %s,0\n", reg_ax[reg_ty]);
+			printf("	sete al\n");
+			printf("	movzb rax,al\n");
+			break;
 		default:
 			error_at(token->str, "cannot code gen");
 	}
@@ -304,9 +309,7 @@ void gen_expr(Node *node){
 		case ND_NOT:
 			gen_expr(node->rhs);
 			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			printf("	sete al\n");
-			printf("	movzb rax,al\n");
+			gen_calc(node);
 			printf("	push rax\n");
 			return;
 		case ND_ADDRESS:

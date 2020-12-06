@@ -266,6 +266,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		alloc_size += asize;
 		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
+		/*
 		if(lvar->type->ty == STRUCT){
 			lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
 			alloc_size   += lvar->type->size;
@@ -273,6 +274,9 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			lvar->offset =  (locals) ? (locals->offset)+8 : 8;
 			alloc_size   += 8;
 		}
+		*/
+		lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
+		alloc_size   += lvar->type->size;
 	}
 
 	node->type = lvar->type;
@@ -354,7 +358,7 @@ Member *register_struc_member(int *asize_ptr){
 		if(consume("}")) break;
 	}
 
-	(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
+	//(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
 	return memb_head;
 }
 
