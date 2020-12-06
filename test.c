@@ -1,1 +1,1 @@
-int main(){int a=0; return !a;}
+int func(int a){return a;} int main(){int b;b=func(1);b;}

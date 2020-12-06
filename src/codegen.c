@@ -361,6 +361,9 @@ void gen_expr(Node *node){
 void gen(Node *node){
 	Node *cases;
 	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
+	//                        void _Bool  char  int   ptr  array
+	const char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
+	const char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
 
 	// generate assembly
 	switch(node->kind){
@@ -479,14 +482,11 @@ void gen(Node *node){
 		case ND_ARG:
 			while(node){
 				// push register argument saved
-				printf("	push %s\n", reg[node->val]);
+				printf("        push %s\n", reg[node->val]);
 				gen_lvar(node->rhs);
 				printf("	pop rax\n");
 				printf("	pop rdi\n");
-				printf("	mov [rax],rdi\n");
-				printf("	push rdi\n");
-				// pop stack top
-				printf("	pop rax\n");
+				printf("	mov [rax],%s\n", reg_di[node->rhs->type->ty]);
 				node=node->next;
 			}
 
