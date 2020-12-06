@@ -138,11 +138,11 @@ void gen_calc(Node *node){
 			printf("	setne al\n");
 			printf("	movzb rax,al\n");
 			break;
-		case ND_AND:
+		case ND_BIT_AND:
 			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	movzb rax,al\n");
 			break;
-		case ND_OR:
+		case ND_BIT_OR:
 			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	movzb rax,al\n");
 			break;
@@ -195,7 +195,7 @@ void gen_expr(Node *node){
 		case ND_POSTID:
 			// push
 			gen_address(node->lhs); // push lhs
-			gen_expr(node->rhs->rhs->rhs);          // push rhs
+			gen_expr(node->rhs->rhs->rhs);// push rhs
 			
 			// calc
 			printf("	pop rdi\n");    // rhs
@@ -304,6 +304,30 @@ void gen_expr(Node *node){
 			// false
 			gen(node->next);
 			printf(".LifEnd%03d:\n", node->val);
+			printf("	push rax\n");
+			return;
+		case ND_AND:
+			gen_expr(node->lhs);
+			printf("	je .LlogicEnd%03d\n", node->val);
+			gen_expr(node->rhs);
+
+			printf("	pop rax\n");
+			printf("	pop rdx\n");
+			printf("	and al,dl\n");
+			printf("	movzb rax,al\n");
+			printf(".LlogicEnd%03d:\n", node->val);
+			printf("	push rax\n");
+			return;
+		case ND_OR:
+			gen_expr(node->lhs);
+			printf("	je .LlogicEnd%03d\n", node->val);
+			gen_expr(node->rhs);
+
+			printf("	pop rax\n");
+			printf("	pop rdx\n");
+			printf("	or al,dl\n");
+			printf("	movzb rax,al\n");
+			printf(".LlogicEnd%03d:\n", node->val);
 			printf("	push rax\n");
 			return;
 		case ND_NOT:

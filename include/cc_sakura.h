@@ -49,6 +49,8 @@ typedef enum{
 	ND_NE, 		//  !=
 	ND_AND, 	//  &&
 	ND_OR, 		//  ||
+	ND_BIT_AND, 	//  &
+	ND_BIT_OR, 	//  |
 	ND_ASSIGN, 	//  =
 	ND_COMPOUND, 	//  +=, -=, *=, /=
 
