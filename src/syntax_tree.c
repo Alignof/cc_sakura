@@ -157,7 +157,7 @@ Node *unary(void){
 
 	// logical not
 	if(consume("!")){
-		node = new_node(ND_NOT, NULL, logical());
+		node = new_node(ND_NOT, NULL, unary());
 		return node;
 	}
 
@@ -273,9 +273,9 @@ Node *equelity(void){
 
 	for(;;){
 		if(consume("==")){
-			node = new_node(ND_EQ, node, relational());
+			node = new_node(ND_EQ, node, equelity());
 		}else if(consume("!=")){
-			node = new_node(ND_NE, node, relational());
+			node = new_node(ND_NE, node, equelity());
 		}else{
 			return node;
 		}
@@ -286,9 +286,15 @@ Node *logical(void){
 	Node *node = equelity();
 	for(;;){
 		if(consume("&&")){
-			node = new_node(ND_AND, node, equelity());
+			node = new_node(ND_AND, node, logical());
+			node->lhs = new_node(ND_NE, node->lhs, new_node_num(0));
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
+			node->val = label_num++;
 		}else if(consume("||")){
-			node = new_node(ND_OR, node, equelity());
+			node = new_node(ND_OR, node, logical());
+			node->lhs = new_node(ND_NE, node->lhs, new_node_num(0));
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
+			node->val = label_num++;
 		}else{
 			return node;
 		}

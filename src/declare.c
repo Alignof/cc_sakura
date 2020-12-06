@@ -266,6 +266,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		alloc_size += asize;
 		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
+		/*
 		if(lvar->type->ty == STRUCT){
 			lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
 			alloc_size   += lvar->type->size;
@@ -273,6 +274,9 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			lvar->offset =  (locals) ? (locals->offset)+8 : 8;
 			alloc_size   += 8;
 		}
+		*/
+		lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
+		alloc_size   += lvar->type->size;
 	}
 
 	node->type = lvar->type;
@@ -297,7 +301,6 @@ Member *register_struc_member(int *asize_ptr){
 
 		// parse member type
 		new_memb->type    = parse_type();
-		new_memb->memsize = new_memb->type->size;
 
 		// add member name
 		Token *def_name  = consume_ident();
@@ -328,15 +331,10 @@ Member *register_struc_member(int *asize_ptr){
 			expect("]");
 		}
 
-		// align member offset
 		int padding = 0;
-		if(new_memb->type->ty == ARRAY){
-			size_of_type = 8;
-		}else if (new_memb->type->ty == STRUCT){
-			size_of_type = new_memb->memsize;
-		}else{
-			size_of_type = new_memb->type->size;
-		}
+		new_memb->memsize = new_memb->type->size;
+		size_of_type      = new_memb->memsize;
+
 
 		if(memb_head){
 			int prev_tail    = (memb_head) ? (memb_head->offset + memb_head->type->size) : 0;
@@ -354,7 +352,7 @@ Member *register_struc_member(int *asize_ptr){
 		if(consume("}")) break;
 	}
 
-	(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
+	//(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
 	return memb_head;
 }
 
