@@ -287,13 +287,13 @@ Node *logical(void){
 	for(;;){
 		if(consume("&&")){
 			node = new_node(ND_AND, node, equelity());
-			node->lhs = new_node(ND_BIT_AND, node->lhs, new_node_num(1));
-			node->rhs = new_node(ND_BIT_AND, node->rhs, new_node_num(1));
+			node->lhs = new_node(ND_NE, node->lhs, new_node_num(0));
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
 			node->val = label_num++;
 		}else if(consume("||")){
 			node = new_node(ND_OR, node, equelity());
-			node->lhs = new_node(ND_BIT_AND, node->lhs, new_node_num(1));
-			node->rhs = new_node(ND_BIT_AND, node->rhs, new_node_num(1));
+			node->lhs = new_node(ND_NE, node->lhs, new_node_num(0));
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
 			node->val = label_num++;
 		}else{
 			return node;
