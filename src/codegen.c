@@ -315,8 +315,8 @@ void gen_expr(Node *node){
 			printf("	pop rdx\n");
 			printf("	and al,dl\n");
 			printf("	movzb rax,al\n");
-			printf(".LlogicEnd%03d:\n", node->val);
 			printf("	push rax\n");
+			printf(".LlogicEnd%03d:\n", node->val);
 			return;
 		case ND_OR:
 			gen_expr(node->lhs);
@@ -327,8 +327,8 @@ void gen_expr(Node *node){
 			printf("	pop rdx\n");
 			printf("	or al,dl\n");
 			printf("	movzb rax,al\n");
-			printf(".LlogicEnd%03d:\n", node->val);
 			printf("	push rax\n");
+			printf(".LlogicEnd%03d:\n", node->val);
 			return;
 		case ND_NOT:
 			gen_expr(node->rhs);
