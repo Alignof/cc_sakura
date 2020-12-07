@@ -320,7 +320,7 @@ void gen_expr(Node *node){
 			return;
 		case ND_OR:
 			gen_expr(node->lhs);
-			printf("	je .LlogicEnd%03d\n", node->val);
+			printf("	jne .LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
 			printf("	pop rax\n");
