@@ -315,8 +315,7 @@ Node *new_lvalue_node(NodeKind kind, Node *lhs, Node *rhs){
 	if(kind == ND_DEREF){
 		// *(a+b)
 		if(rhs->kind == ND_ADD || rhs->kind == ND_SUB){
-			if(rhs->lhs->type->ty == PTR || rhs->lhs->type->ty == ARRAY ||
-			   rhs->rhs->type->ty == PTR || rhs->rhs->type->ty == ARRAY ){
+			if(rhs->lhs->type->ty == ARRAY || rhs->rhs->type->ty == ARRAY){
 				node->rhs = pointer_calc(rhs, rhs->lhs->type, rhs->rhs->type);
 			}
 		}
