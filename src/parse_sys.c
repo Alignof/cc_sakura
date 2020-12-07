@@ -349,6 +349,12 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		}
 	}
 
+	if(kind == ND_ADD || kind == ND_SUB){
+		if(lhs->type->ty == PTR || rhs->type->ty == PTR){
+			node = pointer_calc(node, lhs->type, rhs->type);
+		}
+	}
+
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
 		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}
