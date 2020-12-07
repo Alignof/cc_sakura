@@ -544,9 +544,10 @@ Node *stmt(void){
 		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
-		node      = new_node(ND_DOWHILE, NULL, stmt());
+		node      = new_node(ND_DOWHILE, NULL, NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
+		node->rhs = stmt();
 
 		consume_reserved_word("while", TK_WHILE);
 		if(consume("(")){

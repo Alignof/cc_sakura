@@ -1,3 +1,18 @@
-//int foo(char a){int d;d = 3;char c;c = a+d;return c;} int main(){char f;f=3;return foo(f)*4+150;}
-//int main(){int a[10][5];int *q;q = *(a+1); *q=174; return **(a+1);}
-int main(){int a[10][5]; int *q=a[1]; *q=174; return a[1][0];}
+int main(){
+	int a = 0;
+	int b = 0;
+
+	do{
+		a -= 1;
+		b += a;
+		if(a){
+			continue;
+		}
+
+		break;
+		a+=100;
+	}while(a+3);
+
+	return -a;// expect 3
+}
+
