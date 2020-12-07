@@ -432,6 +432,7 @@ void gen(Node *node){
 			if(node->lhs){
 				printf("	jmp .LcaseBegin%03d\n", node->lhs->val);
 			}
+			printf("	jmp .LloopEnd%03d\n", node->val);
 
 			// gen code block
 			gen(node->rhs);
