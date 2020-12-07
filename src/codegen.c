@@ -84,9 +84,9 @@ void gen_address(Node *node){
 
 void gen_calc(Node *node){
 	//                        void _Bool  char  int   ptr  array
-	const char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
-	const char reg_dx[6][4]={"edx","edx","edx","edx","rdx","rdx"};
-	const char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
+	const char reg_ax[6][4]={"al","al","al","eax","rax","rax"};
+	const char reg_dx[6][4]={"dl","dl","dl","edx","rdx","rdx"};
+	const char reg_di[6][4]={"dil","dil","dil","edi","rdi","rdi"};
 	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
 
 	switch(node->kind){
@@ -97,7 +97,13 @@ void gen_calc(Node *node){
 			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			break;
 		case ND_MUL:
-			printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			if(node->type->ty == CHAR){
+				printf("	movsx eax,al\n");
+				printf("	movsx edi,dil\n");
+				printf("	imul eax,edi\n");
+			}else{
+				printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			}
 			break;
 		case ND_DIV:
 			printf("	cqo\n");
@@ -386,8 +392,7 @@ void gen(Node *node){
 	Node *cases;
 	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
 	//                        void _Bool  char  int   ptr  array
-	const char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
-	const char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
+	const char reg_di[6][4]={"edi","dil","dil","edi","rdi","rdi"};
 
 	// generate assembly
 	switch(node->kind){

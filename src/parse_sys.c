@@ -354,8 +354,17 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		}
 	}
 
+/*
 	if(ND_ADD <= kind && kind <= ND_ASSIGN){
 		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	}
+*/
+	if(ND_ADD <= kind && kind <= ND_BIT_OR){
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	}
+
+	if(kind == ND_ASSIGN || kind == ND_COMPOUND){
+		node->type = lhs->type;
 	}
 
 	if(kind == ND_DOT || kind == ND_ARROW){
