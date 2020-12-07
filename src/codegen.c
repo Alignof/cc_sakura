@@ -347,13 +347,14 @@ void gen_expr(Node *node){
 			gen_address(node->rhs);// printf("	push rax\n");
 			return;
 		case ND_DEREF:
-			gen_expr(node->rhs);
-			printf("	pop rax\n");
-			if(node->type->ty <= CHAR){
-				printf("	movzx eax,BYTE PTR [rax]\n");
-				printf("	movsx eax,al\n");
-			}else{
-				printf("	mov rax,[rax]\n");
+			gen(node->rhs);
+			if(node->type->ty != ARRAY){
+				if(node->type->ty <= CHAR){
+					printf("	movzx eax,BYTE PTR [rax]\n");
+					printf("	movsx eax,al\n");
+				}else{
+					printf("	mov rax,[rax]\n");
+				}
 			}
 			printf("	push rax\n");
 			return;
