@@ -212,6 +212,26 @@ Node *unary(void){
 		return node;
 	}
 
+	if(consume_reserved_word("_Alignof", TK_ALIGNOF)){
+		// _Alignof(5)  = > 4
+		// _Alignof(&a) = > 8
+
+		if(consume("(")){
+			int INSIDE_FILE = 0;
+			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+				Type *target_type = parse_type();
+				node = new_node(ND_NUM, node, new_node_num(target_type->align));
+				node->val = target_type->align;
+			}else{
+				Node *target = expr();
+				node = new_node(ND_NUM, node, target);
+				node->val = node->rhs->type->align;
+			}
+			expect(")");
+		}
+
+		return node;
+	}
 	return primary();
 }
 

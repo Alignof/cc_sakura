@@ -267,4 +267,14 @@ assert -cl 5  "int main(){int x=5; ; return x;}"
 assert -cl 10 "int main(){int i=0; int x=0; for(;i<10;i++){x++;}return x ;}"
 
 
+assert -cl 4 "int main(){return _Alignof(int); }"
+assert -cl 4 "int main(){int x; return _Alignof(x); }"
+assert -cl 4 "int main(){int  a[456]; return _Alignof(a); }"
+assert -cl 1 "int main(){char a[456]; return _Alignof(a); }"
+assert -cl 4 "int main(){struct rgb{int r; int g; int b;}; struct rgb x; return _Alignof(x); }"
+assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
+assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
+
+
+
 echo OK
