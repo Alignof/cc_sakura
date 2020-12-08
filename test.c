@@ -1,17 +1,14 @@
-enum A{
-        B,
-        C,
-        D
-};
+int a[10][10];
 
-int f(enum A b){
-        switch(b){
-                case B: return 1;
-                case C: return 5;
-                case D: return 8;
-        }
+int foo(int p[10][10]){
+        int q;
+        q = ((p+=1)-1)[0][0];
+        // q=100, p[0][0] = 74
+        return q+p[0][0];
 }
 
-int main(void){
-        return (f(B) - 1) || (f(C) - 5) || (f(D) - 8);
+int main(){
+        a[0][0] = 100;
+        a[1][0] = 74;
+        return foo(a);// expected 174
 }

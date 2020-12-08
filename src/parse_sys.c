@@ -300,7 +300,8 @@ Node *new_lvalue_node(NodeKind kind, Node *lhs, Node *rhs){
 	if(kind == ND_ADD || kind == ND_SUB){
 		if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
 		   rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
-			node = pointer_calc(node, lhs->type, rhs->type);
+                        node = pointer_calc(node, lhs->type, rhs->type);
+                        //node->type->ty = PTR;
 		}
 	}
 
@@ -338,6 +339,10 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		if(lhs->type->ty == BOOL){
 			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
 		}
+
+                if(lhs->type->ty == STRUCT){
+                        error_at(token->str, "struct assignment is not implemented");
+                }
 	}
 
 	if(kind == ND_ADD || kind == ND_SUB){

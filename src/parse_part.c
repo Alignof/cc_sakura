@@ -299,11 +299,13 @@ void get_argument(int func_index){
 				new_arg->next->rhs  = expr();
 				new_arg             = new_arg->next;
 			}
-			arg_counter++;
 
-			if(!(consume(","))){
-				break;
-			}
+                        if(new_arg->rhs->type->ty == ARRAY){
+                                new_arg->rhs->type->ty = PTR;
+                        }
+
+			arg_counter++;
+			if(!(consume(","))) break;
 		}
 		expect(")");
 	}
