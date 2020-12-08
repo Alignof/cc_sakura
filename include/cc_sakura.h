@@ -346,6 +346,7 @@ Node *compiler_directive();
 Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(NodeKind type, Node *node);
 Node *init_formula(Node *node, Node *init_val);
+Node *global_init(Node *node, Node *init_val);
 Node *incdec(Node *node, IncDecKind idtype);
 Node *array_block(Node *arr);
 Node *array_str(Node *arr, Node *init_val);

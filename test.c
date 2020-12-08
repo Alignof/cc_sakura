@@ -1,1 +1,11 @@
-int a[10][10]; int foo(int p[10][10]){int q;q = p++[0][0]; return q+p[0][0];} int main(){a[0][0] = 100; a[1][0] = 74; return foo(a);}
+/*
+char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};
+int main(){
+        printf("%s\n", reg_ax[4]);
+        return;
+}
+*/
+int x = 3;
+int main(){
+        return x;
+}
