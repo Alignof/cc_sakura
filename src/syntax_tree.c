@@ -38,7 +38,7 @@ Node *data(void){
 		// new one
 		}else{
 			Str *new = calloc(1, sizeof(Str));
-			new->len = tok->len;
+			new->len = tok->len - 1;
 			new->str = tok->str;
 			new->label_num = strings ? strings->label_num+1 : 0;
 			node->str = new->str;
@@ -734,9 +734,12 @@ void program(void){
 			get_argument(func_index);
 
 			// get function block
-			consume("{");
-			function(func_list[func_index++]);
-			consume("}");
+                        if(consume("{")){
+                                function(func_list[func_index++]);
+			// prototype declaration
+                        }else{
+                                expect(";");
+                        }
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);

@@ -232,7 +232,7 @@ Token *tokenize(char *p){
 			while(!(*(p-1) != '\\' && *p == '"')){
 				now = new_token(TK_STR, now, p++);
 			}
-			p++;
+			now = new_token(TK_STR, now, p++);
 			continue;
 		}
 

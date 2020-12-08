@@ -1,1 +1,20 @@
-struct A{int a;}; int main(){struct A arr[5]; void *p = arr; int *q = p; q[3] = 174; return arr[3].a;}
+/*
+int printf();
+int puts();
+int count;
+int main(){
+        int i;
+        int hist[20];
+        for (i = 1;i < 11;i++) {
+                printf("%d %s: %d", i, (i == 1? " " : "s "), i);
+                puts("");
+        }
+        return 0;
+}
+*/
+
+int main(){
+        char *str = "";
+        return 0;
+}
+
