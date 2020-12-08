@@ -745,15 +745,6 @@ void program(void){
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
 
 			// initialize formula
-                        /*
-			if(consume("=")){
-				if(consume("{")){
-					globals->init = array_block(init_gv);
-				}else{
-					globals->init = init_formula(init_gv, assign());
-				}
-			}
-                        */
 			if(consume("=")){
 			        globals->init = global_init(init_gv, assign());
                         }

@@ -7,8 +7,10 @@
 
 Node *global_init(Node *node, Node *init_val){
         if(init_val->kind == ND_STR){
-                if(node->type->index_size != -1 && init_val->offset > node->type->index_size){
-                                error_at(token->str, "invalid global variable initialize");
+                if(node->kind == ND_GARRAY){
+                        if(node->type->index_size != -1 && init_val->offset > node->type->index_size){
+                                        error_at(token->str, "invalid global variable initialize");
+                        }
                 }
         }else if(init_val->kind == ND_BLOCK){
                 ;

@@ -61,39 +61,41 @@ void get_code(int argc, char **argv){
 }
 
 void set_gvar(GVar *gvar){
-	Node *init;
-	Type *type = get_pointer_type(gvar->type);
 	if(gvar->type->is_extern == 0){
-		if(gvar->type->is_thread_local == 0){
-			if(gvar->init){
-				printf("%.*s:\n", gvar->len, gvar->name);
-				init = gvar->init->rhs;
-				if(gvar->init->kind == ND_BLOCK){
-					while(init){
-						if(type->ty < INT){
-							printf("	.byte	%d\n", init->rhs->val);
-						}else{
-							printf("	.long	%d\n", init->rhs->val);
-						}
-						init = init->block_code;
-					}
-				}else if(gvar->init->rhs->kind == ND_STR){
-					printf("	.quad	.LC%d\n", init->val);
-				}else{
-					if(type->ty < INT){
-						printf("	.byte	%d\n", init->val);
-					}else{
-						printf("	.long	%d\n", init->val);
-					}
-				}
-			}else{
-				printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
-			}
-		}else{
-			printf(".section .tbss,\"awT\",@nobits\n");
-			printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
-		}
-	}
+                return;
+        }
+
+	Node *init = NULL;
+	Type *type = get_pointer_type(gvar->type);
+        if(gvar->type->is_thread_local == 0){
+                if(gvar->init){
+                        printf("%.*s:\n", gvar->len, gvar->name);
+                        init = gvar->init;
+                        if(gvar->init->kind == ND_BLOCK){
+                                while(init){
+                                        if(type->ty < INT){
+                                                printf("	.byte	%d\n", init->val);
+                                        }else{
+                                                printf("	.long	%d\n", init->val);
+                                        }
+                                        init = init->block_code;
+                                }
+                        }else if(gvar->init->kind == ND_STR){
+                                printf("	.quad	.LC%d\n", init->val);
+                        }else{
+                                if(type->ty < INT){
+                                        printf("	.byte	%d\n", init->val);
+                                }else{
+                                        printf("	.long	%d\n", init->val);
+                                }
+                        }
+                }else{
+                        printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+                }
+        }else{
+                printf(".section .tbss,\"awT\",@nobits\n");
+                printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+        }
 }
 
 int main(int argc, char **argv){
