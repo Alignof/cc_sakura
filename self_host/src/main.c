@@ -3,7 +3,7 @@ int   label_num;
 int   label_loop_end;
 char  *user_input;
 char  filename[100];
-Func  *func_list[300];
+Func  *func_list[FUNC_NUM];
 Label *labels_head;
 Label *labels_tail;
 
@@ -18,13 +18,13 @@ char *read_file(char *path){
 	}
 
 	// get file size
-	if(fseek(fp, 0, SEEK_END) == -1){
+	if(fseek(fp, 0L, SEEK_END) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 	
-	if(fseek(fp, 0, SEEK_SET) == -1){
+	if(fseek(fp, 0L, SEEK_SET) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
 
@@ -58,9 +58,45 @@ void get_code(int argc, char **argv){
 	}
 }
 
+void set_gvar(GVar *gvar){
+	Node *init;
+	Type *type = get_pointer_type(gvar->type);
+	if(gvar->type->is_extern == 0){
+		if(gvar->type->is_thread_local == 0){
+			if(gvar->init){
+				printf("%.*s:\n", gvar->len, gvar->name);
+				init = gvar->init->rhs;
+				if(gvar->init->kind == ND_BLOCK){
+					while(init){
+						if(type->ty < INT){
+							printf("	.byte	%d\n", init->rhs->val);
+						}else{
+							printf("	.long	%d\n", init->rhs->val);
+						}
+						init = init->block_code;
+					}
+				}else if(gvar->init->rhs->kind == ND_STR){
+					printf("	.quad	.LC%d\n", init->val);
+				}else{
+					if(type->ty < INT){
+						printf("	.byte	%d\n", init->val);
+					}else{
+						printf("	.long	%d\n", init->val);
+					}
+				}
+			}else{
+				printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+			}
+		}else{
+			printf(".section .tbss,\"awT\",@nobits\n");
+			printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+		}
+	}
+}
+
 int main(int argc, char **argv){
 	int i;
-	int j;
+        int j;
 
 	// get source code
 	get_code(argc, argv);
@@ -77,19 +113,12 @@ int main(int argc, char **argv){
 
 	// generate code
 	printf(".intel_syntax noprefix\n");
-	printf(".globl main\n");
 
 	// set global variable
+	printf(".data\n");
 	GVar *start = globals;
 	for (GVar *var = start;var;var = var->next){
-		if(var->type->is_extern == 0){
-			if(var->type->is_thread_local == 0){
-				printf(".comm	%.*s, %d, %d\n", var->len, var->name, var->memsize, var->type->align);
-			}else{
-				printf(".section .tbss,\"awT\",@nobits\n");
-				printf("%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
-			}
-		}
+		set_gvar(var);
 	}
 
 	// set string
@@ -105,7 +134,9 @@ int main(int argc, char **argv){
 	labels_tail    = __NULL;
 
 	//generate assembly at first expr
+	printf(".text\n");
 	for(i = 0;func_list[i];i++){
+		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	push rbp\n");
 		printf("	mov rbp,rsp\n");
@@ -114,14 +145,6 @@ int main(int argc, char **argv){
 		if(func_list[i]->args){
 			// set local variable
 			gen(func_list[i]->args);
-		}
-
-		// global init (main)
-		if(strncmp(func_list[i]->name, "main", 4) == 0){
-			GVar *start = globals;
-			for (GVar *var = start;var;var = var->next){
-				if(var->init) expand_next(var->init);
-			}
 		}
 
 		for(j = 0;func_list[i]->code[j] != __NULL;j++){
@@ -138,4 +161,5 @@ int main(int argc, char **argv){
 
 	return 0;
 }
+
 

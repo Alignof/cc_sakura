@@ -34,7 +34,7 @@ Node *data(void){
 		// new one
 		}else{
 			Str *new = calloc(1, sizeof(Str));
-			new->len = tok->len;
+			new->len = tok->len - 1;
 			new->str = tok->str;
 			new->label_num = strings ? strings->label_num+1 : 0;
 			node->str = new->str;
@@ -107,12 +107,6 @@ Node *data(void){
 Node *primary(void){
 	Node *node = data();
 
-	// Is array index
-	while(consume("[")){
-		node = array_index(node, add());
-		expect("]");
-	}
-
 	// increment
 	if(consume("++")){
 		node = incdec(node, POST_INC);
@@ -121,6 +115,12 @@ Node *primary(void){
 	// decrement
 	if(consume("--")){
 		node = incdec(node, POST_DEC);
+	}
+
+	// Is array index
+	while(consume("[")){
+		node = array_index(node, add());
+		expect("]");
 	}
 
 	// member variable
@@ -149,23 +149,21 @@ Node *primary(void){
 }
 
 Node *unary(void){
-	Node *node = __NULL;
+	Node *node=__NULL;
 
 	// logical not
 	if(consume("!")){
-		node = new_node(ND_NOT, __NULL, logical());
+		node = new_node(ND_NOT, __NULL, unary());
 		return node;
 	}
 
 	if(consume("*")){
 		node = new_node(ND_DEREF, __NULL, unary());
-
 		return node;
 	}
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, __NULL, unary());
-
 		return node;
 	}
 
@@ -210,11 +208,30 @@ Node *unary(void){
 		return node;
 	}
 
+	if(consume_reserved_word("_Alignof", TK_ALIGNOF)){
+		// _Alignof(5)  = > 4
+		// _Alignof(&a) = > 8
+
+		if(consume("(")){
+			int INSIDE_FILE = 0;
+			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+				Type *target_type = parse_type();
+				node = new_node(ND_NUM, node, new_node_num(target_type->align));
+				node->val = target_type->align;
+			}else{
+				Node *target = expr();
+				node = new_node(ND_NUM, node, target);
+				node->val = node->rhs->type->align;
+			}
+			expect(")");
+		}
+
+		return node;
+	}
 	return primary();
 }
 
 Node *mul(void){
-	//jmp unary()
 	Node *node = unary();
 
 	for(;;){
@@ -233,7 +250,6 @@ Node *mul(void){
 }
 
 Node *add(void){
-	//jmp mul()
 	Node *node = mul();
 
 	for(;;){
@@ -271,9 +287,9 @@ Node *equelity(void){
 
 	for(;;){
 		if(consume("==")){
-			node = new_node(ND_EQ, node, relational());
+			node = new_node(ND_EQ, node, equelity());
 		}else if(consume("!=")){
-			node = new_node(ND_NE, node, relational());
+			node = new_node(ND_NE, node, equelity());
 		}else{
 			return node;
 		}
@@ -284,9 +300,15 @@ Node *logical(void){
 	Node *node = equelity();
 	for(;;){
 		if(consume("&&")){
-			node = new_node(ND_AND, node, equelity());
+			node = new_node(ND_AND, node, logical());
+			node->lhs = new_node(ND_NE, node->lhs, new_node_num(0));
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
+			node->val = label_num++;
 		}else if(consume("||")){
-			node = new_node(ND_OR, node, equelity());
+			node = new_node(ND_OR, node, logical());
+			node->lhs = new_node(ND_NE, node->lhs, new_node_num(0));
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
+			node->val = label_num++;
 		}else{
 			return node;
 		}
@@ -296,7 +318,7 @@ Node *logical(void){
 Node *ternary(void){
 	Node *node = logical();
 	if(consume("?")){
-		//                          cond  if true
+		//                               cond  if true
 		node      = new_node(ND_TERNARY, node, ternary());
 		node->val = label_num++;
 		expect(":");
@@ -538,9 +560,10 @@ Node *stmt(void){
 		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
-		node      = new_node(ND_DOWHILE, __NULL, stmt());
+		node      = new_node(ND_DOWHILE, __NULL, __NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
+		node->rhs = stmt();
 
 		consume_reserved_word("while", TK_WHILE);
 		if(consume("(")){
@@ -551,6 +574,7 @@ Node *stmt(void){
 	}else if(consume_reserved_word("while", TK_WHILE)){
 		node      = new_node(ND_WHILE, node, __NULL);
 		node->val = label_num++;
+		label_loop_end = node->val;
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -706,9 +730,12 @@ void program(void){
 			get_argument(func_index);
 
 			// get function block
-			consume("{");
-			function(func_list[func_index++]);
-			consume("}");
+                        if(consume("{")){
+                                function(func_list[func_index++]);
+			// prototype declaration
+                        }else{
+                                expect(";");
+                        }
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
@@ -720,10 +747,6 @@ void program(void){
 				}else{
 					globals->init = init_formula(init_gv, assign());
 				}
-			}else{
-				if(init_gv->kind == ND_GVAR){
-					globals->init = init_formula(init_gv, new_node_num(0));
-				}
 			}
 
 			expect(";");
@@ -731,3 +754,4 @@ void program(void){
 	}
 	func_list[func_index] = __NULL;
 }
+

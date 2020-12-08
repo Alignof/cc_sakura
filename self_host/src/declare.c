@@ -27,8 +27,8 @@ Type *set_type(Type *type, Token *tok){
 			type->len   = tok->len;
 			type->name  = tok->str;
 			if(struc_found){
-				type->ty = STRUCT;
-				type->size   = struc_found->memsize;
+				type->ty   = STRUCT;
+				type->size = struc_found->memsize;
 				// unname enum
 				if(struc_found->member == __NULL && consume("{")){
 					struc_found->member = register_struc_member(&(struc_found->memsize));
@@ -84,8 +84,8 @@ Type *set_type(Type *type, Token *tok){
 }
 
 Type *parse_type(void){
-	Type *type     = calloc(1, sizeof(Type));
-	int star_count = 0;
+	Type *type = calloc(1, sizeof(Type));
+	int star_count  = 0;
 	int INSIDE_FILE = 0;
 
 	// check type
@@ -260,6 +260,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		alloc_size += asize;
 		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
+		/*
 		if(lvar->type->ty == STRUCT){
 			lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
 			alloc_size   += lvar->type->size;
@@ -267,11 +268,13 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			lvar->offset =  (locals) ? (locals->offset)+8 : 8;
 			alloc_size   += 8;
 		}
+		*/
+		lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
+		alloc_size   += lvar->type->size;
 	}
 
 	node->type = lvar->type;
 	node->offset = lvar->offset;
-	// locals == new lvar
 	locals = lvar;
 
 	return node;
@@ -292,7 +295,6 @@ Member *register_struc_member(int *asize_ptr){
 
 		// parse member type
 		new_memb->type    = parse_type();
-		new_memb->memsize = new_memb->type->size;
 
 		// add member name
 		Token *def_name  = consume_ident();
@@ -323,15 +325,10 @@ Member *register_struc_member(int *asize_ptr){
 			expect("]");
 		}
 
-		// align member offset
 		int padding = 0;
-		if(new_memb->type->ty == ARRAY){
-			size_of_type = 8;
-		}else if (new_memb->type->ty == STRUCT){
-			size_of_type = new_memb->memsize;
-		}else{
-			size_of_type = new_memb->type->size;
-		}
+		new_memb->memsize = new_memb->type->size;
+		size_of_type      = new_memb->memsize;
+
 
 		if(memb_head){
 			int prev_tail    = (memb_head) ? (memb_head->offset + memb_head->type->size) : 0;
@@ -349,7 +346,7 @@ Member *register_struc_member(int *asize_ptr){
 		if(consume("}")) break;
 	}
 
-	(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
+	//(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
 	return memb_head;
 }
 
@@ -404,3 +401,4 @@ void declare_enum(Enum *new_enum){
 	new_enum->next   = enumerations;
 	enumerations     = new_enum;
 }
+

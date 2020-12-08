@@ -1,12 +1,12 @@
-void error(char *loc, char *fmt){
-	//va_list ap;
-	//va_start(ap, fmt);
+void error(char *loc, char *fmt, ...){
+	va_list ap;
+	va_start(ap, fmt);
 
 	int pos = loc-user_input;
 	fprintf(stderr, "%s\n", user_input);
 	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ ");
-	//vfprintf(stderr, fmt, ap);
+	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit(1);
 }
@@ -29,7 +29,7 @@ void error_at(char *loc, char *msg){
 	while(*start == '\t') start++;
 
 	int indent = fprintf(stderr, "%s:%d ", filename, line_num);
-	fprintf(stderr, "%.*s\n", (end-start), start);
+	fprintf(stderr, "%.*s\n", (int)(end-start), start);
 
 	int pos = indent+loc-start;
 	fprintf(stderr, "%*s", pos, " ");
@@ -40,7 +40,7 @@ void error_at(char *loc, char *msg){
 bool check(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-			strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -50,7 +50,7 @@ bool check(char *op){
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-			strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -65,12 +65,12 @@ int string_len(void){
 		len++;
 	}
 
-	return len;
+	return len - 1;
 }
 
 bool consume_ret(void){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
-			memcmp(token->str, "return", token->len)){
+	    memcmp(token->str, "return", token->len)){
 		return false;
 	}
 
@@ -79,9 +79,9 @@ bool consume_ret(void){
 }
 
 bool consume_reserved_word(char *keyword, TokenKind kind){
-	if( token->kind != kind ||
-			token->len != strlen(keyword) ||
-			memcmp(token->str, keyword, token->len)){
+	if(token->kind != kind ||
+	   token->len != strlen(keyword) ||
+	   memcmp(token->str, keyword, token->len)){
 		return false;
 	}
 
@@ -130,8 +130,8 @@ Token *consume_ident(void){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-			strlen(op) != token->len||
-			memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len||
+	    memcmp(token->str, op, token->len)){
 		error_at(token->str, "not a charctor.");
 	}
 	token = token->next;
@@ -144,7 +144,7 @@ int expect_number(void){
 	}
 
 	int val = token->val;
-	token = token->next;
+	token   = token->next;
 	return val;
 }
 
@@ -164,7 +164,6 @@ void label_register(Node *node, LabelKind kind){
 	labels_tail      = (labels_tail) ? labels_tail->next : labels_head;
 
 	llid++;
-
 
 	if(kind == LB_CASE){
 		new_label->cond = node->lhs;
@@ -293,9 +292,22 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	node->lhs  = lhs;
 	node->rhs  = rhs;
 
+	if(ND_ADD <= kind && kind <= ND_BIT_OR){
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	}
+        
+        if(kind == ND_SUB){
+                if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
+		   (lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
+                        node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
+                        return node;
+                }
+        }
+
 	if(kind == ND_ADD || kind == ND_SUB){
-		if(lhs->type->ty >= PTR  ||  rhs->type->ty >= PTR){
-			node = pointer_calc(node, lhs->type, rhs->type);
+                if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
+		   rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
+                        node = pointer_calc(node, lhs->type, rhs->type);
 		}
 	}
 
@@ -303,14 +315,22 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		if(lhs->type->ty == BOOL){
 			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
 		}
+
+                if(lhs->type->ty == STRUCT){
+                        error_at(token->str, "struct assignment is not implemented");
+                }
 	}
 
-	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	if(kind == ND_ASSIGN || kind == ND_COMPOUND){
+		node->type = lhs->type;
 	}
 
 	if(kind == ND_DOT || kind == ND_ARROW){
 		node->type = lhs->type;
+	}
+
+	if(kind == ND_DEREF){
+		node->type = node->rhs->type->ptr_to;
 	}
 
 	if(kind == ND_ADDRESS){
@@ -318,17 +338,6 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		node->type->size   = type_size(node->type);
 		node->type->align  = type_align(node->type);
 		node->type->ptr_to = rhs->type;
-	}
-
-	if(kind == ND_DEREF){
-		if(rhs->type->ptr_to == __NULL || rhs->type->ptr_to->ty != ARRAY){
-			node->type = node->rhs->type->ptr_to;
-		}else{
-			free(node->type);
-			free(node);
-			rhs->type = rhs->type->ptr_to;
-			return rhs;
-		}
 	}
 
 	return node;
@@ -345,4 +354,5 @@ Node *new_node_num(int val){
 	node->type->align = type_align(node->type);
 	return node;
 }
+
 
