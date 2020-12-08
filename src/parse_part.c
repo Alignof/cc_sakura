@@ -246,10 +246,10 @@ Node *call_function(Node *node, Token *tok){
 	Node *new = NULL;
 	while(1){
 		if(new == NULL){
-			new       = logical();
-			node->rhs = new;
+			new        = assign();
+			node->rhs  = new;
 		}else{
-			new->next  = logical();
+			new->next  = assign();
 			new        = new->next;
 		}
 

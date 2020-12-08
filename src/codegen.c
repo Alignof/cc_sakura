@@ -1,5 +1,11 @@
 #include "cc_sakura.h"
 
+//                         void _Bool  char   int   ptr  array struct enum
+const char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};
+const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","rdx","rdx","rdx","edx"};
+const char reg_di[8][4] = {"dil","dil","dil","edi","rdi","rdi","rdi","edi"};
+const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
+
 void expand_next(Node *node){
 	while(node){
 		gen(node);
@@ -54,7 +60,6 @@ void gen_struc(Node *node){
 void gen_args(Node *args){
 	int reg_num;
 	int arg_count = 0;
-	const char reg[8][4]={"rdi","rsi","rdx","rcx","r8","r9"};
 
 
 	while(args){
@@ -83,10 +88,6 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	//                        void _Bool  char  int   ptr  array
-	const char reg_ax[8][4]={"al","al","al","eax","rax","rax","rax","rax"};
-	const char reg_dx[8][4]={"dl","dl","dl","edx","rdx","rdx","rdx","rdx"};
-	const char reg_di[8][4]={"dil","dil","dil","edi","rdi","rdi","rdi","rdi"};
 	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
 
 	switch(node->kind){
@@ -163,7 +164,6 @@ void gen_calc(Node *node){
 }
 
 void gen_expr(Node *node){
-	const char reg_ax[8][4]={"al","al","al","eax","rax","rax","rax","rax"};
 	switch(node->kind){
 		case ND_NUM:
 			printf("	push %d\n", node->val);
@@ -392,10 +392,6 @@ void gen_expr(Node *node){
 
 void gen(Node *node){
 	Node *cases;
-	char reg[6][4]  = {"rdi","rsi","rdx","rcx","r8","r9"};
-	//                        void _Bool  char  int   ptr  array
-	const char reg_di[8][4]={"edi","dil","dil","edi","rdi","rdi","rdi","rdi"};
-	const char reg_ax[8][4]={"al","al","al","eax","rax","rax","rax","rax"};
 
 	// generate assembly
 	switch(node->kind){

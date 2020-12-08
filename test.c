@@ -1,18 +1,17 @@
-int main(){
-	int a = 0;
-	int b = 0;
+enum A{
+        B,
+        C,
+        D
+};
 
-	do{
-		a -= 1;
-		b += a;
-		if(a){
-                        printf("continue\n");
-			continue;
-		}
+int f(enum A b){
+        switch(b){
+                case B: return 1;
+                case C: return 5;
+                case D: return 8;
+        }
+}
 
-		break;
-		a+=100;
-	}while(a+3);
-
-	return -a;// expect 3
+int main(void){
+        return (f(B) - 1) || (f(C) - 5) || (f(D) - 8);
 }
