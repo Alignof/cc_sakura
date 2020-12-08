@@ -111,12 +111,6 @@ Node *data(void){
 Node *primary(void){
 	Node *node = data();
 
-	// Is array index
-	while(consume("[")){
-		node = array_index(node, add());
-		expect("]");
-	}
-
 	// increment
 	if(consume("++")){
 		node = incdec(node, POST_INC);
@@ -125,6 +119,12 @@ Node *primary(void){
 	// decrement
 	if(consume("--")){
 		node = incdec(node, POST_DEC);
+	}
+
+	// Is array index
+	while(consume("[")){
+		node = array_index(node, add());
+		expect("]");
 	}
 
 	// member variable

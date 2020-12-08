@@ -1,12 +1,1 @@
-int printf();
-int puts();
-int count;
-int main(){
-        int i;
-        int hist[20];
-        for (i = 1;i < 11;i++) {
-                printf("%d %s: %d", i, (i == 1? " " : "s "), i);
-                puts("");
-        }
-        return 0;
-}
+int a[10][10]; int foo(int p[10][10]){int q;q = p++[0][0]; return q+p[0][0];} int main(){a[0][0] = 100; a[1][0] = 74; return foo(a);}
