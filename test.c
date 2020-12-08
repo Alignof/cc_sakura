@@ -1,4 +1,3 @@
-/*
 int printf();
 int puts();
 int count;
@@ -11,10 +10,3 @@ int main(){
         }
         return 0;
 }
-*/
-
-int main(){
-        char *str = "";
-        return 0;
-}
-

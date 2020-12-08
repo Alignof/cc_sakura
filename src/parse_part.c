@@ -249,8 +249,8 @@ Node *call_function(Node *node, Token *tok){
 			new        = assign();
 			node->rhs  = new;
 		}else{
-			new->next  = assign();
-			new        = new->next;
+			new->block_code = assign();
+			new             = new->block_code;
 		}
 
 		ctr++;
