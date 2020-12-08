@@ -6,6 +6,7 @@ int main(){
 		a -= 1;
 		b += a;
 		if(a){
+                        printf("continue\n");
 			continue;
 		}
 
@@ -15,4 +16,3 @@ int main(){
 
 	return -a;// expect 3
 }
-

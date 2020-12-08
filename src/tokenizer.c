@@ -188,18 +188,18 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		if(tokenize_reserved(&p, "void",     4, &now, TK_TYPE))	   continue;
-		if(tokenize_reserved(&p, "_Bool",    5, &now, TK_TYPE))	   continue;
-		if(tokenize_reserved(&p, "char",     4, &now, TK_TYPE))	   continue;
-		if(tokenize_reserved(&p, "int",	     3, &now, TK_TYPE))	   continue;
+		if(tokenize_reserved(&p, "void",     4, &now, TK_TYPE))	    continue;
+		if(tokenize_reserved(&p, "_Bool",    5, &now, TK_TYPE))	    continue;
+		if(tokenize_reserved(&p, "char",     4, &now, TK_TYPE))	    continue;
+		if(tokenize_reserved(&p, "int",	     3, &now, TK_TYPE))	    continue;
 		if(tokenize_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
 		if(tokenize_reserved(&p, "enum",     4, &now, TK_TYPE))     continue;
-		if(tokenize_reserved(&p, "if",	     2, &now, TK_IF))	   continue;
-		if(tokenize_reserved(&p, "else",     4, &now, TK_ELSE))	   continue;
+		if(tokenize_reserved(&p, "if",	     2, &now, TK_IF))	    continue;
+		if(tokenize_reserved(&p, "else",     4, &now, TK_ELSE))	    continue;
 		if(tokenize_reserved(&p, "switch",   6, &now, TK_SWITCH))   continue;
-		if(tokenize_reserved(&p, "case",     4, &now, TK_CASE))	   continue;
+		if(tokenize_reserved(&p, "case",     4, &now, TK_CASE))	    continue;
 		if(tokenize_reserved(&p, "default",  7, &now, TK_DEFAULT))  continue;
-		if(tokenize_reserved(&p, "for",	     3, &now, TK_FOR))	   continue;
+		if(tokenize_reserved(&p, "for",	     3, &now, TK_FOR))	    continue;
 		if(tokenize_reserved(&p, "do",	     2, &now, TK_DO))       continue;
 		if(tokenize_reserved(&p, "while",    5, &now, TK_WHILE))    continue;
 		if(tokenize_reserved(&p, "break",    5, &now, TK_BREAK))    continue;

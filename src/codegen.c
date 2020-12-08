@@ -488,14 +488,15 @@ void gen(Node *node){
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->rhs);
 
+			// continue
+			printf(".LloopCont%03d:\n", node->val);
+
 			// condition
 			gen(node->lhs);
 			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
 			// break loop
 			printf("	je .LloopEnd%03d\n", node->val);
 
-			// continue
-			printf(".LloopCont%03d:\n", node->val);
 			printf("	jmp .LloopBegin%03d\n", node->val);
 			printf(".LloopEnd%03d:\n", node->val);
 			return;
