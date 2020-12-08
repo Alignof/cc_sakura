@@ -1,4 +1,5 @@
 #!/bin/bash
+set -f
 run_test() {
 	echo -e $2 > test/hsjoihs_tmp/task$1.c 
     ./cc_sakura test/hsjoihs_tmp/task$1.c > test/hsjoihs_tmp/task$1.s
@@ -414,15 +415,6 @@ run_test 099 'int foo(int* p){return *p;} int main(){int x; x = 174; return foo(
 run_test 100 'int foo(int* p){*p = 172; return *p+2;} int main(){int x; return foo(&x);}' 174
 run_test 101 'int *foo(int *p){*p = 4;return p;} int main(){int x;int *y;y = foo(&x); *y+= 170;return x;}' 174
 run_test 102 'int *foo(int *p){*p = 4;return p;} int main(){int x;int y;*foo(&x) += 170;return x;}' 174
-
-
-
-
-
-
-
-
-
 
 run_test 113 'int *foo(int *p){*p = 4;return p;} int main(){int x;int y; int **z; *foo(&x) += 170;return x;}' 174
 run_test 114 'int main(){int a[2][3]; return 174;}' 174

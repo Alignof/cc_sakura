@@ -162,7 +162,7 @@ Node *unary(void){
 	}
 
 	if(consume("*")){
-		node = new_lvalue_node(ND_DEREF, NULL, unary());
+		node = new_node(ND_DEREF, NULL, unary());
 		return node;
 	}
 
