@@ -24,7 +24,7 @@ Node *compiler_directive(){
 }
 
 Node *compound_assign(TypeKind type, Node *dst, Node *src){
-	Node *calc = new_lvalue_node(type, dst, src);
+	Node *calc = new_node(type, dst, src);
 	Node *new  = new_node(ND_COMPOUND, dst, calc);
 	return new;
 }
@@ -35,7 +35,7 @@ Node *dot_arrow(NodeKind type, Node *node){
 	// (lvar <- node -> dot) <- node -> dot
 	int INSIDE_FILE = 0;
 	Type *struc_type;
-	Node *new = new_lvalue_node(type, node, NULL);
+	Node *new = new_node(type, node, NULL);
 	Token *memb_name  = consume_ident();
 	Member *memb_list;
 
@@ -81,9 +81,9 @@ Node *incdec(Node *node, IncDecKind idtype){
 
 	// increment or decrement
 	if(idtype == PRE_INC || idtype == POST_INC){
-		plmi_one = new_node(ND_COMPOUND, node, new_lvalue_node(ND_ADD,node,new_node_num(1)));
+		plmi_one = new_node(ND_COMPOUND, node, new_node(ND_ADD,node,new_node_num(1)));
 	}else{
-		plmi_one = new_node(ND_COMPOUND, node, new_lvalue_node(ND_SUB,node,new_node_num(1)));
+		plmi_one = new_node(ND_COMPOUND, node, new_node(ND_SUB,node,new_node_num(1)));
 	}
 
 	// pre
@@ -246,10 +246,10 @@ Node *call_function(Node *node, Token *tok){
 	Node *new = NULL;
 	while(1){
 		if(new == NULL){
-			new       = logical();
-			node->rhs = new;
+			new        = assign();
+			node->rhs  = new;
 		}else{
-			new->next  = logical();
+			new->next  = assign();
 			new        = new->next;
 		}
 
@@ -265,7 +265,7 @@ Node *call_function(Node *node, Token *tok){
 Node *array_index(Node *node, Node *index){
 	// a[1] == *(a+1)
 	node = new_node(ND_ADD, node, index);
-	node = new_lvalue_node(ND_DEREF, NULL, node);
+	node = new_node(ND_DEREF, NULL, node);
 
 	return node;
 }
@@ -299,11 +299,13 @@ void get_argument(int func_index){
 				new_arg->next->rhs  = expr();
 				new_arg             = new_arg->next;
 			}
-			arg_counter++;
 
-			if(!(consume(","))){
-				break;
-			}
+                        if(new_arg->rhs->type->ty == ARRAY){
+                                new_arg->rhs->type->ty = PTR;
+                        }
+
+			arg_counter++;
+			if(!(consume(","))) break;
 		}
 		expect(")");
 	}

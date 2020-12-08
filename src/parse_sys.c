@@ -289,52 +289,6 @@ Def_Type *find_defined_type(Token *tok, int find_range){
 	return NULL;
 }
 
-Node *new_lvalue_node(NodeKind kind, Node *lhs, Node *rhs){
-	//create new node(symbol)
-	Node *node = calloc(1, sizeof(Node));
-	node->type = calloc(1, sizeof(Type));
-	node->kind = kind;
-	node->lhs  = lhs;
-	node->rhs  = rhs;
-
-	if(kind == ND_ADD || kind == ND_SUB){
-		if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
-		   rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
-			node = pointer_calc(node, lhs->type, rhs->type);
-		}
-	}
-
-	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
-	}
-
-	if(kind == ND_DOT || kind == ND_ARROW){
-		node->type = lhs->type;
-	}
-
-	if(kind == ND_DEREF){
-		// *(a+b)
-		if(rhs->kind == ND_ADD || rhs->kind == ND_SUB){
-			if(rhs->lhs->type->ty == PTR || rhs->lhs->type->ty == ARRAY ||
-			   rhs->rhs->type->ty == PTR || rhs->rhs->type->ty == ARRAY ){
-				node->rhs = pointer_calc(rhs, rhs->lhs->type, rhs->rhs->type);
-			}
-		}
-
-		if(rhs->type->ptr_to == NULL || rhs->type->ptr_to->ty != ARRAY){
-			node->type = node->rhs->type->ptr_to;
-		}else{
-			free(node->type);
-			free(node);
-			rhs->type = rhs->type->ptr_to;
-			return rhs;
-		}
-
-	}
-
-	return node;
-}
-
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	//create new node(symbol)
 	Node *node = calloc(1, sizeof(Node));
@@ -343,18 +297,45 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	node->lhs  = lhs;
 	node->rhs  = rhs;
 
+	if(ND_ADD <= kind && kind <= ND_BIT_OR){
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	}
+        
+        if(kind == ND_SUB){
+                if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
+		   (lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
+                        node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
+                        return node;
+                }
+        }
+
+	if(kind == ND_ADD || kind == ND_SUB){
+                if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
+		   rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
+                        node = pointer_calc(node, lhs->type, rhs->type);
+		}
+	}
+
 	if(kind == ND_ASSIGN){
 		if(lhs->type->ty == BOOL){
 			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
 		}
+
+                if(lhs->type->ty == STRUCT){
+                        error_at(token->str, "struct assignment is not implemented");
+                }
 	}
 
-	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	if(kind == ND_ASSIGN || kind == ND_COMPOUND){
+		node->type = lhs->type;
 	}
 
 	if(kind == ND_DOT || kind == ND_ARROW){
 		node->type = lhs->type;
+	}
+
+	if(kind == ND_DEREF){
+		node->type = node->rhs->type->ptr_to;
 	}
 
 	if(kind == ND_ADDRESS){
