@@ -22,6 +22,7 @@ typedef enum{
 	TK_WHILE,
 	TK_FOR,
 	TK_SIZEOF,
+	TK_ALIGNOF,
 	TK_BLOCK,
 	TK_STR,
 	TK_BREAK,

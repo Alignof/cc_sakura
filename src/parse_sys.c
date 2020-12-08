@@ -70,7 +70,7 @@ int string_len(void){
 		len++;
 	}
 
-	return len;
+	return len - 1;
 }
 
 bool consume_ret(void){

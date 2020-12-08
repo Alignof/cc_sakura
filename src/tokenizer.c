@@ -205,6 +205,7 @@ Token *tokenize(char *p){
 		if(tokenize_reserved(&p, "break",    5, &now, TK_BREAK))    continue;
 		if(tokenize_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;
 		if(tokenize_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
+		if(tokenize_reserved(&p, "_Alignof", 8, &now, TK_ALIGNOF))  continue;
 		if(tokenize_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
 		if(tokenize_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
 		if(tokenize_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
@@ -231,7 +232,7 @@ Token *tokenize(char *p){
 			while(!(*(p-1) != '\\' && *p == '"')){
 				now = new_token(TK_STR, now, p++);
 			}
-			p++;
+			now = new_token(TK_STR, now, p++);
 			continue;
 		}
 

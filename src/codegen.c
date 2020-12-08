@@ -65,10 +65,10 @@ void gen_args(Node *args){
 	while(args){
 		gen_expr(args);
 		arg_count++;
-		args=args->next;
+		args=args->block_code;
 	}
 
-	for(reg_num=arg_count;reg_num > 0;reg_num--){
+	for(reg_num = arg_count;reg_num > 0;reg_num--){
 		printf("	pop rax\n");
 		printf("	mov %s,rax\n", reg[reg_num-1]);
 	}

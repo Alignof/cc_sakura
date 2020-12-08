@@ -38,7 +38,7 @@ Node *data(void){
 		// new one
 		}else{
 			Str *new = calloc(1, sizeof(Str));
-			new->len = tok->len;
+			new->len = tok->len - 1;
 			new->str = tok->str;
 			new->label_num = strings ? strings->label_num+1 : 0;
 			node->str = new->str;
@@ -111,12 +111,6 @@ Node *data(void){
 Node *primary(void){
 	Node *node = data();
 
-	// Is array index
-	while(consume("[")){
-		node = array_index(node, add());
-		expect("]");
-	}
-
 	// increment
 	if(consume("++")){
 		node = incdec(node, POST_INC);
@@ -125,6 +119,12 @@ Node *primary(void){
 	// decrement
 	if(consume("--")){
 		node = incdec(node, POST_DEC);
+	}
+
+	// Is array index
+	while(consume("[")){
+		node = array_index(node, add());
+		expect("]");
 	}
 
 	// member variable
@@ -212,6 +212,26 @@ Node *unary(void){
 		return node;
 	}
 
+	if(consume_reserved_word("_Alignof", TK_ALIGNOF)){
+		// _Alignof(5)  = > 4
+		// _Alignof(&a) = > 8
+
+		if(consume("(")){
+			int INSIDE_FILE = 0;
+			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+				Type *target_type = parse_type();
+				node = new_node(ND_NUM, node, new_node_num(target_type->align));
+				node->val = target_type->align;
+			}else{
+				Node *target = expr();
+				node = new_node(ND_NUM, node, target);
+				node->val = node->rhs->type->align;
+			}
+			expect(")");
+		}
+
+		return node;
+	}
 	return primary();
 }
 
@@ -714,9 +734,12 @@ void program(void){
 			get_argument(func_index);
 
 			// get function block
-			consume("{");
-			function(func_list[func_index++]);
-			consume("}");
+                        if(consume("{")){
+                                function(func_list[func_index++]);
+			// prototype declaration
+                        }else{
+                                expect(";");
+                        }
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
