@@ -348,7 +348,7 @@ void gen_expr(Node *node){
 			return;
 		case ND_DEREF:
 			gen(node->rhs);
-			if(node->type->ty != ARRAY){
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				if(node->type->ty <= CHAR){
 					printf("	movzx eax,BYTE PTR [rax]\n");
 					printf("	movsx eax,al\n");
