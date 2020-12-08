@@ -1,18 +1,1 @@
-/*
-int main(void){
-        int a[5];
-        a[1] = 174;
-        int *p = a + 3;
-        p -= 2;
-        return *p;
-}
-*/
-int main(void){
-        int a[5];
-        a[1] = 174;
-        int *p = a + 3;
-        p -= 2;
-        return *p;
-}
-
-//int main(){char a[456]; return a + 3 - a; }
+struct A{int k[15];}; int main(){struct A a[5]; return a + 3 - a;}

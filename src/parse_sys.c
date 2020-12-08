@@ -297,8 +297,20 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	node->lhs  = lhs;
 	node->rhs  = rhs;
 
+	if(ND_ADD <= kind && kind <= ND_BIT_OR){
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	}
+        
+        if(kind == ND_SUB){
+                if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
+		   (lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
+                        node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
+                        return node;
+                }
+        }
+
 	if(kind == ND_ADD || kind == ND_SUB){
-		if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
+                if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
 		   rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
                         node = pointer_calc(node, lhs->type, rhs->type);
 		}
@@ -312,10 +324,6 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
                 if(lhs->type->ty == STRUCT){
                         error_at(token->str, "struct assignment is not implemented");
                 }
-	}
-
-	if(ND_ADD <= kind && kind <= ND_BIT_OR){
-		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}
 
 	if(kind == ND_ASSIGN || kind == ND_COMPOUND){
