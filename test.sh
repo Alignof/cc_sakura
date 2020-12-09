@@ -194,9 +194,11 @@ assert -cl 5  "int a=8; int main(){a=a-3;a;}"
 assert -cl 108 'char *x="hello"; int main(){*(x+2);}'
 assert -cl 108 'char x[]="hello"; int main(){*(x+2);}'
 assert -cl 108 'char x[6]="hello"; int main(){*(x+2);}'
-assert -cl 4 'int a[]={0,1,2,3,4}; int main(){return a[4];}'
-assert -cl 4 'int a[5]={0,1,2,3,4}; int main(){return a[4];}'
-assert -cl 0 'int a[5]={0,1,2}; int main(){return a[4];}'
+assert -cl 4   'int a[]={0,1,2,3,4}; int main(){return a[4];}'
+assert -cl 4   'int a[5]={0,1,2,3,4}; int main(){return a[4];}'
+assert -cl 0   'int a[5]={0,1,2}; int main(){return a[4];}'
+assert -cl 97  'char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];}'
+
 
 assert -cl 7  'int main(){int x=3; int a=x++; return a+x;}'
 assert -cl 8  'int main(){int x=3; int a=++x; return a+x;}'

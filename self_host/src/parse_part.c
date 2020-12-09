@@ -170,7 +170,7 @@ Node *array_block(Node *arr){
 	int ctr = 0;
 	int isize = arr->type->index_size;
 	Node *src;
-	Node *dst = calloc(1, sizeof(Node));
+	Node *dst  = calloc(1, sizeof(Node));
 	Node *node = new_node(ND_BLOCK, __NULL, __NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
@@ -196,10 +196,10 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type);
-			alloc_size+=asize;
-			arr->offset = ((locals)?(locals->offset):0) + asize;
-			clone->offset = arr->offset;
+			int asize  = align_array_size(ctr, arr->type);
+			alloc_size += asize;
+			arr->offset    = ((locals)?(locals->offset):0) + asize;
+			clone->offset  = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 			locals->type->size  = type_size(locals->type);
@@ -239,11 +239,11 @@ Node *call_function(Node *node, Token *tok){
 	Node *new = __NULL;
 	while(1){
 		if(new == __NULL){
-			new       = logical();
-			node->rhs = new;
+			new        = assign();
+			node->rhs  = new;
 		}else{
-			new->next  = logical();
-			new        = new->next;
+			new->block_code = assign();
+			new             = new->block_code;
 		}
 
 		ctr++;
@@ -292,12 +292,15 @@ void get_argument(int func_index){
 				new_arg->next->rhs  = expr();
 				new_arg             = new_arg->next;
 			}
-			arg_counter++;
 
-			if(!(consume(","))){
-				break;
-			}
+                        if(new_arg->rhs->type->ty == ARRAY){
+                                new_arg->rhs->type->ty = PTR;
+                        }
+
+			arg_counter++;
+			if(!(consume(","))) break;
 		}
 		expect(")");
 	}
 }
+

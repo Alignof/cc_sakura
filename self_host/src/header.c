@@ -12,6 +12,7 @@ typedef enum{
 	TK_WHILE,
 	TK_FOR,
 	TK_SIZEOF,
+	TK_ALIGNOF,
 	TK_BLOCK,
 	TK_STR,
 	TK_BREAK,
@@ -39,6 +40,8 @@ typedef enum{
 	ND_NE, 		//  !=
 	ND_AND, 	//  &&
 	ND_OR, 		//  ||
+	ND_BIT_AND, 	//  &
+	ND_BIT_OR, 	//  |
 	ND_ASSIGN, 	//  =
 	ND_COMPOUND, 	//  +=, -=, *=, /=
 
@@ -168,7 +171,7 @@ struct Node{
 // function
 struct Func{
 	//int argc;
-	int  stack_size;
+	int stack_size;
 	char *name;
 	Type *type;
 	Node *args;

@@ -75,7 +75,6 @@ Type *get_pointer_type(Type *given){
 Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	Type *ptrtype;
 
-
 	node->type = (lhs_type->ty > rhs_type->ty)? lhs_type : rhs_type;
 	Node *pointer_size = calloc(1, sizeof(Node));
 	pointer_size->kind = ND_NUM;
@@ -97,3 +96,4 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 
 	return node;
 }
+

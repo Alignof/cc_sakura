@@ -173,6 +173,7 @@ struct Node{
 	Node *next;
 	Node *block_code;
 	Type *type;
+        int  len;
 	int  val;
 	char *str;
 	int  offset;
@@ -277,6 +278,7 @@ extern Def_Type *outside_deftype;
 char *read_file(char *path);
 void get_code(int argc, char **argv);
 void set_gvar(GVar *gvar);
+void gen_gvar_label(GVar *gvar, Node *init);
 
 // tokenizer.c
 int  len_val(char *str);
@@ -346,6 +348,7 @@ Node *compiler_directive();
 Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(NodeKind type, Node *node);
 Node *init_formula(Node *node, Node *init_val);
+Node *global_init(Node *node);
 Node *incdec(Node *node, IncDecKind idtype);
 Node *array_block(Node *arr);
 Node *array_str(Node *arr, Node *init_val);

@@ -34,7 +34,7 @@ Node *data(void){
 		if(fstr){
 			node->str = fstr->str;
 			node->val = fstr->label_num;
-			node->offset = fstr->len;
+			node->len = fstr->len;
 		// new one
 		}else{
 			Str *new = calloc(1, sizeof(Str));
@@ -42,7 +42,7 @@ Node *data(void){
 			new->str = tok->str;
 			new->label_num = strings ? strings->label_num+1 : 0;
 			node->str = new->str;
-			node->offset = new->len;
+			node->len = new->len;
 			node->val = new->label_num;
 
 			if(strings == NULL){
@@ -85,7 +85,7 @@ Node *data(void){
 				node->kind = (gvar->type->ty == ARRAY)? ND_GARRAY : ND_GVAR;
 				node->type = gvar->type;
 				node->str  = tok->str;
-				node->val  = tok->len;
+				node->len  = tok->len;
 			}else{
 				Member *rator = find_enumerator(tok, INSIDE_FUNC);
 				if(rator){
@@ -746,12 +746,9 @@ void program(void){
 
 			// initialize formula
 			if(consume("=")){
-				if(consume("{")){
-					globals->init = array_block(init_gv);
-				}else{
-					globals->init = init_formula(init_gv, assign());
-				}
-			}
+			        //globals->init = global_init(init_gv, assign());
+			        globals->init = global_init(init_gv);
+                        }
 
 			expect(";");
 		}

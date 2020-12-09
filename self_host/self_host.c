@@ -12,6 +12,7 @@ typedef enum{
 	TK_WHILE,
 	TK_FOR,
 	TK_SIZEOF,
+	TK_ALIGNOF,
 	TK_BLOCK,
 	TK_STR,
 	TK_BREAK,
@@ -39,6 +40,8 @@ typedef enum{
 	ND_NE, 		//  !=
 	ND_AND, 	//  &&
 	ND_OR, 		//  ||
+	ND_BIT_AND, 	//  &
+	ND_BIT_OR, 	//  |
 	ND_ASSIGN, 	//  =
 	ND_COMPOUND, 	//  +=, -=, *=, /=
 
@@ -241,27 +244,26 @@ struct Member{
 
 
 //================= global variable ===================
-int      llid;
-int      lvar_count;
-int      alloc_size;
-char     *user_input;
-char     filename[100];
-Token    *token;
-Func     *func_list[300];
-LVar     *locals;
-GVar     *globals;
-Str      *strings;
-Struc    *structs;
-Enum     *enumerations;
-Def_Type *defined_types;
-Label    *labels_head;
-Label    *labels_tail;
-LVar     *outside_lvar;
-Struc    *outside_struct;
-Enum     *outside_enum;
-Def_Type *outside_deftype;
-int label_num;
-int label_loop_end;
+extern int      llid;
+extern int      alloc_size;
+extern char     *user_input;
+extern char     filename[100];
+extern Token    *token;
+extern Func     *func_list[300];
+extern LVar     *locals;
+extern GVar     *globals;
+extern Str      *strings;
+extern Struc    *structs;
+extern Enum     *enumerations;
+extern Def_Type *defined_types;
+extern Label    *labels_head;
+extern Label    *labels_tail;
+extern LVar     *outside_lvar;
+extern Struc    *outside_struct;
+extern Enum     *outside_enum;
+extern Def_Type *outside_deftype;
+extern int label_num;
+extern int label_loop_end;
 //=====================================================
 
 
@@ -307,7 +309,7 @@ struct _IO_FILE{
 	_IO_lock_t *_lock;
 };
 
-typedef _Bool bool;
+typedef int bool;
 bool true  = 1;
 bool false = 0;
 //=========================================================
@@ -333,7 +335,12 @@ extern _Thread_local int errno;
 
 
 
-//==================== codegen.c ==========================
+//====================== codegen.c ========================
+char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};
+char reg_dx[8][4] = {"dl", "dl", "dl", "edx","rdx","rdx","rdx","edx"};
+char reg_di[8][4] = {"dil","dil","dil","edi","rdi","rdi","rdi","edi"};
+char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
+
 void expand_next(Node *node){
 	while(node){
 		gen(node);
@@ -356,7 +363,7 @@ void gen_gvar(Node *node){
 		printf("	mov rax, fs:0\n");
 		printf("	add rax, fs:%.*s@tpoff\n", node->val, node->str);
 	}else{
-		printf("	lea rax,  %.*s[rip]\n", node->val, node->str);
+		printf("	lea rax,%.*s[rip]\n", node->val, node->str);
 	}
 	printf("	push rax\n");
 }
@@ -388,24 +395,15 @@ void gen_struc(Node *node){
 void gen_args(Node *args){
 	int reg_num;
 	int arg_count = 0;
-	//const char reg[6][4]={"rdi","rsi","rdx","rcx","r8","r9"};
-	char *reg[6];
-	reg[0] = "rdi";
-	reg[1] = "rsi";
-	reg[2] = "rdx";
-	reg[3] = "rcx";
-	reg[4] = "r8";
-	reg[5] = "r9";
-
 
 
 	while(args){
 		gen_expr(args);
 		arg_count++;
-		args=args->next;
+		args=args->block_code;
 	}
 
-	for(reg_num=arg_count;reg_num > 0;reg_num--){
+	for(reg_num = arg_count;reg_num > 0;reg_num--){
 		printf("	pop rax\n");
 		printf("	mov %s,rax\n", reg[reg_num-1]);
 	}
@@ -425,36 +423,7 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	//                          void _Bool  char  int   ptr  array
-	//const char reg_ax[6][4]={"eax","eax","eax","eax","rax","rax"};
-	//const char reg_dx[6][4]={"edx","edx","edx","edx","rdx","rdx"};
-	//const char reg_di[6][4]={"edi","edi","edi","edi","rdi","rdi"};
-
-	int reg_ty = (node->type->ty == ENUM) ? 1 : node->type->ty;
-	char *reg_ax[6];
-	char *reg_dx[6];
-	char *reg_di[6];
-
-	reg_ax[0] = "eax";
-	reg_ax[1] = "eax";
-	reg_ax[2] = "eax";
-	reg_ax[3] = "eax";
-	reg_ax[4] = "rax";
-	reg_ax[5] = "rax";
-
-	reg_dx[0] = "edx";
-	reg_dx[1] = "edx";
-	reg_dx[2] = "edx";
-	reg_dx[3] = "edx";
-	reg_dx[4] = "rdx";
-	reg_dx[5] = "rdx";
-
-	reg_di[0] = "edi";
-	reg_di[1] = "edi";
-	reg_di[2] = "edi";
-	reg_di[3] = "edi";
-	reg_di[4] = "rdi";
-	reg_di[5] = "rdi";
+	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
 
 	switch(node->kind){
 		case ND_ADD:
@@ -464,7 +433,13 @@ void gen_calc(Node *node){
 			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			break;
 		case ND_MUL:
-			printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			if(node->type->ty == CHAR){
+				printf("	movsx eax,al\n");
+				printf("	movsx edi,dil\n");
+				printf("	imul eax,edi\n");
+			}else{
+				printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			}
 			break;
 		case ND_DIV:
 			printf("	cqo\n");
@@ -505,12 +480,17 @@ void gen_calc(Node *node){
 			printf("	setne al\n");
 			printf("	movzb rax,al\n");
 			break;
-		case ND_AND:
+		case ND_BIT_AND:
 			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			printf("	movzb rax,al\n");
 			break;
-		case ND_OR:
+		case ND_BIT_OR:
 			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	movzb rax,al\n");
+			break;
+		case ND_NOT:
+			printf("	cmp %s,0\n", reg_ax[reg_ty]);
+			printf("	sete al\n");
 			printf("	movzb rax,al\n");
 			break;
 		default:
@@ -557,7 +537,7 @@ void gen_expr(Node *node){
 		case ND_POSTID:
 			// push
 			gen_address(node->lhs); // push lhs
-			gen_expr(node->rhs->rhs->rhs);          // push rhs
+			gen_expr(node->rhs->rhs->rhs);// push rhs
 			
 			// calc
 			printf("	pop rdi\n");    // rhs
@@ -655,7 +635,7 @@ void gen_expr(Node *node){
 			// condition
 			gen_expr(node->lhs);
 			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
+			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
 			printf("	je .Lelse%03d\n", node->val);
 
 			// true
@@ -668,25 +648,48 @@ void gen_expr(Node *node){
 			printf(".LifEnd%03d:\n", node->val);
 			printf("	push rax\n");
 			return;
+		case ND_AND:
+			gen_expr(node->lhs);
+			printf("	je .LlogicEnd%03d\n", node->val);
+			gen_expr(node->rhs);
+
+			printf("	pop rax\n");
+			printf("	pop rdx\n");
+			printf("	and al,dl\n");
+			printf("	movzb rax,al\n");
+			printf("	push rax\n");
+			printf(".LlogicEnd%03d:\n", node->val);
+			return;
+		case ND_OR:
+			gen_expr(node->lhs);
+			printf("	jne .LlogicEnd%03d\n", node->val);
+			gen_expr(node->rhs);
+
+			printf("	pop rax\n");
+			printf("	pop rdx\n");
+			printf("	or al,dl\n");
+			printf("	movzb rax,al\n");
+			printf("	push rax\n");
+			printf(".LlogicEnd%03d:\n", node->val);
+			return;
 		case ND_NOT:
 			gen_expr(node->rhs);
 			printf("	pop rax\n");
-			printf("	cmp rax,0\n");
-			printf("	sete al\n");
-			printf("	movzb rax,al\n");
+			gen_calc(node);
 			printf("	push rax\n");
 			return;
 		case ND_ADDRESS:
 			gen_address(node->rhs);// printf("	push rax\n");
 			return;
 		case ND_DEREF:
-			gen_expr(node->rhs);
-			printf("	pop rax\n");
-			if(node->type->ty <= CHAR){
-				printf("	movzx eax,BYTE PTR [rax]\n");
-				printf("	movsx eax,al\n");
-			}else{
-				printf("	mov rax,[rax]\n");
+			gen(node->rhs);
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
+				if(node->type->ty <= CHAR){
+					printf("	movzx eax,BYTE PTR [rax]\n");
+					printf("	movsx eax,al\n");
+				}else{
+					printf("	mov rax,[rax]\n");
+				}
 			}
 			printf("	push rax\n");
 			return;
@@ -724,13 +727,6 @@ void gen_expr(Node *node){
 
 void gen(Node *node){
 	Node *cases;
-	char *reg[6];
-	reg[0] = "rdi";
-	reg[1] = "rsi";
-	reg[2] = "rdx";
-	reg[3] = "rcx";
-	reg[4] = "r8";
-	reg[5] = "r9";
 
 	// generate assembly
 	switch(node->kind){
@@ -739,7 +735,7 @@ void gen(Node *node){
 			return;
 		case ND_IF:
 			gen(node->lhs);
-			printf("	cmp rax,0\n");
+			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
 			printf("	je .LifEnd%03d\n", node->val);
 			gen(node->rhs);
 
@@ -748,7 +744,7 @@ void gen(Node *node){
 		case ND_IFELSE:
 			// condition
 			gen(node->lhs);
-			printf("	cmp rax,0\n");
+			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
 			printf("	je .Lelse%03d\n", node->val);
 
 			// expr in if
@@ -766,7 +762,7 @@ void gen(Node *node){
 			while(cases){
 				gen(cases);
 
-				printf("	cmp rax,0\n");
+				printf("	cmp %s,0\n", reg_ax[cases->type->ty]);
 				printf("	jne .LcaseBegin%03d\n", cases->val);
 				cases = cases->next;
 			}
@@ -775,6 +771,7 @@ void gen(Node *node){
 			if(node->lhs){
 				printf("	jmp .LcaseBegin%03d\n", node->lhs->val);
 			}
+			printf("	jmp .LloopEnd%03d\n", node->val);
 
 			// gen code block
 			gen(node->rhs);
@@ -788,7 +785,7 @@ void gen(Node *node){
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs->next);
-			printf("	cmp rax,0\n");
+			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
 			printf("	je .LloopEnd%03d\n", node->val);
 
 			// gen block
@@ -806,7 +803,7 @@ void gen(Node *node){
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs);
-			printf("	cmp rax,0\n");
+			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
 			printf("	je .LloopEnd%03d\n", node->val);
 
 			// else expression
@@ -822,14 +819,15 @@ void gen(Node *node){
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->rhs);
 
+			// continue
+			printf(".LloopCont%03d:\n", node->val);
+
 			// condition
 			gen(node->lhs);
-			printf("	cmp rax,0\n");
+			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
 			// break loop
 			printf("	je .LloopEnd%03d\n", node->val);
 
-			// continue
-			printf(".LloopCont%03d:\n", node->val);
 			printf("	jmp .LloopBegin%03d\n", node->val);
 			printf(".LloopEnd%03d:\n", node->val);
 			return;
@@ -849,14 +847,11 @@ void gen(Node *node){
 		case ND_ARG:
 			while(node){
 				// push register argument saved
-				printf("	push %s\n", reg[node->val]);
+				printf("        push %s\n", reg[node->val]);
 				gen_lvar(node->rhs);
 				printf("	pop rax\n");
 				printf("	pop rdi\n");
-				printf("	mov [rax],rdi\n");
-				printf("	push rdi\n");
-				// pop stack top
-				printf("	pop rax\n");
+				printf("	mov [rax],%s\n", reg_di[node->rhs->type->ty]);
 				node=node->next;
 			}
 
@@ -878,7 +873,17 @@ void gen(Node *node){
 //=========================================================
 
 
-//===================== declare.c =========================
+//====================== declare.c ========================
+LVar     *locals;
+GVar     *globals;
+Struc    *structs;
+Enum     *enumerations;
+Def_Type *defined_types;
+LVar     *outside_lvar;
+Struc    *outside_struct;
+Enum     *outside_enum;
+Def_Type *outside_deftype;
+
 Type *set_type(Type *type, Token *tok){
 	Enum  *enum_found  = __NULL;
 	Struc *struc_found = __NULL;
@@ -898,8 +903,8 @@ Type *set_type(Type *type, Token *tok){
 			type->len   = tok->len;
 			type->name  = tok->str;
 			if(struc_found){
-				type->ty = STRUCT;
-				type->size   = struc_found->memsize;
+				type->ty   = STRUCT;
+				type->size = struc_found->memsize;
 				// unname enum
 				if(struc_found->member == __NULL && consume("{")){
 					struc_found->member = register_struc_member(&(struc_found->memsize));
@@ -955,8 +960,8 @@ Type *set_type(Type *type, Token *tok){
 }
 
 Type *parse_type(void){
-	Type *type     = calloc(1, sizeof(Type));
-	int star_count = 0;
+	Type *type = calloc(1, sizeof(Type));
+	int star_count  = 0;
 	int INSIDE_FILE = 0;
 
 	// check type
@@ -1131,6 +1136,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		alloc_size += asize;
 		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
+		/*
 		if(lvar->type->ty == STRUCT){
 			lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
 			alloc_size   += lvar->type->size;
@@ -1138,11 +1144,13 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			lvar->offset =  (locals) ? (locals->offset)+8 : 8;
 			alloc_size   += 8;
 		}
+		*/
+		lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
+		alloc_size   += lvar->type->size;
 	}
 
 	node->type = lvar->type;
 	node->offset = lvar->offset;
-	// locals == new lvar
 	locals = lvar;
 
 	return node;
@@ -1163,7 +1171,6 @@ Member *register_struc_member(int *asize_ptr){
 
 		// parse member type
 		new_memb->type    = parse_type();
-		new_memb->memsize = new_memb->type->size;
 
 		// add member name
 		Token *def_name  = consume_ident();
@@ -1194,15 +1201,10 @@ Member *register_struc_member(int *asize_ptr){
 			expect("]");
 		}
 
-		// align member offset
 		int padding = 0;
-		if(new_memb->type->ty == ARRAY){
-			size_of_type = 8;
-		}else if (new_memb->type->ty == STRUCT){
-			size_of_type = new_memb->memsize;
-		}else{
-			size_of_type = new_memb->type->size;
-		}
+		new_memb->memsize = new_memb->type->size;
+		size_of_type      = new_memb->memsize;
+
 
 		if(memb_head){
 			int prev_tail    = (memb_head) ? (memb_head->offset + memb_head->type->size) : 0;
@@ -1220,7 +1222,7 @@ Member *register_struc_member(int *asize_ptr){
 		if(consume("}")) break;
 	}
 
-	(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
+	//(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
 	return memb_head;
 }
 
@@ -1275,6 +1277,7 @@ void declare_enum(Enum *new_enum){
 	new_enum->next   = enumerations;
 	enumerations     = new_enum;
 }
+
 //=========================================================
 
 
@@ -1452,7 +1455,7 @@ Node *array_block(Node *arr){
 	int ctr = 0;
 	int isize = arr->type->index_size;
 	Node *src;
-	Node *dst = calloc(1, sizeof(Node));
+	Node *dst  = calloc(1, sizeof(Node));
 	Node *node = new_node(ND_BLOCK, __NULL, __NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
@@ -1478,10 +1481,10 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
-			int asize = align_array_size(ctr, arr->type);
-			alloc_size+=asize;
-			arr->offset = ((locals)?(locals->offset):0) + asize;
-			clone->offset = arr->offset;
+			int asize  = align_array_size(ctr, arr->type);
+			alloc_size += asize;
+			arr->offset    = ((locals)?(locals->offset):0) + asize;
+			clone->offset  = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 			locals->type->size  = type_size(locals->type);
@@ -1521,11 +1524,11 @@ Node *call_function(Node *node, Token *tok){
 	Node *new = __NULL;
 	while(1){
 		if(new == __NULL){
-			new       = logical();
-			node->rhs = new;
+			new        = assign();
+			node->rhs  = new;
 		}else{
-			new->next  = logical();
-			new        = new->next;
+			new->block_code = assign();
+			new             = new->block_code;
 		}
 
 		ctr++;
@@ -1574,15 +1577,18 @@ void get_argument(int func_index){
 				new_arg->next->rhs  = expr();
 				new_arg             = new_arg->next;
 			}
-			arg_counter++;
 
-			if(!(consume(","))){
-				break;
-			}
+                        if(new_arg->rhs->type->ty == ARRAY){
+                                new_arg->rhs->type->ty = PTR;
+                        }
+
+			arg_counter++;
+			if(!(consume(","))) break;
 		}
 		expect(")");
 	}
 }
+
 //=========================================================
 
 
@@ -1675,31 +1681,32 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	pointer_size->type->align = type_align(pointer_size->type);
 
 
-	 if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to != __NULL){
-	 	ptrtype = lhs_type->ptr_to;
-	 	pointer_size->val = ptrtype->size;
-	 	node->rhs = new_node(ND_MUL, node->rhs, pointer_size);
-	 }else if(rhs_type->ty >= PTR  &&  rhs_type->ptr_to != __NULL){
-	 	ptrtype = rhs_type->ptr_to;
-	 	pointer_size->val = ptrtype->size;
-	 	node->lhs = new_node(ND_MUL, node->lhs, pointer_size);
-	 }
+	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to != __NULL){
+		ptrtype = lhs_type->ptr_to;
+		pointer_size->val = ptrtype->size;
+		node->rhs = new_node(ND_MUL, node->rhs, pointer_size);
+	}else if(rhs_type->ty >= PTR  &&  rhs_type->ptr_to != __NULL){
+		ptrtype = rhs_type->ptr_to;
+		pointer_size->val = ptrtype->size;
+		node->lhs = new_node(ND_MUL, node->lhs, pointer_size);
+	}
 
 	return node;
 }
+
 //=========================================================
 
 
-//====================== parse_sys.c ======================
-void error(char *loc, char *fmt){
-	//va_list ap;
-	//va_start(ap, fmt);
+//==================== parse_sys.c ========================
+void error(char *loc, char *fmt, ...){
+	va_list ap;
+	va_start(ap, fmt);
 
 	int pos = loc-user_input;
 	fprintf(stderr, "%s\n", user_input);
 	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ ");
-	//vfprintf(stderr, fmt, ap);
+	vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit(1);
 }
@@ -1722,7 +1729,7 @@ void error_at(char *loc, char *msg){
 	while(*start == '\t') start++;
 
 	int indent = fprintf(stderr, "%s:%d ", filename, line_num);
-	fprintf(stderr, "%.*s\n", (end-start), start);
+	fprintf(stderr, "%.*s\n", (int)(end-start), start);
 
 	int pos = indent+loc-start;
 	fprintf(stderr, "%*s", pos, " ");
@@ -1733,7 +1740,7 @@ void error_at(char *loc, char *msg){
 bool check(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-			strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -1743,7 +1750,7 @@ bool check(char *op){
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-			strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -1758,12 +1765,12 @@ int string_len(void){
 		len++;
 	}
 
-	return len;
+	return len - 1;
 }
 
 bool consume_ret(void){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
-			memcmp(token->str, "return", token->len)){
+	    memcmp(token->str, "return", token->len)){
 		return false;
 	}
 
@@ -1772,9 +1779,9 @@ bool consume_ret(void){
 }
 
 bool consume_reserved_word(char *keyword, TokenKind kind){
-	if( token->kind != kind ||
-			token->len != strlen(keyword) ||
-			memcmp(token->str, keyword, token->len)){
+	if(token->kind != kind ||
+	   token->len != strlen(keyword) ||
+	   memcmp(token->str, keyword, token->len)){
 		return false;
 	}
 
@@ -1823,8 +1830,8 @@ Token *consume_ident(void){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-			strlen(op) != token->len||
-			memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len||
+	    memcmp(token->str, op, token->len)){
 		error_at(token->str, "not a charctor.");
 	}
 	token = token->next;
@@ -1837,7 +1844,7 @@ int expect_number(void){
 	}
 
 	int val = token->val;
-	token = token->next;
+	token   = token->next;
 	return val;
 }
 
@@ -1857,7 +1864,6 @@ void label_register(Node *node, LabelKind kind){
 	labels_tail      = (labels_tail) ? labels_tail->next : labels_head;
 
 	llid++;
-
 
 	if(kind == LB_CASE){
 		new_label->cond = node->lhs;
@@ -1986,9 +1992,22 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	node->lhs  = lhs;
 	node->rhs  = rhs;
 
+	if(ND_ADD <= kind && kind <= ND_BIT_OR){
+		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	}
+        
+        if(kind == ND_SUB){
+                if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
+		   (lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
+                        node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
+                        return node;
+                }
+        }
+
 	if(kind == ND_ADD || kind == ND_SUB){
-		if(lhs->type->ty >= PTR  ||  rhs->type->ty >= PTR){
-			node = pointer_calc(node, lhs->type, rhs->type);
+                if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
+		   rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
+                        node = pointer_calc(node, lhs->type, rhs->type);
 		}
 	}
 
@@ -1996,14 +2015,22 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		if(lhs->type->ty == BOOL){
 			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
 		}
+
+                if(lhs->type->ty == STRUCT){
+                        error_at(token->str, "struct assignment is not implemented");
+                }
 	}
 
-	if(ND_ADD <= kind && kind <= ND_ASSIGN){
-		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
+	if(kind == ND_ASSIGN || kind == ND_COMPOUND){
+		node->type = lhs->type;
 	}
 
 	if(kind == ND_DOT || kind == ND_ARROW){
 		node->type = lhs->type;
+	}
+
+	if(kind == ND_DEREF){
+		node->type = node->rhs->type->ptr_to;
 	}
 
 	if(kind == ND_ADDRESS){
@@ -2011,17 +2038,6 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		node->type->size   = type_size(node->type);
 		node->type->align  = type_align(node->type);
 		node->type->ptr_to = rhs->type;
-	}
-
-	if(kind == ND_DEREF){
-		if(rhs->type->ptr_to == __NULL || rhs->type->ptr_to->ty != ARRAY){
-			node->type = node->rhs->type->ptr_to;
-		}else{
-			free(node->type);
-			free(node);
-			rhs->type = rhs->type->ptr_to;
-			return rhs;
-		}
 	}
 
 	return node;
@@ -2038,10 +2054,16 @@ Node *new_node_num(int val){
 	node->type->align = type_align(node->type);
 	return node;
 }
+
+
 //=========================================================
 
 
 //==================== syntax_tree.c ======================
+int alloc_size;
+Token *token;
+Str *strings;
+
 Node *data(void){
 	if(consume("(")){
 		Node *node = expr();
@@ -2074,7 +2096,7 @@ Node *data(void){
 		// new one
 		}else{
 			Str *new = calloc(1, sizeof(Str));
-			new->len = tok->len;
+			new->len = tok->len - 1;
 			new->str = tok->str;
 			new->label_num = strings ? strings->label_num+1 : 0;
 			node->str = new->str;
@@ -2147,12 +2169,6 @@ Node *data(void){
 Node *primary(void){
 	Node *node = data();
 
-	// Is array index
-	while(consume("[")){
-		node = array_index(node, add());
-		expect("]");
-	}
-
 	// increment
 	if(consume("++")){
 		node = incdec(node, POST_INC);
@@ -2161,6 +2177,12 @@ Node *primary(void){
 	// decrement
 	if(consume("--")){
 		node = incdec(node, POST_DEC);
+	}
+
+	// Is array index
+	while(consume("[")){
+		node = array_index(node, add());
+		expect("]");
 	}
 
 	// member variable
@@ -2189,23 +2211,21 @@ Node *primary(void){
 }
 
 Node *unary(void){
-	Node *node = __NULL;
+	Node *node=__NULL;
 
 	// logical not
 	if(consume("!")){
-		node = new_node(ND_NOT, __NULL, logical());
+		node = new_node(ND_NOT, __NULL, unary());
 		return node;
 	}
 
 	if(consume("*")){
 		node = new_node(ND_DEREF, __NULL, unary());
-
 		return node;
 	}
 
 	if(consume("&")){
 		node = new_node(ND_ADDRESS, __NULL, unary());
-
 		return node;
 	}
 
@@ -2250,11 +2270,30 @@ Node *unary(void){
 		return node;
 	}
 
+	if(consume_reserved_word("_Alignof", TK_ALIGNOF)){
+		// _Alignof(5)  = > 4
+		// _Alignof(&a) = > 8
+
+		if(consume("(")){
+			int INSIDE_FILE = 0;
+			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+				Type *target_type = parse_type();
+				node = new_node(ND_NUM, node, new_node_num(target_type->align));
+				node->val = target_type->align;
+			}else{
+				Node *target = expr();
+				node = new_node(ND_NUM, node, target);
+				node->val = node->rhs->type->align;
+			}
+			expect(")");
+		}
+
+		return node;
+	}
 	return primary();
 }
 
 Node *mul(void){
-	//jmp unary()
 	Node *node = unary();
 
 	for(;;){
@@ -2273,7 +2312,6 @@ Node *mul(void){
 }
 
 Node *add(void){
-	//jmp mul()
 	Node *node = mul();
 
 	for(;;){
@@ -2311,9 +2349,9 @@ Node *equelity(void){
 
 	for(;;){
 		if(consume("==")){
-			node = new_node(ND_EQ, node, relational());
+			node = new_node(ND_EQ, node, equelity());
 		}else if(consume("!=")){
-			node = new_node(ND_NE, node, relational());
+			node = new_node(ND_NE, node, equelity());
 		}else{
 			return node;
 		}
@@ -2324,9 +2362,15 @@ Node *logical(void){
 	Node *node = equelity();
 	for(;;){
 		if(consume("&&")){
-			node = new_node(ND_AND, node, equelity());
+			node = new_node(ND_AND, node, logical());
+			node->lhs = new_node(ND_NE, node->lhs, new_node_num(0));
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
+			node->val = label_num++;
 		}else if(consume("||")){
-			node = new_node(ND_OR, node, equelity());
+			node = new_node(ND_OR, node, logical());
+			node->lhs = new_node(ND_NE, node->lhs, new_node_num(0));
+			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
+			node->val = label_num++;
 		}else{
 			return node;
 		}
@@ -2336,7 +2380,7 @@ Node *logical(void){
 Node *ternary(void){
 	Node *node = logical();
 	if(consume("?")){
-		//                          cond  if true
+		//                               cond  if true
 		node      = new_node(ND_TERNARY, node, ternary());
 		node->val = label_num++;
 		expect(":");
@@ -2578,9 +2622,10 @@ Node *stmt(void){
 		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
-		node      = new_node(ND_DOWHILE, __NULL, stmt());
+		node      = new_node(ND_DOWHILE, __NULL, __NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
+		node->rhs = stmt();
 
 		consume_reserved_word("while", TK_WHILE);
 		if(consume("(")){
@@ -2591,6 +2636,7 @@ Node *stmt(void){
 	}else if(consume_reserved_word("while", TK_WHILE)){
 		node      = new_node(ND_WHILE, node, __NULL);
 		node->val = label_num++;
+		label_loop_end = node->val;
 		if(consume("(")){
 			//jmp expr
 			Node *cond = expr();
@@ -2746,9 +2792,12 @@ void program(void){
 			get_argument(func_index);
 
 			// get function block
-			consume("{");
-			function(func_list[func_index++]);
-			consume("}");
+                        if(consume("{")){
+                                function(func_list[func_index++]);
+			// prototype declaration
+                        }else{
+                                expect(";");
+                        }
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
@@ -2760,10 +2809,6 @@ void program(void){
 				}else{
 					globals->init = init_formula(init_gv, assign());
 				}
-			}else{
-				if(init_gv->kind == ND_GVAR){
-					globals->init = init_formula(init_gv, new_node_num(0));
-				}
 			}
 
 			expect(";");
@@ -2771,25 +2816,11 @@ void program(void){
 	}
 	func_list[func_index] = __NULL;
 }
+
 //=========================================================
 
 
 //==================== tokenizer.c ========================
-bool isblock(char *str){
-	return (*str == '{') || (*str == '}');
-}
-
-bool at_eof(void){
-	return token->kind == TK_EOF;
-}
-
-int is_alnum(char c){
-	return	(('a' <=  c) && (c <=  'z')) ||
-		(('A' <=  c) && (c <=  'Z')) ||
-		(('0' <=  c) && (c <=  '9')) ||
-		(c == '_');
-}
-
 int len_val(char *str){
 	int counter = 0;
 	for(;is_alnum(*str);str++){
@@ -2799,52 +2830,76 @@ int len_val(char *str){
 	return counter;
 }
 
-bool issymbol(char *str,  bool *single_flag){
-	int i;
-	int size;
-	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
-	char repeat_symbol[] = "<>&|+-";
-	char multi_symbol[]  = "->";
-	char multi_eq[]      = "<=>!+*-/";
-	
-	//Is multi equal? (<=,==,!=,>=)
-	size = sizeof(multi_eq)/sizeof(char);
-	for(i = 0;i < size;i++){
-		if((*str == multi_eq[i]) && (*(str+1) == '=')){
-			*single_flag = false;
-			return true;
-		}
-	}
-	
-	//Is repeat symbol? (<<,>>,&&,||,++,--)
-	size = sizeof(repeat_symbol)/sizeof(char);
-	for(i = 0;i < size;i++){
-		if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
-			*single_flag = false;
-			return true;
-		}
-	}
-
-	//Is multi symbol? (->)
-	size = sizeof(multi_symbol)/sizeof(char)/2;
-	for(i = 0;i < size;i += 2){
-		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
-			*single_flag = false;
-			return true;
-		}
-	}
-
-	//Is single symbol? (+,-,*,/,%,<,>,',.)
-	size = sizeof(single_symbol)/sizeof(char);
-	for(i = 0;i < size;i++){
-		if(*str == single_symbol[i]){
-			*single_flag = true;
-			return true;
-		}
-	}
-
-	return false;
+bool is_block(char c){
+	return (c == '{') || (c == '}');
 }
+
+bool is_space(char c){
+	return (c == ' ') || (c == '\t') || (c == '\n');
+}
+
+bool is_digit(char c){
+	return	(('0' <=  c) && (c <=  '9'));
+}
+
+bool at_eof(void){
+	return token->kind == TK_EOF;
+}
+
+bool is_alnum(char c){
+	return	(('a' <=  c) && (c <=  'z')) ||
+		(('A' <=  c) && (c <=  'Z')) ||
+		(('0' <=  c) && (c <=  '9')) ||
+		(c == '_');
+}
+
+bool is_symbol(char *str,  bool *single_flag){
+     int i;
+     int size;
+     char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
+     char repeat_symbol[] = "<>&|+-";
+     char multi_symbol[]  = "->";
+     char multi_eq[]      = "<=>!+*-/";
+     
+     //Is multi equal? (<=,==,!=,>=)
+     size = sizeof(multi_eq)/sizeof(char);
+     for(i = 0;i < size;i++){
+     	if((*str == multi_eq[i]) && (*(str+1) == '=')){
+     		*single_flag = false;
+     		return true;
+     	}
+     }
+     
+     //Is repeat symbol? (<<,>>,&&,||,++,--)
+     size = sizeof(repeat_symbol)/sizeof(char);
+     for(i = 0;i < size;i++){
+     	if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
+     		*single_flag = false;
+     		return true;
+     	}
+     }
+
+     //Is multi symbol? (->)
+     size = sizeof(multi_symbol)/sizeof(char)/2;
+     for(i = 0;i < size;i += 2){
+     	if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
+     		*single_flag = false;
+     		return true;
+     	}
+     }
+
+     //Is single symbol? (+,-,*,/,%,<,>,',.)
+     size = sizeof(single_symbol)/sizeof(char);
+     for(i = 0;i < size;i++){
+     	if(*str == single_symbol[i]){
+     		*single_flag = true;
+     		return true;
+     	}
+     }
+
+     return false;
+}
+
 
 Token *new_token(TokenKind kind, Token *cur, char *str){
 	Token *new = calloc(1, sizeof(Token));
@@ -2856,7 +2911,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str){
 	return new;
 }
 
-bool consume_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
+bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
 	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len])){
 		return false;
 	}
@@ -2878,7 +2933,7 @@ Token *tokenize(char *p){
 	Token *now = &head;
 
 	while(*p){
-		if(isspace(*p)){
+		if(is_space(*p)){
 			p++;
 			continue;
 		}
@@ -2929,7 +2984,7 @@ Token *tokenize(char *p){
 		}
 
 		//Is number?
-		if(isdigit(*p)){
+		if(is_digit(*p)){
 			if(now->kind == TK_IDENT){
 				now = new_token(TK_IDENT, now, p++);
 				now->len = 1;
@@ -2943,7 +2998,7 @@ Token *tokenize(char *p){
 		}
 
 		//judge single token or multi token or isn't token
-		if(issymbol(p, &is_single_token)){
+		if(is_symbol(p, &is_single_token)){
 			now = new_token(TK_RESERVED, now, p);
 			if(is_single_token){
 				p++;
@@ -2954,36 +3009,37 @@ Token *tokenize(char *p){
 			continue;
 		}
 
-		if(consume_reserved(&p, "void",     4, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "_Bool",    5, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "char",     4, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "int",	    3, &now, TK_TYPE))	   continue;
-		if(consume_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
-		if(consume_reserved(&p, "enum",     4, &now, TK_TYPE))     continue;
-		if(consume_reserved(&p, "if",	    2, &now, TK_IF))	   continue;
-		if(consume_reserved(&p, "else",	    4, &now, TK_ELSE))	   continue;
-		if(consume_reserved(&p, "switch",   6, &now, TK_SWITCH))   continue;
-		if(consume_reserved(&p, "case",     4, &now, TK_CASE))	   continue;
-		if(consume_reserved(&p, "default",  7, &now, TK_DEFAULT))  continue;
-		if(consume_reserved(&p, "for",	    3, &now, TK_FOR))	   continue;
-		if(consume_reserved(&p, "do",	    2, &now, TK_DO))       continue;
-		if(consume_reserved(&p, "while",    5, &now, TK_WHILE))    continue;
-		if(consume_reserved(&p, "break",    5, &now, TK_BREAK))    continue;
-		if(consume_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;
-		if(consume_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
-		if(consume_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
-		if(consume_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
-		if(consume_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
-		if(consume_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
+		if(tokenize_reserved(&p, "void",     4, &now, TK_TYPE))	    continue;
+		if(tokenize_reserved(&p, "_Bool",    5, &now, TK_TYPE))	    continue;
+		if(tokenize_reserved(&p, "char",     4, &now, TK_TYPE))	    continue;
+		if(tokenize_reserved(&p, "int",	     3, &now, TK_TYPE))	    continue;
+		if(tokenize_reserved(&p, "struct",   6, &now, TK_TYPE))     continue;
+		if(tokenize_reserved(&p, "enum",     4, &now, TK_TYPE))     continue;
+		if(tokenize_reserved(&p, "if",	     2, &now, TK_IF))	    continue;
+		if(tokenize_reserved(&p, "else",     4, &now, TK_ELSE))	    continue;
+		if(tokenize_reserved(&p, "switch",   6, &now, TK_SWITCH))   continue;
+		if(tokenize_reserved(&p, "case",     4, &now, TK_CASE))	    continue;
+		if(tokenize_reserved(&p, "default",  7, &now, TK_DEFAULT))  continue;
+		if(tokenize_reserved(&p, "for",	     3, &now, TK_FOR))	    continue;
+		if(tokenize_reserved(&p, "do",	     2, &now, TK_DO))       continue;
+		if(tokenize_reserved(&p, "while",    5, &now, TK_WHILE))    continue;
+		if(tokenize_reserved(&p, "break",    5, &now, TK_BREAK))    continue;
+		if(tokenize_reserved(&p, "continue", 8, &now, TK_CONTINUE)) continue;
+		if(tokenize_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
+		if(tokenize_reserved(&p, "_Alignof", 8, &now, TK_ALIGNOF))  continue;
+		if(tokenize_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
+		if(tokenize_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
+		if(tokenize_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
+		if(tokenize_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
 
 		// compiler directive
-		if(consume_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
-		//if(consume_reserved(&p, "define",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
-		//if(consume_reserved(&p, "include",  7, &now, TK_COMPILER_DIRECTIVE)) continue;
+		if(tokenize_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(tokenize_reserved(&p, "define",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
+		//if(tokenize_reserved(&p, "include",  7, &now, TK_COMPILER_DIRECTIVE)) continue;
 
 
 		//Is block? '{' or '}'
-		if(isblock(p)){
+		if(is_block(*p)){
 			now = new_token(TK_BLOCK, now, p);
 			now->len = 1;
 			now->str = p;
@@ -2997,7 +3053,7 @@ Token *tokenize(char *p){
 			while(!(*(p-1) != '\\' && *p == '"')){
 				now = new_token(TK_STR, now, p++);
 			}
-			p++;
+			now = new_token(TK_STR, now, p++);
 			continue;
 		}
 
@@ -3024,12 +3080,22 @@ Token *tokenize(char *p){
 	new_token(TK_EOF, now, p);
 	return head.next;
 }
+
 //=========================================================
 
 
 
 
 //======================= main.c ==========================
+int   llid;
+int   label_num;
+int   label_loop_end;
+char  *user_input;
+char  filename[100];
+Func  *func_list[FUNC_NUM];
+Label *labels_head;
+Label *labels_tail;
+
 char *read_file(char *path){
 	FILE *fp;
 	char *buf;
@@ -3041,13 +3107,13 @@ char *read_file(char *path){
 	}
 
 	// get file size
-	if(fseek(fp, 0, SEEK_END) == -1){
+	if(fseek(fp, 0L, SEEK_END) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 	
-	if(fseek(fp, 0, SEEK_SET) == -1){
+	if(fseek(fp, 0L, SEEK_SET) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
 
@@ -3081,9 +3147,45 @@ void get_code(int argc, char **argv){
 	}
 }
 
+void set_gvar(GVar *gvar){
+	Node *init;
+	Type *type = get_pointer_type(gvar->type);
+	if(gvar->type->is_extern == 0){
+		if(gvar->type->is_thread_local == 0){
+			if(gvar->init){
+				printf("%.*s:\n", gvar->len, gvar->name);
+				init = gvar->init->rhs;
+				if(gvar->init->kind == ND_BLOCK){
+					while(init){
+						if(type->ty < INT){
+							printf("	.byte	%d\n", init->rhs->val);
+						}else{
+							printf("	.long	%d\n", init->rhs->val);
+						}
+						init = init->block_code;
+					}
+				}else if(gvar->init->rhs->kind == ND_STR){
+					printf("	.quad	.LC%d\n", init->val);
+				}else{
+					if(type->ty < INT){
+						printf("	.byte	%d\n", init->val);
+					}else{
+						printf("	.long	%d\n", init->val);
+					}
+				}
+			}else{
+				printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+			}
+		}else{
+			printf(".section .tbss,\"awT\",@nobits\n");
+			printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+		}
+	}
+}
+
 int main(int argc, char **argv){
 	int i;
-	int j;
+        int j;
 
 	// get source code
 	get_code(argc, argv);
@@ -3100,19 +3202,12 @@ int main(int argc, char **argv){
 
 	// generate code
 	printf(".intel_syntax noprefix\n");
-	printf(".globl main\n");
 
 	// set global variable
+	printf(".data\n");
 	GVar *start = globals;
 	for (GVar *var = start;var;var = var->next){
-		if(var->type->is_extern == 0){
-			if(var->type->is_thread_local == 0){
-				printf(".comm	%.*s, %d, %d\n", var->len, var->name, var->memsize, var->type->align);
-			}else{
-				printf(".section .tbss,\"awT\",@nobits\n");
-				printf("%.*s:\n	.zero %d\n", var->len, var->name, var->memsize);
-			}
-		}
+		set_gvar(var);
 	}
 
 	// set string
@@ -3128,7 +3223,9 @@ int main(int argc, char **argv){
 	labels_tail    = __NULL;
 
 	//generate assembly at first expr
+	printf(".text\n");
 	for(i = 0;func_list[i];i++){
+		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	push rbp\n");
 		printf("	mov rbp,rsp\n");
@@ -3137,14 +3234,6 @@ int main(int argc, char **argv){
 		if(func_list[i]->args){
 			// set local variable
 			gen(func_list[i]->args);
-		}
-
-		// global init (main)
-		if(strncmp(func_list[i]->name, "main", 4) == 0){
-			GVar *start = globals;
-			for (GVar *var = start;var;var = var->next){
-				if(var->init) expand_next(var->init);
-			}
 		}
 
 		for(j = 0;func_list[i]->code[j] != __NULL;j++){
@@ -3161,6 +3250,7 @@ int main(int argc, char **argv){
 
 	return 0;
 }
+
 
 //=========================================================
 
