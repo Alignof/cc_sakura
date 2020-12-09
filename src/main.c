@@ -77,6 +77,7 @@ void set_gvar(GVar *gvar){
                 printf("%.*s:\n", gvar->len, gvar->name);
                 init = gvar->init;
                 if(gvar->init->kind == ND_BLOCK){
+                        init = gvar->init->rhs;
                         while(init){
                                 if(type->ty < INT){
                                         printf("	.byte	%d\n", init->val);
@@ -85,6 +86,7 @@ void set_gvar(GVar *gvar){
                                 }
                                 init = init->block_code;
                         }
+                        if(gvar->init->offset) printf("        .zero   %d\n", gvar->init->offset);
                 }else if(gvar->init->kind == ND_STR){
                         if(gvar->type->ty == PTR){
                                 printf("	.quad	.LC%d\n", init->val);

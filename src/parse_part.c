@@ -5,17 +5,52 @@
 // LVar *locals;
 // Func *func_list[100];
 
-Node *global_init(Node *node, Node *init_val){
-        if(init_val->kind == ND_STR){
+Node *global_init(Node *node){
+        Node *init_val = NULL;
+        if(check("\"")){
                 if(node->kind == ND_GARRAY){
+		        Token *tok = consume_string();
+                        init_val = new_node(ND_STR, NULL, NULL);
+			init_val->str      = tok->str;
+			init_val->len      = tok->len - 1;
+		        init_val->type->ty = PTR;
+
                         if(node->type->index_size != -1 && init_val->len > node->type->index_size){
                                 error_at(token->str, "invalid global variable initialize");
                         }else if(node->type->index_size != -1 && init_val->len < node->type->index_size){
                                 init_val->len = node->type->index_size - init_val->len - 1;
                         }
+                }else{
+                        init_val = assign();
                 }
-        }else if(init_val->kind == ND_BLOCK){
-                ;
+        }else if(consume("{")){
+                int ctr = 0;
+                Node *new = NULL;
+                init_val = new_node(ND_BLOCK, NULL, NULL);
+                while(token->kind != TK_BLOCK){
+                        //Is first?
+                        if(ctr == 0){
+                                new = expr();
+                                init_val->rhs = new;
+                        }else{
+                                new->block_code = expr();
+                                new = new->block_code;
+                        }
+                        consume(",");
+                        ctr++;
+                }
+
+                expect("}");
+
+                // too many
+                if(node->type->index_size != -1 && node->type->index_size < ctr){
+                        error_at(token->str, "Invalid array size");
+                // too little
+                }else if(node->type->index_size > ctr){
+                        init_val->offset = (node->type->index_size - ctr) * node->type->ptr_to->size;
+                }
+        }else{
+                init_val = assign();
         }
 
         return init_val;

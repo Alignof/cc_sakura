@@ -14,5 +14,6 @@ int main(){
 }
 */
 
-char x[6]="hello";
-int main(){*(x+2);}
+int global = 7;
+int *f(int *x){*x += 1; global += 1; return x;}
+int main(){int x=3; x = (*f(&x))++; return global + x;}
