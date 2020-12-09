@@ -67,7 +67,7 @@ void gen_gvar_label(GVar *gvar, Node *init){
 			printf("	.quad	.LC%d\n", init->val);
 		}else if(gvar->type->ty == ARRAY){
 			printf("	.string \"%.*s\"\n", init->len, init->str);
-			if(init->offset) printf("        .zero   %d\n", init->offset);
+			if(init->offset) printf("        .zero	%d\n", init->offset);
 		}
 	}else{
 		if(type->ty < INT){
@@ -85,12 +85,13 @@ void set_gvar(GVar *gvar){
 
 	if(gvar->type->is_thread_local == 1){
 		printf(".section .tbss,\"awT\",@nobits\n");
-		printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+		printf("%.*s:\n	.zero	%d\n", gvar->len, gvar->name, gvar->memsize);
 		return;
 	}
 
+	printf(".globl %.*s\n", gvar->len, gvar->name);
+	printf("%.*s:\n", gvar->len, gvar->name);
 	if(gvar->init){
-		printf("%.*s:\n", gvar->len, gvar->name);
 		if(gvar->init->kind == ND_BLOCK){
 			Node *init = gvar->init->rhs;
 			while(init){
@@ -102,7 +103,7 @@ void set_gvar(GVar *gvar){
 			gen_gvar_label(gvar, gvar->init);
 		}
 	}else{
-		printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+		printf("	.zero	%d\n", gvar->memsize);
 	}
 }
 

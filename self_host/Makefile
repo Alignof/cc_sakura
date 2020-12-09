@@ -11,7 +11,6 @@ OBJDIR   := ./asem/obj
 SOURCES  := $(wildcard ../src/*.c)
 ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
 OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
-#ASEMS    := $(wildcard ./assemblies/*.s)
 
 # $(TARGET): $(OBJECTS)
 # 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -21,8 +20,13 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 # 	$(CC) $(CFLAGS) -o $@ -c $<
 
 
+$(ASMDIR)/%.s: $(SRCDIR)/%.c 
+	@[ -d $(ASMDIR) ]
+	$(CC) $(INCLUDE) $(CFLAGS) -S -masm=intel $< -o $@
+
+
 # franken 
-EXCLUDEFILE := declare
+EXCLUDEFILE := main
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILE)
 	cat src/header.h src/$(EXCLUDEFILE).c > tmp.c
@@ -61,10 +65,6 @@ patch:$(ASEMS)
 	# check
 	diff gen2.s gen3.s
 
-$(ASMDIR)/%.s: $(SRCDIR)/%.c 
-	@[ -d $(ASMDIR) ]
-	$(CC) $(INCLUDE) $(CFLAGS) -S -masm=intel $< -o $@
-
 
 # build child by mother
 build: $(MOTHER)
@@ -81,13 +81,13 @@ self_host:
 	cat src/header.h > self_host.c && cat src/*.c >> self_host.c
 	# gen1
 	$(MOTHER) self_host.c > child.s && gcc -static child.s -o child
-	cp chile.s gen1.s
+	cp child.s gen1.s
 	# gen2
 	./child self_host.c > child.s && gcc -static child.s -o child
-	cp chile.s gen2.s
+	cp child.s gen2.s
 	# gen3
 	./child self_host.c > child.s && gcc -static child.s -o child
-	cp chile.s gen3.s
+	cp child.s gen3.s
 	# check
 	diff gen2.s gen3.s
 
