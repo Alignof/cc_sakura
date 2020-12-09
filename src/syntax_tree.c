@@ -34,7 +34,7 @@ Node *data(void){
 		if(fstr){
 			node->str = fstr->str;
 			node->val = fstr->label_num;
-			node->offset = fstr->len;
+			node->len = fstr->len;
 		// new one
 		}else{
 			Str *new = calloc(1, sizeof(Str));

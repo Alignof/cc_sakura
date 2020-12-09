@@ -365,7 +365,7 @@ void gen_expr(Node *node){
 			printf("	mov rbp,rsp\n");
 			printf("	and rsp,-16\n");
 
-			printf("	call %.*s\n", node->val, node->str);
+			printf("	call %.*s\n", node->len, node->str);
 
 			printf("	mov rsp,rbp\n");
 			printf("	pop rbp\n");

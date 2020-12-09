@@ -288,7 +288,7 @@ Node *call_function(Node *node, Token *tok){
 
 	node->kind = ND_CALL_FUNC;
 	node->str  = tok->str;
-	node->val  = tok->len;
+	node->len  = tok->len;
 
 	// have argument?
 	if(consume(")")) return node;
