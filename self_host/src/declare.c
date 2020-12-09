@@ -143,6 +143,8 @@ Type *insert_ptr_type(Type *prev, int star_count){
 			newtype->size   = type_size(newtype);
 			newtype->align  = type_align(newtype);
 			newtype->ptr_to = prev;
+			newtype->is_extern       = prev->is_extern;
+			newtype->is_thread_local = prev->is_thread_local;
 			prev = newtype;
 		}
 		
@@ -196,6 +198,8 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			newtype->index_size  = index_num;
 			newtype->size        = type_size(newtype);
 			newtype->align       = type_align(newtype);
+			newtype->is_extern       = gvar->type->is_extern;
+			newtype->is_thread_local = gvar->type->is_thread_local;
 			gvar->type = newtype;
 			expect("]");
 		}

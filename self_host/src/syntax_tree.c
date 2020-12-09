@@ -742,7 +742,6 @@ void program(void){
 
 			// initialize formula
 			if(consume("=")){
-				//globals->init = global_init(init_gv, assign());
 				globals->init = global_init(init_gv);
 			}
 
