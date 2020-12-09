@@ -123,6 +123,7 @@ Token *tokenize(char *p){
 		}
 
 		if((*p == '/') && (*(p+1) == '*')){
+                        p+=3;
 			while(!((*(p-1) == '*') && (*p == '/'))) p++;
 			p++;
 			continue;
