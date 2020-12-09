@@ -8,7 +8,7 @@ Node *data(void){
 		expect(")");
 		return node;
 	}
-	
+
 	// compiler directive
 	if(token->kind == TK_COMPILER_DIRECTIVE){
 		Node *node = compiler_directive();
@@ -30,7 +30,7 @@ Node *data(void){
 		if(fstr){
 			node->str = fstr->str;
 			node->val = fstr->label_num;
-			node->offset = fstr->len;
+			node->len = fstr->len;
 		// new one
 		}else{
 			Str *new = calloc(1, sizeof(Str));
@@ -38,7 +38,7 @@ Node *data(void){
 			new->str = tok->str;
 			new->label_num = strings ? strings->label_num+1 : 0;
 			node->str = new->str;
-			node->offset = new->len;
+			node->len = new->len;
 			node->val = new->label_num;
 
 			if(strings == __NULL){
@@ -81,12 +81,12 @@ Node *data(void){
 				node->kind = (gvar->type->ty == ARRAY)? ND_GARRAY : ND_GVAR;
 				node->type = gvar->type;
 				node->str  = tok->str;
-				node->val  = tok->len;
+				node->len  = tok->len;
 			}else{
 				Member *rator = find_enumerator(tok, INSIDE_FUNC);
 				if(rator){
 					node = new_node_num(rator->offset);
-				// variable does not exist.
+					// variable does not exist.
 				}else{
 					error_at(token->str, "this variable is not declaration");
 				}
@@ -441,35 +441,35 @@ Node *stmt(void){
 			node->rhs  = else_block;
 			node->kind = ND_IFELSE;
 		}
- 
- 	}else if(consume_reserved_word("switch", TK_SWITCH)){
- 		/*
- 		 * default<---switch--->block code
- 		 *               | 
- 		 *               | (next)
- 		 *               | 
- 		 *   (cond)<---case->code
- 		 *               | 
- 		 *               | (next: chain_case)
- 		 *               +----->case->case->... 
- 		 */
- 
- 		Node  *cond = __NULL;
+
+	}else if(consume_reserved_word("switch", TK_SWITCH)){
+		/*
+		 * default<---switch--->block code
+		 *               | 
+		 *               | (next)
+		 *               | 
+		 *   (cond)<---case->code
+		 *               | 
+		 *               | (next: chain_case)
+		 *               +----->case->case->... 
+		 */
+
+		Node  *cond = __NULL;
 		Label *before_switch = labels_tail;
 		Label *prev = __NULL;
 
- 		node      = new_node(ND_SWITCH, node, __NULL);
+		node      = new_node(ND_SWITCH, node, __NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
 
- 		if(consume("(")){
- 			//jmp expr
- 			cond = expr();
- 			//check end of caret
- 			expect(")");
- 		}else{
- 			error_at(token->str, "expected ‘(’ before ‘{’ token");
- 		}
+		if(consume("(")){
+			//jmp expr
+			cond = expr();
+			//check end of caret
+			expect(")");
+		}else{
+			error_at(token->str, "expected ‘(’ before ‘{’ token");
+		}
 
 		// get code block 
 		node->rhs = stmt(); 
@@ -504,7 +504,7 @@ Node *stmt(void){
 				//free(lb);
 				lb   = prev->next;
 				prev = lb;
-			// remove head
+				// remove head
 			}else{
 				prev = lb;
 				//free(prev);
@@ -532,7 +532,7 @@ Node *stmt(void){
 		outside_lvar   = locals;
 		outside_enum   = enumerations;
 		outside_struct = structs;
-		
+
 		node      = new_node(ND_FOR, node, __NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
@@ -602,7 +602,7 @@ Node *stmt(void){
 				node->rhs = block_code;
 			}
 		}
-		
+
 		locals       = outside_lvar; 
 		enumerations = outside_enum; 
 		structs      = outside_struct; 
@@ -722,7 +722,7 @@ void program(void){
 			func_list[func_index]->type = toplv_type;
 			func_list[func_index]->name = calloc(def_name->len, sizeof(char));
 			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
-			
+
 			// add type list
 			func_list[func_index]->type = insert_ptr_type(func_list[func_index]->type, star_count);
 
@@ -730,23 +730,20 @@ void program(void){
 			get_argument(func_index);
 
 			// get function block
-                        if(consume("{")){
-                                function(func_list[func_index++]);
-			// prototype declaration
-                        }else{
-                                expect(";");
-                        }
-		// global variable
+			if(consume("{")){
+				function(func_list[func_index++]);
+				// prototype declaration
+			}else{
+				expect(";");
+			}
+			// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
 
 			// initialize formula
 			if(consume("=")){
-				if(consume("{")){
-					globals->init = array_block(init_gv);
-				}else{
-					globals->init = init_formula(init_gv, assign());
-				}
+				//globals->init = global_init(init_gv, assign());
+				globals->init = global_init(init_gv);
 			}
 
 			expect(";");

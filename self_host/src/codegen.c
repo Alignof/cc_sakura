@@ -23,9 +23,9 @@ void expand_block_code(Node *node){
 void gen_gvar(Node *node){
 	if(node->type->is_thread_local){
 		printf("	mov rax, fs:0\n");
-		printf("	add rax, fs:%.*s@tpoff\n", node->val, node->str);
+		printf("	add rax, fs:%.*s@tpoff\n", node->len, node->str);
 	}else{
-		printf("	lea rax,%.*s[rip]\n", node->val, node->str);
+		printf("	lea rax,%.*s[rip]\n", node->len, node->str);
 	}
 	printf("	push rax\n");
 }
@@ -200,7 +200,7 @@ void gen_expr(Node *node){
 			// push
 			gen_address(node->lhs); // push lhs
 			gen_expr(node->rhs->rhs->rhs);// push rhs
-			
+
 			// calc
 			printf("	pop rdi\n");    // rhs
 			printf("	pop rax\n");    // lhs
@@ -362,7 +362,7 @@ void gen_expr(Node *node){
 			printf("	mov rbp,rsp\n");
 			printf("	and rsp,-16\n");
 
-			printf("	call %.*s\n", node->val, node->str);
+			printf("	call %.*s\n", node->len, node->str);
 
 			printf("	mov rsp,rbp\n");
 			printf("	pop rbp\n");

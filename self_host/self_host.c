@@ -163,6 +163,7 @@ struct Node{
 	Node *next;
 	Node *block_code;
 	Type *type;
+        int  len;
 	int  val;
 	char *str;
 	int  offset;
@@ -240,6 +241,7 @@ struct Member{
 	Type   *type;
 	Member *next;
 };
+
 
 
 
@@ -335,6 +337,9 @@ extern _Thread_local int errno;
 
 
 
+
+
+
 //====================== codegen.c ========================
 char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};
 char reg_dx[8][4] = {"dl", "dl", "dl", "edx","rdx","rdx","rdx","edx"};
@@ -361,9 +366,9 @@ void expand_block_code(Node *node){
 void gen_gvar(Node *node){
 	if(node->type->is_thread_local){
 		printf("	mov rax, fs:0\n");
-		printf("	add rax, fs:%.*s@tpoff\n", node->val, node->str);
+		printf("	add rax, fs:%.*s@tpoff\n", node->len, node->str);
 	}else{
-		printf("	lea rax,%.*s[rip]\n", node->val, node->str);
+		printf("	lea rax,%.*s[rip]\n", node->len, node->str);
 	}
 	printf("	push rax\n");
 }
@@ -538,7 +543,7 @@ void gen_expr(Node *node){
 			// push
 			gen_address(node->lhs); // push lhs
 			gen_expr(node->rhs->rhs->rhs);// push rhs
-			
+
 			// calc
 			printf("	pop rdi\n");    // rhs
 			printf("	pop rax\n");    // lhs
@@ -700,7 +705,7 @@ void gen_expr(Node *node){
 			printf("	mov rbp,rsp\n");
 			printf("	and rsp,-16\n");
 
-			printf("	call %.*s\n", node->val, node->str);
+			printf("	call %.*s\n", node->len, node->str);
 
 			printf("	mov rsp,rbp\n");
 			printf("	pop rbp\n");
@@ -870,6 +875,8 @@ void gen(Node *node){
 			printf("	pop rax\n");
 	}
 }
+
+
 //=========================================================
 
 
@@ -1283,9 +1290,75 @@ void declare_enum(Enum *new_enum){
 
 
 //===================== parse_part.c ======================
+Node *global_init(Node *node){
+	Node *init_val = __NULL;
+	if(check("\"")){
+		if(node->kind == ND_GARRAY){
+			Token *tok = consume_string();
+			init_val = new_node(ND_STR, __NULL, __NULL);
+			init_val->str      = tok->str;
+			init_val->len      = tok->len - 1;
+			init_val->type->ty = PTR;
+
+			if(node->type->index_size != -1 && init_val->len > node->type->index_size){
+				error_at(token->str, "invalid global variable initialize");
+			}else if(node->type->index_size != -1 && init_val->len < node->type->index_size){
+				init_val->len = node->type->index_size - init_val->len - 1;
+			}
+		}else{
+			init_val = assign();
+		}
+	}else if(consume("{")){
+		int ctr = 0;
+		Node *new = __NULL;
+		init_val = new_node(ND_BLOCK, __NULL, __NULL);
+		while(token->kind != TK_BLOCK){
+			//Is first?
+			if(ctr == 0){
+				new = expr();
+				init_val->rhs = new;
+			}else{
+				new->block_code = expr();
+				new = new->block_code;
+			}
+
+			if(new->kind == ND_STR && node->kind == ND_GARRAY){
+				if(node->type->index_size != -1 && new->len > node->type->index_size){
+					error_at(token->str, "invalid global variable initialize");
+				}else if(node->type->index_size != -1 && new->len < node->type->index_size){
+					new->offset = node->type->index_size - new->len - 1;
+				}
+			}
+			consume(",");
+			ctr++;
+		}
+
+		expect("}");
+
+		int elements_num = 0;
+		if(node->type->ptr_to->ptr_to){
+			elements_num = node->type->ptr_to->index_size;
+		}else{
+			elements_num = node->type->index_size;
+		}
+
+		// too many
+		if(elements_num != -1 && elements_num < ctr){
+			error_at(token->str, "Invalid array size");
+			// too little
+		}else if(elements_num > ctr){
+			init_val->offset = (elements_num - ctr) * node->type->ptr_to->size;
+		}
+	}else{
+		init_val = assign();
+	}
+
+	return init_val;
+}
+
 Node *compiler_directive(){
 	Node *node;
-	
+
 	if(consume_reserved_word("__NULL", TK_COMPILER_DIRECTIVE)){
 		node = new_node_num(0);
 		node->type->ty    = PTR;
@@ -1369,7 +1442,7 @@ Node *incdec(Node *node, IncDecKind idtype){
 		new->kind = ND_PREID;
 		new->lhs  = plmi_one;
 		new->rhs  = node;
-	// post
+		// post
 	}else{
 		new->kind = ND_POSTID;
 		new->lhs  = node;
@@ -1386,7 +1459,7 @@ Node *init_formula(Node *node, Node *init_val){
 			if(node->type->ty == PTR){
 				node = new_node(ND_ASSIGN, node, init_val);
 			}else if(node->type->ty == ARRAY){
-				if(node->type->index_size == init_val->offset+1 || node->type->index_size == -1){
+				if(node->type->index_size == init_val->len+1 || node->type->index_size == -1){
 					node = array_str(node, init_val);
 				}else{
 					error_at(token->str, "Invalid array size");
@@ -1414,7 +1487,7 @@ Node *array_str(Node *arr, Node *init_val){
 	memcpy(clone, arr, sizeof(Node));
 	clone->kind = arr->kind;
 
-	while(ctr < init_val->offset){
+	while(ctr < init_val->len){
 		src = array_index(clone, new_node_num(ctr));
 		//Is first?
 		if(ctr == 0){
@@ -1428,7 +1501,7 @@ Node *array_str(Node *arr, Node *init_val){
 	}
 
 	// '\0'
-	dst->block_code = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->offset)), new_node_num('\0'));
+	dst->block_code = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->len)), new_node_num('\0'));
 	dst = dst->block_code;
 	ctr++;
 
@@ -1477,7 +1550,7 @@ Node *array_block(Node *arr){
 	}
 
 	expect("}");
-	
+
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
@@ -1492,10 +1565,10 @@ Node *array_block(Node *arr){
 		}else{
 			globals->memsize = align_array_size(ctr, arr->type);
 		}
-	// too many
+		// too many
 	}else if(arr->type->index_size < ctr){
 		error_at(token->str, "Invalid array size");
-	// too little
+		// too little
 	}else if(arr->type->index_size > ctr){
 		while(ctr != arr->type->index_size){
 			src = array_index(clone, new_node_num(ctr));
@@ -1515,7 +1588,7 @@ Node *call_function(Node *node, Token *tok){
 
 	node->kind = ND_CALL_FUNC;
 	node->str  = tok->str;
-	node->val  = tok->len;
+	node->len  = tok->len;
 
 	// have argument?
 	if(consume(")")) return node;
@@ -1578,9 +1651,9 @@ void get_argument(int func_index){
 				new_arg             = new_arg->next;
 			}
 
-                        if(new_arg->rhs->type->ty == ARRAY){
-                                new_arg->rhs->type->ty = PTR;
-                        }
+			if(new_arg->rhs->type->ty == ARRAY){
+				new_arg->rhs->type->ty = PTR;
+			}
 
 			arg_counter++;
 			if(!(consume(","))) break;
@@ -2070,7 +2143,7 @@ Node *data(void){
 		expect(")");
 		return node;
 	}
-	
+
 	// compiler directive
 	if(token->kind == TK_COMPILER_DIRECTIVE){
 		Node *node = compiler_directive();
@@ -2092,7 +2165,7 @@ Node *data(void){
 		if(fstr){
 			node->str = fstr->str;
 			node->val = fstr->label_num;
-			node->offset = fstr->len;
+			node->len = fstr->len;
 		// new one
 		}else{
 			Str *new = calloc(1, sizeof(Str));
@@ -2100,7 +2173,7 @@ Node *data(void){
 			new->str = tok->str;
 			new->label_num = strings ? strings->label_num+1 : 0;
 			node->str = new->str;
-			node->offset = new->len;
+			node->len = new->len;
 			node->val = new->label_num;
 
 			if(strings == __NULL){
@@ -2143,12 +2216,12 @@ Node *data(void){
 				node->kind = (gvar->type->ty == ARRAY)? ND_GARRAY : ND_GVAR;
 				node->type = gvar->type;
 				node->str  = tok->str;
-				node->val  = tok->len;
+				node->len  = tok->len;
 			}else{
 				Member *rator = find_enumerator(tok, INSIDE_FUNC);
 				if(rator){
 					node = new_node_num(rator->offset);
-				// variable does not exist.
+					// variable does not exist.
 				}else{
 					error_at(token->str, "this variable is not declaration");
 				}
@@ -2503,35 +2576,35 @@ Node *stmt(void){
 			node->rhs  = else_block;
 			node->kind = ND_IFELSE;
 		}
- 
- 	}else if(consume_reserved_word("switch", TK_SWITCH)){
- 		/*
- 		 * default<---switch--->block code
- 		 *               | 
- 		 *               | (next)
- 		 *               | 
- 		 *   (cond)<---case->code
- 		 *               | 
- 		 *               | (next: chain_case)
- 		 *               +----->case->case->... 
- 		 */
- 
- 		Node  *cond = __NULL;
+
+	}else if(consume_reserved_word("switch", TK_SWITCH)){
+		/*
+		 * default<---switch--->block code
+		 *               | 
+		 *               | (next)
+		 *               | 
+		 *   (cond)<---case->code
+		 *               | 
+		 *               | (next: chain_case)
+		 *               +----->case->case->... 
+		 */
+
+		Node  *cond = __NULL;
 		Label *before_switch = labels_tail;
 		Label *prev = __NULL;
 
- 		node      = new_node(ND_SWITCH, node, __NULL);
+		node      = new_node(ND_SWITCH, node, __NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
 
- 		if(consume("(")){
- 			//jmp expr
- 			cond = expr();
- 			//check end of caret
- 			expect(")");
- 		}else{
- 			error_at(token->str, "expected ‘(’ before ‘{’ token");
- 		}
+		if(consume("(")){
+			//jmp expr
+			cond = expr();
+			//check end of caret
+			expect(")");
+		}else{
+			error_at(token->str, "expected ‘(’ before ‘{’ token");
+		}
 
 		// get code block 
 		node->rhs = stmt(); 
@@ -2566,7 +2639,7 @@ Node *stmt(void){
 				//free(lb);
 				lb   = prev->next;
 				prev = lb;
-			// remove head
+				// remove head
 			}else{
 				prev = lb;
 				//free(prev);
@@ -2594,7 +2667,7 @@ Node *stmt(void){
 		outside_lvar   = locals;
 		outside_enum   = enumerations;
 		outside_struct = structs;
-		
+
 		node      = new_node(ND_FOR, node, __NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
@@ -2664,7 +2737,7 @@ Node *stmt(void){
 				node->rhs = block_code;
 			}
 		}
-		
+
 		locals       = outside_lvar; 
 		enumerations = outside_enum; 
 		structs      = outside_struct; 
@@ -2784,7 +2857,7 @@ void program(void){
 			func_list[func_index]->type = toplv_type;
 			func_list[func_index]->name = calloc(def_name->len, sizeof(char));
 			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
-			
+
 			// add type list
 			func_list[func_index]->type = insert_ptr_type(func_list[func_index]->type, star_count);
 
@@ -2792,23 +2865,20 @@ void program(void){
 			get_argument(func_index);
 
 			// get function block
-                        if(consume("{")){
-                                function(func_list[func_index++]);
-			// prototype declaration
-                        }else{
-                                expect(";");
-                        }
-		// global variable
+			if(consume("{")){
+				function(func_list[func_index++]);
+				// prototype declaration
+			}else{
+				expect(";");
+			}
+			// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
 
 			// initialize formula
 			if(consume("=")){
-				if(consume("{")){
-					globals->init = array_block(init_gv);
-				}else{
-					globals->init = init_formula(init_gv, assign());
-				}
+				//globals->init = global_init(init_gv, assign());
+				globals->init = global_init(init_gv);
 			}
 
 			expect(";");
@@ -3112,7 +3182,7 @@ char *read_file(char *path){
 	}
 
 	size_t size = ftell(fp);
-	
+
 	if(fseek(fp, 0L, SEEK_SET) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
@@ -3147,39 +3217,49 @@ void get_code(int argc, char **argv){
 	}
 }
 
-void set_gvar(GVar *gvar){
-	Node *init;
+void gen_gvar_label(GVar *gvar, Node *init){
 	Type *type = get_pointer_type(gvar->type);
-	if(gvar->type->is_extern == 0){
-		if(gvar->type->is_thread_local == 0){
-			if(gvar->init){
-				printf("%.*s:\n", gvar->len, gvar->name);
-				init = gvar->init->rhs;
-				if(gvar->init->kind == ND_BLOCK){
-					while(init){
-						if(type->ty < INT){
-							printf("	.byte	%d\n", init->rhs->val);
-						}else{
-							printf("	.long	%d\n", init->rhs->val);
-						}
-						init = init->block_code;
-					}
-				}else if(gvar->init->rhs->kind == ND_STR){
-					printf("	.quad	.LC%d\n", init->val);
-				}else{
-					if(type->ty < INT){
-						printf("	.byte	%d\n", init->val);
-					}else{
-						printf("	.long	%d\n", init->val);
-					}
-				}
-			}else{
-				printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
-			}
-		}else{
-			printf(".section .tbss,\"awT\",@nobits\n");
-			printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+	if(init->kind == ND_STR){
+		if(gvar->type->ty == PTR){
+			printf("	.quad	.LC%d\n", init->val);
+		}else if(gvar->type->ty == ARRAY){
+			printf("	.string \"%.*s\"\n", init->len, init->str);
+			if(init->offset) printf("        .zero   %d\n", init->offset);
 		}
+	}else{
+		if(type->ty < INT){
+			printf("	.byte	%d\n", init->val);
+		}else{
+			printf("	.long	%d\n", init->val);
+		}
+	}
+}
+
+void set_gvar(GVar *gvar){
+	if(gvar->type->is_extern == 1){
+		return;
+	}
+
+	if(gvar->type->is_thread_local == 1){
+		printf(".section .tbss,\"awT\",@nobits\n");
+		printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+		return;
+	}
+
+	if(gvar->init){
+		printf("%.*s:\n", gvar->len, gvar->name);
+		if(gvar->init->kind == ND_BLOCK){
+			Node *init = gvar->init->rhs;
+			while(init){
+				gen_gvar_label(gvar, init);
+				init = init->block_code;
+			}
+			if(gvar->init->offset) printf("        .zero   %d\n", gvar->init->offset);
+		}else{
+			gen_gvar_label(gvar, gvar->init);
+		}
+	}else{
+		printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
 	}
 }
 

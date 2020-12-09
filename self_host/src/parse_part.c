@@ -1,6 +1,72 @@
+Node *global_init(Node *node){
+	Node *init_val = __NULL;
+	if(check("\"")){
+		if(node->kind == ND_GARRAY){
+			Token *tok = consume_string();
+			init_val = new_node(ND_STR, __NULL, __NULL);
+			init_val->str      = tok->str;
+			init_val->len      = tok->len - 1;
+			init_val->type->ty = PTR;
+
+			if(node->type->index_size != -1 && init_val->len > node->type->index_size){
+				error_at(token->str, "invalid global variable initialize");
+			}else if(node->type->index_size != -1 && init_val->len < node->type->index_size){
+				init_val->len = node->type->index_size - init_val->len - 1;
+			}
+		}else{
+			init_val = assign();
+		}
+	}else if(consume("{")){
+		int ctr = 0;
+		Node *new = __NULL;
+		init_val = new_node(ND_BLOCK, __NULL, __NULL);
+		while(token->kind != TK_BLOCK){
+			//Is first?
+			if(ctr == 0){
+				new = expr();
+				init_val->rhs = new;
+			}else{
+				new->block_code = expr();
+				new = new->block_code;
+			}
+
+			if(new->kind == ND_STR && node->kind == ND_GARRAY){
+				if(node->type->index_size != -1 && new->len > node->type->index_size){
+					error_at(token->str, "invalid global variable initialize");
+				}else if(node->type->index_size != -1 && new->len < node->type->index_size){
+					new->offset = node->type->index_size - new->len - 1;
+				}
+			}
+			consume(",");
+			ctr++;
+		}
+
+		expect("}");
+
+		int elements_num = 0;
+		if(node->type->ptr_to->ptr_to){
+			elements_num = node->type->ptr_to->index_size;
+		}else{
+			elements_num = node->type->index_size;
+		}
+
+		// too many
+		if(elements_num != -1 && elements_num < ctr){
+			error_at(token->str, "Invalid array size");
+			// too little
+		}else if(elements_num > ctr){
+			init_val->offset = (elements_num - ctr) * node->type->ptr_to->size;
+		}
+	}else{
+		init_val = assign();
+	}
+
+	return init_val;
+}
+
 Node *compiler_directive(){
 	Node *node;
-	
+
 	if(consume_reserved_word("__NULL", TK_COMPILER_DIRECTIVE)){
 		node = new_node_num(0);
 		node->type->ty    = PTR;
@@ -84,7 +150,7 @@ Node *incdec(Node *node, IncDecKind idtype){
 		new->kind = ND_PREID;
 		new->lhs  = plmi_one;
 		new->rhs  = node;
-	// post
+		// post
 	}else{
 		new->kind = ND_POSTID;
 		new->lhs  = node;
@@ -101,7 +167,7 @@ Node *init_formula(Node *node, Node *init_val){
 			if(node->type->ty == PTR){
 				node = new_node(ND_ASSIGN, node, init_val);
 			}else if(node->type->ty == ARRAY){
-				if(node->type->index_size == init_val->offset+1 || node->type->index_size == -1){
+				if(node->type->index_size == init_val->len+1 || node->type->index_size == -1){
 					node = array_str(node, init_val);
 				}else{
 					error_at(token->str, "Invalid array size");
@@ -129,7 +195,7 @@ Node *array_str(Node *arr, Node *init_val){
 	memcpy(clone, arr, sizeof(Node));
 	clone->kind = arr->kind;
 
-	while(ctr < init_val->offset){
+	while(ctr < init_val->len){
 		src = array_index(clone, new_node_num(ctr));
 		//Is first?
 		if(ctr == 0){
@@ -143,7 +209,7 @@ Node *array_str(Node *arr, Node *init_val){
 	}
 
 	// '\0'
-	dst->block_code = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->offset)), new_node_num('\0'));
+	dst->block_code = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->len)), new_node_num('\0'));
 	dst = dst->block_code;
 	ctr++;
 
@@ -192,7 +258,7 @@ Node *array_block(Node *arr){
 	}
 
 	expect("}");
-	
+
 	// ommitted
 	if(isize == -1){
 		if(arr->kind == ND_LARRAY){
@@ -207,10 +273,10 @@ Node *array_block(Node *arr){
 		}else{
 			globals->memsize = align_array_size(ctr, arr->type);
 		}
-	// too many
+		// too many
 	}else if(arr->type->index_size < ctr){
 		error_at(token->str, "Invalid array size");
-	// too little
+		// too little
 	}else if(arr->type->index_size > ctr){
 		while(ctr != arr->type->index_size){
 			src = array_index(clone, new_node_num(ctr));
@@ -230,7 +296,7 @@ Node *call_function(Node *node, Token *tok){
 
 	node->kind = ND_CALL_FUNC;
 	node->str  = tok->str;
-	node->val  = tok->len;
+	node->len  = tok->len;
 
 	// have argument?
 	if(consume(")")) return node;
@@ -293,9 +359,9 @@ void get_argument(int func_index){
 				new_arg             = new_arg->next;
 			}
 
-                        if(new_arg->rhs->type->ty == ARRAY){
-                                new_arg->rhs->type->ty = PTR;
-                        }
+			if(new_arg->rhs->type->ty == ARRAY){
+				new_arg->rhs->type->ty = PTR;
+			}
 
 			arg_counter++;
 			if(!(consume(","))) break;
