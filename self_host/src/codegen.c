@@ -1,7 +1,7 @@
-char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};
-char reg_dx[8][4] = {"dl", "dl", "dl", "edx","rdx","rdx","rdx","edx"};
-char reg_di[8][4] = {"dil","dil","dil","edi","rdi","rdi","rdi","edi"};
-char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
+const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
+const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
+const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
+const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
 
 void expand_next(Node *node){
 	while(node){

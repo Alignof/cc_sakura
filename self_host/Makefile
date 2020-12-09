@@ -77,8 +77,18 @@ test:
 
 # self hosting
 self_host:
+	# prepare
+	# gen1
 	$(MOTHER) self_host.c > child.s && gcc -static child.s -o child
-	./child self_host.c
+	cp chile.s gen1.s
+	# gen2
+	./child self_host.c > child.s && gcc -static child.s -o child
+	cp chile.s gen2.s
+	# gen3
+	./child self_host.c > child.s && gcc -static child.s -o child
+	cp chile.s gen3.s
+	# check
+	diff gen2.s gen3.s
 
 simple_test:$(TARGET)
 	./child dummy.c || echo $$?

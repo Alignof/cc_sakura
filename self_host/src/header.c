@@ -91,10 +91,10 @@ typedef enum{
 	BOOL,
 	CHAR,
 	INT,
+	ENUM,
 	PTR,
 	ARRAY,
 	STRUCT,
-	ENUM,
 }TypeKind;
 
 typedef enum{
