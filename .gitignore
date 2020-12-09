@@ -19,6 +19,7 @@ self_host/*~
 self_host/*.o
 self_host/*.s
 self_host/self_host.c
+self_host/replaced.c
 self_host/tmp*
 self_host/a.out
 self_host/*.txt

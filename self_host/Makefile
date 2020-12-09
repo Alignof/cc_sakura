@@ -26,7 +26,7 @@ $(ASMDIR)/%.s: $(SRCDIR)/%.c
 
 
 # franken 
-EXCLUDEFILE := main
+EXCLUDEFILE := tokenizer
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILE)
 	cat src/header.h src/$(EXCLUDEFILE).c > tmp.c
