@@ -65,40 +65,41 @@ void set_gvar(GVar *gvar){
                 return;
         }
 
+        if(gvar->type->is_thread_local == 1){
+                printf(".section .tbss,\"awT\",@nobits\n");
+                printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+                return;
+        }
+
 	Node *init = NULL;
 	Type *type = get_pointer_type(gvar->type);
-        if(gvar->type->is_thread_local == 0){
-                if(gvar->init){
-                        printf("%.*s:\n", gvar->len, gvar->name);
-                        init = gvar->init;
-                        if(gvar->init->kind == ND_BLOCK){
-                                while(init){
-                                        if(type->ty < INT){
-                                                printf("	.byte	%d\n", init->val);
-                                        }else{
-                                                printf("	.long	%d\n", init->val);
-                                        }
-                                        init = init->block_code;
-                                }
-                        }else if(gvar->init->kind == ND_STR){
-                                if(init->offset){
-		                        printf("	.string \"%.*s\"\n", init->len, init->str);
-                                        printf("        .zero   %d\n", init->offset);
-                                }else{
-                                        printf("	.quad	.LC%d\n", init->val);
-                                }
-                        }else{
+        if(gvar->init){
+                printf("%.*s:\n", gvar->len, gvar->name);
+                init = gvar->init;
+                if(gvar->init->kind == ND_BLOCK){
+                        while(init){
                                 if(type->ty < INT){
                                         printf("	.byte	%d\n", init->val);
                                 }else{
                                         printf("	.long	%d\n", init->val);
                                 }
+                                init = init->block_code;
+                        }
+                }else if(gvar->init->kind == ND_STR){
+                        if(gvar->type->ty == PTR){
+                                printf("	.quad	.LC%d\n", init->val);
+                        }else if(gvar->type->ty == ARRAY){
+                                printf("	.string \"%.*s\"\n", init->len, init->str);
+                                if(init->offset) printf("        .zero   %d\n", init->offset);
                         }
                 }else{
-                        printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+                        if(type->ty < INT){
+                                printf("	.byte	%d\n", init->val);
+                        }else{
+                                printf("	.long	%d\n", init->val);
+                        }
                 }
         }else{
-                printf(".section .tbss,\"awT\",@nobits\n");
                 printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
         }
 }

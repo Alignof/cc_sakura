@@ -8,10 +8,10 @@
 Node *global_init(Node *node, Node *init_val){
         if(init_val->kind == ND_STR){
                 if(node->kind == ND_GARRAY){
-                        if(node->type->index_size != -1 && init_val->offset > node->type->index_size){
+                        if(node->type->index_size != -1 && init_val->len > node->type->index_size){
                                 error_at(token->str, "invalid global variable initialize");
-                        }else if(node->type->index_size != -1 && init_val->offset < node->type->index_size){
-                                init_val->offset = node->type->index_size - init_val->len - 1;
+                        }else if(node->type->index_size != -1 && init_val->len < node->type->index_size){
+                                init_val->len = node->type->index_size - init_val->len - 1;
                         }
                 }
         }else if(init_val->kind == ND_BLOCK){
@@ -124,7 +124,7 @@ Node *init_formula(Node *node, Node *init_val){
 			if(node->type->ty == PTR){
 				node = new_node(ND_ASSIGN, node, init_val);
 			}else if(node->type->ty == ARRAY){
-				if(node->type->index_size == init_val->offset+1 || node->type->index_size == -1){
+				if(node->type->index_size == init_val->len+1 || node->type->index_size == -1){
 					node = array_str(node, init_val);
 				}else{
 					error_at(token->str, "Invalid array size");
@@ -152,7 +152,7 @@ Node *array_str(Node *arr, Node *init_val){
 	memcpy(clone, arr, sizeof(Node));
 	clone->kind = arr->kind;
 
-	while(ctr < init_val->offset){
+	while(ctr < init_val->len){
 		src = array_index(clone, new_node_num(ctr));
 		//Is first?
 		if(ctr == 0){
@@ -166,7 +166,7 @@ Node *array_str(Node *arr, Node *init_val){
 	}
 
 	// '\0'
-	dst->block_code = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->offset)), new_node_num('\0'));
+	dst->block_code = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->len)), new_node_num('\0'));
 	dst = dst->block_code;
 	ctr++;
 
