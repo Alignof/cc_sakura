@@ -1,5 +1,1 @@
-char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};
-int main(){
-        printf("%s\n", reg_ax[4]);
-        return;
-}
+int a[]={0,1,2,3,4}; int main(){return a[4];}

@@ -36,18 +36,33 @@ Node *global_init(Node *node){
                                 new->block_code = expr();
                                 new = new->block_code;
                         }
+
+                        if(new->kind == ND_STR && node->kind == ND_GARRAY){
+                                if(node->type->index_size != -1 && new->len > node->type->index_size){
+                                        error_at(token->str, "invalid global variable initialize");
+                                }else if(node->type->index_size != -1 && new->len < node->type->index_size){
+                                        new->offset = node->type->index_size - new->len - 1;
+                                }
+                        }
                         consume(",");
                         ctr++;
                 }
 
                 expect("}");
 
+                int elements_num = 0;
+                if(node->type->ptr_to->ptr_to){
+                        elements_num = node->type->ptr_to->index_size;
+                }else{
+                        elements_num = node->type->index_size;
+                }
+
                 // too many
-                if(node->type->index_size != -1 && node->type->index_size < ctr){
+                if(elements_num != -1 && elements_num < ctr){
                         error_at(token->str, "Invalid array size");
                 // too little
-                }else if(node->type->index_size > ctr){
-                        init_val->offset = (node->type->index_size - ctr) * node->type->ptr_to->size;
+                }else if(elements_num > ctr){
+                        init_val->offset = (elements_num - ctr) * node->type->ptr_to->size;
                 }
         }else{
                 init_val = assign();

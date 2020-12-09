@@ -62,7 +62,7 @@ void get_code(int argc, char **argv){
 
 void gen_gvar_label(GVar *gvar, Node *init){
 	Type *type = get_pointer_type(gvar->type);
-        if(gvar->init->kind == ND_STR){
+        if(init->kind == ND_STR){
                 if(gvar->type->ty == PTR){
                         printf("	.quad	.LC%d\n", init->val);
                 }else if(gvar->type->ty == ARRAY){
