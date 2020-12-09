@@ -55,7 +55,7 @@ bool check(char *op){
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    trlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 
@@ -135,8 +135,7 @@ Token *consume_ident(void){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-	    strlen(op) != token->len||
-	    memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		error_at(token->str, "not a charctor.");
 	}
 	token = token->next;
@@ -300,19 +299,19 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	if(ND_ADD <= kind && kind <= ND_BIT_OR){
 		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}
-        
-        if(kind == ND_SUB){
-                if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
-		   (lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
-                        node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
-                        return node;
-                }
-        }
+
+	if(kind == ND_SUB){
+		if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
+				(lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
+			node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
+			return node;
+		}
+	}
 
 	if(kind == ND_ADD || kind == ND_SUB){
-                if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
-		   rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
-                        node = pointer_calc(node, lhs->type, rhs->type);
+		if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
+				rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
+			node = pointer_calc(node, lhs->type, rhs->type);
 		}
 	}
 
@@ -321,9 +320,9 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
 		}
 
-                if(lhs->type->ty == STRUCT){
-                        error_at(token->str, "struct assignment is not implemented");
-                }
+		if(lhs->type->ty == STRUCT){
+			error_at(token->str, "struct assignment is not implemented");
+		}
 	}
 
 	if(kind == ND_ASSIGN || kind == ND_COMPOUND){

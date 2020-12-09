@@ -203,7 +203,7 @@ void gen_expr(Node *node){
 			// push
 			gen_address(node->lhs); // push lhs
 			gen_expr(node->rhs->rhs->rhs);// push rhs
-			
+
 			// calc
 			printf("	pop rdi\n");    // rhs
 			printf("	pop rax\n");    // lhs

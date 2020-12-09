@@ -127,7 +127,7 @@ Type *parse_type(void){
 
 	type->size  = type_size(type);
 	type->align = type_align(type);
-	
+
 	// count asterisk
 	while(token->kind == TK_RESERVED && *(token->str) == '*'){
 		star_count++;
@@ -151,7 +151,7 @@ Type *insert_ptr_type(Type *prev, int star_count){
 			newtype->ptr_to = prev;
 			prev = newtype;
 		}
-		
+
 		return newtype;
 	}else{
 		return prev;
@@ -246,7 +246,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 				}else{
 					isize *= token->val;
 				}
-				
+
 				index_num = token->val;
 				token     = token->next;
 			}
@@ -266,15 +266,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		alloc_size += asize;
 		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
-		/*
-		if(lvar->type->ty == STRUCT){
-			lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
-			alloc_size   += lvar->type->size;
-		}else{
-			lvar->offset =  (locals) ? (locals->offset)+8 : 8;
-			alloc_size   += 8;
-		}
-		*/
 		lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
 		alloc_size   += lvar->type->size;
 	}
@@ -352,13 +343,12 @@ Member *register_struc_member(int *asize_ptr){
 		if(consume("}")) break;
 	}
 
-	//(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
 	return memb_head;
 }
 
 void declare_struct(Struc *new_struc){
 	int asize = 0;
-	
+
 	new_struc->member  = register_struc_member(&asize);
 	new_struc->memsize = asize;
 	new_struc->next    = structs;

@@ -33,50 +33,50 @@ bool is_alnum(char c){
 }
 
 bool is_symbol(char *str,  bool *single_flag){
-     int i;
-     int size;
-     char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
-     char repeat_symbol[] = "<>&|+-";
-     char multi_symbol[]  = "->";
-     char multi_eq[]      = "<=>!+*-/";
-     
-     //Is multi equal? (<=,==,!=,>=)
-     size = sizeof(multi_eq)/sizeof(char);
-     for(i = 0;i < size;i++){
-     	if((*str == multi_eq[i]) && (*(str+1) == '=')){
-     		*single_flag = false;
-     		return true;
-     	}
-     }
-     
-     //Is repeat symbol? (<<,>>,&&,||,++,--)
-     size = sizeof(repeat_symbol)/sizeof(char);
-     for(i = 0;i < size;i++){
-     	if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
-     		*single_flag = false;
-     		return true;
-     	}
-     }
+	int i;
+	int size;
+	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
+	char repeat_symbol[] = "<>&|+-";
+	char multi_symbol[]  = "->";
+	char multi_eq[]      = "<=>!+*-/";
 
-     //Is multi symbol? (->)
-     size = sizeof(multi_symbol)/sizeof(char)/2;
-     for(i = 0;i < size;i += 2){
-     	if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
-     		*single_flag = false;
-     		return true;
-     	}
-     }
+	//Is multi equal? (<=,==,!=,>=)
+	size = sizeof(multi_eq)/sizeof(char);
+	for(i = 0;i < size;i++){
+		if((*str == multi_eq[i]) && (*(str+1) == '=')){
+			*single_flag = false;
+			return true;
+		}
+	}
 
-     //Is single symbol? (+,-,*,/,%,<,>,',.)
-     size = sizeof(single_symbol)/sizeof(char);
-     for(i = 0;i < size;i++){
-     	if(*str == single_symbol[i]){
-     		*single_flag = true;
-     		return true;
-     	}
-     }
+	//Is repeat symbol? (<<,>>,&&,||,++,--)
+	size = sizeof(repeat_symbol)/sizeof(char);
+	for(i = 0;i < size;i++){
+		if(*str == repeat_symbol[i] && *(str+1) == repeat_symbol[i]){
+			*single_flag = false;
+			return true;
+		}
+	}
 
-     return false;
+	//Is multi symbol? (->)
+	size = sizeof(multi_symbol)/sizeof(char)/2;
+	for(i = 0;i < size;i += 2){
+		if(*str == multi_symbol[i] && *(str+1) == multi_symbol[i+1]){
+			*single_flag = false;
+			return true;
+		}
+	}
+
+	//Is single symbol? (+,-,*,/,%,<,>,',.)
+	size = sizeof(single_symbol)/sizeof(char);
+	for(i = 0;i < size;i++){
+		if(*str == single_symbol[i]){
+			*single_flag = true;
+			return true;
+		}
+	}
+
+	return false;
 }
 
 
@@ -123,7 +123,7 @@ Token *tokenize(char *p){
 		}
 
 		if((*p == '/') && (*(p+1) == '*')){
-                        p+=3;
+			p+=3;
 			while(!((*(p-1) == '*') && (*p == '/'))) p++;
 			p++;
 			continue;
@@ -139,11 +139,11 @@ Token *tokenize(char *p){
 				if(*p == '0'){
 					now = new_token(TK_NUM, now, p++);
 					now->val = 0;
-				//Is LF? (\n)
+					//Is LF? (\n)
 				}else if(*p == 'n'){
 					now = new_token(TK_NUM, now, p++);
 					now->val = 10;
-				//Is HT? (\t)
+					//Is HT? (\t)
 				}else if(*p == 't'){
 					now = new_token(TK_NUM, now, p++);
 					now->val = 9;
@@ -243,7 +243,7 @@ Token *tokenize(char *p){
 			p++;
 			continue;
 		}
-		
+
 		//Is valiable?
 		if(is_alnum(*p)){
 			while(is_alnum(*p)){

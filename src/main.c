@@ -25,7 +25,7 @@ char *read_file(char *path){
 	}
 
 	size_t size = ftell(fp);
-	
+
 	if(fseek(fp, 0L, SEEK_SET) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
@@ -62,48 +62,48 @@ void get_code(int argc, char **argv){
 
 void gen_gvar_label(GVar *gvar, Node *init){
 	Type *type = get_pointer_type(gvar->type);
-        if(init->kind == ND_STR){
-                if(gvar->type->ty == PTR){
-                        printf("	.quad	.LC%d\n", init->val);
-                }else if(gvar->type->ty == ARRAY){
-                        printf("	.string \"%.*s\"\n", init->len, init->str);
-                        if(init->offset) printf("        .zero   %d\n", init->offset);
-                }
-        }else{
-                if(type->ty < INT){
-                        printf("	.byte	%d\n", init->val);
-                }else{
-                        printf("	.long	%d\n", init->val);
-                }
-        }
+	if(init->kind == ND_STR){
+		if(gvar->type->ty == PTR){
+			printf("	.quad	.LC%d\n", init->val);
+		}else if(gvar->type->ty == ARRAY){
+			printf("	.string \"%.*s\"\n", init->len, init->str);
+			if(init->offset) printf("        .zero   %d\n", init->offset);
+		}
+	}else{
+		if(type->ty < INT){
+			printf("	.byte	%d\n", init->val);
+		}else{
+			printf("	.long	%d\n", init->val);
+		}
+	}
 }
 
 void set_gvar(GVar *gvar){
 	if(gvar->type->is_extern == 1){
-                return;
-        }
+		return;
+	}
 
-        if(gvar->type->is_thread_local == 1){
-                printf(".section .tbss,\"awT\",@nobits\n");
-                printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
-                return;
-        }
+	if(gvar->type->is_thread_local == 1){
+		printf(".section .tbss,\"awT\",@nobits\n");
+		printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+		return;
+	}
 
-        if(gvar->init){
-                printf("%.*s:\n", gvar->len, gvar->name);
-                if(gvar->init->kind == ND_BLOCK){
-                        Node *init = gvar->init->rhs;
-                        while(init){
-                                gen_gvar_label(gvar, init);
-                                init = init->block_code;
-                        }
-                        if(gvar->init->offset) printf("        .zero   %d\n", gvar->init->offset);
-                }else{
-                        gen_gvar_label(gvar, gvar->init);
-                }
-        }else{
-                printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
-        }
+	if(gvar->init){
+		printf("%.*s:\n", gvar->len, gvar->name);
+		if(gvar->init->kind == ND_BLOCK){
+			Node *init = gvar->init->rhs;
+			while(init){
+				gen_gvar_label(gvar, init);
+				init = init->block_code;
+			}
+			if(gvar->init->offset) printf("        .zero   %d\n", gvar->init->offset);
+		}else{
+			gen_gvar_label(gvar, gvar->init);
+		}
+	}else{
+		printf("%.*s:\n	.zero %d\n", gvar->len, gvar->name, gvar->memsize);
+	}
 }
 
 int main(int argc, char **argv){
