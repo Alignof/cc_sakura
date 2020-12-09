@@ -1,12 +1,12 @@
-void error(char *loc, char *fmt, ...){
-	va_list ap;
-	va_start(ap, fmt);
+void error(char *loc, char *fmt){
+	//va_list ap;
+	//va_start(ap, fmt);
 
 	int pos = loc-user_input;
 	fprintf(stderr, "%s\n", user_input);
 	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ ");
-	vfprintf(stderr, fmt, ap);
+	//vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit(1);
 }
@@ -29,7 +29,7 @@ void error_at(char *loc, char *msg){
 	while(*start == '\t') start++;
 
 	int indent = fprintf(stderr, "%s:%d ", filename, line_num);
-	fprintf(stderr, "%.*s\n", (int)(end-start), start);
+	fprintf(stderr, "%.*s\n", (end-start), start);
 
 	int pos = indent+loc-start;
 	fprintf(stderr, "%*s", pos, " ");

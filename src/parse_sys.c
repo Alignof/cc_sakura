@@ -55,7 +55,7 @@ bool check(char *op){
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    trlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		return false;
 	}
 

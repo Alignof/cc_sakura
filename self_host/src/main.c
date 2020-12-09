@@ -18,13 +18,13 @@ char *read_file(char *path){
 	}
 
 	// get file size
-	if(fseek(fp, 0L, SEEK_END) == -1){
+	if(fseek(fp, 0, SEEK_END) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 
-	if(fseek(fp, 0L, SEEK_SET) == -1){
+	if(fseek(fp, 0, SEEK_SET) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
 

@@ -85,7 +85,7 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
+	int reg_ty = (node->type->ty == ENUM) ? 1 : node->type->ty;
 
 	switch(node->kind){
 		case ND_ADD:

@@ -428,7 +428,7 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
+	int reg_ty = (node->type->ty == ENUM) ? 1 : node->type->ty;
 
 	switch(node->kind){
 		case ND_ADD:
@@ -1771,15 +1771,15 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 
 
 //==================== parse_sys.c ========================
-void error(char *loc, char *fmt, ...){
-	va_list ap;
-	va_start(ap, fmt);
+void error(char *loc, char *fmt){
+	//va_list ap;
+	//va_start(ap, fmt);
 
 	int pos = loc-user_input;
 	fprintf(stderr, "%s\n", user_input);
 	fprintf(stderr, "%*s", pos, " ");
 	fprintf(stderr, "^ ");
-	vfprintf(stderr, fmt, ap);
+	//vfprintf(stderr, fmt, ap);
 	fprintf(stderr, "\n");
 	exit(1);
 }
@@ -1802,7 +1802,7 @@ void error_at(char *loc, char *msg){
 	while(*start == '\t') start++;
 
 	int indent = fprintf(stderr, "%s:%d ", filename, line_num);
-	fprintf(stderr, "%.*s\n", (int)(end-start), start);
+	fprintf(stderr, "%.*s\n", (end-start), start);
 
 	int pos = indent+loc-start;
 	fprintf(stderr, "%*s", pos, " ");
@@ -3162,7 +3162,7 @@ int   label_num;
 int   label_loop_end;
 char  *user_input;
 char  filename[100];
-Func  *func_list[FUNC_NUM];
+Func  *func_list[300];
 Label *labels_head;
 Label *labels_tail;
 
@@ -3177,13 +3177,13 @@ char *read_file(char *path){
 	}
 
 	// get file size
-	if(fseek(fp, 0L, SEEK_END) == -1){
+	if(fseek(fp, 0, SEEK_END) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 
-	if(fseek(fp, 0L, SEEK_SET) == -1){
+	if(fseek(fp, 0, SEEK_SET) == -1){
 		error("%s: fseek:%s", path, strerror(errno));
 	}
 
