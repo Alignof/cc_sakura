@@ -5,7 +5,9 @@
            return;
    }
  */
-char str[10] = "hello";
+
+char str[12] = "hello";
+//char *str = "hello";
 int main(){
         printf("%s\n", str);
         return 0;

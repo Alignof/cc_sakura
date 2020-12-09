@@ -61,7 +61,7 @@ void get_code(int argc, char **argv){
 }
 
 void set_gvar(GVar *gvar){
-	if(gvar->type->is_extern == 0){
+	if(gvar->type->is_extern == 1){
                 return;
         }
 
@@ -81,7 +81,12 @@ void set_gvar(GVar *gvar){
                                         init = init->block_code;
                                 }
                         }else if(gvar->init->kind == ND_STR){
-                                printf("	.quad	.LC%d\n", init->val);
+                                if(init->offset){
+		                        printf("	.string \"%.*s\"\n", init->len, init->str);
+                                        printf("        .zero   %d\n", init->offset);
+                                }else{
+                                        printf("	.quad	.LC%d\n", init->val);
+                                }
                         }else{
                                 if(type->ty < INT){
                                         printf("	.byte	%d\n", init->val);

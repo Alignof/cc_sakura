@@ -173,6 +173,7 @@ struct Node{
 	Node *next;
 	Node *block_code;
 	Type *type;
+        int  len;
 	int  val;
 	char *str;
 	int  offset;
