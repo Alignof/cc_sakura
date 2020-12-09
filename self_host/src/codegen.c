@@ -1,7 +1,7 @@
-const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
-const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
-const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
-const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
+char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
+char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
+char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
+char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
 
 void expand_next(Node *node){
 	while(node){
@@ -85,7 +85,7 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	int reg_ty = (node->type->ty == ENUM) ? 1 : node->type->ty;
+	int reg_ty = node->type->ty;
 
 	switch(node->kind){
 		case ND_ADD:
@@ -95,7 +95,7 @@ void gen_calc(Node *node){
 			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			break;
 		case ND_MUL:
-			if(node->type->ty == CHAR){
+			if(node->type->ty <= CHAR){
 				printf("	movsx eax,al\n");
 				printf("	movsx edi,dil\n");
 				printf("	imul eax,edi\n");

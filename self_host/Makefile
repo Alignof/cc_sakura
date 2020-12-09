@@ -25,7 +25,7 @@ OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 EXCLUDEFILE := declare
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILE)
-	cat src/header.c src/$(EXCLUDEFILE).c > tmp.c
+	cat src/header.h src/$(EXCLUDEFILE).c > tmp.c
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
@@ -45,7 +45,7 @@ franken:$(ASEMS)
 PATCHFILE := replaced
 patch:$(ASEMS)
 	# patch target:$(PATCHFILE)
-	cat src/header.c src/$(PATCHFILE).c > tmp.c
+	cat src/header.h $(PATCHFILE).c > tmp.c
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/$(PATCHFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
@@ -78,6 +78,7 @@ test:
 # self hosting
 self_host:
 	# prepare
+	cat src/header.h > self_host.c && cat src/*.c >> self_host.c
 	# gen1
 	$(MOTHER) self_host.c > child.s && gcc -static child.s -o child
 	cp chile.s gen1.s

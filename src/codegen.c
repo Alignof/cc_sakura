@@ -88,7 +88,7 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	int reg_ty = (node->type->ty == ENUM) ? 1 : (int)node->type->ty;
+	int reg_ty = (int)node->type->ty;
 
 	switch(node->kind){
 		case ND_ADD:
@@ -98,7 +98,7 @@ void gen_calc(Node *node){
 			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			break;
 		case ND_MUL:
-			if(node->type->ty == CHAR){
+			if(node->type->ty <= CHAR){
 				printf("	movsx eax,al\n");
 				printf("	movsx edi,dil\n");
 				printf("	imul eax,edi\n");
