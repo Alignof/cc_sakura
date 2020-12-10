@@ -1,10 +1,10 @@
 #include "cc_sakura.h"
-
-//                         void _Bool  char   int   ptr  array struct enum
-const char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};
-const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","rdx","rdx","rdx","edx"};
-const char reg_di[8][4] = {"dil","dil","dil","edi","rdi","rdi","rdi","edi"};
+//                         void _Bool  char   enum  int   ptr  array struct
+const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
+const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
+const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
 const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
+
 
 void expand_next(Node *node){
 	while(node){
@@ -165,12 +165,10 @@ void gen_calc(Node *node){
 
 void gen_expr(Node *node){
 	int reg_ty; 
-	int reg_rty;
 	int reg_lty;
 
 	if(node && node->type) reg_ty = (int)node->type->ty;
 	if(node->lhs && node->lhs->type) reg_lty = (int)node->lhs->type->ty;
-	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 
 	switch(node->kind){
 		case ND_NUM:
@@ -180,7 +178,7 @@ void gen_expr(Node *node){
 			gen_gvar(node);
 
 			printf("	pop rax\n");
-			printf("	mov rax,[rax]\n");
+			printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 			printf("	push rax\n");
 
 			return;
@@ -188,15 +186,14 @@ void gen_expr(Node *node){
 			gen_lvar(node);
 
 			printf("	pop rax\n");
-			/*
-			if(node->type->ty <= CHAR){
-				printf("	movzx eax,BYTE PTR [rax]\n");
-				printf("	movsx eax,al\n");
-			}else{
-				printf("	mov rax,[rax]\n");
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
+				if(node->type->ty <= CHAR){
+					printf("        movzx eax,BYTE PTR [rax]\n");
+					printf("        movsx eax,al\n");
+				}else{
+					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
+				}
 			}
-			*/
-			printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 			printf("	push rax\n");
 			return;
 		case ND_GARRAY:
@@ -349,10 +346,10 @@ void gen_expr(Node *node){
 			gen(node->rhs);
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				if(node->type->ty <= CHAR){
-					printf("	movzx eax,BYTE PTR [rax]\n");
-					printf("	movsx eax,al\n");
+					printf("        movzx eax,BYTE PTR [rax]\n");
+					printf("        movsx eax,al\n");
 				}else{
-					printf("	mov rax,[rax]\n");
+					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 				}
 			}
 			printf("	push rax\n");
@@ -390,13 +387,8 @@ void gen_expr(Node *node){
 }
 
 void gen(Node *node){
-	int reg_ty; 
-	int reg_rty;
-	int reg_lty;
 	Node *cases;
-
-	if(node && node->type) reg_ty = (int)node->type->ty;
-	if(node->lhs && node->lhs->type) reg_lty = (int)node->lhs->type->ty;
+	int reg_rty;
 	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 
 	// generate assembly
