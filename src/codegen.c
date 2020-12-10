@@ -1,10 +1,10 @@
 #include "cc_sakura.h"
-
 //                         void _Bool  char   enum  int   ptr  array struct
 const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
 const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
 const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
 const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
+
 
 void expand_next(Node *node){
 	while(node){
@@ -98,7 +98,7 @@ void gen_calc(Node *node){
 			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
 			break;
 		case ND_MUL:
-			if(node->type->ty <= CHAR){
+			if(node->type->ty == CHAR){
 				printf("	movsx eax,al\n");
 				printf("	movsx edi,dil\n");
 				printf("	imul eax,edi\n");
@@ -164,6 +164,12 @@ void gen_calc(Node *node){
 }
 
 void gen_expr(Node *node){
+	int reg_ty; 
+	int reg_lty;
+
+	if(node && node->type) reg_ty = (int)node->type->ty;
+	if(node->lhs && node->lhs->type) reg_lty = (int)node->lhs->type->ty;
+
 	switch(node->kind){
 		case ND_NUM:
 			printf("	push %d\n", node->val);
@@ -172,7 +178,7 @@ void gen_expr(Node *node){
 			gen_gvar(node);
 
 			printf("	pop rax\n");
-			printf("	mov rax,[rax]\n");
+			printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 			printf("	push rax\n");
 
 			return;
@@ -180,11 +186,13 @@ void gen_expr(Node *node){
 			gen_lvar(node);
 
 			printf("	pop rax\n");
-			if(node->type->ty <= CHAR){
-				printf("	movzx eax,BYTE PTR [rax]\n");
-				printf("	movsx eax,al\n");
-			}else{
-				printf("	mov rax,[rax]\n");
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
+				if(node->type->ty <= CHAR){
+					printf("        movzx eax,BYTE PTR [rax]\n");
+					printf("        movsx eax,al\n");
+				}else{
+					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
+				}
 			}
 			printf("	push rax\n");
 			return;
@@ -203,7 +211,7 @@ void gen_expr(Node *node){
 			// push
 			gen_address(node->lhs); // push lhs
 			gen_expr(node->rhs->rhs->rhs);// push rhs
-
+			
 			// calc
 			printf("	pop rdi\n");    // rhs
 			printf("	pop rax\n");    // lhs
@@ -217,19 +225,13 @@ void gen_expr(Node *node){
 			// assign
 			printf("	pop rdi\n"); // src
 			printf("	pop rax\n"); // dst
-			if(node->lhs->type->ty <= CHAR){
-				if(node->lhs->type->ty == BOOL){
-					printf("	mov R8B,dil\n");
-					printf("	cmp R8B,0\n");
-					printf("	setne dl\n");
-					printf("	movzb rdi,dl\n");
-				}
-				printf("	mov [rax],dil\n");
-			}else if(node->lhs->type->ty == INT){
-				printf("	mov [rax],edi\n");
-			}else{
-				printf("	mov [rax],rdi\n");
+			if(node->lhs->type->ty == BOOL){
+				printf("	mov R8B,dil\n");
+				printf("	cmp R8B,0\n");
+				printf("	setne dl\n");
+				printf("	movzb rdi,dl\n");
 			}
+			printf("	mov [rax],%s\n", reg_di[reg_lty]);
 
 			// already evacuation
 			//printf("	push rax\n");
@@ -244,13 +246,7 @@ void gen_expr(Node *node){
 
 			printf("	pop rdi\n");
 			printf("	pop rax\n");
-			if(node->lhs->type->ty <= CHAR){
-				printf("	mov [rax],dil\n");
-			}else if(node->lhs->type->ty == INT){
-				printf("	mov [rax],edi\n");
-			}else{
-				printf("	mov [rax],rdi\n");
-			}
+			printf("	mov [rax],%s\n", reg_di[reg_ty]);
 
 			printf("	push rdi\n");
 			return;
@@ -350,10 +346,10 @@ void gen_expr(Node *node){
 			gen(node->rhs);
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				if(node->type->ty <= CHAR){
-					printf("	movzx eax,BYTE PTR [rax]\n");
-					printf("	movsx eax,al\n");
+					printf("        movzx eax,BYTE PTR [rax]\n");
+					printf("        movsx eax,al\n");
 				}else{
-					printf("	mov rax,[rax]\n");
+					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 				}
 			}
 			printf("	push rax\n");
@@ -392,6 +388,8 @@ void gen_expr(Node *node){
 
 void gen(Node *node){
 	Node *cases;
+	int reg_rty;
+	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 
 	// generate assembly
 	switch(node->kind){
@@ -516,7 +514,7 @@ void gen(Node *node){
 				gen_lvar(node->rhs);
 				printf("	pop rax\n");
 				printf("	pop rdi\n");
-				printf("	mov [rax],%s\n", reg_di[node->rhs->type->ty]);
+				printf("	mov [rax],%s\n", reg_di[reg_rty]);
 				node=node->next;
 			}
 

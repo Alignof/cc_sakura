@@ -46,10 +46,14 @@ franken:$(ASEMS)
 	diff gen2.s gen3.s
 
 # fix franken 
-PATCHFILE := replaced
+PATCHFILE   := patch
+TARGETFILE  := target
+EXCLUDEFILE := tokenizer
 patch:$(ASEMS)
 	# patch target:$(PATCHFILE)
+	rm -f $(ASMDIR)/$(EXCLUDEFILE).s
 	cat src/header.h $(PATCHFILE).c > tmp.c
+	gcc $(INCLUDE) -static -S -masm=intel $(TARGETFILE).c -o $(ASMDIR)/$(TARGETFILE).s
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/$(PATCHFILE).s 
 	gcc $(ASMDIR)/*.s -static -o ./child
