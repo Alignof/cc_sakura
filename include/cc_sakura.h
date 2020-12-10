@@ -76,6 +76,7 @@ typedef enum{
 	ND_CALL_FUNC, 	//  func();
 	ND_CASE, 	//  case or default(has code after label)
 	ND_TERNARY,	//  cond ? if_true : if_false
+	ND_CAST,	//  (type) variable;
 	ND_BLOCK, 	//  {}
 
 	// statement(does not push value to stack)

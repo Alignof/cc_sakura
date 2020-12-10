@@ -155,10 +155,31 @@ Node *primary(void){
 Node *unary(void){
 	Node *node=NULL;
 
+	// increment
+	if(consume("++")){
+		return incdec(primary(), PRE_INC);
+	}
+
+	// decrement
+	if(consume("--")){
+		return incdec(primary(), PRE_DEC);
+	}
+
 	// logical not
 	if(consume("!")){
 		node = new_node(ND_NOT, NULL, unary());
 		return node;
+	}
+
+	// cast
+	if(check("(")){
+		if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+			consume("(");
+			Type *casting_type = parse_type();
+			node = new_node(ND_CAST, NULL, unary());
+			node->type = casting_type;
+			expect(")");
+		}
 	}
 
 	if(consume("*")){
@@ -179,16 +200,6 @@ Node *unary(void){
 	if(consume("-")){
 		//convert to 0-n
 		return new_node(ND_SUB, new_node_num(0), primary());
-	}
-
-	// increment
-	if(consume("++")){
-		return incdec(primary(), PRE_INC);
-	}
-
-	// decrement
-	if(consume("--")){
-		return incdec(primary(), PRE_DEC);
 	}
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
