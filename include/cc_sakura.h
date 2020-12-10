@@ -102,6 +102,7 @@ typedef enum{
 	CHAR,
 	INT,
 	ENUM,
+	SIZE_T,
 	PTR,
 	ARRAY,
 	STRUCT,

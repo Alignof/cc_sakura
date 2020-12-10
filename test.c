@@ -1,1 +1,2 @@
-int main(){int flag; char *hello="hello"; if(hello[1] == 'e') flag=1; else flag=0; return flag;}
+//int main(){return sizeof(size_t);}
+int main(){size_t isize = 8; return sizeof(isize);}

@@ -277,6 +277,8 @@ assert -cl 4 "int main(){struct rgb{int r; int g; int b;}; struct rgb x; return 
 assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
 assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
 
+assert -cl 8 "int main(){return sizeof(size_t);}"
+assert -cl 8 "int main(){size_t isize = 8; return sizeof(isize);}"
 
 
 echo OK

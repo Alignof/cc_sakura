@@ -24,6 +24,7 @@ Type *set_type(Type *type, Token *tok){
 		case BOOL:
 		case CHAR:
 		case INT:
+		case SIZE_T:
 		case PTR:
 		case ARRAY:
 			break;
@@ -106,6 +107,9 @@ Type *parse_type(void){
 		type = set_type(type, NULL);
 	}else if(consume_reserved_word("int", TK_TYPE)){
 		type->ty = INT;
+		type = set_type(type, NULL);
+	}else if(consume_reserved_word("size_t", TK_TYPE)){
+		type->ty = SIZE_T;
 		type = set_type(type, NULL);
 	}else if(consume_reserved_word("struct", TK_TYPE)){
 		type->ty = STRUCT;
