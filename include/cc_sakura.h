@@ -217,6 +217,7 @@ struct LVar{
 	char *name;
 	Type *type;
 	LVar *next;
+	NodeKind kind;
 }; 
 
 // Labels

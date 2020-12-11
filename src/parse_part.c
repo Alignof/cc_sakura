@@ -367,6 +367,8 @@ void get_argument(int func_index){
 			}
 
 			if(new_arg->rhs->type->ty == ARRAY){
+				alloc_size -= new_arg->rhs->type->size;
+				alloc_size += 8;
 				new_arg->rhs->type->ty = PTR;
 			}
 

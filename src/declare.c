@@ -278,6 +278,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		alloc_size   += lvar->type->size;
 	}
 
+	lvar->kind = node->kind;
 	node->type = lvar->type;
 	node->offset = lvar->offset;
 	locals = lvar;
