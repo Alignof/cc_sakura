@@ -204,7 +204,6 @@ void gen_expr(Node *node){
 			printf("	pop rax\n");
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				if(node->type->ty <= CHAR){
-					//printf("        movzx eax,BYTE PTR [rax]\n");
 					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
 					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
@@ -547,7 +546,7 @@ void gen(Node *node){
 			return;
 		default:
 			gen_expr(node);
-			printf("	pop rax\n");
+			printf("	pop rax\n\n");
 	}
 }
 
