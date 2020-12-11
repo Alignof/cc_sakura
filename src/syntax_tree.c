@@ -153,7 +153,8 @@ Node *primary(void){
 }
 
 Node *unary(void){
-	Node *node=NULL;
+	Node *node = NULL;
+	int INSIDE_FILE = 1;
 
 	// increment
 	if(consume("++")){
@@ -173,12 +174,13 @@ Node *unary(void){
 
 	// cast
 	if(check("(")){
-		if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+		if(token->next->kind == TK_TYPE || find_defined_type(token->next, INSIDE_FILE)){
 			consume("(");
 			Type *casting_type = parse_type();
+			expect(")");
 			node = new_node(ND_CAST, NULL, unary());
 			node->type = casting_type;
-			expect(")");
+			return node;
 		}
 	}
 

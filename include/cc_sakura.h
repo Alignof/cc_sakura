@@ -67,6 +67,7 @@ typedef enum{
 	ND_DEREF, 	//  *a
 
 	// other
+	ND_CAST,	//  (type) variable;
 	ND_LVAR, 	//  local variable
 	ND_GVAR, 	//  global variable
 	ND_LARRAY, 	//  local array
@@ -76,7 +77,6 @@ typedef enum{
 	ND_CALL_FUNC, 	//  func();
 	ND_CASE, 	//  case or default(has code after label)
 	ND_TERNARY,	//  cond ? if_true : if_false
-	ND_CAST,	//  (type) variable;
 	ND_BLOCK, 	//  {}
 
 	// statement(does not push value to stack)
@@ -375,6 +375,7 @@ void gen(Node *node);
 void gen_expr(Node *node);
 void gen_args(Node *args);
 void gen_calc(Node *node);
+void gen_cast(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
 void gen_struc(Node *node);

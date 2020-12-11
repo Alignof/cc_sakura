@@ -163,16 +163,64 @@ void gen_calc(Node *node){
 	}
 }
 
+/*
+void gen_cast(Node *node){
+	TypeKind nty = node->type->ty;
+	TypeKind rty = node->rhs->type->ty;
+
+	switch(nty){
+		case CHAR:
+			if(rty == BOOL){
+				printf("        movzb eax,al\n");
+			}
+			break;
+		case INT:
+		case ENUM:
+			break;
+		case SIZE_T:
+		case PTR:
+			if(rty == BOOL){
+				printf("        movzx eax,BYTE PTR [rax]\n");
+			}else if(rty == CHAR){
+				printf("        movsx rax,BYTE PTR [rax]\n");
+			}else if(rty == INT){
+				printf("        mov eax,DWORD PTR [rax]\n");
+				printf("        cdqe\n");
+			}else{
+				printf("        mov rax,QWORD PTR [rax]\n");
+			}
+			break;
+	}
+
+}
+*/
+
 void gen_expr(Node *node){
 	int reg_ty; 
 	int reg_lty;
+	int reg_rty;
 
 	if(node && node->type) reg_ty = (int)node->type->ty;
 	if(node->lhs && node->lhs->type) reg_lty = (int)node->lhs->type->ty;
+	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 
 	switch(node->kind){
 		case ND_NUM:
 			printf("	push %d\n", node->val);
+			return;
+		case ND_CAST:
+			gen_expr(node->rhs);
+			printf("	pop rax\n");
+			if(reg_ty > reg_rty){
+				if(reg_rty == BOOL){
+					printf("        movzx eax,al\n");
+				}else if(reg_rty == CHAR){
+					printf("        movsx eax,al\n");
+				}else if(reg_rty == INT){
+					printf("        cdqe\n");
+				}
+			}
+			printf("	push rax\n");
 			return;
 		case ND_GVAR:
 			gen_gvar(node);
@@ -188,8 +236,8 @@ void gen_expr(Node *node){
 			printf("	pop rax\n");
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				if(node->type->ty <= CHAR){
-					printf("        movzx eax,BYTE PTR [rax]\n");
-					printf("        movsx eax,al\n");
+					//printf("        movzx eax,BYTE PTR [rax]\n");
+					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
 					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 				}
@@ -346,8 +394,9 @@ void gen_expr(Node *node){
 			gen(node->rhs);
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				if(node->type->ty <= CHAR){
-					printf("        movzx eax,BYTE PTR [rax]\n");
-					printf("        movsx eax,al\n");
+					//printf("        movzx eax,BYTE PTR [rax]\n");
+					//printf("        movsx eax,al\n");
+					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
 					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 				}
