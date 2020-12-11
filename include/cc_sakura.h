@@ -42,18 +42,18 @@ typedef enum{
 	ND_MUL, 	//  *
 	ND_DIV, 	//  /
 	ND_MOD, 	//  %
-	ND_GT, 		//  >
-	ND_GE, 		//  >=
-	ND_LT, 		//  <
-	ND_LE, 		//  <=
-	ND_EQ, 		//  ==
-	ND_NE, 		//  !=
 	ND_AND, 	//  &&
 	ND_OR, 		//  ||
 	ND_BIT_AND, 	//  &
 	ND_BIT_OR, 	//  |
 	ND_ASSIGN, 	//  =
 	ND_COMPOUND, 	//  +=, -=, *=, /=
+	ND_GT, 		//  >
+	ND_GE, 		//  >=
+	ND_LT, 		//  <
+	ND_LE, 		//  <=
+	ND_EQ, 		//  ==
+	ND_NE, 		//  !=
 
 	// symbol --> rhs
 	ND_POSTID, 	//  a++, a--

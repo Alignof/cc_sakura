@@ -163,38 +163,6 @@ void gen_calc(Node *node){
 	}
 }
 
-/*
-void gen_cast(Node *node){
-	TypeKind nty = node->type->ty;
-	TypeKind rty = node->rhs->type->ty;
-
-	switch(nty){
-		case CHAR:
-			if(rty == BOOL){
-				printf("        movzb eax,al\n");
-			}
-			break;
-		case INT:
-		case ENUM:
-			break;
-		case SIZE_T:
-		case PTR:
-			if(rty == BOOL){
-				printf("        movzx eax,BYTE PTR [rax]\n");
-			}else if(rty == CHAR){
-				printf("        movsx rax,BYTE PTR [rax]\n");
-			}else if(rty == INT){
-				printf("        mov eax,DWORD PTR [rax]\n");
-				printf("        cdqe\n");
-			}else{
-				printf("        mov rax,QWORD PTR [rax]\n");
-			}
-			break;
-	}
-
-}
-*/
-
 void gen_expr(Node *node){
 	int reg_ty; 
 	int reg_lty;
