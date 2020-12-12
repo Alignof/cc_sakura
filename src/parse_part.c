@@ -8,7 +8,7 @@
 Node *global_init(Node *node){
 	Node *init_val = NULL;
 	if(check("\"")){
-		if(node->kind == ND_GARRAY){
+		if(node->type->ty == ARRAY){
 			Token *tok = consume_string();
 			init_val = new_node(ND_STR, NULL, NULL);
 			init_val->str      = tok->str;
@@ -37,7 +37,7 @@ Node *global_init(Node *node){
 				new = new->block_code;
 			}
 
-			if(new->kind == ND_STR && node->kind == ND_GARRAY){
+			if(new->kind == ND_STR && node->type->ty == ARRAY){
 				if(node->type->index_size != -1 && new->len > node->type->index_size){
 					error_at(token->str, "invalid global variable initialize");
 				}else if(node->type->index_size != -1 && new->len < node->type->index_size){

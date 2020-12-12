@@ -188,7 +188,6 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	if(check("[")){
 		int isize  = -1;
 		node->val  = -1;
-		node->kind = ND_GARRAY;
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){

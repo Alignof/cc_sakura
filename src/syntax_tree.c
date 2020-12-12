@@ -82,7 +82,7 @@ Node *data(void){
 			GVar *gvar = find_gvar(tok);
 			if(gvar){
 				// global variable exist
-				node->kind = (gvar->type->ty == ARRAY)? ND_GARRAY : ND_GVAR;
+				node->kind = ND_GVAR;
 				node->type = gvar->type;
 				node->str  = tok->str;
 				node->len  = tok->len;
