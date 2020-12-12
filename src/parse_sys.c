@@ -310,7 +310,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 
 	if(kind == ND_ADD || kind == ND_SUB){
 		if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
-				rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
+		   rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
 			node = pointer_calc(node, lhs->type, rhs->type);
 		}
 	}
@@ -327,7 +327,27 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 
 	if(kind == ND_ASSIGN || kind == ND_COMPOUND){
 		node->type = lhs->type;
+		if(lhs->type->ty > rhs->type->ty){
+			node->type = lhs->type;
+			node->rhs  = new_node(ND_CAST, NULL, node->rhs);
+			node->rhs->type = node->type;
+		}
 	}
+
+	if(ND_GT <= kind && kind <= ND_NE){
+		if(lhs->type->ty > rhs->type->ty){
+			node->type = lhs->type;
+			node->rhs  = new_node(ND_CAST, NULL, node->rhs);
+			node->rhs->type = lhs->type;
+		}else if(lhs->type->ty < rhs->type->ty){
+			node->type = rhs->type;
+			node->lhs  = new_node(ND_CAST, NULL, node->lhs);
+			node->lhs->type = rhs->type;
+		}else{
+			node->type = lhs->type;
+		}
+	}
+
 
 	if(kind == ND_DOT || kind == ND_ARROW){
 		node->type = lhs->type;

@@ -42,18 +42,18 @@ typedef enum{
 	ND_MUL, 	//  *
 	ND_DIV, 	//  /
 	ND_MOD, 	//  %
-	ND_GT, 		//  >
-	ND_GE, 		//  >=
-	ND_LT, 		//  <
-	ND_LE, 		//  <=
-	ND_EQ, 		//  ==
-	ND_NE, 		//  !=
 	ND_AND, 	//  &&
 	ND_OR, 		//  ||
 	ND_BIT_AND, 	//  &
 	ND_BIT_OR, 	//  |
 	ND_ASSIGN, 	//  =
 	ND_COMPOUND, 	//  +=, -=, *=, /=
+	ND_GT, 		//  >
+	ND_GE, 		//  >=
+	ND_LT, 		//  <
+	ND_LE, 		//  <=
+	ND_EQ, 		//  ==
+	ND_NE, 		//  !=
 
 	// symbol --> rhs
 	ND_POSTID, 	//  a++, a--
@@ -67,10 +67,9 @@ typedef enum{
 	ND_DEREF, 	//  *a
 
 	// other
+	ND_CAST,	//  (type) variable;
 	ND_LVAR, 	//  local variable
 	ND_GVAR, 	//  global variable
-	ND_LARRAY, 	//  local array
-	ND_GARRAY, 	//  global array
 	ND_STR, 	//  "string"
 	ND_NUM, 	//  integer
 	ND_CALL_FUNC, 	//  func();
@@ -102,6 +101,7 @@ typedef enum{
 	CHAR,
 	INT,
 	ENUM,
+	SIZE_T,
 	PTR,
 	ARRAY,
 	STRUCT,
@@ -373,6 +373,7 @@ void gen(Node *node);
 void gen_expr(Node *node);
 void gen_args(Node *args);
 void gen_calc(Node *node);
+void gen_cast(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
 void gen_struc(Node *node);

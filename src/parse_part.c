@@ -8,7 +8,7 @@
 Node *global_init(Node *node){
 	Node *init_val = NULL;
 	if(check("\"")){
-		if(node->kind == ND_GARRAY){
+		if(node->type->ty == ARRAY){
 			Token *tok = consume_string();
 			init_val = new_node(ND_STR, NULL, NULL);
 			init_val->str      = tok->str;
@@ -37,7 +37,7 @@ Node *global_init(Node *node){
 				new = new->block_code;
 			}
 
-			if(new->kind == ND_STR && node->kind == ND_GARRAY){
+			if(new->kind == ND_STR && node->type->ty == ARRAY){
 				if(node->type->index_size != -1 && new->len > node->type->index_size){
 					error_at(token->str, "invalid global variable initialize");
 				}else if(node->type->index_size != -1 && new->len < node->type->index_size){
@@ -222,7 +222,7 @@ Node *array_str(Node *arr, Node *init_val){
 
 	// ommitted
 	if(isize == -1){
-		if(arr->kind == ND_LARRAY){
+		if(arr->type->ty == ARRAY){
 			int asize = align_array_size(ctr, arr->type);
 			alloc_size+=asize;
 			arr->offset    = ((locals)?(locals->offset):0) + asize;
@@ -268,7 +268,7 @@ Node *array_block(Node *arr){
 
 	// ommitted
 	if(isize == -1){
-		if(arr->kind == ND_LARRAY){
+		if(arr->type->ty == ARRAY){
 			int asize  = align_array_size(ctr, arr->type);
 			alloc_size += asize;
 			arr->offset    = ((locals)?(locals->offset):0) + asize;
@@ -366,8 +366,15 @@ void get_argument(int func_index){
 				new_arg             = new_arg->next;
 			}
 
+			// Implicit Type Conversion 
 			if(new_arg->rhs->type->ty == ARRAY){
 				new_arg->rhs->type->ty = PTR;
+				new_arg->rhs->offset   -= new_arg->rhs->type->size;
+				new_arg->rhs->offset   += 8;
+				locals->offset         = new_arg->rhs->offset;
+				locals->type->size     = new_arg->rhs->type->size;
+				alloc_size -= new_arg->rhs->type->size;
+				alloc_size += 8;
 			}
 
 			arg_counter++;

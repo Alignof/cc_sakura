@@ -24,6 +24,7 @@ Type *set_type(Type *type, Token *tok){
 		case BOOL:
 		case CHAR:
 		case INT:
+		case SIZE_T:
 		case PTR:
 		case ARRAY:
 			break;
@@ -107,6 +108,9 @@ Type *parse_type(void){
 	}else if(consume_reserved_word("int", TK_TYPE)){
 		type->ty = INT;
 		type = set_type(type, NULL);
+	}else if(consume_reserved_word("size_t", TK_TYPE)){
+		type->ty = SIZE_T;
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("struct", TK_TYPE)){
 		type->ty = STRUCT;
 		type = set_type(type, consume_ident());
@@ -184,7 +188,6 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	if(check("[")){
 		int isize  = -1;
 		node->val  = -1;
-		node->kind = ND_GARRAY;
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
@@ -241,7 +244,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		int index_num;
 		int asize = 0;
 		int isize = -1;
-		node->kind = ND_LARRAY;
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
