@@ -64,7 +64,7 @@ Node *data(void){
 
 		LVar *lvar = find_lvar(tok, INSIDE_FUNC);
 		if(lvar){
-			node->kind   = (lvar->type->ty == ARRAY)? ND_LARRAY : ND_LVAR;
+			node->kind   = ND_LVAR;
 			node->offset = lvar->offset;
 			node->type   = lvar->type;
 		// call function

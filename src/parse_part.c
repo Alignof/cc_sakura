@@ -222,7 +222,7 @@ Node *array_str(Node *arr, Node *init_val){
 
 	// ommitted
 	if(isize == -1){
-		if(arr->kind == ND_LARRAY){
+		if(arr->type->ty == ARRAY){
 			int asize = align_array_size(ctr, arr->type);
 			alloc_size+=asize;
 			arr->offset    = ((locals)?(locals->offset):0) + asize;
@@ -268,7 +268,7 @@ Node *array_block(Node *arr){
 
 	// ommitted
 	if(isize == -1){
-		if(arr->kind == ND_LARRAY){
+		if(arr->type->ty == ARRAY){
 			int asize  = align_array_size(ctr, arr->type);
 			alloc_size += asize;
 			arr->offset    = ((locals)?(locals->offset):0) + asize;

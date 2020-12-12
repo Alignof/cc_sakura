@@ -245,7 +245,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		int index_num;
 		int asize = 0;
 		int isize = -1;
-		node->kind = ND_LARRAY;
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){

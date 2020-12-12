@@ -70,7 +70,6 @@ typedef enum{
 	ND_CAST,	//  (type) variable;
 	ND_LVAR, 	//  local variable
 	ND_GVAR, 	//  global variable
-	ND_LARRAY, 	//  local array
 	ND_GARRAY, 	//  global array
 	ND_STR, 	//  "string"
 	ND_NUM, 	//  integer

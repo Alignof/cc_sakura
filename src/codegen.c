@@ -34,7 +34,7 @@ void gen_gvar(Node *node){
 }
 
 void gen_lvar(Node *node){
-	if(node->kind != ND_LVAR && node->kind != ND_LARRAY && node->kind != ND_CALL_FUNC){
+	if(node->kind != ND_LVAR && node->kind != ND_CALL_FUNC){
 		error_at(token->str,"not a variable");
 	}
 
@@ -83,7 +83,6 @@ void gen_address(Node *node){
 	else if(node->kind == ND_GVAR)    gen_gvar(node);
 	else if(node->kind == ND_GARRAY)  gen_gvar(node);
 	else if(node->kind == ND_LVAR)    gen_lvar(node);
-	else if(node->kind == ND_LARRAY)  gen_lvar(node);
 	else error_at(token->str, "can not assign");
 }
 
@@ -201,21 +200,18 @@ void gen_expr(Node *node){
 		case ND_LVAR:
 			gen_lvar(node);
 
-			printf("	pop rax\n");
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
+				printf("	pop rax\n");
 				if(node->type->ty <= CHAR){
 					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
 					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 				}
+				printf("	push rax\n");
 			}
-			printf("	push rax\n");
 			return;
 		case ND_GARRAY:
 			gen_gvar(node);
-			return;
-		case ND_LARRAY:
-			gen_lvar(node);
 			return;
 		case ND_PREID:
 			// ++p -> p += 1
