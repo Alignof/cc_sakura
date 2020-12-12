@@ -191,12 +191,6 @@ void gen_expr(Node *node){
 		case ND_GVAR:
 			gen_gvar(node);
 
-/*
-			printf("	pop rax\n");
-			printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
-			printf("	push rax\n");
-*/
-
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				printf("	pop rax\n");
 				if(node->type->ty <= CHAR){
@@ -528,6 +522,7 @@ void gen(Node *node){
 			return;
 		case ND_ARG:
 			while(node){
+				if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 				// push register argument saved
 				printf("        push %s\n", reg[node->val]);
 				gen_lvar(node->rhs);

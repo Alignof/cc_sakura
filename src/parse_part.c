@@ -366,8 +366,15 @@ void get_argument(int func_index){
 				new_arg             = new_arg->next;
 			}
 
+			// Implicit Type Conversion 
 			if(new_arg->rhs->type->ty == ARRAY){
 				new_arg->rhs->type->ty = PTR;
+				new_arg->rhs->offset   -= new_arg->rhs->type->size;
+				new_arg->rhs->offset   += 8;
+				locals->offset         = new_arg->rhs->offset;
+				locals->type->size     = new_arg->rhs->type->size;
+				alloc_size -= new_arg->rhs->type->size;
+				alloc_size += 8;
 			}
 
 			arg_counter++;
