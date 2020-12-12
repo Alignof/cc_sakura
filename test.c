@@ -56,8 +56,8 @@ int setQueen(int board[30][30], int num_placed){
 	if (board[num_placed][j] == 0);
 	return 0;
 }
-int main(void){
-	int board_[30][30];
+int board_[30][30];
+int main(){
 	setQueen(board_, 0);
 	return 0;
 }
