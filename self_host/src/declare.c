@@ -7,6 +7,10 @@ LVar     *outside_lvar;
 Struc    *outside_struct;
 Enum     *outside_enum;
 Def_Type *outside_deftype;
+// int alloc_size;
+// Token *token;
+// LVar *locals;
+// Func *func_list[100];
 
 Type *set_type(Type *type, Token *tok){
 	Enum  *enum_found  = __NULL;
@@ -18,6 +22,7 @@ Type *set_type(Type *type, Token *tok){
 		case BOOL:
 		case CHAR:
 		case INT:
+		case SIZE_T:
 		case PTR:
 		case ARRAY:
 			break;
@@ -101,6 +106,9 @@ Type *parse_type(void){
 	}else if(consume_reserved_word("int", TK_TYPE)){
 		type->ty = INT;
 		type = set_type(type, __NULL);
+	}else if(consume_reserved_word("size_t", TK_TYPE)){
+		type->ty = SIZE_T;
+		type = set_type(type, __NULL);
 	}else if(consume_reserved_word("struct", TK_TYPE)){
 		type->ty = STRUCT;
 		type = set_type(type, consume_ident());
@@ -121,7 +129,7 @@ Type *parse_type(void){
 
 	type->size  = type_size(type);
 	type->align = type_align(type);
-	
+
 	// count asterisk
 	while(token->kind == TK_RESERVED && *(token->str) == '*'){
 		star_count++;
@@ -147,7 +155,7 @@ Type *insert_ptr_type(Type *prev, int star_count){
 			newtype->is_thread_local = prev->is_thread_local;
 			prev = newtype;
 		}
-		
+
 		return newtype;
 	}else{
 		return prev;
@@ -178,7 +186,6 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	if(check("[")){
 		int isize  = -1;
 		node->val  = -1;
-		node->kind = ND_GARRAY;
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
@@ -235,7 +242,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		int index_num;
 		int asize = 0;
 		int isize = -1;
-		node->kind = ND_LARRAY;
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
@@ -244,7 +250,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 				}else{
 					isize *= token->val;
 				}
-				
+
 				index_num = token->val;
 				token     = token->next;
 			}
@@ -264,15 +270,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 		alloc_size += asize;
 		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
 	}else{
-		/*
-		if(lvar->type->ty == STRUCT){
-			lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
-			alloc_size   += lvar->type->size;
-		}else{
-			lvar->offset =  (locals) ? (locals->offset)+8 : 8;
-			alloc_size   += 8;
-		}
-		*/
 		lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
 		alloc_size   += lvar->type->size;
 	}
@@ -350,13 +347,12 @@ Member *register_struc_member(int *asize_ptr){
 		if(consume("}")) break;
 	}
 
-	//(*asize_ptr) = ((*asize_ptr)%8) ? (*asize_ptr)/8*8+8 : (*asize_ptr);
 	return memb_head;
 }
 
 void declare_struct(Struc *new_struc){
 	int asize = 0;
-	
+
 	new_struc->member  = register_struc_member(&asize);
 	new_struc->memsize = asize;
 	new_struc->next    = structs;

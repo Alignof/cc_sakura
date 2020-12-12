@@ -8,6 +8,8 @@ int type_size(Type *type){
 			return 1;
 		case INT:
 			return 4;
+		case SIZE_T:
+			return 8;
 		case PTR:
 			return 8;
 		case ARRAY:
@@ -38,6 +40,8 @@ int type_align(Type *type){
 			return 1;
 		case INT:
 			return 4;
+		case SIZE_T:
+			return 8;
 		case PTR:
 			return 8;
 		case ARRAY:
