@@ -216,9 +216,8 @@ Node *array_str(Node *arr, Node *init_val){
 	// ommitted
 	if(isize == -1){
 		if(arr->type->ty == ARRAY){
-			int asize = align_array_size(ctr, arr->type);
-			alloc_size+=asize;
-			arr->offset    = ((locals)?(locals->offset):0) + asize;
+			alloc_size += ctr;
+			arr->offset    = ((locals)?(locals->offset):0) + ctr;
 			clone->offset  = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
