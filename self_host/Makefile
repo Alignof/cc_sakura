@@ -35,7 +35,7 @@ endef
 
 
 # franken 
-EXCLUDEFILES := main
+EXCLUDEFILES := codegen
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILES)
 	@$(call prepare_franken)

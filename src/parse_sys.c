@@ -302,7 +302,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 
 	if(kind == ND_SUB){
 		if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
-				(lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
+		   (lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
 			node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
 			return node;
 		}

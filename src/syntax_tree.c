@@ -92,7 +92,7 @@ Node *data(void){
 					node = new_node_num(rator->offset);
 					// variable does not exist.
 				}else{
-					error_at(token->str, "this variable is not declaration");
+					error_at(token->str, "this variable is not declarated");
 				}
 			}
 		}

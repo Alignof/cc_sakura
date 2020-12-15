@@ -53,7 +53,7 @@ Node *global_init(Node *node){
 		// too many
 		if(elements_num != -1 && elements_num < ctr){
 			error_at(token->str, "Invalid array size");
-			// too little
+		// too little
 		}else if(elements_num > ctr){
 			init_val->offset = (elements_num - ctr) * node->type->ptr_to->size;
 		}
