@@ -157,7 +157,7 @@ Node *incdec(Node *node, IncDecKind idtype){
 		new->kind = ND_PREID;
 		new->lhs  = plmi_one;
 		new->rhs  = node;
-		// post
+	// post
 	}else{
 		new->kind = ND_POSTID;
 		new->lhs  = node;
@@ -230,8 +230,6 @@ Node *array_str(Node *arr, Node *init_val){
 			locals->type->index_size = ctr;
 			locals->type->size  = type_size(locals->type);
 			locals->type->align = type_size(locals->type);
-		}else{
-			globals->memsize = align_array_size(ctr, arr->type);
 		}
 	}
 
@@ -268,7 +266,7 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->type->ty == ARRAY){
-			int asize  = align_array_size(ctr, arr->type);
+			int asize  = arr->type->ptr_to->size * ctr;
 			alloc_size += asize;
 			arr->offset    = ((locals)?(locals->offset):0) + asize;
 			clone->offset  = arr->offset;
@@ -276,13 +274,11 @@ Node *array_block(Node *arr){
 			locals->type->index_size = ctr;
 			locals->type->size  = type_size(locals->type);
 			locals->type->align = type_size(locals->type);
-		}else{
-			globals->memsize = align_array_size(ctr, arr->type);
 		}
-		// too many
+	// too many
 	}else if(arr->type->index_size < ctr){
 		error_at(token->str, "Invalid array size");
-		// too little
+	// too little
 	}else if(arr->type->index_size > ctr){
 		while(ctr != arr->type->index_size){
 			src = array_index(clone, new_node_num(ctr));
