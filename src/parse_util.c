@@ -67,11 +67,6 @@ int type_align(Type *type){
 	return -1;
 }
 
-int align_array_size(int isize, Type *array_type){
-	int array_size = array_type->size;
-	return (array_size%8) ? array_size/8*8+8 : array_size;
-}
-
 
 Type *get_pointer_type(Type *given){
 	while(given->ptr_to != NULL) given = given->ptr_to;

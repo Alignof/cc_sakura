@@ -169,7 +169,8 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	if(!def_name) error_at(token->str, "not a variable.");
 
 	int index_num;
-	Type *newtype;
+	Type *newtype = NULL;
+	Type *prev    = NULL;
 	Node *node = calloc(1, sizeof(Node));
 	node->kind = ND_GVAR;
 
@@ -212,9 +213,9 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			gvar->type = newtype;
 			expect("]");
 		}
-		gvar->memsize = align_array_size(isize, gvar->type);
+		gvar->memsize = gvar->type->size;
 	}else{
-		gvar->memsize  = type_size(gvar->type);
+		gvar->memsize = type_size(gvar->type);
 	}
 
 	// globals == new lvar
@@ -242,7 +243,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	if(check("[")){
 		Type *newtype;
 		int index_num;
-		int asize = 0;
 		int isize = -1;
 		while(consume("[")){
 			index_num = -1;
@@ -267,15 +267,10 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 			expect("]");
 		}
-
-		asize = align_array_size(isize, lvar->type);
-		alloc_size += asize;
-		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
-	}else{
-		lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
-		alloc_size   += lvar->type->size;
 	}
 
+	lvar->offset = ((locals) ? (locals->offset) : 0) + lvar->type->size;
+	alloc_size   += lvar->type->size;
 	node->type = lvar->type;
 	node->offset = lvar->offset;
 	locals = lvar;
