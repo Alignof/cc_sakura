@@ -178,9 +178,8 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->next = globals;
 	gvar->len  = def_name->len;
 	gvar->name = def_name->str;
-	gvar->type = toplv_type;
-	gvar->type->size  = type_size(toplv_type);
-	gvar->type->align = type_align(toplv_type);
+	toplv_type->size  = type_size(toplv_type);
+	toplv_type->align = type_align(toplv_type);
 
 	// add type list
 	gvar->type = insert_ptr_type(gvar->type, star_count);
@@ -203,17 +202,22 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			}
 
 			newtype = calloc(1, sizeof(Type));
-			newtype->ty          = ARRAY;
-			newtype->ptr_to      = gvar->type;
-			newtype->index_size  = index_num;
-			newtype->size        = type_size(newtype);
-			newtype->align       = type_align(newtype);
+			newtype->ty              = ARRAY;
+			newtype->index_size      = index_num;
+			newtype->size            = type_size(newtype);
+			newtype->align           = type_align(newtype);
 			newtype->is_extern       = gvar->type->is_extern;
 			newtype->is_thread_local = gvar->type->is_thread_local;
-			gvar->type = newtype;
+
+			if(gvar->type){
+				gvar->type = newtype;
+			}else{
+				;
+			}
 			expect("]");
 		}
-		gvar->memsize = gvar->type->size;
+		newtype->ptr_to = toplv_type;
+		gvar->memsize   = gvar->type->size;
 	}else{
 		gvar->memsize = type_size(gvar->type);
 	}
