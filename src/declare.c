@@ -146,22 +146,20 @@ Type *parse_type(void){
 
 Type *insert_ptr_type(Type *prev, int star_count){
 	Type *newtype;
-	if(star_count){
-		for(int i = 0;i<star_count;i++){
-			newtype = calloc(1, sizeof(Type));
-			newtype->ty     = PTR;
-			newtype->size   = type_size(newtype);
-			newtype->align  = type_align(newtype);
-			newtype->ptr_to = prev;
-			newtype->is_extern       = prev->is_extern;
-			newtype->is_thread_local = prev->is_thread_local;
-			prev = newtype;
-		}
+	if(star_count == 0) return prev;
 
-		return newtype;
-	}else{
-		return prev;
+	for(int i = 0;i<star_count;i++){
+		newtype = calloc(1, sizeof(Type));
+		newtype->ty     = PTR;
+		newtype->size   = type_size(newtype);
+		newtype->align  = type_align(newtype);
+		newtype->ptr_to = prev;
+		newtype->is_extern       = prev->is_extern;
+		newtype->is_thread_local = prev->is_thread_local;
+		prev = newtype;
 	}
+
+	return newtype;
 }
 
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type){
@@ -169,14 +167,13 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	if(!def_name) error_at(token->str, "not a variable.");
 
 	int index_num;
-	Type *newtype = calloc(1, sizeof(Type));
-	Node *node    = calloc(1, sizeof(Node));
-	node->kind    = ND_GVAR;
+	Node *node = calloc(1, sizeof(Node));
+	node->kind = ND_GVAR;
 
-	GVar *gvar    = calloc(1, sizeof(GVar));
-	gvar->next    = globals;
-	gvar->len     = def_name->len;
-	gvar->name    = def_name->str;
+	GVar *gvar = calloc(1, sizeof(GVar));
+	gvar->next = globals;
+	gvar->len  = def_name->len;
+	gvar->name = def_name->str;
 	toplv_type->size  = type_size(toplv_type);
 	toplv_type->align = type_align(toplv_type);
 
@@ -185,8 +182,9 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 
 	// Is array
 	if(check("[")){
-		int isize  = -1;
-		node->val  = -1;
+		int isize     = -1;
+		node->val     = -1;
+		Type *newtype = calloc(1, sizeof(Type));
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
@@ -257,16 +255,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 				token     = token->next;
 			}
 
-/*
-			newtype = calloc(1, sizeof(Type));
-			newtype->ty          = ARRAY;
-			newtype->ptr_to      = lvar->type;
-			newtype->index_size  = index_num;
-			newtype->size        = type_size(newtype);
-			newtype->align       = type_align(newtype);
-			lvar->type = newtype;
-*/
-
 			newtype->ptr_to = calloc(1, sizeof(Type));
 			newtype->ptr_to->ty         = ARRAY;
 			newtype->ptr_to->index_size = index_num;
@@ -307,7 +295,7 @@ Member *register_struc_member(int *asize_ptr){
 		new_memb = calloc(1,sizeof(Member));
 
 		// parse member type
-		new_memb->type    = parse_type();
+		new_memb->type   = parse_type();
 
 		// add member name
 		Token *def_name  = consume_ident();

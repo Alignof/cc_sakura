@@ -30,7 +30,7 @@ int type_size(Type *type){
 
 int type_align(Type *type){
 	int INSIDE_FILE = 0;
-	int max=0;
+	int max = 0;
 	int align_num;
 	Member *memb_list;
 

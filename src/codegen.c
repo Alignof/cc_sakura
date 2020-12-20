@@ -61,7 +61,6 @@ void gen_args(Node *args){
 	int reg_num;
 	int arg_count = 0;
 
-
 	while(args){
 		gen_expr(args);
 		arg_count++;
@@ -358,8 +357,6 @@ void gen_expr(Node *node){
 			gen(node->rhs);
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				if(node->type->ty <= CHAR){
-					//printf("        movzx eax,BYTE PTR [rax]\n");
-					//printf("        movsx eax,al\n");
 					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
 					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);

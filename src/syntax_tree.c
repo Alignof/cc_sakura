@@ -207,7 +207,6 @@ Node *unary(void){
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
-
 		if(consume("(")){
 			int INSIDE_FILE = 0;
 			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
@@ -228,7 +227,6 @@ Node *unary(void){
 	if(consume_reserved_word("_Alignof", TK_ALIGNOF)){
 		// _Alignof(5)  = > 4
 		// _Alignof(&a) = > 8
-
 		if(consume("(")){
 			int INSIDE_FILE = 0;
 			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
@@ -245,6 +243,7 @@ Node *unary(void){
 
 		return node;
 	}
+
 	return primary();
 }
 
@@ -753,7 +752,7 @@ void program(void){
 			}else{
 				expect(";");
 			}
-			// global variable
+		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
 
