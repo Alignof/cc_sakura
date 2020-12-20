@@ -257,8 +257,8 @@ struct Member{
 // global variable
 extern int      llid;
 extern int      alloc_size;
-extern int      INSIDE_FILE;
-extern int      INSIDE_SCOPE;
+extern int      IGNORE_SCOPE;
+extern int      CONSIDER_SCOPE;
 extern char     *user_input;
 extern char     filename[100];
 extern Token    *token;

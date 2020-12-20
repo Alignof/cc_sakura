@@ -29,7 +29,7 @@ Type *set_type(Type *type, Token *tok){
 			break;
 		case STRUCT:
 			// find with tag name
-			struc_found = find_struc(tok, INSIDE_FILE);
+			struc_found = find_struc(tok, IGNORE_SCOPE);
 			type->len   = tok->len;
 			type->name  = tok->str;
 			if(struc_found){
@@ -59,7 +59,7 @@ Type *set_type(Type *type, Token *tok){
 			break;
 		case ENUM:
 			if(tok){
-				enum_found = find_enum(tok, INSIDE_FILE);
+				enum_found = find_enum(tok, IGNORE_SCOPE);
 			}
 
 			if(enum_found){
@@ -117,7 +117,7 @@ Type *parse_type(void){
 		type = set_type(type, consume_ident());
 	}else{
 		Token *tok = consume_ident();
-		Def_Type *def_found = find_defined_type(tok, INSIDE_FILE);
+		Def_Type *def_found = find_defined_type(tok, IGNORE_SCOPE);
 		if(def_found){
 			tok->str = def_found->tag;
 			tok->len = def_found->tag_len;
@@ -226,7 +226,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 }
 
 Node *declare_local_variable(Node *node, Token *tok, int star_count){
-	LVar *lvar = find_lvar(tok, INSIDE_SCOPE);
+	LVar *lvar = find_lvar(tok, CONSIDER_SCOPE);
 	if(lvar) error_at(token->str, "this variable has already existed.");
 
 	lvar = calloc(1, sizeof(LVar));
@@ -284,7 +284,7 @@ Member *register_struc_member(int *asize_ptr){
 	Member *memb_head = NULL;
 
 	while(1){
-		if(!(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE))){
+		if(!(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE))){
 			error_at(token->str, "not a type.");
 		}
 

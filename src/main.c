@@ -2,8 +2,8 @@
 
 int   llid;
 int   label_num;
-int   INSIDE_FILE;
-int   INSIDE_SCOPE;
+int   IGNORE_SCOPE;
+int   CONSIDER_SCOPE;
 int   label_loop_end;
 char  *user_input;
 char  filename[100];
@@ -111,8 +111,8 @@ void set_gvar(GVar *gvar){
 
 int main(int argc, char **argv){
 	int i, j;
-	INSIDE_FILE  = 0;
-	INSIDE_SCOPE = 1;
+	IGNORE_SCOPE  = 0;
+	CONSIDER_SCOPE = 1;
 
 	// get source code
 	get_code(argc, argv);

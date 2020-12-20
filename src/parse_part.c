@@ -108,9 +108,9 @@ Node *dot_arrow(NodeKind type, Node *node){
 
 	// get member list
 	if(type == ND_DOT){
-		memb_list = find_struct_member(struc_type, INSIDE_FILE);
+		memb_list = find_struct_member(struc_type, IGNORE_SCOPE);
 	}else{
-		memb_list = find_struct_member(struc_type->ptr_to, INSIDE_FILE);
+		memb_list = find_struct_member(struc_type->ptr_to, IGNORE_SCOPE);
 	}
 
 	while(memb_list){

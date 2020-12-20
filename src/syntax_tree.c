@@ -59,7 +59,7 @@ Node *data(void){
 	if(tok){
 		Node *node = calloc(1, sizeof(Node));
 
-		LVar *lvar = find_lvar(tok, INSIDE_FILE);
+		LVar *lvar = find_lvar(tok, IGNORE_SCOPE);
 		if(lvar){
 			node->kind   = ND_LVAR;
 			node->offset = lvar->offset;
@@ -84,7 +84,7 @@ Node *data(void){
 				node->str  = tok->str;
 				node->len  = tok->len;
 			}else{
-				Member *rator = find_enumerator(tok, INSIDE_FILE);
+				Member *rator = find_enumerator(tok, IGNORE_SCOPE);
 				if(rator){
 					node = new_node_num(rator->offset);
 					// variable does not exist.
@@ -170,7 +170,7 @@ Node *unary(void){
 
 	// cast
 	if(check("(")){
-		if(token->next->kind == TK_TYPE || find_defined_type(token->next, INSIDE_SCOPE)){
+		if(token->next->kind == TK_TYPE || find_defined_type(token->next, CONSIDER_SCOPE)){
 			consume("(");
 			Type *casting_type = parse_type();
 			expect(")");
@@ -204,7 +204,7 @@ Node *unary(void){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 		if(consume("(")){
-			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();
 				node = new_node(ND_NUM, node, new_node_num(target_type->size));
 				node->val = target_type->size;
@@ -223,7 +223,7 @@ Node *unary(void){
 		// _Alignof(5)  = > 4
 		// _Alignof(&a) = > 8
 		if(consume("(")){
-			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();
 				node = new_node(ND_NUM, node, new_node_num(target_type->align));
 				node->val = target_type->align;
@@ -362,7 +362,7 @@ Node *expr(void){
 	int star_count = 0;
 	Node *node;
 
-	if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE)){
+	if(token->kind == TK_TYPE || find_defined_type(token, CONSIDER_SCOPE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 
@@ -378,7 +378,7 @@ Node *expr(void){
 		Token *tok = consume_ident();
 		if(tok){
 			// If enumerator already exist -> error
-			find_enumerator(tok, INSIDE_SCOPE);
+			find_enumerator(tok, CONSIDER_SCOPE);
 			node = declare_local_variable(node, tok, star_count);
 		}else{
 			error_at(token->str, "not a variable.");
