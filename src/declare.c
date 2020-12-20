@@ -169,15 +169,14 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	if(!def_name) error_at(token->str, "not a variable.");
 
 	int index_num;
-	Type *newtype = NULL;
-	Type *prev    = NULL;
-	Node *node = calloc(1, sizeof(Node));
-	node->kind = ND_GVAR;
+	Type *newtype = calloc(1, sizeof(Type));
+	Node *node    = calloc(1, sizeof(Node));
+	node->kind    = ND_GVAR;
 
-	GVar *gvar = calloc(1, sizeof(GVar));
-	gvar->next = globals;
-	gvar->len  = def_name->len;
-	gvar->name = def_name->str;
+	GVar *gvar    = calloc(1, sizeof(GVar));
+	gvar->next    = globals;
+	gvar->len     = def_name->len;
+	gvar->name    = def_name->str;
 	toplv_type->size  = type_size(toplv_type);
 	toplv_type->align = type_align(toplv_type);
 
@@ -201,30 +200,26 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 				token = token->next;
 			}
 
-			newtype = calloc(1, sizeof(Type));
-			newtype->ty              = ARRAY;
-			newtype->index_size      = index_num;
-			newtype->size            = type_size(newtype);
-			newtype->align           = type_align(newtype);
-			newtype->is_extern       = gvar->type->is_extern;
-			newtype->is_thread_local = gvar->type->is_thread_local;
+			newtype->ptr_to = calloc(1, sizeof(Type));
+			newtype->ptr_to->ty              = ARRAY;
+			newtype->ptr_to->index_size      = index_num;
+			newtype->ptr_to->is_extern       = toplv_type->is_extern;
+			newtype->ptr_to->is_thread_local = toplv_type->is_thread_local;
+			newtype = newtype->ptr_to;
 
-			if(gvar->type){
+			if(gvar->type == NULL){
 				gvar->type = newtype;
-			}else{
-				;
 			}
 			expect("]");
 		}
 		newtype->ptr_to = toplv_type;
-		gvar->memsize   = gvar->type->size;
-	}else{
-		gvar->memsize = type_size(gvar->type);
 	}
 
-	// globals == new lvar
-	globals = gvar;
+	gvar->type->size = type_size(gvar->type);
+	gvar->memsize    = gvar->type->size;
 
+	// globals == new gvar
+	globals = gvar;
 	node->type = gvar->type;
 	node->str  = gvar->name;
 	node->val  = gvar->len;
