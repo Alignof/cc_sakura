@@ -238,11 +238,10 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	lvar->next = locals;
 	lvar->name = tok->str;
 	lvar->len  = tok->len;
-	lvar->type = node->type;
 
 	// Is array
 	if(check("[")){
-		Type *newtype;
+		Type *newtype = calloc(1, sizeof(Type));
 		int index_num;
 		int isize = -1;
 		while(consume("[")){
@@ -258,6 +257,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 				token     = token->next;
 			}
 
+/*
 			newtype = calloc(1, sizeof(Type));
 			newtype->ty          = ARRAY;
 			newtype->ptr_to      = lvar->type;
@@ -265,14 +265,28 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			newtype->size        = type_size(newtype);
 			newtype->align       = type_align(newtype);
 			lvar->type = newtype;
+*/
 
+			newtype->ptr_to = calloc(1, sizeof(Type));
+			newtype->ptr_to->ty         = ARRAY;
+			newtype->ptr_to->index_size = index_num;
+			newtype = newtype->ptr_to;
+
+			if(lvar->type == NULL){
+				lvar->type = newtype;
+			}
 			expect("]");
 		}
+		newtype->ptr_to = node->type;
+	}else{
+		lvar->type      = node->type;
 	}
 
+	lvar->type->size  = type_size(lvar->type);
+	lvar->type->align = type_align(lvar->type);
 	lvar->offset = ((locals) ? (locals->offset) : 0) + lvar->type->size;
 	alloc_size   += lvar->type->size;
-	node->type = lvar->type;
+	node->type   = lvar->type;
 	node->offset = lvar->offset;
 	locals = lvar;
 
