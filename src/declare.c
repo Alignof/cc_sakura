@@ -213,6 +213,8 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			expect("]");
 		}
 		newtype->ptr_to = toplv_type;
+	}else{
+		gvar->type      = toplv_type;
 	}
 
 	gvar->type->size = type_size(gvar->type);

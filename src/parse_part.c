@@ -40,8 +40,8 @@ Node *global_init(Node *node){
 			if(new->kind == ND_STR && node->type->ty == ARRAY){
 				if(node->type->index_size != -1 && new->len > node->type->index_size){
 					error_at(token->str, "invalid global variable initialize");
-				}else if(node->type->index_size != -1 && new->len < node->type->index_size){
-					new->offset = node->type->index_size - new->len - 1;
+				}else if(node->type->ptr_to->index_size != -1 && new->len < node->type->index_size){
+					new->offset = node->type->ptr_to->index_size - new->len - 1;
 				}
 			}
 			consume(",");
@@ -50,19 +50,12 @@ Node *global_init(Node *node){
 
 		expect("}");
 
-		int elements_num = 0;
-		if(node->type->ptr_to->ptr_to){
-			elements_num = node->type->ptr_to->index_size;
-		}else{
-			elements_num = node->type->index_size;
-		}
-
 		// too many
-		if(elements_num != -1 && elements_num < ctr){
+		if(node->type->index_size != -1 && node->type->index_size < ctr){
 			error_at(token->str, "Invalid array size");
-			// too little
-		}else if(elements_num > ctr){
-			init_val->offset = (elements_num - ctr) * node->type->ptr_to->size;
+		// too little
+		}else if(node->type->index_size > ctr){
+			init_val->offset = (node->type->index_size - ctr) * node->type->ptr_to->size;
 		}
 	}else{
 		init_val = assign();

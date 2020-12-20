@@ -15,7 +15,7 @@ int type_size(Type *type){
 		case PTR:
 			return 8;
 		case ARRAY:
-			if(type->index_size == -1) return -1; 
+			if(type->index_size == -1) break; 
 			type->size = type->index_size * type_size(type->ptr_to);
 			return type->size;
 		case STRUCT:
