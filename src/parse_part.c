@@ -92,7 +92,6 @@ Node *dot_arrow(NodeKind type, Node *node){
 	// struc.aaa.bbb.ccc;
 	// struc->aaa->bbb->ccc;
 	// (lvar <- node -> dot) <- node -> dot
-	int INSIDE_FILE = 0;
 	Type *struc_type;
 	Node *new = new_node(type, node, NULL);
 	Token *memb_name  = consume_ident();

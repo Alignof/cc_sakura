@@ -3,8 +3,6 @@
 int alloc_size;
 Token *token;
 Str *strings;
-//LVar *locals;
-//Func *func_list[100]; 
 
 Node *data(void){
 	if(consume("(")){
@@ -57,12 +55,11 @@ Node *data(void){
 	}
 
 	// variable
-	int INSIDE_FUNC = 0;
 	Token *tok = consume_ident();
 	if(tok){
 		Node *node = calloc(1, sizeof(Node));
 
-		LVar *lvar = find_lvar(tok, INSIDE_FUNC);
+		LVar *lvar = find_lvar(tok, INSIDE_FILE);
 		if(lvar){
 			node->kind   = ND_LVAR;
 			node->offset = lvar->offset;
@@ -87,7 +84,7 @@ Node *data(void){
 				node->str  = tok->str;
 				node->len  = tok->len;
 			}else{
-				Member *rator = find_enumerator(tok, INSIDE_FUNC);
+				Member *rator = find_enumerator(tok, INSIDE_FILE);
 				if(rator){
 					node = new_node_num(rator->offset);
 					// variable does not exist.
@@ -154,7 +151,6 @@ Node *primary(void){
 
 Node *unary(void){
 	Node *node = NULL;
-	int INSIDE_FILE = 1;
 
 	// increment
 	if(consume("++")){
@@ -174,7 +170,7 @@ Node *unary(void){
 
 	// cast
 	if(check("(")){
-		if(token->next->kind == TK_TYPE || find_defined_type(token->next, INSIDE_FILE)){
+		if(token->next->kind == TK_TYPE || find_defined_type(token->next, INSIDE_SCOPE)){
 			consume("(");
 			Type *casting_type = parse_type();
 			expect(")");
@@ -208,7 +204,6 @@ Node *unary(void){
 		// sizeof(5)  = > 4
 		// sizeof(&a)  = > 8
 		if(consume("(")){
-			int INSIDE_FILE = 0;
 			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
 				Type *target_type = parse_type();
 				node = new_node(ND_NUM, node, new_node_num(target_type->size));
@@ -228,7 +223,6 @@ Node *unary(void){
 		// _Alignof(5)  = > 4
 		// _Alignof(&a) = > 8
 		if(consume("(")){
-			int INSIDE_FILE = 0;
 			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
 				Type *target_type = parse_type();
 				node = new_node(ND_NUM, node, new_node_num(target_type->align));
@@ -365,8 +359,7 @@ Node *assign(void){
 }
 
 Node *expr(void){
-	int star_count   = 0;
-	int INSIDE_SCOPE = 1;
+	int star_count = 0;
 	Node *node;
 
 	if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE)){
@@ -384,7 +377,6 @@ Node *expr(void){
 		// variable declaration
 		Token *tok = consume_ident();
 		if(tok){
-			int INSIDE_SCOPE = 1;
 			// If enumerator already exist -> error
 			find_enumerator(tok, INSIDE_SCOPE);
 			node = declare_local_variable(node, tok, star_count);

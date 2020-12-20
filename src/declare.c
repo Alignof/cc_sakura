@@ -17,7 +17,6 @@ Def_Type *outside_deftype;
 Type *set_type(Type *type, Token *tok){
 	Enum  *enum_found  = NULL;
 	Struc *struc_found = NULL;
-	int INSIDE_FILE = 0;
 
 	switch(type->ty){
 		case VOID:
@@ -93,7 +92,6 @@ Type *set_type(Type *type, Token *tok){
 Type *parse_type(void){
 	Type *type = calloc(1, sizeof(Type));
 	int star_count  = 0;
-	int INSIDE_FILE = 0;
 
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
@@ -228,7 +226,6 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 }
 
 Node *declare_local_variable(Node *node, Token *tok, int star_count){
-	int INSIDE_SCOPE = 1;
 	LVar *lvar = find_lvar(tok, INSIDE_SCOPE);
 	if(lvar) error_at(token->str, "this variable has already existed.");
 
@@ -283,7 +280,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 Member *register_struc_member(int *asize_ptr){
 	int size_of_type;
-	int INSIDE_FILE   = 0;
 	Member *new_memb  = NULL;
 	Member *memb_head = NULL;
 

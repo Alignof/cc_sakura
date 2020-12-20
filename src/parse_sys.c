@@ -197,7 +197,7 @@ GVar *find_gvar(Token *tok){
 
 LVar *find_lvar(Token *tok, int find_range){
 	/* find_range
-	 * INSIDE_FUNC  == 0
+	 * INSIDE_FILE  == 0
 	 * INSIDE_SCOPE == 1 
 	 */
 
