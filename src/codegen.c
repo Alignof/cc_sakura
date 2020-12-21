@@ -61,7 +61,6 @@ void gen_args(Node *args){
 	int reg_num;
 	int arg_count = 0;
 
-
 	while(args){
 		gen_expr(args);
 		arg_count++;
@@ -245,7 +244,7 @@ void gen_expr(Node *node){
 			}
 			printf("	mov [rax],%s\n", reg_di[reg_lty]);
 
-			// already evacuation
+			// already evacuated
 			//printf("	push rax\n");
 			return;
 		case ND_STR:
@@ -264,8 +263,8 @@ void gen_expr(Node *node){
 			return;
 		case ND_COMPOUND:
 			// push
-			gen_address(node->lhs); // push lhs
-			gen_expr(node->rhs->rhs);  // push rhs
+			gen_address(node->lhs);  // push lhs
+			gen_expr(node->rhs->rhs);// push rhs
 
 			// calc
 			printf("	pop rdi\n");  // rhs
@@ -358,8 +357,6 @@ void gen_expr(Node *node){
 			gen(node->rhs);
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				if(node->type->ty <= CHAR){
-					//printf("        movzx eax,BYTE PTR [rax]\n");
-					//printf("        movsx eax,al\n");
 					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
 					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
@@ -461,8 +458,10 @@ void gen(Node *node){
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs->next);
-			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
-			printf("	je .LloopEnd%03d\n", node->val);
+			if(node->lhs->next->kind != ND_NULL_STMT){
+				printf("	cmp %s,0\n", reg_ax[node->type->ty]);
+				printf("	je .LloopEnd%03d\n", node->val);
+			}
 
 			// gen block
 			gen(node->rhs);
@@ -547,4 +546,3 @@ void gen(Node *node){
 			printf("	pop rax\n\n");
 	}
 }
-

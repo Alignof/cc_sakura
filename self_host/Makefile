@@ -25,23 +25,32 @@ $(ASMDIR)/%.s: $(SRCDIR)/%.c
 	$(CC) $(INCLUDE) $(CFLAGS) -S -masm=intel $< -o $@
 
 
+define prepare_franken
+	cat src/header.h > tmp.c
+	for EF in $(EXCLUDEFILES); do\
+		cat src/$$EF.c >> tmp.c;\
+		rm -f $(ASMDIR)/$$EF.s;\
+	done
+endef
+
+
 # franken 
-EXCLUDEFILE := tokenizer
+EXCLUDEFILES := codegen
 franken:$(ASEMS)
-	# target:$(EXCLUDEFILE)
-	cat src/header.h src/$(EXCLUDEFILE).c > tmp.c
+	# target:$(EXCLUDEFILES)
+	@$(call prepare_franken)
 	# gen1
-	$(MOTHER) tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
+	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen1.s
+	cp $(ASMDIR)/tmp.s ./gen1.s
 	# gen2
-	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
+	./child tmp.c > $(ASMDIR)/tmp.s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen2.s
+	cp $(ASMDIR)/tmp.s ./gen2.s
 	# gen3
-	./child tmp.c > $(ASMDIR)/$(EXCLUDEFILE).s 
+	./child tmp.c > $(ASMDIR)/tmp.s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/$(EXCLUDEFILE).s ./gen3.s
+	cp $(ASMDIR)/tmp.s ./gen3.s
 	# check
 	diff gen2.s gen3.s
 

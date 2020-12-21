@@ -1,8 +1,5 @@
 #include "cc_sakura.h"
 
-// GVar *globals;
-// char filename[100];
-
 void error(char *loc, char *fmt, ...){
 	va_list ap;
 	va_start(ap, fmt);
@@ -121,10 +118,10 @@ Token *consume_ident(void){
 
 	Token *ret = token;
 	//check variable length
-	int _len = len_val(token->str);
+	int _len   = len_val(token->str);
 	token->len = _len;
 
-	//move next token 
+	//move for next token 
 	for(int i = 0;i < _len;i++){
 		token = token->next;
 	}
@@ -197,8 +194,8 @@ GVar *find_gvar(Token *tok){
 
 LVar *find_lvar(Token *tok, int find_range){
 	/* find_range
-	 * INSIDE_FUNC  == 0
-	 * INSIDE_SCOPE == 1 
+	 * IGNORE_SCOPE   == 0
+	 * CONSIDER_SCOPE == 1 
 	 */
 
 	int out_of_scope = 0;
@@ -235,9 +232,9 @@ Struc *find_struc(Token *tok, int find_range){
 }
 
 Member *find_struct_member(Type *type, int find_range){
-	char *struc_name = type->name;
-	int  struc_len   = type->len;
 	int out_of_scope = 0;
+	int struc_len    = type->len;
+	char *struc_name = type->name;
 
 	for (Struc *var = structs;var;var = var->next){
 		if(var == outside_struct) out_of_scope = 1;
@@ -251,7 +248,6 @@ Member *find_struct_member(Type *type, int find_range){
 
 Enum *find_enum(Token *tok, int find_range){
 	int out_of_scope = 0;
-
 	for (Enum *var = enumerations;var;var = var->next){
 		if(var == outside_enum) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
@@ -302,7 +298,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 
 	if(kind == ND_SUB){
 		if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
-				(lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
+		   (lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
 			node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
 			return node;
 		}

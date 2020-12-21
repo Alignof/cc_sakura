@@ -1,16 +1,11 @@
 #include "cc_sakura.h"
 
-// int alloc_size;
-// Token *token;
-// LVar *locals;
-// Func *func_list[100];
-
 Node *global_init(Node *node){
 	Node *init_val = NULL;
 	if(check("\"")){
 		if(node->type->ty == ARRAY){
 			Token *tok = consume_string();
-			init_val = new_node(ND_STR, NULL, NULL);
+			init_val   = new_node(ND_STR, NULL, NULL);
 			init_val->str      = tok->str;
 			init_val->len      = tok->len - 1;
 			init_val->type->ty = PTR;
@@ -24,9 +19,9 @@ Node *global_init(Node *node){
 			init_val = assign();
 		}
 	}else if(consume("{")){
-		int ctr = 0;
+		int ctr   = 0;
 		Node *new = NULL;
-		init_val = new_node(ND_BLOCK, NULL, NULL);
+		init_val  = new_node(ND_BLOCK, NULL, NULL);
 		while(token->kind != TK_BLOCK){
 			//Is first?
 			if(ctr == 0){
@@ -40,8 +35,8 @@ Node *global_init(Node *node){
 			if(new->kind == ND_STR && node->type->ty == ARRAY){
 				if(node->type->index_size != -1 && new->len > node->type->index_size){
 					error_at(token->str, "invalid global variable initialize");
-				}else if(node->type->index_size != -1 && new->len < node->type->index_size){
-					new->offset = node->type->index_size - new->len - 1;
+				}else if(node->type->ptr_to->index_size != -1 && new->len < node->type->index_size){
+					new->offset = node->type->ptr_to->index_size - new->len - 1;
 				}
 			}
 			consume(",");
@@ -50,19 +45,12 @@ Node *global_init(Node *node){
 
 		expect("}");
 
-		int elements_num = 0;
-		if(node->type->ptr_to->ptr_to){
-			elements_num = node->type->ptr_to->index_size;
-		}else{
-			elements_num = node->type->index_size;
-		}
-
 		// too many
-		if(elements_num != -1 && elements_num < ctr){
+		if(node->type->index_size != -1 && node->type->index_size < ctr){
 			error_at(token->str, "Invalid array size");
-			// too little
-		}else if(elements_num > ctr){
-			init_val->offset = (elements_num - ctr) * node->type->ptr_to->size;
+		// too little
+		}else if(node->type->index_size > ctr){
+			init_val->offset = (node->type->index_size - ctr) * node->type->ptr_to->size;
 		}
 	}else{
 		init_val = assign();
@@ -99,7 +87,6 @@ Node *dot_arrow(NodeKind type, Node *node){
 	// struc.aaa.bbb.ccc;
 	// struc->aaa->bbb->ccc;
 	// (lvar <- node -> dot) <- node -> dot
-	int INSIDE_FILE = 0;
 	Type *struc_type;
 	Node *new = new_node(type, node, NULL);
 	Token *memb_name  = consume_ident();
@@ -116,9 +103,9 @@ Node *dot_arrow(NodeKind type, Node *node){
 
 	// get member list
 	if(type == ND_DOT){
-		memb_list = find_struct_member(struc_type, INSIDE_FILE);
+		memb_list = find_struct_member(struc_type, IGNORE_SCOPE);
 	}else{
-		memb_list = find_struct_member(struc_type->ptr_to, INSIDE_FILE);
+		memb_list = find_struct_member(struc_type->ptr_to, IGNORE_SCOPE);
 	}
 
 	while(memb_list){
@@ -142,7 +129,7 @@ Node *incdec(Node *node, IncDecKind idtype){
 	 * a = a-1; <-- (ND_PREID) --> a;
 	 */
 
-	Node *new = calloc(1,sizeof(Node));
+	Node *new      = calloc(1,sizeof(Node));
 	Node *plmi_one = calloc(1,sizeof(Node));
 
 	// increment or decrement
@@ -157,7 +144,7 @@ Node *incdec(Node *node, IncDecKind idtype){
 		new->kind = ND_PREID;
 		new->lhs  = plmi_one;
 		new->rhs  = node;
-		// post
+	// post
 	}else{
 		new->kind = ND_POSTID;
 		new->lhs  = node;
@@ -169,32 +156,29 @@ Node *incdec(Node *node, IncDecKind idtype){
 }
 
 Node *init_formula(Node *node, Node *init_val){
-	switch(init_val->kind){
-		case ND_STR:
-			if(node->type->ty == PTR){
-				node = new_node(ND_ASSIGN, node, init_val);
-			}else if(node->type->ty == ARRAY){
-				if(node->type->index_size == init_val->len+1 || node->type->index_size == -1){
-					node = array_str(node, init_val);
-				}else{
-					error_at(token->str, "Invalid array size");
-				}
-			}else{
-				error_at(token->str, "Invalid assign");
-			}
-			break;
-		default:
+	if(init_val->kind == ND_STR){
+		if(node->type->ty == PTR){
 			node = new_node(ND_ASSIGN, node, init_val);
-			break;
+		}else if(node->type->ty == ARRAY){
+			if(node->type->index_size == init_val->len+1 || node->type->index_size == -1){
+				node = array_str(node, init_val);
+			}else{
+				error_at(token->str, "Invalid array size");
+			}
+		}else{
+			error_at(token->str, "Invalid assign");
+		}
+	}else{
+		node = new_node(ND_ASSIGN, node, init_val);
 	}
 
 	return node;
 }
 
 Node *array_str(Node *arr, Node *init_val){
-	int ctr	  = 0;
-	int isize = arr->type->index_size;
-	Node *src;
+	int ctr	   = 0;
+	int isize  = arr->type->index_size;
+	Node *src  = NULL;
 	Node *dst  = calloc(1, sizeof(Node));
 	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
@@ -223,16 +207,13 @@ Node *array_str(Node *arr, Node *init_val){
 	// ommitted
 	if(isize == -1){
 		if(arr->type->ty == ARRAY){
-			int asize = align_array_size(ctr, arr->type);
-			alloc_size+=asize;
-			arr->offset    = ((locals)?(locals->offset):0) + asize;
+			alloc_size += ctr;
+			arr->offset    = ((locals)?(locals->offset):0) + ctr;
 			clone->offset  = arr->offset;
 			locals->offset = arr->offset;
 			locals->type->index_size = ctr;
 			locals->type->size  = type_size(locals->type);
 			locals->type->align = type_size(locals->type);
-		}else{
-			globals->memsize = align_array_size(ctr, arr->type);
 		}
 	}
 
@@ -269,7 +250,7 @@ Node *array_block(Node *arr){
 	// ommitted
 	if(isize == -1){
 		if(arr->type->ty == ARRAY){
-			int asize  = align_array_size(ctr, arr->type);
+			int asize  = arr->type->ptr_to->size * ctr;
 			alloc_size += asize;
 			arr->offset    = ((locals)?(locals->offset):0) + asize;
 			clone->offset  = arr->offset;
@@ -277,13 +258,11 @@ Node *array_block(Node *arr){
 			locals->type->index_size = ctr;
 			locals->type->size  = type_size(locals->type);
 			locals->type->align = type_size(locals->type);
-		}else{
-			globals->memsize = align_array_size(ctr, arr->type);
 		}
-		// too many
+	// too many
 	}else if(arr->type->index_size < ctr){
 		error_at(token->str, "Invalid array size");
-		// too little
+	// too little
 	}else if(arr->type->index_size > ctr){
 		while(ctr != arr->type->index_size){
 			src = array_index(clone, new_node_num(ctr));
@@ -308,7 +287,7 @@ Node *call_function(Node *node, Token *tok){
 	// have argument?
 	if(consume(")")) return node;
 
-	int ctr = 0;
+	int ctr   = 0;
 	Node *new = NULL;
 	while(1){
 		if(new == NULL){
@@ -337,49 +316,44 @@ Node *array_index(Node *node, Node *index){
 }
 
 void get_argument(int func_index){
-	if(consume_reserved_word("void", TK_TYPE)){
+	if(consume_reserved_word("void", TK_TYPE) || check(")")){
 		func_list[func_index]->args = NULL;
 		expect(")");
 		return;
 	}
 
-	// get argument
-	if(consume(")")){
-		func_list[func_index]->args = NULL;
-	}else{
-		// set args node
-		Node *new_arg = NULL;
-		int arg_counter = 0;
+	// set args node
+	Node *new_arg = NULL;
+	int arg_counter = 0;
 
-		while(token->kind == TK_NUM || token->kind == TK_TYPE  || find_defined_type(token, 0)){
-			if(new_arg == NULL){
-				new_arg       = calloc(1, sizeof(Node));
-				new_arg->kind = ND_ARG;
-				new_arg->val  = arg_counter;
-				new_arg->rhs  = expr();
-				func_list[func_index]->args = new_arg;
-			}else{
-				new_arg->next       = calloc(1, sizeof(Node));
-				new_arg->next->kind = ND_ARG;
-				new_arg->next->val  = arg_counter;
-				new_arg->next->rhs  = expr();
-				new_arg             = new_arg->next;
-			}
-
-			// Implicit Type Conversion 
-			if(new_arg->rhs->type->ty == ARRAY){
-				new_arg->rhs->type->ty = PTR;
-				new_arg->rhs->offset   -= new_arg->rhs->type->size;
-				new_arg->rhs->offset   += 8;
-				locals->offset         = new_arg->rhs->offset;
-				locals->type->size     = new_arg->rhs->type->size;
-				alloc_size -= new_arg->rhs->type->size;
-				alloc_size += 8;
-			}
-
-			arg_counter++;
-			if(!(consume(","))) break;
+	while(token->kind == TK_NUM || token->kind == TK_TYPE  || find_defined_type(token, 0)){
+		if(new_arg == NULL){
+			new_arg       = calloc(1, sizeof(Node));
+			new_arg->kind = ND_ARG;
+			new_arg->val  = arg_counter;
+			new_arg->rhs  = expr();
+			func_list[func_index]->args = new_arg;
+		}else{
+			new_arg->next       = calloc(1, sizeof(Node));
+			new_arg->next->kind = ND_ARG;
+			new_arg->next->val  = arg_counter;
+			new_arg->next->rhs  = expr();
+			new_arg             = new_arg->next;
 		}
-		expect(")");
+
+		// Implicit Type Conversion 
+		if(new_arg->rhs->type->ty == ARRAY){
+			new_arg->rhs->type->ty = PTR;
+			new_arg->rhs->offset   -= new_arg->rhs->type->size;
+			new_arg->rhs->offset   += 8;
+			locals->offset         = new_arg->rhs->offset;
+			locals->type->size     = new_arg->rhs->type->size;
+			alloc_size -= new_arg->rhs->type->size;
+			alloc_size += 8;
+		}
+
+		arg_counter++;
+		if(!(consume(","))) break;
 	}
+	expect(")");
 }

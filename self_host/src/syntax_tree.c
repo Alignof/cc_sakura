@@ -1,6 +1,8 @@
 int alloc_size;
 Token *token;
 Str *strings;
+//LVar *locals;
+//Func *func_list[100]; 
 
 Node *data(void){
 	if(consume("(")){
@@ -60,7 +62,7 @@ Node *data(void){
 
 		LVar *lvar = find_lvar(tok, INSIDE_FUNC);
 		if(lvar){
-			node->kind   = (lvar->type->ty == ARRAY)? ND_LARRAY : ND_LVAR;
+			node->kind   = ND_LVAR;
 			node->offset = lvar->offset;
 			node->type   = lvar->type;
 		// call function
@@ -78,7 +80,7 @@ Node *data(void){
 			GVar *gvar = find_gvar(tok);
 			if(gvar){
 				// global variable exist
-				node->kind = (gvar->type->ty == ARRAY)? ND_GARRAY : ND_GVAR;
+				node->kind = ND_GVAR;
 				node->type = gvar->type;
 				node->str  = tok->str;
 				node->len  = tok->len;
@@ -149,12 +151,35 @@ Node *primary(void){
 }
 
 Node *unary(void){
-	Node *node=__NULL;
+	Node *node = __NULL;
+	int INSIDE_FILE = 1;
+
+	// increment
+	if(consume("++")){
+		return incdec(primary(), PRE_INC);
+	}
+
+	// decrement
+	if(consume("--")){
+		return incdec(primary(), PRE_DEC);
+	}
 
 	// logical not
 	if(consume("!")){
 		node = new_node(ND_NOT, __NULL, unary());
 		return node;
+	}
+
+	// cast
+	if(check("(")){
+		if(token->next->kind == TK_TYPE || find_defined_type(token->next, INSIDE_FILE)){
+			consume("(");
+			Type *casting_type = parse_type();
+			expect(")");
+			node = new_node(ND_CAST, __NULL, unary());
+			node->type = casting_type;
+			return node;
+		}
 	}
 
 	if(consume("*")){
@@ -175,16 +200,6 @@ Node *unary(void){
 	if(consume("-")){
 		//convert to 0-n
 		return new_node(ND_SUB, new_node_num(0), primary());
-	}
-
-	// increment
-	if(consume("++")){
-		return incdec(primary(), PRE_INC);
-	}
-
-	// decrement
-	if(consume("--")){
-		return incdec(primary(), PRE_DEC);
 	}
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){

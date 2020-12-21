@@ -91,7 +91,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str){
 }
 
 bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind){
-	if(strncmp(*p, str, len) !=  0 || is_alnum((*p)[len])){
+	if(strncmp(*p, str, (size_t)len) !=  0 || is_alnum((*p)[len])){
 		return false;
 	}
 

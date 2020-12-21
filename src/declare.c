@@ -9,15 +9,10 @@ LVar     *outside_lvar;
 Struc    *outside_struct;
 Enum     *outside_enum;
 Def_Type *outside_deftype;
-// int alloc_size;
-// Token *token;
-// LVar *locals;
-// Func *func_list[100];
 
 Type *set_type(Type *type, Token *tok){
 	Enum  *enum_found  = NULL;
 	Struc *struc_found = NULL;
-	int INSIDE_FILE = 0;
 
 	switch(type->ty){
 		case VOID:
@@ -30,7 +25,7 @@ Type *set_type(Type *type, Token *tok){
 			break;
 		case STRUCT:
 			// find with tag name
-			struc_found = find_struc(tok, INSIDE_FILE);
+			struc_found = find_struc(tok, IGNORE_SCOPE);
 			type->len   = tok->len;
 			type->name  = tok->str;
 			if(struc_found){
@@ -60,7 +55,7 @@ Type *set_type(Type *type, Token *tok){
 			break;
 		case ENUM:
 			if(tok){
-				enum_found = find_enum(tok, INSIDE_FILE);
+				enum_found = find_enum(tok, IGNORE_SCOPE);
 			}
 
 			if(enum_found){
@@ -92,8 +87,7 @@ Type *set_type(Type *type, Token *tok){
 
 Type *parse_type(void){
 	Type *type = calloc(1, sizeof(Type));
-	int star_count  = 0;
-	int INSIDE_FILE = 0;
+	int star_count = 0;
 
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
@@ -119,7 +113,7 @@ Type *parse_type(void){
 		type = set_type(type, consume_ident());
 	}else{
 		Token *tok = consume_ident();
-		Def_Type *def_found = find_defined_type(tok, INSIDE_FILE);
+		Def_Type *def_found = find_defined_type(tok, IGNORE_SCOPE);
 		if(def_found){
 			tok->str = def_found->tag;
 			tok->len = def_found->tag_len;
@@ -146,22 +140,20 @@ Type *parse_type(void){
 
 Type *insert_ptr_type(Type *prev, int star_count){
 	Type *newtype;
-	if(star_count){
-		for(int i = 0;i<star_count;i++){
-			newtype = calloc(1, sizeof(Type));
-			newtype->ty     = PTR;
-			newtype->size   = type_size(newtype);
-			newtype->align  = type_align(newtype);
-			newtype->ptr_to = prev;
-			newtype->is_extern       = prev->is_extern;
-			newtype->is_thread_local = prev->is_thread_local;
-			prev = newtype;
-		}
+	if(star_count == 0) return prev;
 
-		return newtype;
-	}else{
-		return prev;
+	for(int i = 0;i<star_count;i++){
+		newtype = calloc(1, sizeof(Type));
+		newtype->ty     = PTR;
+		newtype->size   = type_size(newtype);
+		newtype->align  = type_align(newtype);
+		newtype->ptr_to = prev;
+		newtype->is_extern       = prev->is_extern;
+		newtype->is_thread_local = prev->is_thread_local;
+		prev = newtype;
 	}
+
+	return newtype;
 }
 
 Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type){
@@ -169,7 +161,6 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	if(!def_name) error_at(token->str, "not a variable.");
 
 	int index_num;
-	Type *newtype;
 	Node *node = calloc(1, sizeof(Node));
 	node->kind = ND_GVAR;
 
@@ -177,49 +168,45 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 	gvar->next = globals;
 	gvar->len  = def_name->len;
 	gvar->name = def_name->str;
-	gvar->type = toplv_type;
-	gvar->type->size  = type_size(toplv_type);
-	gvar->type->align = type_align(toplv_type);
+	toplv_type->size  = type_size(toplv_type);
+	toplv_type->align = type_align(toplv_type);
 
 	// add type list
 	gvar->type = insert_ptr_type(gvar->type, star_count);
 
 	// Is array
 	if(check("[")){
-		int isize  = -1;
-		node->val  = -1;
+		node->val     = -1;
+		Type *newtype = calloc(1, sizeof(Type));
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
-				// body
-				if(isize == -1){
-					isize = token->val;
-				}else{
-					isize *= token->val;
-				}
 				index_num = token->val;
 				token = token->next;
 			}
 
-			newtype = calloc(1, sizeof(Type));
-			newtype->ty          = ARRAY;
-			newtype->ptr_to      = gvar->type;
-			newtype->index_size  = index_num;
-			newtype->size        = type_size(newtype);
-			newtype->align       = type_align(newtype);
-			newtype->is_extern       = gvar->type->is_extern;
-			newtype->is_thread_local = gvar->type->is_thread_local;
-			gvar->type = newtype;
+			newtype->ptr_to = calloc(1, sizeof(Type));
+			newtype->ptr_to->ty              = ARRAY;
+			newtype->ptr_to->index_size      = index_num;
+			newtype->ptr_to->is_extern       = toplv_type->is_extern;
+			newtype->ptr_to->is_thread_local = toplv_type->is_thread_local;
+			newtype = newtype->ptr_to;
+
+			if(gvar->type == NULL){
+				gvar->type = newtype;
+			}
 			expect("]");
 		}
-		gvar->memsize = align_array_size(isize, gvar->type);
+		newtype->ptr_to = toplv_type;
 	}else{
-		gvar->memsize  = type_size(gvar->type);
+		gvar->type      = toplv_type;
 	}
 
-	// globals == new lvar
-	globals = gvar;
+	gvar->type->size = type_size(gvar->type);
+	gvar->memsize    = gvar->type->size;
 
+	// globals == new gvar
+	globals = gvar;
 	node->type = gvar->type;
 	node->str  = gvar->name;
 	node->val  = gvar->len;
@@ -228,56 +215,47 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 }
 
 Node *declare_local_variable(Node *node, Token *tok, int star_count){
-	int INSIDE_SCOPE = 1;
-	LVar *lvar = find_lvar(tok, INSIDE_SCOPE);
+	LVar *lvar = find_lvar(tok, CONSIDER_SCOPE);
 	if(lvar) error_at(token->str, "this variable has already existed.");
 
 	lvar = calloc(1, sizeof(LVar));
 	lvar->next = locals;
 	lvar->name = tok->str;
 	lvar->len  = tok->len;
-	lvar->type = node->type;
 
 	// Is array
 	if(check("[")){
-		Type *newtype;
+		Type *newtype = calloc(1, sizeof(Type));
 		int index_num;
-		int asize = 0;
-		int isize = -1;
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
-				if(isize == -1){
-					isize = token->val;
-				}else{
-					isize *= token->val;
-				}
-
 				index_num = token->val;
 				token     = token->next;
 			}
 
-			newtype = calloc(1, sizeof(Type));
-			newtype->ty          = ARRAY;
-			newtype->ptr_to      = lvar->type;
-			newtype->index_size  = index_num;
-			newtype->size        = type_size(newtype);
-			newtype->align       = type_align(newtype);
-			lvar->type = newtype;
+			newtype->ptr_to = calloc(1, sizeof(Type));
+			newtype->ptr_to->ty         = ARRAY;
+			newtype->ptr_to->index_size = index_num;
+			newtype = newtype->ptr_to;
 
+			if(lvar->type == NULL){
+				lvar->type = newtype;
+			}
 			expect("]");
 		}
-
-		asize = align_array_size(isize, lvar->type);
-		alloc_size += asize;
-		lvar->offset = ((locals) ? (locals->offset) : 0) + asize;
+		newtype->ptr_to = node->type;
 	}else{
-		lvar->offset =  (locals) ? (locals->offset) + lvar->type->size : lvar->type->size;
-		alloc_size   += lvar->type->size;
+		lvar->type      = node->type;
 	}
 
-	node->type = lvar->type;
+	lvar->type->size  = type_size(lvar->type);
+	lvar->type->align = type_align(lvar->type);
+	lvar->offset      = ((locals) ? (locals->offset) : 0) + lvar->type->size;
+
+	node->type   = lvar->type;
 	node->offset = lvar->offset;
+	alloc_size   += lvar->type->size;
 	locals = lvar;
 
 	return node;
@@ -285,53 +263,55 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 Member *register_struc_member(int *asize_ptr){
 	int size_of_type;
-	int INSIDE_FILE   = 0;
 	Member *new_memb  = NULL;
 	Member *memb_head = NULL;
 
 	while(1){
-		if(!(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE))){
+		if(!(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE))){
 			error_at(token->str, "not a type.");
 		}
 
 		new_memb = calloc(1,sizeof(Member));
 
 		// parse member type
-		new_memb->type    = parse_type();
+		Type *memb_type  = parse_type();
 
 		// add member name
 		Token *def_name  = consume_ident();
 		new_memb->name   = def_name->str;
 		new_memb->len    = def_name->len;
 
-		// Is array index
-		int isize = -1;
-		int index_num;
-		Type *newtype;
-		while(consume("[")){
-			if(isize == -1){
-				isize = token->val;
-			}else{
-				isize *= token->val;
+		// Is array
+		if(check("[")){
+			int index_num;
+			Type *newtype = calloc(1, sizeof(Type));
+			while(consume("[")){
+				index_num = -1;
+				if(!check("]")){
+					index_num = token->val;
+					token     = token->next;
+				}
+
+				newtype->ptr_to = calloc(1, sizeof(Type));
+				newtype->ptr_to->ty         = ARRAY;
+				newtype->ptr_to->index_size = index_num;
+				newtype = newtype->ptr_to;
+
+				if(new_memb->type == NULL){
+					new_memb->type = newtype;
+				}
+				expect("]");
 			}
-			index_num = token->val;
-			token = token->next;
-
-			newtype = calloc(1, sizeof(Type));
-			newtype->ty         = ARRAY;
-			newtype->ptr_to     = new_memb->type;
-			newtype->index_size = index_num;
-			newtype->size  = type_size(newtype);
-			newtype->align = type_align(newtype);
-			new_memb->type = newtype;
-
-			expect("]");
+			newtype->ptr_to = memb_type;
+		}else{
+			new_memb->type  = memb_type;
 		}
+		new_memb->type->size  = type_size(new_memb->type);
+		new_memb->type->align = type_align(new_memb->type);
 
 		int padding = 0;
 		new_memb->memsize = new_memb->type->size;
 		size_of_type      = new_memb->memsize;
-
 
 		if(memb_head){
 			int prev_tail    = (memb_head) ? (memb_head->offset + memb_head->type->size) : 0;

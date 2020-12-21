@@ -1,7 +1,4 @@
 void error(char *loc, char *fmt){
-	//va_list ap;
-	//va_start(ap, fmt);
-
 	int pos = loc-user_input;
 	fprintf(stderr, "%s\n", user_input);
 	fprintf(stderr, "%*s", pos, " ");
@@ -29,7 +26,7 @@ void error_at(char *loc, char *msg){
 	while(*start == '\t') start++;
 
 	int indent = fprintf(stderr, "%s:%d ", filename, line_num);
-	fprintf(stderr, "%.*s\n", (end-start), start);
+	fprintf(stderr, "%.*s\n", (int)(end-start), start);
 
 	int pos = indent+loc-start;
 	fprintf(stderr, "%*s", pos, " ");
@@ -130,8 +127,7 @@ Token *consume_ident(void){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-	    strlen(op) != token->len||
-	    memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		error_at(token->str, "not a charctor.");
 	}
 	token = token->next;
@@ -295,19 +291,19 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	if(ND_ADD <= kind && kind <= ND_BIT_OR){
 		node->type = (lhs->type->ty > rhs->type->ty)? lhs->type : rhs->type;
 	}
-        
-        if(kind == ND_SUB){
-                if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
-		   (lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
-                        node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
-                        return node;
-                }
-        }
+
+	if(kind == ND_SUB){
+		if((lhs->type->ty == PTR   && rhs->type->ty == PTR)||
+				(lhs->type->ty == ARRAY && rhs->type->ty == ARRAY)){
+			node = new_node(ND_DIV, node, new_node_num(node->type->ptr_to->size));
+			return node;
+		}
+	}
 
 	if(kind == ND_ADD || kind == ND_SUB){
-                if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
+		if(lhs->type->ty == PTR || lhs->type->ty == ARRAY ||
 		   rhs->type->ty == PTR || rhs->type->ty == ARRAY ){
-                        node = pointer_calc(node, lhs->type, rhs->type);
+			node = pointer_calc(node, lhs->type, rhs->type);
 		}
 	}
 
@@ -316,14 +312,34 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 			node->rhs = new_node(ND_NE, node->rhs, new_node_num(0));
 		}
 
-                if(lhs->type->ty == STRUCT){
-                        error_at(token->str, "struct assignment is not implemented");
-                }
+		if(lhs->type->ty == STRUCT){
+			error_at(token->str, "struct assignment is not implemented");
+		}
 	}
 
 	if(kind == ND_ASSIGN || kind == ND_COMPOUND){
 		node->type = lhs->type;
+		if(lhs->type->ty > rhs->type->ty){
+			node->type = lhs->type;
+			node->rhs  = new_node(ND_CAST, __NULL, node->rhs);
+			node->rhs->type = node->type;
+		}
 	}
+
+	if(ND_GT <= kind && kind <= ND_NE){
+		if(lhs->type->ty > rhs->type->ty){
+			node->type = lhs->type;
+			node->rhs  = new_node(ND_CAST, __NULL, node->rhs);
+			node->rhs->type = lhs->type;
+		}else if(lhs->type->ty < rhs->type->ty){
+			node->type = rhs->type;
+			node->lhs  = new_node(ND_CAST, __NULL, node->lhs);
+			node->lhs->type = rhs->type;
+		}else{
+			node->type = lhs->type;
+		}
+	}
+
 
 	if(kind == ND_DOT || kind == ND_ARROW){
 		node->type = lhs->type;

@@ -3,8 +3,6 @@
 int alloc_size;
 Token *token;
 Str *strings;
-//LVar *locals;
-//Func *func_list[100]; 
 
 Node *data(void){
 	if(consume("(")){
@@ -15,8 +13,7 @@ Node *data(void){
 
 	// compiler directive
 	if(token->kind == TK_COMPILER_DIRECTIVE){
-		Node *node = compiler_directive();
-		return node;
+		return compiler_directive();
 	}
 
 
@@ -28,7 +25,7 @@ Node *data(void){
 		node->type->ty = PTR;
 
 		Token *tok = consume_string();
-		Str *fstr = find_string(tok);
+		Str  *fstr = find_string(tok);
 
 		// has already
 		if(fstr){
@@ -57,12 +54,11 @@ Node *data(void){
 	}
 
 	// variable
-	int INSIDE_FUNC = 0;
 	Token *tok = consume_ident();
 	if(tok){
 		Node *node = calloc(1, sizeof(Node));
 
-		LVar *lvar = find_lvar(tok, INSIDE_FUNC);
+		LVar *lvar = find_lvar(tok, IGNORE_SCOPE);
 		if(lvar){
 			node->kind   = ND_LVAR;
 			node->offset = lvar->offset;
@@ -87,12 +83,12 @@ Node *data(void){
 				node->str  = tok->str;
 				node->len  = tok->len;
 			}else{
-				Member *rator = find_enumerator(tok, INSIDE_FUNC);
+				Member *rator = find_enumerator(tok, IGNORE_SCOPE);
 				if(rator){
 					node = new_node_num(rator->offset);
 					// variable does not exist.
 				}else{
-					error_at(token->str, "this variable is not declaration");
+					error_at(token->str, "this variable is not declarated");
 				}
 			}
 		}
@@ -154,7 +150,6 @@ Node *primary(void){
 
 Node *unary(void){
 	Node *node = NULL;
-	int INSIDE_FILE = 1;
 
 	// increment
 	if(consume("++")){
@@ -168,13 +163,12 @@ Node *unary(void){
 
 	// logical not
 	if(consume("!")){
-		node = new_node(ND_NOT, NULL, unary());
-		return node;
+		return new_node(ND_NOT, NULL, unary());
 	}
 
 	// cast
 	if(check("(")){
-		if(token->next->kind == TK_TYPE || find_defined_type(token->next, INSIDE_FILE)){
+		if(token->next->kind == TK_TYPE || find_defined_type(token->next, CONSIDER_SCOPE)){
 			consume("(");
 			Type *casting_type = parse_type();
 			expect(")");
@@ -185,13 +179,11 @@ Node *unary(void){
 	}
 
 	if(consume("*")){
-		node = new_node(ND_DEREF, NULL, unary());
-		return node;
+		return new_node(ND_DEREF, NULL, unary());
 	}
 
 	if(consume("&")){
-		node = new_node(ND_ADDRESS, NULL, unary());
-		return node;
+		return new_node(ND_ADDRESS, NULL, unary());
 	}
 
 	if(consume("+")){
@@ -205,12 +197,10 @@ Node *unary(void){
 	}
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
-		// sizeof(5)  = > 4
-		// sizeof(&a)  = > 8
-
+		// sizeof(5)  => 4
+		// sizeof(&a) => 8
 		if(consume("(")){
-			int INSIDE_FILE = 0;
-			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();
 				node = new_node(ND_NUM, node, new_node_num(target_type->size));
 				node->val = target_type->size;
@@ -226,12 +216,10 @@ Node *unary(void){
 	}
 
 	if(consume_reserved_word("_Alignof", TK_ALIGNOF)){
-		// _Alignof(5)  = > 4
-		// _Alignof(&a) = > 8
-
+		// _Alignof(5)  => 4
+		// _Alignof(&a) => 8
 		if(consume("(")){
-			int INSIDE_FILE = 0;
-			if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_FILE)){
+			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();
 				node = new_node(ND_NUM, node, new_node_num(target_type->align));
 				node->val = target_type->align;
@@ -245,6 +233,7 @@ Node *unary(void){
 
 		return node;
 	}
+
 	return primary();
 }
 
@@ -366,11 +355,10 @@ Node *assign(void){
 }
 
 Node *expr(void){
-	int star_count   = 0;
-	int INSIDE_SCOPE = 1;
+	int star_count = 0;
 	Node *node;
 
-	if(token->kind == TK_TYPE || find_defined_type(token, INSIDE_SCOPE)){
+	if(token->kind == TK_TYPE || find_defined_type(token, CONSIDER_SCOPE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 
@@ -385,9 +373,8 @@ Node *expr(void){
 		// variable declaration
 		Token *tok = consume_ident();
 		if(tok){
-			int INSIDE_SCOPE = 1;
 			// If enumerator already exist -> error
-			find_enumerator(tok, INSIDE_SCOPE);
+			find_enumerator(tok, CONSIDER_SCOPE);
 			node = declare_local_variable(node, tok, star_count);
 		}else{
 			error_at(token->str, "not a variable.");
@@ -518,13 +505,10 @@ Node *stmt(void){
 			// remove used case
 			if(prev){
 				prev->next = lb->next;
-				//free(lb);
 				lb   = prev->next;
 				prev = lb;
-				// remove head
 			}else{
 				prev = lb;
-				//free(prev);
 				lb   = lb->next;
 				prev = NULL;
 			}
@@ -753,7 +737,7 @@ void program(void){
 			}else{
 				expect(";");
 			}
-			// global variable
+		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);
 
