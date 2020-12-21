@@ -244,7 +244,7 @@ void gen_expr(Node *node){
 			}
 			printf("	mov [rax],%s\n", reg_di[reg_lty]);
 
-			// already evacuation
+			// already evacuated
 			//printf("	push rax\n");
 			return;
 		case ND_STR:
@@ -263,8 +263,8 @@ void gen_expr(Node *node){
 			return;
 		case ND_COMPOUND:
 			// push
-			gen_address(node->lhs); // push lhs
-			gen_expr(node->rhs->rhs);  // push rhs
+			gen_address(node->lhs);  // push lhs
+			gen_expr(node->rhs->rhs);// push rhs
 
 			// calc
 			printf("	pop rdi\n");  // rhs
@@ -544,4 +544,3 @@ void gen(Node *node){
 			printf("	pop rax\n\n");
 	}
 }
-
