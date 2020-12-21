@@ -176,18 +176,11 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 
 	// Is array
 	if(check("[")){
-		int isize     = -1;
 		node->val     = -1;
 		Type *newtype = calloc(1, sizeof(Type));
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
-				// body
-				if(isize == -1){
-					isize = token->val;
-				}else{
-					isize *= token->val;
-				}
 				index_num = token->val;
 				token = token->next;
 			}
@@ -233,17 +226,10 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	// Is array
 	if(check("[")){
 		Type *newtype = calloc(1, sizeof(Type));
-		int isize = -1;
 		int index_num;
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
-				if(isize == -1){
-					isize = token->val;
-				}else{
-					isize *= token->val;
-				}
-
 				index_num = token->val;
 				token     = token->next;
 			}
@@ -296,18 +282,11 @@ Member *register_struc_member(int *asize_ptr){
 
 		// Is array
 		if(check("[")){
-			int isize = -1;
 			int index_num;
 			Type *newtype = calloc(1, sizeof(Type));
 			while(consume("[")){
 				index_num = -1;
 				if(!check("]")){
-					if(isize == -1){
-						isize = token->val;
-					}else{
-						isize *= token->val;
-					}
-
 					index_num = token->val;
 					token     = token->next;
 				}
@@ -332,7 +311,6 @@ Member *register_struc_member(int *asize_ptr){
 		int padding = 0;
 		new_memb->memsize = new_memb->type->size;
 		size_of_type      = new_memb->memsize;
-
 
 		if(memb_head){
 			int prev_tail    = (memb_head) ? (memb_head->offset + memb_head->type->size) : 0;
