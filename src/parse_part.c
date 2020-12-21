@@ -287,7 +287,7 @@ Node *call_function(Node *node, Token *tok){
 	// have argument?
 	if(consume(")")) return node;
 
-	int ctr = 0;
+	int ctr   = 0;
 	Node *new = NULL;
 	while(1){
 		if(new == NULL){

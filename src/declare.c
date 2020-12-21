@@ -87,7 +87,7 @@ Type *set_type(Type *type, Token *tok){
 
 Type *parse_type(void){
 	Type *type = calloc(1, sizeof(Type));
-	int star_count  = 0;
+	int star_count = 0;
 
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
@@ -251,10 +251,11 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 	lvar->type->size  = type_size(lvar->type);
 	lvar->type->align = type_align(lvar->type);
-	lvar->offset = ((locals) ? (locals->offset) : 0) + lvar->type->size;
-	alloc_size   += lvar->type->size;
+	lvar->offset      = ((locals) ? (locals->offset) : 0) + lvar->type->size;
+
 	node->type   = lvar->type;
 	node->offset = lvar->offset;
+	alloc_size   += lvar->type->size;
 	locals = lvar;
 
 	return node;

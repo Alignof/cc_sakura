@@ -13,8 +13,7 @@ Node *data(void){
 
 	// compiler directive
 	if(token->kind == TK_COMPILER_DIRECTIVE){
-		Node *node = compiler_directive();
-		return node;
+		return compiler_directive();
 	}
 
 
@@ -26,7 +25,7 @@ Node *data(void){
 		node->type->ty = PTR;
 
 		Token *tok = consume_string();
-		Str *fstr = find_string(tok);
+		Str  *fstr = find_string(tok);
 
 		// has already
 		if(fstr){
@@ -201,8 +200,8 @@ Node *unary(void){
 	}
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
-		// sizeof(5)  = > 4
-		// sizeof(&a)  = > 8
+		// sizeof(5)  => 4
+		// sizeof(&a) => 8
 		if(consume("(")){
 			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();
@@ -220,8 +219,8 @@ Node *unary(void){
 	}
 
 	if(consume_reserved_word("_Alignof", TK_ALIGNOF)){
-		// _Alignof(5)  = > 4
-		// _Alignof(&a) = > 8
+		// _Alignof(5)  => 4
+		// _Alignof(&a) => 8
 		if(consume("(")){
 			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();
@@ -509,13 +508,10 @@ Node *stmt(void){
 			// remove used case
 			if(prev){
 				prev->next = lb->next;
-				//free(lb);
 				lb   = prev->next;
 				prev = lb;
-				// remove head
 			}else{
 				prev = lb;
-				//free(prev);
 				lb   = lb->next;
 				prev = NULL;
 			}

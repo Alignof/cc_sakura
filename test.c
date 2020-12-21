@@ -1,8 +1,8 @@
 int main(){
 	int x = 0;
-	while(x < 10){
-		int i = 3;
-		x += i;
+	for(;;){
+		if (x == 10) break;
+		x++;
 	}
-	return x ;
+	return x;
 }
