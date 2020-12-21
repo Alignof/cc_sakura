@@ -1,16 +1,11 @@
 #include "cc_sakura.h"
 
-// int alloc_size;
-// Token *token;
-// LVar *locals;
-// Func *func_list[100];
-
 Node *global_init(Node *node){
 	Node *init_val = NULL;
 	if(check("\"")){
 		if(node->type->ty == ARRAY){
 			Token *tok = consume_string();
-			init_val = new_node(ND_STR, NULL, NULL);
+			init_val   = new_node(ND_STR, NULL, NULL);
 			init_val->str      = tok->str;
 			init_val->len      = tok->len - 1;
 			init_val->type->ty = PTR;
@@ -24,9 +19,9 @@ Node *global_init(Node *node){
 			init_val = assign();
 		}
 	}else if(consume("{")){
-		int ctr = 0;
+		int ctr   = 0;
 		Node *new = NULL;
-		init_val = new_node(ND_BLOCK, NULL, NULL);
+		init_val  = new_node(ND_BLOCK, NULL, NULL);
 		while(token->kind != TK_BLOCK){
 			//Is first?
 			if(ctr == 0){
@@ -134,7 +129,7 @@ Node *incdec(Node *node, IncDecKind idtype){
 	 * a = a-1; <-- (ND_PREID) --> a;
 	 */
 
-	Node *new = calloc(1,sizeof(Node));
+	Node *new      = calloc(1,sizeof(Node));
 	Node *plmi_one = calloc(1,sizeof(Node));
 
 	// increment or decrement
@@ -161,32 +156,29 @@ Node *incdec(Node *node, IncDecKind idtype){
 }
 
 Node *init_formula(Node *node, Node *init_val){
-	switch(init_val->kind){
-		case ND_STR:
-			if(node->type->ty == PTR){
-				node = new_node(ND_ASSIGN, node, init_val);
-			}else if(node->type->ty == ARRAY){
-				if(node->type->index_size == init_val->len+1 || node->type->index_size == -1){
-					node = array_str(node, init_val);
-				}else{
-					error_at(token->str, "Invalid array size");
-				}
-			}else{
-				error_at(token->str, "Invalid assign");
-			}
-			break;
-		default:
+	if(init_val->kind == ND_STR){
+		if(node->type->ty == PTR){
 			node = new_node(ND_ASSIGN, node, init_val);
-			break;
+		}else if(node->type->ty == ARRAY){
+			if(node->type->index_size == init_val->len+1 || node->type->index_size == -1){
+				node = array_str(node, init_val);
+			}else{
+				error_at(token->str, "Invalid array size");
+			}
+		}else{
+			error_at(token->str, "Invalid assign");
+		}
+	}else{
+		node = new_node(ND_ASSIGN, node, init_val);
 	}
 
 	return node;
 }
 
 Node *array_str(Node *arr, Node *init_val){
-	int ctr	  = 0;
-	int isize = arr->type->index_size;
-	Node *src;
+	int ctr	   = 0;
+	int isize  = arr->type->index_size;
+	Node *src  = NULL;
 	Node *dst  = calloc(1, sizeof(Node));
 	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
@@ -324,49 +316,44 @@ Node *array_index(Node *node, Node *index){
 }
 
 void get_argument(int func_index){
-	if(consume_reserved_word("void", TK_TYPE)){
+	if(consume_reserved_word("void", TK_TYPE) || check(")")){
 		func_list[func_index]->args = NULL;
 		expect(")");
 		return;
 	}
 
-	// get argument
-	if(consume(")")){
-		func_list[func_index]->args = NULL;
-	}else{
-		// set args node
-		Node *new_arg = NULL;
-		int arg_counter = 0;
+	// set args node
+	Node *new_arg = NULL;
+	int arg_counter = 0;
 
-		while(token->kind == TK_NUM || token->kind == TK_TYPE  || find_defined_type(token, 0)){
-			if(new_arg == NULL){
-				new_arg       = calloc(1, sizeof(Node));
-				new_arg->kind = ND_ARG;
-				new_arg->val  = arg_counter;
-				new_arg->rhs  = expr();
-				func_list[func_index]->args = new_arg;
-			}else{
-				new_arg->next       = calloc(1, sizeof(Node));
-				new_arg->next->kind = ND_ARG;
-				new_arg->next->val  = arg_counter;
-				new_arg->next->rhs  = expr();
-				new_arg             = new_arg->next;
-			}
-
-			// Implicit Type Conversion 
-			if(new_arg->rhs->type->ty == ARRAY){
-				new_arg->rhs->type->ty = PTR;
-				new_arg->rhs->offset   -= new_arg->rhs->type->size;
-				new_arg->rhs->offset   += 8;
-				locals->offset         = new_arg->rhs->offset;
-				locals->type->size     = new_arg->rhs->type->size;
-				alloc_size -= new_arg->rhs->type->size;
-				alloc_size += 8;
-			}
-
-			arg_counter++;
-			if(!(consume(","))) break;
+	while(token->kind == TK_NUM || token->kind == TK_TYPE  || find_defined_type(token, 0)){
+		if(new_arg == NULL){
+			new_arg       = calloc(1, sizeof(Node));
+			new_arg->kind = ND_ARG;
+			new_arg->val  = arg_counter;
+			new_arg->rhs  = expr();
+			func_list[func_index]->args = new_arg;
+		}else{
+			new_arg->next       = calloc(1, sizeof(Node));
+			new_arg->next->kind = ND_ARG;
+			new_arg->next->val  = arg_counter;
+			new_arg->next->rhs  = expr();
+			new_arg             = new_arg->next;
 		}
-		expect(")");
+
+		// Implicit Type Conversion 
+		if(new_arg->rhs->type->ty == ARRAY){
+			new_arg->rhs->type->ty = PTR;
+			new_arg->rhs->offset   -= new_arg->rhs->type->size;
+			new_arg->rhs->offset   += 8;
+			locals->offset         = new_arg->rhs->offset;
+			locals->type->size     = new_arg->rhs->type->size;
+			alloc_size -= new_arg->rhs->type->size;
+			alloc_size += 8;
+		}
+
+		arg_counter++;
+		if(!(consume(","))) break;
 	}
+	expect(")");
 }

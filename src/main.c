@@ -111,7 +111,7 @@ void set_gvar(GVar *gvar){
 
 int main(int argc, char **argv){
 	int i, j;
-	IGNORE_SCOPE  = 0;
+	IGNORE_SCOPE   = 0;
 	CONSIDER_SCOPE = 1;
 
 	// get source code

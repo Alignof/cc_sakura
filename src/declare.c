@@ -9,10 +9,6 @@ LVar     *outside_lvar;
 Struc    *outside_struct;
 Enum     *outside_enum;
 Def_Type *outside_deftype;
-// int alloc_size;
-// Token *token;
-// LVar *locals;
-// Func *func_list[100];
 
 Type *set_type(Type *type, Token *tok){
 	Enum  *enum_found  = NULL;
@@ -237,8 +233,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 	// Is array
 	if(check("[")){
 		Type *newtype = calloc(1, sizeof(Type));
-		int index_num;
 		int isize = -1;
+		int index_num;
 		while(consume("[")){
 			index_num = -1;
 			if(!check("]")){
@@ -291,36 +287,47 @@ Member *register_struc_member(int *asize_ptr){
 		new_memb = calloc(1,sizeof(Member));
 
 		// parse member type
-		new_memb->type   = parse_type();
+		Type *memb_type  = parse_type();
 
 		// add member name
 		Token *def_name  = consume_ident();
 		new_memb->name   = def_name->str;
 		new_memb->len    = def_name->len;
 
-		// Is array index
-		int isize = -1;
-		int index_num;
-		Type *newtype;
-		while(consume("[")){
-			if(isize == -1){
-				isize = token->val;
-			}else{
-				isize *= token->val;
+		// Is array
+		if(check("[")){
+			int isize = -1;
+			int index_num;
+			Type *newtype = calloc(1, sizeof(Type));
+			while(consume("[")){
+				index_num = -1;
+				if(!check("]")){
+					if(isize == -1){
+						isize = token->val;
+					}else{
+						isize *= token->val;
+					}
+
+					index_num = token->val;
+					token     = token->next;
+				}
+
+				newtype->ptr_to = calloc(1, sizeof(Type));
+				newtype->ptr_to->ty         = ARRAY;
+				newtype->ptr_to->index_size = index_num;
+				newtype = newtype->ptr_to;
+
+				if(new_memb->type == NULL){
+					new_memb->type = newtype;
+				}
+				expect("]");
 			}
-			index_num = token->val;
-			token = token->next;
-
-			newtype = calloc(1, sizeof(Type));
-			newtype->ty         = ARRAY;
-			newtype->ptr_to     = new_memb->type;
-			newtype->index_size = index_num;
-			newtype->size  = type_size(newtype);
-			newtype->align = type_align(newtype);
-			new_memb->type = newtype;
-
-			expect("]");
+			newtype->ptr_to = memb_type;
+		}else{
+			new_memb->type  = memb_type;
 		}
+		new_memb->type->size  = type_size(new_memb->type);
+		new_memb->type->align = type_align(new_memb->type);
 
 		int padding = 0;
 		new_memb->memsize = new_memb->type->size;
