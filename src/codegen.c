@@ -458,8 +458,10 @@ void gen(Node *node){
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs->next);
-			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
-			printf("	je .LloopEnd%03d\n", node->val);
+			if(node->lhs->next->kind != ND_NULL_STMT){
+				printf("	cmp %s,0\n", reg_ax[node->type->ty]);
+				printf("	je .LloopEnd%03d\n", node->val);
+			}
 
 			// gen block
 			gen(node->rhs);

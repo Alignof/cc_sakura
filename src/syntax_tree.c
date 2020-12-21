@@ -163,8 +163,7 @@ Node *unary(void){
 
 	// logical not
 	if(consume("!")){
-		node = new_node(ND_NOT, NULL, unary());
-		return node;
+		return new_node(ND_NOT, NULL, unary());
 	}
 
 	// cast
@@ -180,13 +179,11 @@ Node *unary(void){
 	}
 
 	if(consume("*")){
-		node = new_node(ND_DEREF, NULL, unary());
-		return node;
+		return new_node(ND_DEREF, NULL, unary());
 	}
 
 	if(consume("&")){
-		node = new_node(ND_ADDRESS, NULL, unary());
-		return node;
+		return new_node(ND_ADDRESS, NULL, unary());
 	}
 
 	if(consume("+")){
