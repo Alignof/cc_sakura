@@ -4,16 +4,16 @@ Node *global_init(Node *node){
 	Node *init_val = NULL;
 	if(check("\"")){
 		if(node->type->ty == ARRAY){
+			consume("\"");
 			Token *tok = consume_string();
+			expect("\"");
 			init_val   = new_node(ND_STR, NULL, NULL);
 			init_val->str      = tok->str;
-			init_val->len      = tok->len - 1;
+			init_val->len      = tok->len;
 			init_val->type->ty = PTR;
 
-			if(node->type->index_size != -1 && init_val->len > node->type->index_size){
+			if(node->type->index_size != -1 && init_val->len+1 != node->type->index_size){
 				error_at(token->str, "invalid global variable initialize");
-			}else if(node->type->index_size != -1 && init_val->len < node->type->index_size){
-				init_val->len = node->type->index_size - init_val->len - 1;
 			}
 		}else{
 			init_val = assign();
