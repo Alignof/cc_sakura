@@ -185,20 +185,25 @@ Node *array_str(Node *arr){
 
 	consume("\"");
 	Token *tok = consume_string();
-	while(token->kind != TK_STR){
+	while(ctr < tok->len){
 		src = array_index(arr, new_node_num(ctr));
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, new_node_num(*(tok->str + ctr)));
 			node->rhs = dst;
 		}else{
-			dst->rhs->block_code = new_node(ND_ASSIGN, src, new_node_num(*(tok->str + ctr)));
-			dst = dst->rhs->block_code;
+			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(*(tok->str + ctr)));
+			dst = dst->block_code;
 		}
 		consume(",");
 		ctr++;
 	}
 	expect("\"");
+
+	// '\0'
+	dst->block_code = new_node(ND_ASSIGN, array_index(arr, new_node_num(tok->len)), new_node_num('\0'));
+	dst = dst->block_code;
+	ctr++;
 
 	// ommitted
 	if(isize == -1){

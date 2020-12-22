@@ -57,6 +57,7 @@ bool false = 0;
 // 	bool is_single_token;
 // 
 // 	printf("size of arr:%d\n", sizeof(arr));
+// 	printf("arr:%s\n", arr);
 // 	if(is_symbol(arr, &is_single_token)){
 // 		printf("found. single flag is %d\n", (int)is_single_token);
 // 	}else{
@@ -66,17 +67,15 @@ bool false = 0;
 // 	return 0;
 // }
 
+
 int main(){
-	char arr[]  = "+1;";
-	char arr2[] = "#%&";
+	char arr[] = "+123456";
+ 	char single_symbol[] = "+-*/%&()'<>=,;.[]?:!";
+ 	char repeat_symbol[] = "<>&|+-";
 	bool is_single_token;
 
-	printf("size of arr:%d\n", sizeof(arr));
 	printf("arr:%s\n", arr);
-	printf("arr[0]:%c\n", arr[0]);
-	printf("arr[1]:%c\n", arr[1]);
-	printf("arr2:%s\n", arr2);
-	printf("arr2[0]:%c\n", arr2[0]);
-	printf("arr2[1]:%c\n", arr2[1]);
+	printf("size of arr:%d\n", sizeof(arr));
+
 	return 0;
 }

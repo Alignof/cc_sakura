@@ -230,11 +230,11 @@ Token *tokenize(char *p){
 
 		//Is string?
 		if(*p == '"'){
-			p++;
+			now = new_token(TK_RESERVED, now, p++);
 			while(!(*(p-1) != '\\' && *p == '"')){
 				now = new_token(TK_STR, now, p++);
 			}
-			now = new_token(TK_STR, now, p++);
+			now = new_token(TK_RESERVED, now, p++);
 			continue;
 		}
 
