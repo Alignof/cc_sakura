@@ -284,6 +284,7 @@ void gen_gvar_label(GVar *gvar, Node *init);
 
 // tokenizer.c
 int  len_val(char *str);
+bool is_ascii(char c);
 bool is_alnum(char c);
 bool is_space(char c);
 bool is_digit(char c);

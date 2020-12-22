@@ -32,6 +32,10 @@ bool is_alnum(char c){
 		(c == '_');
 }
 
+bool is_ascii(char c){
+	return 0 <= c && c <= 127;
+}
+
 bool is_symbol(char *str,  bool *single_flag){
 	int i;
 	int size;
