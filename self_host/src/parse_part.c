@@ -12,6 +12,8 @@ Node *global_init(Node *node){
 
 			if(node->type->index_size != -1 && init_val->len+1 != node->type->index_size){
 				error_at(token->str, "invalid global variable initialize");
+			}else if(node->type->index_size != -1 && init_val->len+1 < node->type->index_size){
+				init_val->len = node->type->index_size - init_val->len - 1;
 			}
 		}else{
 			init_val = assign();

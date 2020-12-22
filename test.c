@@ -14,22 +14,27 @@ void prepare(Test *test){
 	}
 }
 
-void expand_next(Test *test){
-	printf("test0: %d\n", test->value);
-	printf("test1: %d\n", test->next->value);
-	printf("test2: %d\n", test->next->next->value);
-
-	while(test){
-		printf("%d\n", test->value);
-		test=test->next;
-	}
-	printf("	push rax\n");
-}
-
+// void expand_next(Test *test){
+// 	printf("test0: %d\n", test->value);
+// 	printf("test1: %d\n", test->next->value);
+// 	printf("test2: %d\n", test->next->next->value);
+// 
+// 	while(test){
+// 		printf("%d\n", test->value);
+// 		test=test->next;
+// 	}
+// 	printf("	push rax\n");
+// }
+// 
 int main(){
 	Test *test = calloc(1, sizeof(Test));
 	prepare(test);
-	expand_next(test);
+	if(!test){
+		printf("NULL\n");
+	}else{
+		printf("exist: %d\n", test->value);
+	}
+	//expand_next(test);
 
 	return 0;
 }
