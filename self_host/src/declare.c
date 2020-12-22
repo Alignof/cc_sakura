@@ -381,3 +381,4 @@ void declare_enum(Enum *new_enum){
 	new_enum->next   = enumerations;
 	enumerations     = new_enum;
 }
+

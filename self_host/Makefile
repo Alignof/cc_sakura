@@ -57,7 +57,7 @@ franken:$(ASEMS)
 # fix franken 
 PATCHFILE   := patch
 TARGETFILE  := target
-EXCLUDEFILE := tokenizer
+EXCLUDEFILE := codegen
 patch:$(ASEMS)
 	# patch target:$(PATCHFILE)
 	rm -f $(ASMDIR)/$(EXCLUDEFILE).s
@@ -65,16 +65,16 @@ patch:$(ASEMS)
 	gcc $(INCLUDE) -static -S -masm=intel $(TARGETFILE).c -o $(ASMDIR)/$(TARGETFILE).s
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/$(PATCHFILE).s 
-	gcc $(ASMDIR)/*.s -static -o ./child
 	cp $(ASMDIR)/$(PATCHFILE).s ./gen1.s
+	gcc $(ASMDIR)/*.s -static -o ./child
 	# gen2
 	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
-	gcc $(ASMDIR)/*.s -static -o ./child
 	cp $(ASMDIR)/$(PATCHFILE).s ./gen2.s
+	gcc $(ASMDIR)/*.s -static -o ./child
 	# gen3
 	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
-	gcc $(ASMDIR)/*.s -static -o ./child
 	cp $(ASMDIR)/$(PATCHFILE).s ./gen3.s
+	gcc $(ASMDIR)/*.s -static -o ./child
 	# check
 	diff gen2.s gen3.s
 

@@ -244,6 +244,7 @@ struct Member{
 
 
 
+
 //================= global variable ===================
 extern int      llid;
 extern int      alloc_size;
