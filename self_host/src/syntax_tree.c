@@ -15,8 +15,7 @@ Node *data(void){
 	}
 
 
-	if(token->kind == TK_STR){
-		consume("\"");
+	if(consume("\"")){
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_STR;
 		node->type = calloc(1, sizeof(Type));
@@ -33,7 +32,7 @@ Node *data(void){
 		// new one
 		}else{
 			Str *new = calloc(1, sizeof(Str));
-			new->len = tok->len - 1;
+			new->len = tok->len;
 			new->str = tok->str;
 			new->label_num = strings ? strings->label_num+1 : 0;
 			node->str = new->str;
@@ -48,6 +47,7 @@ Node *data(void){
 			}
 		}
 
+		consume("\"");
 		return node;
 	}
 
@@ -380,11 +380,7 @@ Node *expr(void){
 
 		// initialize formula
 		if(consume("=")){
-			if(consume("{")){
-				node = array_block(node);
-			}else{
-				node = init_formula(node, assign());
-			}
+			node = init_formula(node);
 		}
 	}else if(consume_reserved_word("break", TK_BREAK)){
 		node	   = calloc(1, sizeof(Node));
