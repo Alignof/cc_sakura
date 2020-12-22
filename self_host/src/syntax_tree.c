@@ -161,7 +161,9 @@ Node *unary(void){
 
 	// logical not
 	if(consume("!")){
-		return new_node(ND_NOT, __NULL, unary());
+		node = new_node(ND_NOT, __NULL, unary());
+		node->type = node->rhs->type;
+		return node;
 	}
 
 	// cast
