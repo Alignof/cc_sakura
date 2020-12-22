@@ -530,7 +530,6 @@ void gen(Node *node){
 				printf("	mov [rax],%s\n", reg_di[reg_rty]);
 				node=node->next;
 			}
-
 			return;
 		case ND_RETURN:
 			if(node->rhs){
@@ -544,5 +543,6 @@ void gen(Node *node){
 		default:
 			gen_expr(node);
 			printf("	pop rax\n\n");
+			return;
 	}
 }
