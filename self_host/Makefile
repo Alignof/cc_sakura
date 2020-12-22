@@ -34,7 +34,8 @@ endef
 
 
 # franken 
-EXCLUDEFILES := declare
+#EXCLUDEFILES := codegen main declare syntax_tree parse_util parse_part parse_sys tokenizer
+EXCLUDEFILES := parse_sys
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILES)
 	@$(call prepare_franken)
@@ -56,7 +57,7 @@ franken:$(ASEMS)
 # fix franken 
 PATCHFILE   := patch
 TARGETFILE  := target
-EXCLUDEFILE := declare
+EXCLUDEFILE := parse_sys
 patch:$(ASEMS)
 	# patch target:$(PATCHFILE)
 	rm -f $(ASMDIR)/$(EXCLUDEFILE).s
