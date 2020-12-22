@@ -4,16 +4,16 @@ Node *global_init(Node *node){
 	Node *init_val = NULL;
 	if(check("\"")){
 		if(node->type->ty == ARRAY){
+			consume("\"");
 			Token *tok = consume_string();
+			expect("\"");
 			init_val   = new_node(ND_STR, NULL, NULL);
 			init_val->str      = tok->str;
-			init_val->len      = tok->len - 1;
+			init_val->len      = tok->len;
 			init_val->type->ty = PTR;
 
-			if(node->type->index_size != -1 && init_val->len > node->type->index_size){
+			if(node->type->index_size != -1 && init_val->len+1 != node->type->index_size){
 				error_at(token->str, "invalid global variable initialize");
-			}else if(node->type->index_size != -1 && init_val->len < node->type->index_size){
-				init_val->len = node->type->index_size - init_val->len - 1;
 			}
 		}else{
 			init_val = assign();
@@ -155,68 +155,66 @@ Node *incdec(Node *node, IncDecKind idtype){
 	return new;
 }
 
-Node *init_formula(Node *node, Node *init_val){
-	if(init_val->kind == ND_STR){
-		if(node->type->ty == PTR){
-			node = new_node(ND_ASSIGN, node, init_val);
-		}else if(node->type->ty == ARRAY){
-			if(node->type->index_size == init_val->len+1 || node->type->index_size == -1){
-				node = array_str(node, init_val);
-			}else{
-				error_at(token->str, "Invalid array size");
-			}
-		}else{
-			error_at(token->str, "Invalid assign");
-		}
+Node *init_formula(Node *node){
+	if(consume("{")){
+		node = array_block(node);
+	}else if(check("\"")){
+		node = array_str(node);
 	}else{
-		node = new_node(ND_ASSIGN, node, init_val);
+		node = new_node(ND_ASSIGN, node, assign());
 	}
 
 	return node;
 }
 
-Node *array_str(Node *arr, Node *init_val){
+Node *array_str(Node *arr){
 	int ctr	   = 0;
 	int isize  = arr->type->index_size;
+
+	if(arr->type->ty == PTR){
+		return new_node(ND_ASSIGN, arr, assign());
+	}
+
+	if(arr->type->ty != ARRAY){
+		error_at(token->str, "Invalid assign");
+	}
+
 	Node *src  = NULL;
 	Node *dst  = calloc(1, sizeof(Node));
 	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
-	Node *clone = calloc(1, sizeof(Node));
-	memcpy(clone, arr, sizeof(Node));
-	clone->kind = arr->kind;
-
-	while(ctr < init_val->len){
-		src = array_index(clone, new_node_num(ctr));
+	consume("\"");
+	Token *tok = consume_string();
+	while(ctr < tok->len){
+		src = array_index(arr, new_node_num(ctr));
 		//Is first?
 		if(ctr == 0){
-			dst = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
+			dst = new_node(ND_ASSIGN, src, new_node_num(*(tok->str + ctr)));
 			node->rhs = dst;
 		}else{
-			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(*(init_val->str + ctr)));
+			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(*(tok->str + ctr)));
 			dst = dst->block_code;
 		}
+		consume(",");
 		ctr++;
 	}
+	expect("\"");
 
 	// '\0'
-	dst->block_code = new_node(ND_ASSIGN, array_index(clone, new_node_num(init_val->len)), new_node_num('\0'));
+	dst->block_code = new_node(ND_ASSIGN, array_index(arr, new_node_num(tok->len)), new_node_num('\0'));
 	dst = dst->block_code;
 	ctr++;
 
 	// ommitted
 	if(isize == -1){
-		if(arr->type->ty == ARRAY){
-			alloc_size += ctr;
-			arr->offset    = ((locals)?(locals->offset):0) + ctr;
-			clone->offset  = arr->offset;
-			locals->offset = arr->offset;
-			locals->type->index_size = ctr;
-			locals->type->size  = type_size(locals->type);
-			locals->type->align = type_size(locals->type);
-		}
+		int asize  = arr->type->ptr_to->size * ctr;
+		alloc_size += asize;
+		arr->offset    = ((locals)?(locals->offset):0) + asize;
+		locals->offset = arr->offset;
+		locals->type->index_size = ctr;
+		locals->type->size  = type_size(locals->type);
+		locals->type->align = type_size(locals->type);
 	}
-
 	return node;
 }
 

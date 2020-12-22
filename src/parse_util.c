@@ -25,7 +25,7 @@ int type_size(Type *type){
 			error_at(token->str, "unknown type");
 	}
 
-	return -1;
+	return 0;
 }
 
 int type_align(Type *type){
@@ -64,7 +64,7 @@ int type_align(Type *type){
 			error_at(token->str, "unknown type");
 	}
 
-	return -1;
+	return 0;
 }
 
 

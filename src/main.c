@@ -110,7 +110,8 @@ void set_gvar(GVar *gvar){
 }
 
 int main(int argc, char **argv){
-	int i, j;
+	int i;
+	int j;
 	IGNORE_SCOPE   = 0;
 	CONSIDER_SCOPE = 1;
 

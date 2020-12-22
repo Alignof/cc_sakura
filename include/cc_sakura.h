@@ -349,11 +349,11 @@ void get_argument(int func_index);
 Node *compiler_directive();
 Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(NodeKind type, Node *node);
-Node *init_formula(Node *node, Node *init_val);
+Node *init_formula(Node *node);
 Node *global_init(Node *node);
 Node *incdec(Node *node, IncDecKind idtype);
 Node *array_block(Node *arr);
-Node *array_str(Node *arr, Node *init_val);
+Node *array_str(Node *arr);
 Node *call_function(Node *node, Token *tok);
 Node *array_index(Node *node, Node *index);
 

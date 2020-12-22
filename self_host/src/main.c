@@ -1,5 +1,7 @@
 int   llid;
 int   label_num;
+int   IGNORE_SCOPE;
+int   CONSIDER_SCOPE;
 int   label_loop_end;
 char  *user_input;
 char  filename[100];
@@ -65,7 +67,7 @@ void gen_gvar_label(GVar *gvar, Node *init){
 			printf("	.quad	.LC%d\n", init->val);
 		}else if(gvar->type->ty == ARRAY){
 			printf("	.string \"%.*s\"\n", init->len, init->str);
-			if(init->offset) printf("        .zero   %d\n", init->offset);
+			if(init->offset) printf("        .zero	%d\n", init->offset);
 		}
 	}else{
 		if(type->ty < INT){
@@ -107,7 +109,9 @@ void set_gvar(GVar *gvar){
 
 int main(int argc, char **argv){
 	int i;
-        int j;
+	int j;
+	IGNORE_SCOPE   = 0;
+	CONSIDER_SCOPE = 1;
 
 	// get source code
 	get_code(argc, argv);

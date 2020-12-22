@@ -13,7 +13,8 @@ int type_size(Type *type){
 		case PTR:
 			return 8;
 		case ARRAY:
-			return type->index_size * type_size(type->ptr_to);
+			if(type->index_size == -1) break; 
+			return type->size = type->index_size * type_size(type->ptr_to);
 		case STRUCT:
 			return type->size;
 		case ENUM:
@@ -26,8 +27,7 @@ int type_size(Type *type){
 }
 
 int type_align(Type *type){
-	int INSIDE_FILE = 0;
-	int max=0;
+	int max = 0;
 	int align_num;
 	Member *memb_list;
 
@@ -45,9 +45,9 @@ int type_align(Type *type){
 		case PTR:
 			return 8;
 		case ARRAY:
-			return type_align(type->ptr_to);
+			return type->align = type_align(type->ptr_to);
 		case STRUCT:
-			memb_list = find_struct_member(type, INSIDE_FILE);
+			memb_list = find_struct_member(type, IGNORE_SCOPE);
 			while(memb_list){
 				align_num = type_align(memb_list->type);
 				if(max < align_num){
@@ -63,11 +63,6 @@ int type_align(Type *type){
 	}
 
 	return -1;
-}
-
-int align_array_size(int isize, Type *array_type){
-	int array_size = array_type->size;
-	return (array_size%8) ? array_size/8*8+8 : array_size;
 }
 
 
