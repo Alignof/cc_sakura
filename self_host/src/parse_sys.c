@@ -27,7 +27,7 @@ void error_at(char *loc, char *msg){
 bool check(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, (size_t)token->len)){
 		return false;
 	}
 
@@ -37,7 +37,7 @@ bool check(char *op){
 bool consume(char *op){
 	// judge whether op is a symbol and return judge result
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK) ||
-	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, (size_t)token->len)){
 		return false;
 	}
 
@@ -57,7 +57,7 @@ int string_len(void){
 
 bool consume_ret(void){
 	if((token->kind != TK_RETURN) || (token->len != 6) ||
-	    memcmp(token->str, "return", token->len)){
+	    memcmp(token->str, "return", (size_t)token->len)){
 		return false;
 	}
 
@@ -68,7 +68,7 @@ bool consume_ret(void){
 bool consume_reserved_word(char *keyword, TokenKind kind){
 	if(token->kind != kind ||
 	   token->len != strlen(keyword) ||
-	   memcmp(token->str, keyword, token->len)){
+	   memcmp(token->str, keyword, (size_t)token->len)){
 		return false;
 	}
 
@@ -117,7 +117,7 @@ Token *consume_ident(void){
 void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
-	    strlen(op) != token->len || memcmp(token->str, op, token->len)){
+	    strlen(op) != token->len || memcmp(token->str, op, (size_t)token->len)){
 		error_at(token->str, "not a charctor.");
 	}
 	token = token->next;
@@ -160,7 +160,7 @@ void label_register(Node *node, LabelKind kind){
 
 Func *find_func(Token *tok){
 	for (int i = 0;func_list[i] && i < FUNC_NUM;i++){
-		if(!memcmp(tok->str, func_list[i]->name, tok->len)){
+		if(!memcmp(tok->str, func_list[i]->name, (size_t)tok->len)){
 			return func_list[i];
 		}
 	}
@@ -170,7 +170,7 @@ Func *find_func(Token *tok){
 GVar *find_gvar(Token *tok){
 	//while var not equal __NULL
 	for (GVar *var = globals;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, (size_t)var->len)){
 			return var;
 		}
 	}
@@ -188,7 +188,7 @@ LVar *find_lvar(Token *tok, int find_range){
 	for (LVar *var = locals;var;var = var->next){
 		if(var == outside_lvar) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
-		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, (size_t)var->len)){
 			return var;
 		}
 	}
@@ -197,7 +197,7 @@ LVar *find_lvar(Token *tok, int find_range){
 
 Str *find_string(Token *tok){
 	for (Str *var = strings;var;var = var->next){
-		if(var->len == tok->len && !memcmp(tok->str, var->str, var->len)){
+		if(var->len == tok->len && !memcmp(tok->str, var->str, (size_t)var->len)){
 			return var;
 		}
 	}
@@ -209,7 +209,7 @@ Struc *find_struc(Token *tok, int find_range){
 	for (Struc *var = structs;var;var = var->next){
 		if(var == outside_struct) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
-		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, (size_t)var->len)){
 			return var;
 		}
 	}
@@ -224,7 +224,7 @@ Member *find_struct_member(Type *type, int find_range){
 	for (Struc *var = structs;var;var = var->next){
 		if(var == outside_struct) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
-		if(var->len == struc_len && !memcmp(struc_name, var->name, var->len)){
+		if(var->len == struc_len && !memcmp(struc_name, var->name, (size_t)var->len)){
 			return var->member;
 		}
 	}
@@ -236,7 +236,7 @@ Enum *find_enum(Token *tok, int find_range){
 	for (Enum *var = enumerations;var;var = var->next){
 		if(var == outside_enum) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
-		if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+		if(var->len == tok->len && !memcmp(tok->str, var->name, (size_t)var->len)){
 			return var;
 		}
 	}
@@ -249,7 +249,7 @@ Member *find_enumerator(Token *tok, int find_range){
 		if(en == outside_enum) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
 		for (Member *var = en->member;var;var = var->next){
-			if(var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+			if(var->len == tok->len && !memcmp(tok->str, var->name, (size_t)var->len)){
 				return var;
 			}
 		}
@@ -262,7 +262,7 @@ Def_Type *find_defined_type(Token *tok, int find_range){
 	for (Def_Type *var = defined_types;var;var = var->next){
 		if(var == outside_deftype) out_of_scope = 1;
 		if(out_of_scope) break;
-		if(var->name_len == len_val(tok->str) && !memcmp(tok->str, var->name, var->name_len)){
+		if(var->name_len == len_val(tok->str) && !memcmp(tok->str, var->name, (size_t)var->name_len)){
 			return var;
 		}
 	}

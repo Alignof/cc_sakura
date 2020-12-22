@@ -109,7 +109,7 @@ Node *dot_arrow(NodeKind type, Node *node){
 	}
 
 	while(memb_list){
-		if(memb_list->len == memb_name->len && !memcmp(memb_name->str, memb_list->name, memb_name->len)){
+		if(memb_list->len == memb_name->len && !memcmp(memb_name->str, memb_list->name, (size_t)memb_name->len)){
 			new->rhs  = new_node_num(memb_list->offset);
 			new->type = memb_list->type;
 			break;
