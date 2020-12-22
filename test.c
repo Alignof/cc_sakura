@@ -29,6 +29,11 @@ void expand_next(Test *test){
 int main(){
 	Test *test = calloc(1, sizeof(Test));
 	prepare(test);
+	if(!test){
+		printf("NULL\n");
+	}else{
+		printf("exist: %d\n", test->value);
+	}
 	expand_next(test);
 
 	return 0;

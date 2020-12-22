@@ -306,7 +306,7 @@ void gen_expr(Node *node){
 			// condition
 			gen_expr(node->lhs);
 			printf("	pop rax\n");
-			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
+			printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
 			printf("	je .Lelse%03d\n", node->val);
 
 			// true
@@ -407,7 +407,7 @@ void gen(Node *node){
 			return;
 		case ND_IF:
 			gen(node->lhs);
-			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
+			printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
 			printf("	je .LifEnd%03d\n", node->val);
 			gen(node->rhs);
 
@@ -416,7 +416,7 @@ void gen(Node *node){
 		case ND_IFELSE:
 			// condition
 			gen(node->lhs);
-			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
+			printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
 			printf("	je .Lelse%03d\n", node->val);
 
 			// expr in if
@@ -458,7 +458,7 @@ void gen(Node *node){
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs->next);
 			if(node->lhs->next->kind != ND_NULL_STMT){
-				printf("	cmp %s,0\n", reg_ax[node->type->ty]);
+				printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
 				printf("	je .LloopEnd%03d\n", node->val);
 			}
 
@@ -477,7 +477,7 @@ void gen(Node *node){
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs);
-			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
+			printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
 			printf("	je .LloopEnd%03d\n", node->val);
 
 			// else expression
@@ -498,7 +498,7 @@ void gen(Node *node){
 
 			// condition
 			gen(node->lhs);
-			printf("	cmp %s,0\n", reg_ax[node->type->ty]);
+			printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
 			// break loop
 			printf("	je .LloopEnd%03d\n", node->val);
 

@@ -6,7 +6,6 @@ MOTHER   := ../cc_sakura
 TARGET   := ./child
 SRCDIR   := ../src
 ASMDIR   := ./asem
-GEN2DIR  := ./gen2
 OBJDIR   := ./asem/obj
 SOURCES  := $(wildcard ../src/*.c)
 ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
@@ -35,7 +34,7 @@ endef
 
 
 # franken 
-EXCLUDEFILES := codegen
+EXCLUDEFILES := declare
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILES)
 	@$(call prepare_franken)
@@ -57,7 +56,7 @@ franken:$(ASEMS)
 # fix franken 
 PATCHFILE   := patch
 TARGETFILE  := target
-EXCLUDEFILE := codegen
+EXCLUDEFILE := declare
 patch:$(ASEMS)
 	# patch target:$(PATCHFILE)
 	rm -f $(ASMDIR)/$(EXCLUDEFILE).s
