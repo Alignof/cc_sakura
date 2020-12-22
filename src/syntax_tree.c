@@ -382,11 +382,7 @@ Node *expr(void){
 
 		// initialize formula
 		if(consume("=")){
-			if(consume("{")){
-				node = array_block(node);
-			}else{
-				node = init_formula(node, assign());
-			}
+			node = init_formula(node);
 		}
 	}else if(consume_reserved_word("break", TK_BREAK)){
 		node	   = calloc(1, sizeof(Node));

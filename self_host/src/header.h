@@ -312,7 +312,7 @@ struct _IO_FILE{
 	_IO_lock_t *_lock;
 };
 
-typedef int bool;
+typedef _Bool bool;
 bool true  = 1;
 bool false = 0;
 //=========================================================
