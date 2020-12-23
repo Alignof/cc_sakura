@@ -151,7 +151,7 @@ void gen_calc(Node *node){
 			printf("	movzb rax,al\n");
 			break;
 		case ND_NOT:
-			printf("	cmp %s,0\n", reg_ax[reg_ty]);
+			printf("	cmp %s,0\n", reg_ax[node->rhs->type->ty]);
 			printf("	sete al\n");
 			printf("	movzb rax,al\n");
 			break;
