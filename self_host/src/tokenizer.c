@@ -1,3 +1,4 @@
+
 int len_val(char *str){
 	int counter = 0;
 	for(;is_alnum(*str);str++){
@@ -28,6 +29,10 @@ bool is_alnum(char c){
 		(('A' <=  c) && (c <=  'Z')) ||
 		(('0' <=  c) && (c <=  '9')) ||
 		(c == '_');
+}
+
+bool is_ascii(char c){
+	return 0 <= c && c <= 127;
 }
 
 bool is_symbol(char *str,  bool *single_flag){
@@ -259,3 +264,4 @@ Token *tokenize(char *p){
 	new_token(TK_EOF, now, p);
 	return head.next;
 }
+

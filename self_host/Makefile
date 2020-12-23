@@ -35,7 +35,7 @@ endef
 
 # franken 
 #EXCLUDEFILES := codegen main declare syntax_tree parse_util parse_part parse_sys tokenizer
-EXCLUDEFILES := parse_sys
+EXCLUDEFILES := tokenizer
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILES)
 	@$(call prepare_franken)

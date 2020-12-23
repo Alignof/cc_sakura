@@ -99,7 +99,7 @@ Node *data(void){
 
 
 	// __NULL statement
-	return new_node(ND_NULL_STMT, __NULL, __NULL);
+	return new_node(ND___NULL_STMT, __NULL, __NULL);
 }
 
 Node *primary(void){
@@ -162,7 +162,9 @@ Node *unary(void){
 	// logical not
 	if(consume("!")){
 		node = new_node(ND_NOT, __NULL, unary());
-		node->type = node->rhs->type;
+		node->type->ty    = INT;
+		node->type->size  = 4 ;
+		node->type->align = 4;
 		return node;
 	}
 

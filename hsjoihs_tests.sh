@@ -4,7 +4,8 @@ run_test() {
 	echo -e $2 > test/hsjoihs_tmp/task$1.c 
     ./cc_sakura test/hsjoihs_tmp/task$1.c > test/hsjoihs_tmp/task$1.s
     d=$?
-    if [ $d -ne 0 ]; then { echo -e "compile FAIL, at test case" $1: $2; return 0; }; else echo -e "\033[32mcompile PASS\033[m"; fi
+    #if [ $d -ne 0 ]; then { echo -e "compile FAIL, at test case" $1: $2; return 0; }; else echo -e "\033[32mcompile PASS\033[m"; fi
+    if [ $d -ne 0 ]; then { echo -e "\033[33mcompile FAIL\033[m"; return 0; }; else echo -e "\033[32mcompile PASS\033[m"; fi
     gcc test/hsjoihs_tmp/task$1.s -o test/hsjoihs_tmp/task$1.out
 	./test/hsjoihs_tmp/task$1.out
 	res=$?

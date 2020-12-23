@@ -79,9 +79,13 @@ bool consume_reserved_word(char *keyword, TokenKind kind){
 }
 
 Token *consume_string(void){
+	// null string
+	if(token->kind == TK_RESERVED && *(token->str) == '"'){
+		return calloc(1, sizeof(Token));
+	}
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_STR || !(is_ascii(*(token->str)))){
-		return false;
+		return NULL;
 	}
 
 	Token *ret = token;

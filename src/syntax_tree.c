@@ -164,7 +164,9 @@ Node *unary(void){
 	// logical not
 	if(consume("!")){
 		node = new_node(ND_NOT, NULL, unary());
-		node->type = node->rhs->type;
+		node->type->ty    = INT;
+		node->type->size  = 4 ;
+		node->type->align = 4;
 		return node;
 	}
 
