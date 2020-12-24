@@ -69,7 +69,7 @@ bool consume_ret(void){
 
 bool consume_reserved_word(char *keyword, TokenKind kind){
 	if(token->kind != kind ||
-	   token->len != strlen(keyword) ||
+	   token->len  != strlen(keyword) ||
 	   memcmp(token->str, keyword, (size_t)token->len)){
 		return false;
 	}

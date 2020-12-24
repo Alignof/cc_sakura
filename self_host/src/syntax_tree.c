@@ -99,7 +99,7 @@ Node *data(void){
 
 
 	// __NULL statement
-	return new_node(ND___NULL_STMT, __NULL, __NULL);
+	return new_node(ND_NULL_STMT, __NULL, __NULL);
 }
 
 Node *primary(void){
