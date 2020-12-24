@@ -42,17 +42,24 @@ franken:$(ASEMS)
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
 	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/tmp.s ./gen1.s
 	# gen2
-	./child tmp.c > $(ASMDIR)/tmp.s 
-	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/tmp.s ./gen2.s
+	./child self_host.c > child.s && gcc -static child.s -o child
+	cp child.s gen2.s
 	# gen3
-	./child tmp.c > $(ASMDIR)/tmp.s 
-	gcc $(ASMDIR)/*.s -static -o ./child
-	cp $(ASMDIR)/tmp.s ./gen3.s
+	./child self_host.c > child.s && gcc -static child.s -o child
+	cp child.s gen3.s
 	# check
 	diff gen2.s gen3.s
+	# # gen2
+	# ./child tmp.c > $(ASMDIR)/tmp.s 
+	# gcc $(ASMDIR)/*.s -static -o ./child
+	# cp $(ASMDIR)/tmp.s ./gen2.s
+	# # gen3
+	# ./child tmp.c > $(ASMDIR)/tmp.s 
+	# gcc $(ASMDIR)/*.s -static -o ./child
+	# cp $(ASMDIR)/tmp.s ./gen3.s
+	# # check
+	# diff gen2.s gen3.s
 
 # fix franken 
 PATCHFILE   := patch
