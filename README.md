@@ -285,6 +285,7 @@ char x[6]="hello"; int main(){*(x+2);} => 108
 int a[]={0,1,2,3,4}; int main(){return a[4];} => 4
 int a[5]={0,1,2,3,4}; int main(){return a[4];} => 4
 int a[5]={0,1,2}; int main(){return a[4];} => 0
+char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];} => 97
 int main(){int x=3; int a=x++; return a+x;} => 7
 int main(){int x=3; int a=++x; return a+x;} => 8
 int main(){int x=3; int a=x--; return a+x;} => 5
@@ -343,5 +344,14 @@ int main(){_Bool x = 3; x-=4; return x;} => 1
 int main(){_Bool x = 3; return x+3;} => 4
 int main(){int x=5; ; return x;} => 5
 int main(){int i=0; int x=0; for(;i<10;i++){x++;}return x ;} => 10
+int main(){return _Alignof(int); } => 4
+int main(){int x; return _Alignof(x); } => 4
+int main(){int  a[456]; return _Alignof(a); } => 4
+int main(){char a[456]; return _Alignof(a); } => 1
+int main(){struct rgb{int r; int g; int b;}; struct rgb x; return _Alignof(x); } => 4
+struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); } => 8
+struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); } => 8
+int main(){return sizeof(size_t);} => 8
+int main(){size_t isize = 8; return sizeof(isize);} => 8
 OK
 ```
