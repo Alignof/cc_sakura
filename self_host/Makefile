@@ -27,7 +27,6 @@ $(ASMDIR)/%.s: $(SRCDIR)/%.c
 define prepare_franken
 	cat src/header.h > tmp.c
 	for EF in $(EXCLUDEFILES); do\
-		diff ../src/$$EF.c src/$$EF.c;\
 		cat src/$$EF.c >> tmp.c;\
 		rm -f $(ASMDIR)/$$EF.s;\
 	done

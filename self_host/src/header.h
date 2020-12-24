@@ -369,7 +369,6 @@ Token *consume_ident(void);
 Token *consume_string(void);
 Node *new_node_num(int val);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
-Node *new_lvalue_node(NodeKind kind, Node *lhs, Node *rhs);
 Func *find_func(Token *tok);
 GVar *find_gvar(Token *tok);
 LVar *find_lvar(Token *tok, int find_range);
@@ -379,7 +378,6 @@ Enum *find_enum(Token *tok, int find_range);
 Member *find_enumerator(Token *tok, int find_range);
 Member *find_struct_member(Type *type, int find_range);
 Def_Type *find_defined_type(Token *tok, int find_range);
-void revert_scope();
 
 // parse_util.c
 int type_size(Type *type);
