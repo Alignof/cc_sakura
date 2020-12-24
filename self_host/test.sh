@@ -17,10 +17,11 @@ assert() {
 	./tmp
 	actual="$?"
 
+	ESC=$(printf '\033')
 	if [ "$actual" = "$expected" ]; then
-		echo -e "$input \033[32;1m=> $actual\033[m"
+		echo "$input ${ESC}[32;1m=> $actual${ESC}[m"
 	else
-		echo -e "$input \033[31;1m=> $expected expected, but got $actual\033[m"
+		echo "$input ${ESC}[31;1m=> $expected expected, but got $actual${ESC}[m"
 		exit 1
 	fi
 }
