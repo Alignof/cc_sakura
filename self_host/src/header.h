@@ -176,7 +176,7 @@ struct Func{
 	char *name;
 	Type *type;
 	Node *args;
-	Node *code[300];
+	Node *code[1000];
 	Func *next;
 };
 
@@ -253,7 +253,7 @@ extern int      CONSIDER_SCOPE;
 extern char     *user_input;
 extern char     filename[100];
 extern Token    *token;
-extern Func     *func_list[300];
+extern Func     *func_list[FUNC_NUM];
 extern LVar     *locals;
 extern GVar     *globals;
 extern Str      *strings;
@@ -266,8 +266,8 @@ extern LVar     *outside_lvar;
 extern Struc    *outside_struct;
 extern Enum     *outside_enum;
 extern Def_Type *outside_deftype;
-extern int label_num;
-extern int label_loop_end;
+extern int      label_num;
+extern int      label_loop_end;
 //=====================================================
 
 
@@ -333,6 +333,115 @@ extern _Thread_local int errno;
 //=========================================================
 
 
+//==================Prototype function=====================
+// main.c
+char *read_file(char *path);
+void get_code(int argc, char **argv);
+void set_gvar(GVar *gvar);
+void gen_gvar_label(GVar *gvar, Node *init);
+
+// tokenizer.c
+int  len_val(char *str);
+bool is_ascii(char c);
+bool is_alnum(char c);
+bool is_space(char c);
+bool is_digit(char c);
+bool is_block(char c);
+bool is_symbol(char *str,  bool *single_flag);
+bool at_eof(void);
+bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
+Token *new_token(TokenKind kind, Token *cur, char *str);
+Token *tokenize(char *p);
+
+
+// parse_sys.c
+void error_at(char *loc, char *msg);
+void expect(char *op);
+void label_register(Node *node, LabelKind kind);
+bool check(char *op);
+bool consume(char *op);
+bool consume_ret(void);
+bool consume_reserved_word(char *keyword, TokenKind kind);
+int expect_number(void);
+int string_len(void);
+Token *consume_ident(void);
+Token *consume_string(void);
+Node *new_node_num(int val);
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
+Node *new_lvalue_node(NodeKind kind, Node *lhs, Node *rhs);
+Func *find_func(Token *tok);
+GVar *find_gvar(Token *tok);
+LVar *find_lvar(Token *tok, int find_range);
+Str  *find_string(Token *tok);
+Struc *find_struc(Token *tok, int find_range);
+Enum *find_enum(Token *tok, int find_range);
+Member *find_enumerator(Token *tok, int find_range);
+Member *find_struct_member(Type *type, int find_range);
+Def_Type *find_defined_type(Token *tok, int find_range);
+void revert_scope();
+
+// parse_util.c
+int type_size(Type *type);
+int type_align(Type *type);
+Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type);
+Type *get_pointer_type(Type *given);
+
+// syntax_tree.c
+void program(void);
+void function(Func *func);
+Node *stmt(void);
+Node *expr(void);
+Node *assign(void);
+Node *relational(void);
+Node *logical(void);
+Node *ternary(void);
+Node *equelity(void);
+Node *add(void);
+Node *mul(void);
+Node *unary(void);
+Node *primary(void);
+Node *data(void);
+
+// parse_part.c
+void get_argument(Func *target_func);
+Node *compiler_directive();
+Node *compound_assign(TypeKind type, Node *dst, Node *src);
+Node *dot_arrow(NodeKind type, Node *node);
+Node *init_formula(Node *node);
+Node *global_init(Node *node);
+Node *incdec(Node *node, IncDecKind idtype);
+Node *array_block(Node *arr);
+Node *array_str(Node *arr);
+Node *call_function(Node *node, Token *tok);
+Node *array_index(Node *node, Node *index);
+
+// declare.c
+Type *set_type(Type *type, Token *tok);
+Type *parse_type(void);
+Type *insert_ptr_type(Type *prev, int star_count);
+Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type);
+Node *declare_local_variable(Node *node, Token *tok, int star_count);
+void declare_struct(Struc *new_struc);
+void declare_enum(Enum *new_enum);
+Member *register_struc_member(int *asize_ptr);
+Member *register_enum_member(void);
+
+// codegen.c
+extern int label_num;
+extern int label_loop_end;
+void gen(Node *node);
+void gen_expr(Node *node);
+void gen_args(Node *args);
+void gen_calc(Node *node);
+void gen_lvar(Node *node);
+void gen_gvar(Node *node);
+void gen_struc(Node *node);
+void gen_address(Node *node);
+void expand_next(Node *node);
+void expand_block_code(Node *node);
+
+
+//=========================================================
 
 
 

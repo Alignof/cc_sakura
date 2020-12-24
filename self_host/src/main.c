@@ -5,7 +5,7 @@ int   CONSIDER_SCOPE;
 int   label_loop_end;
 char  *user_input;
 char  filename[100];
-Func  *func_list[300];
+Func  *func_list[FUNC_NUM];
 Label *labels_head;
 Label *labels_tail;
 
