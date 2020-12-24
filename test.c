@@ -35,9 +35,8 @@ struct Token{
 	int len;
 };
 
-extern Token *gtest;
 Token *gtest;
-Token *show_all();
+Token *show_all(Token *test);
 
 void prepare(){
 	Token *test = gtest;
@@ -64,7 +63,7 @@ int main(){
 	gtest = calloc(1, sizeof(Token));
 	prepare();
 	//expand_next();
-	if(show_all()){
+	if(show_all(gtest)){
 		printf("true\n");
 	}else{
 		printf("false\n");
@@ -73,12 +72,12 @@ int main(){
 	return 0;
 }
 
-Token *show_all(){
-	gtest->kind;
-	gtest->next;
-	gtest->val;
-	gtest->str;
-	gtest->len;
+Token *show_all(Token *test){
+	test->kind;
+	test->next;
+	test->val;
+	test->str;
+	test->len;
 
 	return gtest;
 }

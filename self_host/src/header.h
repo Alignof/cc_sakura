@@ -253,7 +253,7 @@ extern int      CONSIDER_SCOPE;
 extern char     *user_input;
 extern char     filename[100];
 extern Token    *token;
-extern Func     *func_list[FUNC_NUM];
+extern Func     *func_list[300];
 extern LVar     *locals;
 extern GVar     *globals;
 extern Str      *strings;
