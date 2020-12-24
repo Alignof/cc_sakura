@@ -37,6 +37,7 @@ struct Token{
 
 Token *gtest;
 Token *show_all(Token *test);
+Token *no_exist(void);
 
 void prepare(){
 	Token *test = gtest;

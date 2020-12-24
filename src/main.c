@@ -153,6 +153,7 @@ int main(int argc, char **argv){
 	//generate assembly at first expr
 	printf(".text\n");
 	for(i = 0;func_list[i];i++){
+		if(func_list[i]->code[0] == NULL) continue;
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	push rbp\n");
