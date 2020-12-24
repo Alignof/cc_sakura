@@ -317,7 +317,7 @@ Node *array_index(Node *node, Node *index){
 
 void get_argument(int func_index){
 	if(consume_reserved_word("void", TK_TYPE) || check(")")){
-		func_list[func_index]->args = NULL;
+		new_func->args = NULL;
 		expect(")");
 		return;
 	}
@@ -332,7 +332,7 @@ void get_argument(int func_index){
 			new_arg->kind = ND_ARG;
 			new_arg->val  = arg_counter;
 			new_arg->rhs  = expr();
-			func_list[func_index]->args = new_arg;
+			new_func->args = new_arg;
 		}else{
 			new_arg->next       = calloc(1, sizeof(Node));
 			new_arg->next->kind = ND_ARG;
