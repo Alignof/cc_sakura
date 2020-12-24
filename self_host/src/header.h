@@ -427,8 +427,6 @@ Member *register_struc_member(int *asize_ptr);
 Member *register_enum_member(void);
 
 // codegen.c
-extern int label_num;
-extern int label_loop_end;
 void gen(Node *node);
 void gen_expr(Node *node);
 void gen_args(Node *args);

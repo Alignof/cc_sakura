@@ -275,6 +275,8 @@ extern LVar     *outside_lvar;
 extern Struc    *outside_struct;
 extern Enum     *outside_enum;
 extern Def_Type *outside_deftype;
+extern int      label_num;
+extern int      label_loop_end;
 
 // main.c
 char *read_file(char *path);
@@ -291,23 +293,23 @@ bool is_digit(char c);
 bool is_block(char c);
 bool is_symbol(char *str,  bool *single_flag);
 bool at_eof(void);
-Token *tokenize(char *p);
-Token *new_token(TokenKind kind, Token *cur, char *str);
 bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
+Token *new_token(TokenKind kind, Token *cur, char *str);
+Token *tokenize(char *p);
 
 
 // parse_sys.c
-void error(char *loc, char *fmt,  ...);
 void error_at(char *loc, char *msg);
+void expect(char *op);
+void label_register(Node *node, LabelKind kind);
 bool check(char *op);
 bool consume(char *op);
 bool consume_ret(void);
 bool consume_reserved_word(char *keyword, TokenKind kind);
-void expect(char *op);
 int expect_number(void);
+int string_len(void);
 Token *consume_ident(void);
 Token *consume_string(void);
-void label_register(Node *node, LabelKind kind);
 Node *new_node_num(int val);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_lvalue_node(NodeKind kind, Node *lhs, Node *rhs);
@@ -325,7 +327,6 @@ void revert_scope();
 // parse_util.c
 int type_size(Type *type);
 int type_align(Type *type);
-int align_array_size(int isize, Type *array_type);
 Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type);
 Type *get_pointer_type(Type *given);
 
@@ -369,19 +370,15 @@ void declare_enum(Enum *new_enum);
 Member *register_struc_member(int *asize_ptr);
 Member *register_enum_member(void);
 
-// codegan.c
-extern int label_num;
-extern int label_loop_end;
+// codegen.c
 void gen(Node *node);
 void gen_expr(Node *node);
 void gen_args(Node *args);
 void gen_calc(Node *node);
-void gen_cast(Node *node);
 void gen_lvar(Node *node);
 void gen_gvar(Node *node);
 void gen_struc(Node *node);
 void gen_address(Node *node);
 void expand_next(Node *node);
 void expand_block_code(Node *node);
-
 
