@@ -1,0 +1,20 @@
+BasedOnStyle:  Google
+
+IndentWidth:     8
+Language:        Cpp
+Standard:        Cpp11
+TabWidth:        8
+UseTab:          Always
+
+AlignTrailingComments: true
+AlignConsecutiveMacros: true
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: false
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: Empty
+BreakBeforeBraces: Attach
+ColumnLimit: 0
+SpaceBeforeParens: Never
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false

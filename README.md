@@ -50,6 +50,34 @@ int main(){
 	return 0;
 }
 ```
+
+### N queen
+```c
+int count;
+int solve(int n, int col, int *hist){
+	if (col == n) { count += 1; return 0;}
+	int i = 0;
+	int j = 0;
+	for (; i < n; i++) {
+		for (j = 0; j < col && hist[j] != i && (hist[j] - i) != col - j && (hist[j] - i) != j - col; j++) {
+		}
+
+		if (j < col) continue;
+		hist[col] = i; solve(n, col + 1, hist);
+	}
+	return 0;
+}
+
+int main(){
+	int hist[12]; int i;
+	for (i = 1; i < 12; i++) {
+		count = 0; solve(i, 0, hist); printf("%d queen(s): ", i);
+		printf("%d\n", count);
+	}
+	return 0;
+}
+```
+
 ### Duff's device
 ```c
 int main(){
@@ -169,13 +197,15 @@ int main(){int a; int i; a=0; for(i=0;i<10;i=i+1) a=a+1;a;} => 10
 int main(){int a; int i; a=1; for(i=0;i<6;i=i+1) a=a*2;a;} => 64
 int main(){int i; for(i=0;i<10;i++){if(i==5) break;} return i;} => 5
 int main(){int i=0; while(i<10){if(i==5){break;}i++;} return i;} => 5
+int main(){int i; int k; int l; int x=0; for(i=0;i<5;i++){for(k=0;k<10;k++){if(k==5){break;} x++;}for(l=0;l<10;l++){if(l==5){break;} x++;}} return x;} => 50
 int main(){int i; int x[10];for(i=0;i<10;i++){if(i == 5){x[i]=13;continue;}x[i]=i;} return x[5]+x[3];} => 16
 int main(){int i=-1; int x[10]; while(i<10){i++;if(i == 5){x[i]=13;continue;}x[i]=i;} return x[5]+x[3];} => 16
 int main(){int i; int k; int x=0; for(i=0;i<10;i++){for(k=0;k<10;k++){if(k==5){break;} x++;}} return x;} => 50
-int main() {int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;} => 3
-int main() {int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3; case 2:x=4;break; default:x=5;} return x;} => 4
-int main() {int i=8; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;} => 5
-int main() {int i; int x=1; for(i=0; i<4; i++){switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=10;}} return x;} => 10
+int main(){int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;} => 3
+int main(){int i=1; int x; switch(i){case 0:x=2;break; case 1:x=3; case 2:x=4;break; default:x=5;} return x;} => 4
+int main(){int i=8; int x; switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=5;} return x;} => 5
+int main(){int i; int x=1; for(i=0; i<4; i++){switch(i){case 0:x=2;break; case 1:x=3;break; case 2:x=4;break; default:x=10;}} return x;} => 10
+int main(){int i;for(i=0;i<12;i++){while(i<0);while(i<0);if(i==6) break;}return i;} => 6
 int main(){int a;int b;int c; a=2;b=3;c=5;if(a>b){a=a+b;a=a+c;} a;} => 2
 int main(){int a;int b;int c; a=2;b=3;c=5;if(a<b){a=a+b;a=a+b+c;} a;} => 13
 int main(){int x; int y=1; x =(y==1)?2:3; return x;} => 2
@@ -186,6 +216,7 @@ int func(){int a; a=9;return a;} int main(){int b; b=func();b;} => 9
 int func(){int a; a=9;return a;} int main(){int b;int c; b=3;c=func();b;} => 3
 int func(int a){return a;} int main(){int b;b=func(1);b;} => 1
 int func(int a){return a;} int main(){int a;a=func(1);a;} => 1
+int i=0; void increment(void){i++; return;} int main(){increment(); return i;} => 1
 int add(int a,int b){return a+b;} int main(){add(2,3);} => 5
 int add(int a,int b){return a+b;} int main(){int a;int b; a=2;b=3;add(a,b);} => 5
 int add(int a,int b,int c){return a+b+c;} int main(){int a;int b;int c; a=2;b=3;c=4;add(a,b,c);} => 9
@@ -206,6 +237,11 @@ int main(){return sizeof(char);} => 1
 int main(){return sizeof(int);} => 4
 int main(){return sizeof(char *);} => 8
 int main(){return sizeof(int **);} => 8
+int main(){return sizeof(__NULL);} => 8
+int main(){return sizeof(*__NULL);} => 1
+int main(){char x[]="hello"; return sizeof(x);} => 6
+int main(){int x[]={0,1,2}; return sizeof(x);} => 12
+int main(){int x[5]={0,1,2}; return sizeof(x);} => 20
 int main(){int a[4]; *a=1; return *a;} => 1
 int main(){int a[4]; *a=1; *a=1; return *a;} => 1
 int main(){int a[4]; *a=1; *(a+1)=2; return *(a+1);} => 2
@@ -249,6 +285,7 @@ char x[6]="hello"; int main(){*(x+2);} => 108
 int a[]={0,1,2,3,4}; int main(){return a[4];} => 4
 int a[5]={0,1,2,3,4}; int main(){return a[4];} => 4
 int a[5]={0,1,2}; int main(){return a[4];} => 0
+char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];} => 97
 int main(){int x=3; int a=x++; return a+x;} => 7
 int main(){int x=3; int a=++x; return a+x;} => 8
 int main(){int x=3; int a=x--; return a+x;} => 5
@@ -263,6 +300,10 @@ int main(){int x=12; int y=3; x/=y; return x;} => 4
 int main(){int i; int x[4]={0,1,2,3}; int y[4]={0,1,2,3}; int *p=x; int *q=y; for(i=0;i<4;i++){*(p++)+=*(q++);} return x[3];} => 6
 int global = 7; int *f(int *x){*x += 4; global += 3; return x;} int main(){int x=3; *f(&x) += 4; return global + x;} => 21
 int main(){return 'a';} => 97
+int main(){return '\0';} => 0
+int main(){return '\t';} => 9
+int main(){return '\n';} => 10
+int main(){return '\\';} => 92
 int main(){int flag; char *hello="hello"; if(hello[1] == 'e') flag=1; else flag=0; return flag;} => 1
 struct test{int a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;} => 5
 struct test{char a; int b;}; int main(){struct test x; x.a=2; x.b=3; return x.a + x.b;} => 5
@@ -282,5 +323,35 @@ int main(){enum Color{Red, Green, Blue} test=Blue; int result=13; switch(test){c
 int main(){int x=0; int y=1; int z=2; if(x == 0){int y=4;}else{int y=11;} return y+z;} => 3
 int main(){int x=0; int z=2; if(x == 0){int y=4;}else{int y=11;} int y=1; return y+z;} => 3
 int main(){int x=0; int z=2; if(x == 0){if(z==2){int x=2; int y=4; z=x+y;}} int y=1; return y+z;} => 7
+typedef char moji; int main(void){moji head='a'; return head;} => 97
+typedef char moji; int main(void){moji head='a'; return sizeof(moji);} => 1
+typedef int suuji; suuji main(void){suuji x = 3; return sizeof(suuji) + x;} => 7
+typedef int suuji; typedef int* int_ptr; suuji main(void){suuji x=3; int_ptr ptr=&x; return *ptr;} => 3
+typedef int suuji; typedef int* int_ptr; typedef int** int_ptr_ptr; suuji main(void){suuji x=3; int_ptr y=&x; int_ptr_ptr z=&y; return **z;} => 3
+typedef enum Color{Red, Green, Blue}Color; int main(){Color test; test=Blue; return test;} => 2
+typedef enum Color Color; Color{Red, Green, Blue}; int main(){Color test; test=Blue; return test;} => 2
+typedef enum{RED,GREEN,BLUE,}COLOR; int main(void){COLOR c = GREEN; return GREEN;} => 1
+typedef struct test{int a; int b;}Test; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;} => 5
+typedef struct test Test; Test{int a; int b;}; int main(){Test x; x.a=2; x.b=3; return x.a + x.b;} => 5
+typedef struct test Test; struct test{int r; int g; int b; Test *next;}; int main(void){Test x; Test y; x.r=1; x.g=2; x.b=3; y.r=4; y.g=5; y.b=6; x.next = &y; return x.next->r;} => 4
+int main(){_Bool x = 3; return sizeof(x);} => 1
+int main(){_Bool x = 3; return x;} => 1
+int main(){_Bool x = 3; x++; return x;} => 1
+int main(){_Bool x = 3; x--; return x;} => 0
+int main(){_Bool x = 3; x+=3; return x;} => 1
+int main(){_Bool x = 3; x-=1; return x;} => 0
+int main(){_Bool x = 3; x-=4; return x;} => 1
+int main(){_Bool x = 3; return x+3;} => 4
+int main(){int x=5; ; return x;} => 5
+int main(){int i=0; int x=0; for(;i<10;i++){x++;}return x ;} => 10
+int main(){return _Alignof(int); } => 4
+int main(){int x; return _Alignof(x); } => 4
+int main(){int  a[456]; return _Alignof(a); } => 4
+int main(){char a[456]; return _Alignof(a); } => 1
+int main(){struct rgb{int r; int g; int b;}; struct rgb x; return _Alignof(x); } => 4
+struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); } => 8
+struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); } => 8
+int main(){return sizeof(size_t);} => 8
+int main(){size_t isize = 8; return sizeof(isize);} => 8
 OK
 ```

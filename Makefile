@@ -26,6 +26,10 @@ file_test: $(TARGET)
 	$(TARGET) test.c > tmp.s && gcc -static tmp.s -o tmp
 	./tmp || echo $$?
 
+gcc_test: 
+	gcc test.c -S -masm=intel -O0 -o tmp.s && gcc -static -O0 tmp.s -o tmp
+	./tmp || echo $$?
+
 clean:
 	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out
 	rm -f $(OBJECTS) $(TARGET)

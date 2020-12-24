@@ -1,5 +1,3 @@
-#include "cc_sakura.h"
-
 int   llid;
 int   label_num;
 int   IGNORE_SCOPE;
@@ -7,7 +5,7 @@ int   CONSIDER_SCOPE;
 int   label_loop_end;
 char  *user_input;
 char  filename[100];
-Func  *func_list[FUNC_NUM];
+Func  *func_list[300];
 Label *labels_head;
 Label *labels_tail;
 
@@ -16,19 +14,19 @@ char *read_file(char *path){
 	char *buf;
 
 	strcpy(filename, path);
-	if ((fp = fopen(path, "r")) == NULL) {
+	if ((fp = fopen(path, "r")) == __NULL) {
 		fprintf(stderr, "File open error.\n");
 		exit(1);
 	}
 
 	// get file size
-	if(fseek(fp, 0L, SEEK_END) == -1){
+	if(fseek(fp, 0, SEEK_END) == -1){
 		printf("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 
-	if(fseek(fp, 0L, SEEK_SET) == -1){
+	if(fseek(fp, 0, SEEK_SET) == -1){
 		printf("%s: fseek:%s", path, strerror(errno));
 	}
 
@@ -123,7 +121,7 @@ int main(int argc, char **argv){
 	// make syntax tree
 	program();
 
-	if(func_list == NULL){
+	if(func_list == __NULL){
 		fprintf(stderr, "function is not found.");
 	}
 
@@ -147,13 +145,13 @@ int main(int argc, char **argv){
 	llid           = 0;
 	label_num      = 0;
 	label_loop_end = 0;
-	labels_head    = NULL;
-	labels_tail    = NULL;
+	labels_head    = __NULL;
+	labels_tail    = __NULL;
 
 	//generate assembly at first expr
 	printf(".text\n");
 	for(i = 0;func_list[i];i++){
-		if(func_list[i]->code[0] == NULL) continue;
+		if(func_list[i]->code[0] == __NULL) continue;
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	push rbp\n");
@@ -165,7 +163,7 @@ int main(int argc, char **argv){
 			gen(func_list[i]->args);
 		}
 
-		for(j = 0;func_list[i]->code[j] != NULL;j++){
+		for(j = 0;func_list[i]->code[j] != __NULL;j++){
 			// gen code
 			gen(func_list[i]->code[j]);
 		}
@@ -179,4 +177,5 @@ int main(int argc, char **argv){
 
 	return 0;
 }
+
 

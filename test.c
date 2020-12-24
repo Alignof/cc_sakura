@@ -1,13 +1,6 @@
-/*
-typedef int suuji;
-typedef int* int_ptr;
+int main(void){
+	char arr[] = "hello world!";
+	printf("%s\n", arr);
 
-suuji main(void){
-	suuji x = 3;
-	int_ptr ptr = &x;
-
-	return *ptr;
+	return 0;
 }
-*/
-
-
