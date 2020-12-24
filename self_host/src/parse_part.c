@@ -189,10 +189,10 @@ Node *array_str(Node *arr){
 		src = array_index(arr, new_node_num(ctr));
 		//Is first?
 		if(ctr == 0){
-			dst = new_node(ND_ASSIGN, src, new_node_num(*(tok->str + ctr)));
+			dst = new_node(ND_ASSIGN, src, new_node_num((char)*(tok->str + ctr)));
 			node->rhs = dst;
 		}else{
-			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(*(tok->str + ctr)));
+			dst->block_code = new_node(ND_ASSIGN, src, new_node_num((char)*(tok->str + ctr)));
 			dst = dst->block_code;
 		}
 		consume(",");
