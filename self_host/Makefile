@@ -27,6 +27,7 @@ $(ASMDIR)/%.s: $(SRCDIR)/%.c
 define prepare_franken
 	cat src/header.h > tmp.c
 	for EF in $(EXCLUDEFILES); do\
+		diff ../src/$$EF.c src/$$EF.c;\
 		cat src/$$EF.c >> tmp.c;\
 		rm -f $(ASMDIR)/$$EF.s;\
 	done
@@ -35,7 +36,7 @@ endef
 
 # franken 
 #EXCLUDEFILES := codegen main declare syntax_tree parse_util parse_part parse_sys tokenizer
-EXCLUDEFILES := tokenizer
+EXCLUDEFILES := parse_sys
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILES)
 	@$(call prepare_franken)
@@ -64,7 +65,7 @@ franken:$(ASEMS)
 # fix franken 
 PATCHFILE   := patch
 TARGETFILE  := target
-EXCLUDEFILE := parse_sys
+EXCLUDEFILE := main
 patch:$(ASEMS)
 	# patch target:$(PATCHFILE)
 	rm -f $(ASMDIR)/$(EXCLUDEFILE).s
@@ -75,13 +76,11 @@ patch:$(ASEMS)
 	cp $(ASMDIR)/$(PATCHFILE).s ./gen1.s
 	gcc $(ASMDIR)/*.s -static -o ./child
 	# gen2
-	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
-	cp $(ASMDIR)/$(PATCHFILE).s ./gen2.s
-	gcc $(ASMDIR)/*.s -static -o ./child
+	./child self_host.c > child.s && gcc -static child.s -o child
+	cp child.s gen2.s
 	# gen3
-	./child tmp.c > $(ASMDIR)/$(PATCHFILE).s 
-	cp $(ASMDIR)/$(PATCHFILE).s ./gen3.s
-	gcc $(ASMDIR)/*.s -static -o ./child
+	./child self_host.c > child.s && gcc -static child.s -o child
+	cp child.s gen3.s
 	# check
 	diff gen2.s gen3.s
 

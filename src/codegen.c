@@ -9,7 +9,7 @@ const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
 void expand_next(Node *node){
 	while(node){
 		gen(node);
-		node=node->next;
+		node = node->next;
 	}
 	printf("	push rax\n");
 }
@@ -17,7 +17,7 @@ void expand_next(Node *node){
 void expand_block_code(Node *node){
 	while(node){
 		gen(node);
-		node=node->block_code;
+		node = node->block_code;
 	}
 	printf("	push rax\n");
 }
