@@ -181,7 +181,7 @@ struct Node{
 
 // function
 struct Func{
-	//int argc;
+	int len;
 	int stack_size;
 	char *name;
 	Type *type;
