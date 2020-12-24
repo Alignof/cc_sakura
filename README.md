@@ -1,9 +1,36 @@
 # cc\_sakura
 ![C/C++ CI](https://github.com/Takana-Norimasa/cc_sakura/workflows/C/C++%20CI/badge.svg)  
 C Compiler Sakura  
-[https://www.sigbus.info/compilerbook](https://www.sigbus.info/compilerbook)を見ながら勉強していく。
+a small self-hosting C compiler.  
 
-## example
+## Build
+```zsh
+# build
+$ git clone https://github.com/Takana-Norimasa/cc_sakura.git
+$ cd cc_sakura
+$ make install
+
+# test
+$ make test
+
+# self-hosting test
+$ cd self_host/
+$ make self_host
+```
+
+## Special thanks
+- Rui Ueyama ([@.rui314](https://github.com/rui314))  
+- hikalium ([@.hikalium](https://github.com/hikalium))  
+- hsjoihs ([@.hsjoihs](https://github.com/hsjoihs))  
+- azarashi ([@.azarashi2931](https://github.com/azarashi2931))  
+- [security camp 2020](https://www.security-camp.or.jp/camp/)  
+
+thank you so much!
+
+
+
+
+## Example
 
 ### FizzBuzz  
 ```c
