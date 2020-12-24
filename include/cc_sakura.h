@@ -186,7 +186,7 @@ struct Func{
 	char *name;
 	Type *type;
 	Node *args;
-	Node *code[300];
+	Node *code[1000];
 	Func *next;
 };
 

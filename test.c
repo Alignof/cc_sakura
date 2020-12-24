@@ -1,39 +1,84 @@
-typedef struct Test Test;
-struct Test{
-	Test *next;
+typedef struct Token Token;
+
+typedef enum{
+	TK_TYPE,
+	TK_RESERVED,
+	TK_IDENT,
+	TK_NUM,
+	TK_IF,
+	TK_ELSE,
+	TK_SWITCH,
+	TK_CASE,
+	TK_DEFAULT,
+	TK_DO,
+	TK_WHILE,
+	TK_FOR,
+	TK_SIZEOF,
+	TK_ALIGNOF,
+	TK_BLOCK,
+	TK_STR,
+	TK_BREAK,
+	TK_CONTINUE,
+	TK_TYPEDEF,
+	TK_EXTERN,
+	TK_RETURN,
+	TK_THREAD_LOCAL,
+	TK_COMPILER_DIRECTIVE,
+	TK_EOF,
+}TokenKind;
+
+struct Token{
+	TokenKind kind;
+	Token *next;
+	int val;
 	char *str;
 	int len;
-	char dummy;
-	int value;
 };
 
-Test *gtest;
+extern Token *gtest;
+Token *gtest;
+Token *show_all();
 
 void prepare(){
-	Test *test = gtest;
+	Token *test = gtest;
 	for(int i=1;i<8;i++){
-		test->value  = i;
-		test->next = calloc(1, sizeof(Test));
+		test->val  = i;
+		test->next = calloc(1, sizeof(Token));
 		test = test->next;
 	}
 }
 
 void expand_next(){
-	Test *test = gtest;
-	printf("test0: %d\n", gtest->value);
-	printf("test1: %d\n", gtest->next->value);
-	printf("test2: %d\n", gtest->next->next->value);
+	Token *test = gtest;
+	printf("test0: %d\n", gtest->val);
+	printf("test1: %d\n", gtest->next->val);
+	printf("test2: %d\n", gtest->next->next->val);
 
 	while(test){
-		printf("%d\n", test->value);
+		printf("%d\n", test->val);
 		test=test->next;
 	}
 }
 
 int main(){
-	gtest = calloc(1, sizeof(Test));
+	gtest = calloc(1, sizeof(Token));
 	prepare();
-	expand_next();
+	//expand_next();
+	if(show_all()){
+		printf("true\n");
+	}else{
+		printf("false\n");
+	}
 
 	return 0;
+}
+
+Token *show_all(){
+	gtest->kind;
+	gtest->next;
+	gtest->val;
+	gtest->str;
+	gtest->len;
+
+	return gtest;
 }
