@@ -707,31 +707,31 @@ void program(void){
 			continue;
 		}
 
-		func_list[func_index] = calloc(1, sizeof(Func));
-
-		// Is function?
-		if(token->kind != TK_IDENT ||!(is_alnum(*token->str))){
-			error_at(token->str, "not a function.");
-		}
-
 		Token *def_name = consume_ident();
 
 		// function
 		if(consume("(")){
-			func_list[func_index]->type = toplv_type;
-			func_list[func_index]->name = calloc(def_name->len, sizeof(char));
-			strncpy(func_list[func_index]->name, def_name->str, def_name->len);
+			Func *new_func = find_func(def_name);
+			if(new_func == __NULL){
+				func_list[func_index]       = calloc(1, sizeof(Func));
+				func_list[func_index]->type = toplv_type;
+				func_list[func_index]->name = calloc(def_name->len, sizeof(char));
+				func_list[func_index]->len  = def_name->len;
+				strncpy(func_list[func_index]->name, def_name->str, def_name->len);
+				new_func = func_list[func_index];
+				func_index++;
+			}
 
 			// add type list
-			func_list[func_index]->type = insert_ptr_type(func_list[func_index]->type, star_count);
+			new_func->type = insert_ptr_type(new_func->type, star_count);
 
 			// get arguments
-			get_argument(func_index);
+			get_argument(new_func);
 
 			// get function block
 			if(consume("{")){
-				function(func_list[func_index++]);
-				// prototype declaration
+				function(new_func);
+			// prototype declaration
 			}else{
 				expect(";");
 			}

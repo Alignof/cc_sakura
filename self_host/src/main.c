@@ -21,13 +21,13 @@ char *read_file(char *path){
 
 	// get file size
 	if(fseek(fp, 0, SEEK_END) == -1){
-		error("%s: fseek:%s", path, strerror(errno));
+		printf("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 
 	if(fseek(fp, 0, SEEK_SET) == -1){
-		error("%s: fseek:%s", path, strerror(errno));
+		printf("%s: fseek:%s", path, strerror(errno));
 	}
 
 	buf = calloc(1, size+2);
@@ -151,6 +151,7 @@ int main(int argc, char **argv){
 	//generate assembly at first expr
 	printf(".text\n");
 	for(i = 0;func_list[i];i++){
+		if(func_list[i]->code[0] == __NULL) continue;
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	push rbp\n");

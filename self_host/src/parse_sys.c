@@ -67,7 +67,7 @@ bool consume_ret(void){
 
 bool consume_reserved_word(char *keyword, TokenKind kind){
 	if(token->kind != kind ||
-	   token->len != strlen(keyword) ||
+	   token->len  != strlen(keyword) ||
 	   memcmp(token->str, keyword, (size_t)token->len)){
 		return false;
 	}
@@ -164,7 +164,7 @@ void label_register(Node *node, LabelKind kind){
 
 Func *find_func(Token *tok){
 	for (int i = 0;func_list[i] && i < FUNC_NUM;i++){
-		if(!memcmp(tok->str, func_list[i]->name, (size_t)tok->len)){
+		if(func_list[i]->len == tok->len && !memcmp(tok->str, func_list[i]->name, (size_t)tok->len)){
 			return func_list[i];
 		}
 	}

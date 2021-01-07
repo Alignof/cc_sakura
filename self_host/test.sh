@@ -4,11 +4,11 @@ assert() {
 		option="$1"
 		expected="$2"
 		input="$3"
-		./child "$option" "$input" > tmp.s
+		./cc_sakura "$option" "$input" > tmp.s
 	else
 		expected="$1"
 		input="$2"
-		./child "$input" > tmp.s
+		./cc_sakura "$input" > tmp.s
 	fi
 
 	gcc -c tmp.s 
@@ -17,10 +17,11 @@ assert() {
 	./tmp
 	actual="$?"
 
+	ESC=$(printf '\033')
 	if [ "$actual" = "$expected" ]; then
-		echo "$input => $actual"
+		echo "$input ${ESC}[32;1m=> $actual${ESC}[m"
 	else
-		echo "$input => $expected expected, but got $actual"
+		echo "$input ${ESC}[31;1m=> $expected expected, but got $actual${ESC}[m"
 		exit 1
 	fi
 }
@@ -194,9 +195,11 @@ assert -cl 5  "int a=8; int main(){a=a-3;a;}"
 assert -cl 108 'char *x="hello"; int main(){*(x+2);}'
 assert -cl 108 'char x[]="hello"; int main(){*(x+2);}'
 assert -cl 108 'char x[6]="hello"; int main(){*(x+2);}'
-assert -cl 4 'int a[]={0,1,2,3,4}; int main(){return a[4];}'
-assert -cl 4 'int a[5]={0,1,2,3,4}; int main(){return a[4];}'
-assert -cl 0 'int a[5]={0,1,2}; int main(){return a[4];}'
+assert -cl 4   'int a[]={0,1,2,3,4}; int main(){return a[4];}'
+assert -cl 4   'int a[5]={0,1,2,3,4}; int main(){return a[4];}'
+assert -cl 0   'int a[5]={0,1,2}; int main(){return a[4];}'
+assert -cl 97  'char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];}'
+
 
 assert -cl 7  'int main(){int x=3; int a=x++; return a+x;}'
 assert -cl 8  'int main(){int x=3; int a=++x; return a+x;}'
@@ -267,5 +270,16 @@ assert -cl 5  "int main(){int x=5; ; return x;}"
 assert -cl 10 "int main(){int i=0; int x=0; for(;i<10;i++){x++;}return x ;}"
 
 
-echo OK
+assert -cl 4 "int main(){return _Alignof(int); }"
+assert -cl 4 "int main(){int x; return _Alignof(x); }"
+assert -cl 4 "int main(){int  a[456]; return _Alignof(a); }"
+assert -cl 1 "int main(){char a[456]; return _Alignof(a); }"
+assert -cl 4 "int main(){struct rgb{int r; int g; int b;}; struct rgb x; return _Alignof(x); }"
+assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
+assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
 
+assert -cl 8 "int main(){return sizeof(size_t);}"
+assert -cl 8 "int main(){size_t isize = 8; return sizeof(isize);}"
+
+
+echo OK

@@ -718,8 +718,10 @@ void program(void){
 				func_list[func_index]       = calloc(1, sizeof(Func));
 				func_list[func_index]->type = toplv_type;
 				func_list[func_index]->name = calloc(def_name->len, sizeof(char));
+				func_list[func_index]->len  = def_name->len;
 				strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 				new_func = func_list[func_index];
+				func_index++;
 			}
 
 			// add type list
@@ -735,8 +737,6 @@ void program(void){
 			}else{
 				expect(";");
 			}
-
-			func_index++;
 		// global variable
 		}else{
 			Node *init_gv = declare_global_variable(star_count, def_name, toplv_type);

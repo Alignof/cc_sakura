@@ -189,10 +189,10 @@ Node *array_str(Node *arr){
 		src = array_index(arr, new_node_num(ctr));
 		//Is first?
 		if(ctr == 0){
-			dst = new_node(ND_ASSIGN, src, new_node_num(*(tok->str + ctr)));
+			dst = new_node(ND_ASSIGN, src, new_node_num((int)*(tok->str + ctr)));
 			node->rhs = dst;
 		}else{
-			dst->block_code = new_node(ND_ASSIGN, src, new_node_num(*(tok->str + ctr)));
+			dst->block_code = new_node(ND_ASSIGN, src, new_node_num((int)*(tok->str + ctr)));
 			dst = dst->block_code;
 		}
 		consume(",");
@@ -313,9 +313,9 @@ Node *array_index(Node *node, Node *index){
 	return node;
 }
 
-void get_argument(int func_index){
+void get_argument(Func *target_func){
 	if(consume_reserved_word("void", TK_TYPE) || check(")")){
-		func_list[func_index]->args = __NULL;
+		target_func->args = __NULL;
 		expect(")");
 		return;
 	}
@@ -330,7 +330,7 @@ void get_argument(int func_index){
 			new_arg->kind = ND_ARG;
 			new_arg->val  = arg_counter;
 			new_arg->rhs  = expr();
-			func_list[func_index]->args = new_arg;
+			target_func->args = new_arg;
 		}else{
 			new_arg->next       = calloc(1, sizeof(Node));
 			new_arg->next->kind = ND_ARG;
