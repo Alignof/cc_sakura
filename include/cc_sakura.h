@@ -150,6 +150,7 @@ struct Type{
 	int	 size;
 	int	 align;
 	int      index_size;
+	int      is_const;
 	int      is_extern;
 	int      is_thread_local;
 	int      len;
