@@ -87,11 +87,12 @@ Type *set_type(Type *type, Token *tok){
 
 Type *parse_type(void){
 	Type *type = calloc(1, sizeof(Type));
+	int is_const   = 0;
 	int star_count = 0;
 
 	// const
 	if(consume_reserved_word("const", TK_CONST)){
-		type->is_const = 1;
+		is_const = 1;
 	}
 
 	// check type
@@ -139,6 +140,7 @@ Type *parse_type(void){
 
 	// add ptr
 	type = insert_ptr_type(type, star_count);
+	type->is_const = is_const;
 
 	return type;
 }

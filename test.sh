@@ -281,5 +281,8 @@ assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struc
 assert -cl 8 "int main(){return sizeof(size_t);}"
 assert -cl 8 "int main(){size_t isize = 8; return sizeof(isize);}"
 
+assert -cl 3 "int main(){const int x = 3; return x;}"
+assert -cl 0 'int main(){const int x[4]={0,1,2,3}; int *p; int *q; p=x; q=p++; return *q;}'
+assert -cl 3 "const int x = 3; int main(){return x;}"
 
 echo OK
