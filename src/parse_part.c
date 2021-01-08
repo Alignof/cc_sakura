@@ -158,6 +158,9 @@ Node *incdec(Node *node, IncDecKind idtype){
 }
 
 Node *init_formula(Node *node){
+	int is_const = node->type->is_const;
+	node->type->is_const = 0;
+
 	if(consume("{")){
 		node = array_block(node);
 	}else if(check("\"")){
@@ -166,6 +169,7 @@ Node *init_formula(Node *node){
 		node = new_node(ND_ASSIGN, node, assign());
 	}
 
+	if(is_const) node->type->is_const = 1;
 	return node;
 }
 

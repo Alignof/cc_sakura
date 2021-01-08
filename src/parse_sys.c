@@ -351,6 +351,13 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		node->type->ptr_to = rhs->type;
 	}
 
+	if(node->type->is_const){
+		if(node->kind == ND_ASSIGN || node->kind == ND_COMPOUND ||
+		   node->kind == ND_POSTID || node->kind == ND_PREID){
+			error_at(token->str, "changed read-only variable");
+		}
+	}
+
 	return node;
 }
 
