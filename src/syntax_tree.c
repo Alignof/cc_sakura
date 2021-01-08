@@ -359,22 +359,16 @@ Node *assign(void){
 }
 
 Node *expr(void){
-	int is_const   = 0;
 	int star_count = 0;
 	Node *node;
 
-	if(token->kind == TK_TYPE || find_defined_type(token, CONSIDER_SCOPE)){
+	if(token->kind == TK_CONST || token->kind == TK_TYPE ||
+	   find_defined_type(token, CONSIDER_SCOPE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 
-		// is const
-		if(consume_reserved_word("const", TK_CONST)){
-			is_const = 1;
-		}
-
 		// parsing type
 		node->type = parse_type();
-		node->type->is_const = is_const;
 
 		// only type (e.g. int; enum DIR{E,W,S,N}; ...) 
 		if(check(";")){
@@ -647,7 +641,6 @@ void function(Func *func){
 void program(void){
 	int func_index = 0;
 	int star_count;
-	int is_const;
 	int is_extern;
 	int is_thread_local;
 	Type *toplv_type;
@@ -661,7 +654,6 @@ void program(void){
 		star_count = 0;
 
 		// reset flag
-		is_const        = 0;
 		is_extern       = 0;
 		is_thread_local = 0;
 
@@ -697,11 +689,6 @@ void program(void){
 			continue;
 		}
 
-		// const
-		if(consume_reserved_word("const", TK_CONST)){
-			is_const = 1;
-		}
-
 		// extern
 		if(consume_reserved_word("extern", TK_EXTERN)){
 			is_extern = 1;
@@ -715,7 +702,6 @@ void program(void){
 
 		// parsing type
 		toplv_type = parse_type();
-		toplv_type->is_const        = is_const;
 		toplv_type->is_extern       = is_extern;
 		toplv_type->is_thread_local = is_thread_local;
 

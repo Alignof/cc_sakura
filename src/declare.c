@@ -89,6 +89,11 @@ Type *parse_type(void){
 	Type *type = calloc(1, sizeof(Type));
 	int star_count = 0;
 
+	// const
+	if(consume_reserved_word("const", TK_CONST)){
+		type->is_const = 1;
+	}
+
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
 		type->ty = VOID;

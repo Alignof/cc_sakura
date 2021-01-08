@@ -1,6 +1,5 @@
 int main(void){
-	char arr[] = "hello world!";
-	printf("%s\n", arr);
+	const int x = 3;
 
-	return 0;
+	return x;
 }
