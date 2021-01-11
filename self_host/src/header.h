@@ -244,11 +244,6 @@ struct Member{
 	Member *next;
 };
 
-
-
-
-
-
 //================= global variable ===================
 extern int      llid;
 extern int      alloc_size;
