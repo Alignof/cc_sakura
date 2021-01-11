@@ -201,6 +201,8 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 
 			if(gvar->type == NULL){
 				gvar->type = newtype;
+				gvar->type->is_const = toplv_type->is_const;
+				toplv_type->is_const = 0;
 			}
 			expect("]");
 		}
@@ -248,6 +250,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 			if(lvar->type == NULL){
 				lvar->type = newtype;
+				lvar->type->is_const = node->type->is_const;
+				node->type->is_const = 0;
 			}
 			expect("]");
 		}
@@ -306,6 +310,8 @@ Member *register_struc_member(int *asize_ptr){
 
 				if(new_memb->type == NULL){
 					new_memb->type = newtype;
+					new_memb->type->is_const = memb_type->is_const;
+					memb_type->is_const = 0;
 				}
 				expect("]");
 			}
