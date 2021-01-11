@@ -213,8 +213,9 @@ Token *tokenize(char *p){
 		if(tokenize_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
 		if(tokenize_reserved(&p, "_Alignof", 8, &now, TK_ALIGNOF))  continue;
 		if(tokenize_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
-		if(tokenize_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
 		if(tokenize_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
+		if(tokenize_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
+		if(tokenize_reserved(&p, "const",    5, &now, TK_CONST))    continue;
 		if(tokenize_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
 
 		// compiler directive

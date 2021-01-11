@@ -158,6 +158,9 @@ Node *incdec(Node *node, IncDecKind idtype){
 }
 
 Node *init_formula(Node *node){
+	int is_const = node->type->is_const;
+	node->type->is_const = 0;
+
 	if(consume("{")){
 		node = array_block(node);
 	}else if(check("\"")){
@@ -166,6 +169,7 @@ Node *init_formula(Node *node){
 		node = new_node(ND_ASSIGN, node, assign());
 	}
 
+	if(is_const) node->type->is_const = 1;
 	return node;
 }
 
@@ -326,7 +330,8 @@ void get_argument(Func *target_func){
 	Node *new_arg = NULL;
 	int arg_counter = 0;
 
-	while(token->kind == TK_NUM || token->kind == TK_TYPE  || find_defined_type(token, 0)){
+	while(token->kind == TK_CONST || token->kind == TK_NUM ||
+	      token->kind == TK_TYPE  || find_defined_type(token, 0)){
 		if(new_arg == NULL){
 			new_arg       = calloc(1, sizeof(Node));
 			new_arg->kind = ND_ARG;

@@ -28,8 +28,9 @@ typedef enum{
 	TK_BREAK,
 	TK_CONTINUE,
 	TK_TYPEDEF,
-	TK_EXTERN,
 	TK_RETURN,
+	TK_CONST,
+	TK_EXTERN,
 	TK_THREAD_LOCAL,
 	TK_COMPILER_DIRECTIVE,
 	TK_EOF,
@@ -149,6 +150,7 @@ struct Type{
 	int	 size;
 	int	 align;
 	int      index_size;
+	int      is_const;
 	int      is_extern;
 	int      is_thread_local;
 	int      len;

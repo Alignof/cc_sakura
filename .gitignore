@@ -18,7 +18,6 @@ self_host/child
 self_host/*~
 self_host/*.o
 self_host/*.s
-self_host/self_host.c
 self_host/patch.c
 self_host/target.c
 self_host/tmp*

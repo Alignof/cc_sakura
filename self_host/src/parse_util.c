@@ -95,4 +95,3 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 
 	return node;
 }
-
