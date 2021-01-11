@@ -360,7 +360,8 @@ Node *expr(void){
 	int star_count = 0;
 	Node *node;
 
-	if(token->kind == TK_TYPE || find_defined_type(token, CONSIDER_SCOPE)){
+	if(token->kind == TK_CONST || token->kind == TK_TYPE ||
+	   find_defined_type(token, CONSIDER_SCOPE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 
@@ -749,4 +750,3 @@ void program(void){
 	}
 	func_list[func_index] = __NULL;
 }
-

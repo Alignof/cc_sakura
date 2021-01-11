@@ -18,8 +18,9 @@ typedef enum{
 	TK_BREAK,
 	TK_CONTINUE,
 	TK_TYPEDEF,
-	TK_EXTERN,
 	TK_RETURN,
+	TK_CONST,
+	TK_EXTERN,
 	TK_THREAD_LOCAL,
 	TK_COMPILER_DIRECTIVE,
 	TK_EOF,
@@ -139,6 +140,7 @@ struct Type{
 	int	 size;
 	int	 align;
 	int      index_size;
+	int      is_const;
 	int      is_extern;
 	int      is_thread_local;
 	int      len;
@@ -241,6 +243,7 @@ struct Member{
 	Type   *type;
 	Member *next;
 };
+
 
 
 
@@ -442,11 +445,11 @@ void expand_block_code(Node *node);
 
 
 
-//                   void _Bool  char   enum  int   ptr  array struct
-char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
-char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
-char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
-char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
+//                         void _Bool  char   enum  int   ptr  array struct
+const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
+const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
+const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
+const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
 
 
 void expand_next(Node *node){
@@ -989,7 +992,6 @@ void gen(Node *node){
 			return;
 	}
 }
-
 LVar     *locals;
 GVar     *globals;
 Struc    *structs;
@@ -1077,7 +1079,13 @@ Type *set_type(Type *type, Token *tok){
 
 Type *parse_type(void){
 	Type *type = calloc(1, sizeof(Type));
+	int is_const   = 0;
 	int star_count = 0;
+
+	// const
+	if(consume_reserved_word("const", TK_CONST)){
+		is_const = 1;
+	}
 
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
@@ -1124,6 +1132,7 @@ Type *parse_type(void){
 
 	// add ptr
 	type = insert_ptr_type(type, star_count);
+	type->is_const = is_const;
 
 	return type;
 }
@@ -1184,6 +1193,8 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 
 			if(gvar->type == __NULL){
 				gvar->type = newtype;
+				gvar->type->is_const = toplv_type->is_const;
+				toplv_type->is_const = 0;
 			}
 			expect("]");
 		}
@@ -1231,6 +1242,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 			if(lvar->type == __NULL){
 				lvar->type = newtype;
+				lvar->type->is_const = node->type->is_const;
+				node->type->is_const = 0;
 			}
 			expect("]");
 		}
@@ -1289,6 +1302,8 @@ Member *register_struc_member(int *asize_ptr){
 
 				if(new_memb->type == __NULL){
 					new_memb->type = newtype;
+					new_memb->type->is_const = memb_type->is_const;
+					memb_type->is_const = 0;
 				}
 				expect("]");
 			}
@@ -1373,7 +1388,6 @@ void declare_enum(Enum *new_enum){
 	new_enum->next   = enumerations;
 	enumerations     = new_enum;
 }
-
 int   llid;
 int   label_num;
 int   IGNORE_SCOPE;
@@ -1554,7 +1568,6 @@ int main(int argc, char **argv){
 	return 0;
 }
 
-
 Node *global_init(Node *node){
 	Node *init_val = __NULL;
 	if(check("\"")){
@@ -1713,6 +1726,9 @@ Node *incdec(Node *node, IncDecKind idtype){
 }
 
 Node *init_formula(Node *node){
+	int is_const = node->type->is_const;
+	node->type->is_const = 0;
+
 	if(consume("{")){
 		node = array_block(node);
 	}else if(check("\"")){
@@ -1721,6 +1737,7 @@ Node *init_formula(Node *node){
 		node = new_node(ND_ASSIGN, node, assign());
 	}
 
+	if(is_const) node->type->is_const = 1;
 	return node;
 }
 
@@ -1881,7 +1898,8 @@ void get_argument(Func *target_func){
 	Node *new_arg = __NULL;
 	int arg_counter = 0;
 
-	while(token->kind == TK_NUM || token->kind == TK_TYPE  || find_defined_type(token, 0)){
+	while(token->kind == TK_CONST || token->kind == TK_NUM ||
+	      token->kind == TK_TYPE  || find_defined_type(token, 0)){
 		if(new_arg == __NULL){
 			new_arg       = calloc(1, sizeof(Node));
 			new_arg->kind = ND_ARG;
@@ -1912,7 +1930,6 @@ void get_argument(Func *target_func){
 	}
 	expect(")");
 }
-
 void error_at(char *loc, char *msg){
 	while((user_input < loc) && (loc[-1] == '\n' || loc[-1] == '\t')) loc--;
 
@@ -2264,6 +2281,13 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		node->type->ptr_to = rhs->type;
 	}
 
+	if(node->type->is_const){
+		if(node->kind == ND_ASSIGN || node->kind == ND_COMPOUND ||
+		   node->kind == ND_POSTID || node->kind == ND_PREID){
+			error_at(token->str, "changed read-only variable");
+		}
+	}
+
 	return node;
 }
 
@@ -2278,7 +2302,6 @@ Node *new_node_num(int val){
 	node->type->align = type_align(node->type);
 	return node;
 }
-
 
 int type_size(Type *type){
 	switch(type->ty){
@@ -2377,7 +2400,6 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 
 	return node;
 }
-
 int alloc_size;
 Token *token;
 Str *strings;
@@ -2740,7 +2762,8 @@ Node *expr(void){
 	int star_count = 0;
 	Node *node;
 
-	if(token->kind == TK_TYPE || find_defined_type(token, CONSIDER_SCOPE)){
+	if(token->kind == TK_CONST || token->kind == TK_TYPE ||
+	   find_defined_type(token, CONSIDER_SCOPE)){
 		node	   = calloc(1, sizeof(Node));
 		node->kind = ND_LVAR;
 
@@ -3129,7 +3152,6 @@ void program(void){
 	}
 	func_list[func_index] = __NULL;
 }
-
 int len_val(char *str){
 	int counter = 0;
 	for(;is_alnum(*str);str++){
@@ -3343,8 +3365,9 @@ Token *tokenize(char *p){
 		if(tokenize_reserved(&p, "sizeof",   6, &now, TK_SIZEOF))   continue;
 		if(tokenize_reserved(&p, "_Alignof", 8, &now, TK_ALIGNOF))  continue;
 		if(tokenize_reserved(&p, "typedef",  7, &now, TK_TYPEDEF))  continue;
-		if(tokenize_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
 		if(tokenize_reserved(&p, "return",   6, &now, TK_RETURN))   continue;
+		if(tokenize_reserved(&p, "extern",   6, &now, TK_EXTERN))   continue;
+		if(tokenize_reserved(&p, "const",    5, &now, TK_CONST))    continue;
 		if(tokenize_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
 
 		// compiler directive
@@ -3395,4 +3418,3 @@ Token *tokenize(char *p){
 	new_token(TK_EOF, now, p);
 	return head.next;
 }
-
