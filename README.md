@@ -38,16 +38,16 @@ int main(){
 	int i;
 	int max=0;
 
-	scanf("%d",&max);
-	for(i=1;i<=max;i++){
-		if(i%3==0 && i%5==0){
+	scanf("%d", &max);
+	for(i = 1;i <= max;i++){
+		if(i%3 == 0 && i%5 == 0){
 			printf("FizzBuzz\n");
-		}else if(i%3==0){
+		}else if(i%3 == 0){
 			printf("Fizz\n");
-		}else if(i%5==0){
+		}else if(i%5 == 0){
 			printf("Buzz\n");
 		}else{
-			printf("%d\n",i);
+			printf("%d\n", i);
 		}
 	}
 	return 0;
@@ -61,15 +61,15 @@ int main(){
 	int k;
 	int x[10][10];
 
-	for(i=1;i<=9;i++){
-		for(k=1;k<=9;k++){
+	for(i = 1;i <= 9;i++){
+		for(k = 1;k <= 9;k++){
 			x[k][i] = i*k;
 		}
 	}
 
-	for(i=1;i<=9;i++){
-		for(k=1;k<=9;k++){
-			printf("%2d ",x[k][i]);
+	for(i = 1;i <= 9;i++){
+		for(k = 1;k <= 9;k++){
+			printf("%2d ", x[k][i]);
 		}
 		printf("\n");
 	}
@@ -380,5 +380,12 @@ struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; 
 struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); } => 8
 int main(){return sizeof(size_t);} => 8
 int main(){size_t isize = 8; return sizeof(isize);} => 8
+int main(){const int x = 3; return x;} => 3
+int main(){const int x[4]={0,1,2,3}; return x[1] + x[2];} => 3
+const int x = 3; int main(){return x;} => 3
+const int x[4]={0,1,2,3}; int main(){return x[1] + x[2];} => 3
+int main(){int x=3; const int *y=&x; return *y;} => 3
+int main(){int x=3; int * const y=&x; return *y;} => 3
+const char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];} => 97
 OK
 ```
