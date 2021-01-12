@@ -237,6 +237,7 @@ Node *array_block(Node *arr){
 
 	while(token->kind != TK_BLOCK){
 		src = array_index(clone, new_node_num(ctr));
+		src->type->is_const = 0;
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, expr());

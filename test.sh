@@ -285,6 +285,9 @@ assert -cl 3 "int main(){const int x = 3; return x;}"
 assert -cl 3 'int main(){const int x[4]={0,1,2,3}; return x[1] + x[2];}'
 assert -cl 3 "const int x = 3; int main(){return x;}"
 assert -cl 3 'const int x[4]={0,1,2,3}; int main(){return x[1] + x[2];}'
+assert -cl 3 "int main(){int x=3; const int *y=&x; return *y;}"
+assert -cl 3 "int main(){int x=3; int * const y=&x; return *y;}"
 assert -cl 97 'const char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];}'
+
 
 echo OK
