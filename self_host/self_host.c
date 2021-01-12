@@ -244,11 +244,6 @@ struct Member{
 	Member *next;
 };
 
-
-
-
-
-
 //================= global variable ===================
 extern int      llid;
 extern int      alloc_size;
@@ -1121,8 +1116,10 @@ Type *parse_type(void){
 		}
 	}
 
-	type->size  = type_size(type);
-	type->align = type_align(type);
+	type->size     = type_size(type);
+	type->align    = type_align(type);
+	type->is_const = is_const;
+
 
 	// count asterisk
 	while(token->kind == TK_RESERVED && *(token->str) == '*'){
@@ -1132,8 +1129,6 @@ Type *parse_type(void){
 
 	// add ptr
 	type = insert_ptr_type(type, star_count);
-	type->is_const = is_const;
-
 	return type;
 }
 
@@ -1150,6 +1145,10 @@ Type *insert_ptr_type(Type *prev, int star_count){
 		newtype->is_extern       = prev->is_extern;
 		newtype->is_thread_local = prev->is_thread_local;
 		prev = newtype;
+	}
+
+	if(consume_reserved_word("const", TK_CONST)){
+		newtype->is_const = 1;
 	}
 
 	return newtype;
@@ -1193,8 +1192,6 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 
 			if(gvar->type == __NULL){
 				gvar->type = newtype;
-				gvar->type->is_const = toplv_type->is_const;
-				toplv_type->is_const = 0;
 			}
 			expect("]");
 		}
@@ -1242,8 +1239,6 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 			if(lvar->type == __NULL){
 				lvar->type = newtype;
-				lvar->type->is_const = node->type->is_const;
-				node->type->is_const = 0;
 			}
 			expect("]");
 		}
@@ -1302,8 +1297,6 @@ Member *register_struc_member(int *asize_ptr){
 
 				if(new_memb->type == __NULL){
 					new_memb->type = newtype;
-					new_memb->type->is_const = memb_type->is_const;
-					memb_type->is_const = 0;
 				}
 				expect("]");
 			}
@@ -1805,6 +1798,7 @@ Node *array_block(Node *arr){
 
 	while(token->kind != TK_BLOCK){
 		src = array_index(clone, new_node_num(ctr));
+		src->type->is_const = 0;
 		//Is first?
 		if(ctr == 0){
 			dst = new_node(ND_ASSIGN, src, expr());
