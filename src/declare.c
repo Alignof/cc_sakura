@@ -160,6 +160,10 @@ Type *insert_ptr_type(Type *prev, int star_count){
 		prev = newtype;
 	}
 
+	if(consume_reserved_word("const", TK_CONST)){
+		newtype->is_const = 1;
+	}
+
 	return newtype;
 }
 
