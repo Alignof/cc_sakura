@@ -1,5 +1,13 @@
+ARCH     := INTEL
+
+ifeq ($(ARCH), INTEL)
 CC	 := gcc
 CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
+else
+CC	 := /opt/riscv/bin/riscv64-unknown-linux-gnu-gcc
+CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
+endif
+
 
 INCLUDE  := -I ./include
 TARGET   := ./cc_sakura
