@@ -1,11 +1,12 @@
-ARCH     := x8664
+CC	 := gcc
+ARCH     := x8664 # x8664 or riscv
 
 ifeq ($(ARCH), x8664)
-CC	 := gcc
+BT	 := gcc
 CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
 SOURCES  := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 else
-CC	 := /opt/riscv/bin/riscv64-unknown-linux-gnu-gcc
+BT	 := /opt/riscv/bin/riscv64-unknown-linux-gnu-gcc
 CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
 SOURCES  := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 endif
@@ -32,11 +33,11 @@ test: $(TARGET)
 	./test.sh
 
 file_test: $(TARGET)
-	$(TARGET) test.c > tmp.s && $(CC) -static tmp.s -o tmp
+	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
 	./tmp || echo $$?
 
 gcc_test: 
-	$(CC) test.c -S -masm=intel -O0 -o tmp.s && $(CC) -static -O0 tmp.s -o tmp
+	$(BT) test.c -S -masm=intel -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
 	./tmp || echo $$?
 
 clean:

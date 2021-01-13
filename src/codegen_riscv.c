@@ -552,7 +552,7 @@ void gen_main(void){
 	int j;
 
 
-	printf("// x86-64\n");
+	printf("// risc-v\n");
 	printf(".intel_syntax noprefix\n");
 
 	// set global variable
