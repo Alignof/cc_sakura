@@ -371,6 +371,7 @@ Member *register_struc_member(int *asize_ptr);
 Member *register_enum_member(void);
 
 // codegen.c
+void gen_main(void);
 void gen(Node *node);
 void gen_expr(Node *node);
 void gen_args(Node *args);

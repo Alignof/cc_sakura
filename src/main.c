@@ -110,8 +110,6 @@ void set_gvar(GVar *gvar){
 }
 
 int main(int argc, char **argv){
-	int i;
-	int j;
 	IGNORE_SCOPE   = 0;
 	CONSIDER_SCOPE = 1;
 
@@ -120,6 +118,7 @@ int main(int argc, char **argv){
 
 	// tokenize
 	token = tokenize(user_input);
+
 	// make syntax tree
 	program();
 
@@ -127,55 +126,8 @@ int main(int argc, char **argv){
 		fprintf(stderr, "function is not found.");
 	}
 
-
 	// generate code
-	printf(".intel_syntax noprefix\n");
-
-	// set global variable
-	printf(".data\n");
-	GVar *start = globals;
-	for (GVar *var = start;var;var = var->next){
-		set_gvar(var);
-	}
-
-	// set string
-	for (Str *var = strings;var;var = var->next){
-		printf(".LC%d:\n", var->label_num);
-		printf("	.string \"%.*s\"\n", var->len, var->str);
-	}
-
-	llid           = 0;
-	label_num      = 0;
-	label_loop_end = 0;
-	labels_head    = NULL;
-	labels_tail    = NULL;
-
-	//generate assembly at first expr
-	printf(".text\n");
-	for(i = 0;func_list[i];i++){
-		if(func_list[i]->code[0] == NULL) continue;
-		printf(".globl %s\n", func_list[i]->name);
-		printf("%s:\n", func_list[i]->name);
-		printf("	push rbp\n");
-		printf("	mov rbp,rsp\n");
-		printf("	sub rsp,%d\n", func_list[i]->stack_size);
-
-		if(func_list[i]->args){
-			// set local variable
-			gen(func_list[i]->args);
-		}
-
-		for(j = 0;func_list[i]->code[j] != NULL;j++){
-			// gen code
-			gen(func_list[i]->code[j]);
-		}
-
-		// epiroge
-		// rax = return value
-		printf("	mov rsp,rbp\n");
-		printf("	pop rbp\n");
-		printf("	ret\n\n");
-	}
+	gen_main();
 
 	return 0;
 }
