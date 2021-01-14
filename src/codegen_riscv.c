@@ -89,7 +89,7 @@ void gen_calc(Node *node){
 
 	switch(node->kind){
 		case ND_ADD:
-			printf("	add %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	add a0,a0,a1\n");
 			break;
 		case ND_SUB:
 			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
@@ -161,13 +161,13 @@ void gen_calc(Node *node){
 }
 
 void push(char *reg, int size){
-	printf("	add sp,sp,-%d\n", size);
+	printf("	addi sp,sp,-%d\n", size);
 	printf("	sw  %s,0(sp)\n", reg);
 }
 
 void pop(char *reg, int size){
 	printf("	lw  %s,0(sp)\n", reg);
-	printf("	add sp,sp,-%d\n", size);
+	printf("	addi sp,sp,-%d\n", size);
 }
 
 void gen_expr(Node *node){
@@ -396,14 +396,14 @@ void gen_expr(Node *node){
 			gen_expr(node->rhs);
 
 			// pop two value
-			printf("	pop rdi\n");
-			printf("	pop rax\n");
+			pop("a1", node->rhs->type->size);
+			pop("a0", node->lhs->type->size);
 
 			// calculation lhs and rhs
 			gen_calc(node);
 
 			// push result
-			printf("	push rax\n");
+			push("a0", node->type->size);
 	}
 }
 
@@ -546,10 +546,13 @@ void gen(Node *node){
 			if(node->rhs){
 				gen_expr(node->rhs);
 			}
-			printf("	pop rax\n");
-			printf("	mov rsp,rbp\n");
-			printf("	pop rbp\n");
-			printf("	ret\n");
+
+
+			pop("a5", 4);
+			printf("	mv a0,a5\n");
+			printf("	ld s0,%d(sp)\n", stack_align - 8);
+			printf("	addi sp,sp,-%d\n", stack_align);
+			printf("	jr ra\n\n");
 			return;
 		default:
 			gen_expr(node);
@@ -563,7 +566,8 @@ void gen_main(void){
 	int j;
 
 
-	printf("// risc-v\n");
+	//printf("// risc-v\n");
+	printf(".option nopic\n");
 
 	// set global variable
 	printf(".data\n");
@@ -584,16 +588,17 @@ void gen_main(void){
 	labels_head    = NULL;
 	labels_tail    = NULL;
 
-	int stack_align = 32;
 	//generate assembly at first expr
 	printf(".text\n");
 	for(i = 0;func_list[i];i++){
 		if(func_list[i]->code[0] == NULL) continue;
+
+		stack_align = 32;
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
-		printf("	addi rsp,rsp,-%d\n", stack_align);
+		printf("	addi sp,sp,-%d\n", stack_align);
 		printf("	sd s0,%d(sp)\n", stack_align - 8);
-		printf("	addi rsp,rsp,%d\n", stack_align);
+		printf("	addi sp,sp,%d\n", stack_align);
 
 		if(func_list[i]->args){
 			// set local variable
@@ -608,7 +613,7 @@ void gen_main(void){
 		// epiroge
 		printf("	mv a0,a5\n");
 		printf("	ld s0,%d(sp)\n", stack_align - 8);
-		printf("	addi rsp,rsp,-%d\n", func_list[i]->stack_size);
+		printf("	addi sp,sp,-%d\n", stack_align);
 		printf("	jr ra\n\n");
 	}
 }

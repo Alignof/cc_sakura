@@ -1,22 +1,22 @@
-CC	 := gcc
-ARCH     := risc-v # x8664 or riscv
+CC	:= gcc
+ARCH    := x8664 # x8664 or riscv
 
 ifeq ($(ARCH), x8664)
-BT	 := gcc
-CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
-SOURCES  := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
+	BT	 := gcc
+	CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
+	SOURCES  := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 else
-BT	 := /opt/riscv/bin/riscv64-unknown-linux-gnu-gcc
-CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
-SOURCES  := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
+	BT	 := /opt/riscv/bin/riscv64-unknown-linux-gnu-gcc
+	CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
+	SOURCES  := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 endif
 
 
-INCLUDE  := -I ./include
-TARGET   := ./cc_sakura
-SRCDIR   := ./src
-OBJDIR   := ./src/obj
-OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
+INCLUDE := -I ./include
+TARGET  := ./cc_sakura
+SRCDIR  := ./src
+OBJDIR  := ./src/obj
+OBJECTS := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
 $(TARGET): $(OBJECTS)
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -33,6 +33,8 @@ test: $(TARGET)
 	./test.sh
 
 file_test: $(TARGET)
+	echo $(ARCH)
+	echo $(BT)
 	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
 	./tmp || echo $$?
 

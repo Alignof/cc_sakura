@@ -5,6 +5,7 @@ int   label_num;
 int   IGNORE_SCOPE;
 int   CONSIDER_SCOPE;
 int   label_loop_end;
+int   stack_align;
 char  *user_input;
 char  filename[100];
 Func  *func_list[FUNC_NUM];

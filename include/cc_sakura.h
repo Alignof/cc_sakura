@@ -279,6 +279,7 @@ extern Enum     *outside_enum;
 extern Def_Type *outside_deftype;
 extern int      label_num;
 extern int      label_loop_end;
+extern int      stack_align;
 
 // main.c
 char *read_file(char *path);
