@@ -160,6 +160,16 @@ void gen_calc(Node *node){
 	}
 }
 
+void push(char *reg, int size){
+	printf("	add sp,sp,-%d\n", size);
+	printf("	sw  %s,0(sp)\n", reg);
+}
+
+void pop(char *reg, int size){
+	printf("	lw  %s,0(sp)\n", reg);
+	printf("	add sp,sp,-%d\n", size);
+}
+
 void gen_expr(Node *node){
 	int reg_ty; 
 	int reg_lty;
@@ -171,7 +181,8 @@ void gen_expr(Node *node){
 
 	switch(node->kind){
 		case ND_NUM:
-			printf("	push %d\n", node->val);
+			printf("	li a0,%d\n", node->val);
+			push("a0", node->type->size);
 			return;
 		case ND_CAST:
 			gen_expr(node->rhs);
@@ -553,7 +564,6 @@ void gen_main(void){
 
 
 	printf("// risc-v\n");
-	printf(".intel_syntax noprefix\n");
 
 	// set global variable
 	printf(".data\n");
@@ -574,15 +584,16 @@ void gen_main(void){
 	labels_head    = NULL;
 	labels_tail    = NULL;
 
+	int stack_align = 32;
 	//generate assembly at first expr
 	printf(".text\n");
 	for(i = 0;func_list[i];i++){
 		if(func_list[i]->code[0] == NULL) continue;
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
-		printf("	push rbp\n");
-		printf("	mov rbp,rsp\n");
-		printf("	sub rsp,%d\n", func_list[i]->stack_size);
+		printf("	addi rsp,rsp,-%d\n", stack_align);
+		printf("	sd s0,%d(sp)\n", stack_align - 8);
+		printf("	addi rsp,rsp,%d\n", stack_align);
 
 		if(func_list[i]->args){
 			// set local variable
@@ -595,9 +606,9 @@ void gen_main(void){
 		}
 
 		// epiroge
-		// rax = return value
-		printf("	mov rsp,rbp\n");
-		printf("	pop rbp\n");
-		printf("	ret\n\n");
+		printf("	mv a0,a5\n");
+		printf("	ld s0,%d(sp)\n", stack_align - 8);
+		printf("	addi rsp,rsp,-%d\n", func_list[i]->stack_size);
+		printf("	jr ra\n\n");
 	}
 }

@@ -1,5 +1,5 @@
 CC	 := gcc
-ARCH     := x8664 # x8664 or riscv
+ARCH     := risc-v # x8664 or riscv
 
 ifeq ($(ARCH), x8664)
 BT	 := gcc
