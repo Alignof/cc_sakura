@@ -1,4 +1,20 @@
 #!/bin/bash
+
+if [ $# -eq 1 ]; then
+	if [ $1 = "x8664" ]; then
+		ARCH="x8664"
+	elif [ $1 = "riscv" ]; then
+		ARCH="riscv"
+	else
+		echo "unknown architecture."
+		exit
+	fi
+else
+	ARCH="x8664"
+fi
+
+echo $ARCH
+
 assert() {
 	if [ $# -eq 3 ]; then
 		option="$1"
@@ -11,10 +27,16 @@ assert() {
 		./cc_sakura "$input" > tmp.s
 	fi
 
-	gcc -c tmp.s 
-	gcc -o tmp -static tmp.s 
+	if [ $ARCH = "x8664" ]; then
+		gcc -c tmp.s 
+		gcc -o tmp -static tmp.s 
+		./tmp
+	elif [ $ARCH = "riscv" ]; then
+		/opt/riscv/bin/riscv64-unknown-linux-gnu-gcc -c tmp.s 
+		/opt/riscv/bin/riscv64-unknown-linux-gnu-gcc -o tmp -static tmp.s 
+		~/riscv/toolchain/bin/spike pk ./tmp
+	fi
 
-	./tmp
 	actual="$?"
 
 	ESC=$(printf '\033')
@@ -25,6 +47,7 @@ assert() {
 		exit 1
 	fi
 }
+
 
 assert -cl 0  "int main(){0;}"
 assert -cl 42 "int main(){42;}"

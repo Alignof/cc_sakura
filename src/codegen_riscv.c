@@ -92,25 +92,20 @@ void gen_calc(Node *node){
 			printf("	add a0,a0,a1\n");
 			break;
 		case ND_SUB:
-			printf("	sub %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	sub a0,a0,a1\n");
 			break;
 		case ND_MUL:
 			if(node->type->ty == CHAR){
-				printf("	movsx eax,al\n");
-				printf("	movsx edi,dil\n");
-				printf("	imul eax,edi\n");
+				printf("	mulb a0,a0,a1\n");
 			}else{
-				printf("	imul %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+				printf("	mulw a0,a0,a1\n");
 			}
 			break;
 		case ND_DIV:
-			printf("	cqo\n");
-			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	divw a0,a0,a1\n");
 			break;
 		case ND_MOD:
-			printf("	cqo\n");
-			printf("	idiv %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	mov %s,%s\n", reg_ax[reg_ty], reg_dx[reg_ty]);
+			printf("	remw a0,a0,a1\n");
 			break;
 		case ND_GT:
 			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
@@ -167,7 +162,7 @@ void push(char *reg, int size){
 
 void pop(char *reg, int size){
 	printf("	lw  %s,0(sp)\n", reg);
-	printf("	addi sp,sp,-%d\n", size);
+	printf("	addi sp,sp,%d\n", size);
 }
 
 void gen_expr(Node *node){
@@ -548,15 +543,14 @@ void gen(Node *node){
 			}
 
 
-			pop("a5", 4);
-			printf("	mv a0,a5\n");
+			pop("a0", 4);
 			printf("	ld s0,%d(sp)\n", stack_align - 8);
 			printf("	addi sp,sp,-%d\n", stack_align);
 			printf("	jr ra\n\n");
 			return;
 		default:
 			gen_expr(node);
-			printf("	pop rax\n\n");
+			pop("a0", node->type->size);
 			return;
 	}
 }
@@ -611,7 +605,6 @@ void gen_main(void){
 		}
 
 		// epiroge
-		printf("	mv a0,a5\n");
 		printf("	ld s0,%d(sp)\n", stack_align - 8);
 		printf("	addi sp,sp,-%d\n", stack_align);
 		printf("	jr ra\n\n");

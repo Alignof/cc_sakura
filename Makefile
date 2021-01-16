@@ -32,7 +32,11 @@ install: $(OBJECTS)
 	$(CC) -O2 -o $(TARGET) $^ $(LDFLAGS)
 
 test: $(TARGET)
-	./test.sh
+ifeq ($(ARCH),x8664)
+	./test.sh x8664
+else
+	./test.sh riscv
+endif
 
 file_test: $(TARGET)
 	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
