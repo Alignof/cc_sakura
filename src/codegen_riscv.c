@@ -105,34 +105,32 @@ void gen_calc(Node *node){
 			printf("	rem%c a0,a0,a1\n", reg_size[reg_ty]);
 			break;
 		case ND_GT:
-			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
-			printf("	setl al\n");
-			printf("	movzb rax,al\n");
+			printf("	sgt a0,a0,a1\n");
+			printf("	andi a0,a0,0xff\n");
 			break;
 		case ND_GE:
-			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
-			printf("	setle al\n");
-			printf("	movzb rax,al\n");
+			printf("	sgt a0,a0,a1\n");
+			printf("	xori a0,a0,1\n");
+			printf("	andi a0,a0,0xff\n");
 			break;
 		case ND_LT:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	setl al\n");
-			printf("	movzb rax,al\n");
+			printf("	slt a0,a0,a1\n");
+			printf("	andi a0,a0,0xff\n");
 			break;
 		case ND_LE:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	setle al\n");
-			printf("	movzb rax,al\n");
+			printf("	slt a0,a0,a1\n");
+			printf("	xori a0,a0,1\n");
+			printf("	andi a0,a0,0xff\n");
 			break;
 		case ND_EQ:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	sete al\n");
-			printf("	movzb rax,al\n");
+			printf("	sub a0,a0,a1\n");
+			printf("	seqz a0,a0\n");
+			printf("	andi a0,a0,0xff\n");
 			break;
 		case ND_NE:
-			printf("	cmp %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
-			printf("	setne al\n");
-			printf("	movzb rax,al\n");
+			printf("	sub a0,a0,a1\n");
+			printf("	snez a0,a0\n");
+			printf("	andi a0,a0,0xff\n");
 			break;
 		case ND_BIT_AND:
 			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
@@ -143,9 +141,8 @@ void gen_calc(Node *node){
 			printf("	movzb rax,al\n");
 			break;
 		case ND_NOT:
-			printf("	cmp %s,0\n", reg_ax[node->rhs->type->ty]);
-			printf("	sete al\n");
-			printf("	movzb rax,al\n");
+			printf("	seqz a0,a0\n");
+			printf("	andi a0,a0,0xff\n");
 			break;
 		default:
 			error_at(token->str, "cannot code gen");
@@ -325,33 +322,33 @@ void gen_expr(Node *node){
 			return;
 		case ND_AND:
 			gen_expr(node->lhs);
-			printf("	je .LlogicEnd%03d\n", node->val);
+			printf("	ld a0,0(sp)\n");
+			printf("	beqz a0,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
-			printf("	pop rax\n");
-			printf("	pop rdx\n");
-			printf("	and al,dl\n");
-			printf("	movzb rax,al\n");
-			printf("	push rax\n");
+			pop("a0");
+			pop("a1");
+			printf("	and a0,a0,a1\n");
+			push("a0");
 			printf(".LlogicEnd%03d:\n", node->val);
 			return;
 		case ND_OR:
 			gen_expr(node->lhs);
-			printf("	jne .LlogicEnd%03d\n", node->val);
+			printf("	ld a0,0(sp)\n");
+			printf("	bnez a0,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
-			printf("	pop rax\n");
-			printf("	pop rdx\n");
-			printf("	or al,dl\n");
-			printf("	movzb rax,al\n");
-			printf("	push rax\n");
+			pop("a0");
+			pop("a1");
+			printf("	or a0,a0,a1\n");
+			push("a0");
 			printf(".LlogicEnd%03d:\n", node->val);
 			return;
 		case ND_NOT:
 			gen_expr(node->rhs);
-			printf("	pop rax\n");
+			pop("a0");
 			gen_calc(node);
-			printf("	push rax\n");
+			push("a0");
 			return;
 		case ND_ADDRESS:
 			gen_address(node->rhs);// printf("	push rax\n");

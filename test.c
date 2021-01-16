@@ -1,1 +1,1 @@
-int main(){int a=15; int *ptr; ptr=&a; return *ptr;}
+int main(){return !(12 == 11);}
