@@ -6,6 +6,16 @@ const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
 const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
 const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
 
+void push(char *reg){
+	printf("	addi sp,sp,-8\n");
+	printf("	sd  %s,0(sp)\n", reg);
+}
+
+void pop(char *reg){
+	printf("	ld  %s,0(sp)\n", reg);
+	printf("	addi sp,sp,8\n");
+}
+
 
 void expand_next(Node *node){
 	while(node){
@@ -39,9 +49,8 @@ void gen_lvar(Node *node){
 		error_at(token->str,"not a variable");
 	}
 
-	printf("	mov rax,rbp\n");
-	printf("	sub rax,%d\n", node->offset);
-	printf("	push rax\n");
+	printf("	addi a0,s0,-%d\n", stack_align - 8 - node->offset);
+	push("a0");
 }
 
 void gen_struc(Node *node){
@@ -149,16 +158,6 @@ void gen_calc(Node *node){
 	}
 }
 
-void push(char *reg){
-	printf("	addi sp,sp,-8\n");
-	printf("	sd  %s,0(sp)\n", reg);
-}
-
-void pop(char *reg){
-	printf("	ld  %s,0(sp)\n", reg);
-	printf("	addi sp,sp,8\n");
-}
-
 void gen_expr(Node *node){
 	int reg_ty; 
 	int reg_lty;
@@ -191,26 +190,23 @@ void gen_expr(Node *node){
 			gen_gvar(node);
 
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-				printf("	pop rax\n");
+				pop("a0");
 				if(node->type->ty <= CHAR){
 					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
 					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 				}
-				printf("	push rax\n");
+				printf("	s%c a0,a0\n", reg_size[reg_ty]);
+				push("a0");
 			}
 			return;
 		case ND_LVAR:
 			gen_lvar(node);
 
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-				printf("	pop rax\n");
-				if(node->type->ty <= CHAR){
-					printf("        mov al,BYTE PTR [rax]\n");
-				}else{
-					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
-				}
-				printf("	push rax\n");
+				pop("a0");
+				printf("	s%c a0,0(a0)\n", reg_size[reg_ty]);
+				push("a0");
 			}
 			return;
 		case ND_PREID:
@@ -255,11 +251,11 @@ void gen_expr(Node *node){
 			gen_address(node->lhs);
 			gen_expr(node->rhs);
 
-			printf("	pop rdi\n");
-			printf("	pop rax\n");
-			printf("	mov [rax],%s\n", reg_di[reg_ty]);
+			pop("a1");
+			pop("a0");
+			printf("	s%c a1,0(a0)\n", reg_size[reg_ty]);
 
-			printf("	push rdi\n");
+			push("a1");
 			return;
 		case ND_COMPOUND:
 			// push
@@ -586,7 +582,7 @@ void gen_main(void){
 		printf("%s:\n", func_list[i]->name);
 		printf("	addi sp,sp,-%d\n", stack_align);
 		printf("	sd s0,%d(sp)\n", stack_align - 8);
-		printf("	addi sp,sp,%d\n", stack_align);
+		printf("	addi sp,sp,%d\n\n", stack_align);
 
 		if(func_list[i]->args){
 			// set local variable
