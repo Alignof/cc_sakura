@@ -1,1 +1,1 @@
-int main(){int a=15; int b=7; return a%b;}
+int main(){int a=15; int *ptr; ptr=&a; return *ptr;}

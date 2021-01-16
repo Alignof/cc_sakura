@@ -152,14 +152,14 @@ void gen_calc(Node *node){
 	}
 }
 
-void push(char *reg, int size){
-	printf("	addi sp,sp,-%d\n", size);
-	printf("	sw  %s,0(sp)\n", reg);
+void push(char *reg){
+	printf("	addi sp,sp,-8\n");
+	printf("	sd  %s,0(sp)\n", reg);
 }
 
-void pop(char *reg, int size){
-	printf("	lw  %s,0(sp)\n", reg);
-	printf("	addi sp,sp,%d\n", size);
+void pop(char *reg){
+	printf("	ld  %s,0(sp)\n", reg);
+	printf("	addi sp,sp,8\n");
 }
 
 void gen_expr(Node *node){
@@ -174,7 +174,7 @@ void gen_expr(Node *node){
 	switch(node->kind){
 		case ND_NUM:
 			printf("	li a0,%d\n", node->val);
-			push("a0", node->type->size);
+			push("a0");
 			return;
 		case ND_CAST:
 			gen_expr(node->rhs);
@@ -388,14 +388,14 @@ void gen_expr(Node *node){
 			gen_expr(node->rhs);
 
 			// pop two value
-			pop("a1", node->rhs->type->size);
-			pop("a0", node->lhs->type->size);
+			pop("a1");
+			pop("a0");
 
 			// calculation lhs and rhs
 			gen_calc(node);
 
 			// push result
-			push("a0", node->type->size);
+			push("a0");
 	}
 }
 
@@ -540,14 +540,14 @@ void gen(Node *node){
 			}
 
 
-			pop("a0", 4);
+			pop("a0");
 			printf("	ld s0,%d(sp)\n", stack_align - 8);
 			printf("	addi sp,sp,-%d\n", stack_align);
 			printf("	jr ra\n\n");
 			return;
 		default:
 			gen_expr(node);
-			pop("a0", node->type->size);
+			pop("a0");
 			return;
 	}
 }
