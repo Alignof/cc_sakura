@@ -1,5 +1,6 @@
 #include "cc_sakura.h"
 //                         void _Bool  char   enum  int   ptr  array struct
+const char reg_size[8]  = {'b',   'b', 'b',  'w',  'w',  'd',  'd',  'd'};
 const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
 const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
 const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
@@ -95,17 +96,13 @@ void gen_calc(Node *node){
 			printf("	sub a0,a0,a1\n");
 			break;
 		case ND_MUL:
-			if(node->type->ty == CHAR){
-				printf("	mulb a0,a0,a1\n");
-			}else{
-				printf("	mulw a0,a0,a1\n");
-			}
+			printf("	mul%c a0,a0,a1\n", reg_size[reg_ty]);
 			break;
 		case ND_DIV:
-			printf("	divw a0,a0,a1\n");
+			printf("	div%c a0,a0,a1\n", reg_size[reg_ty]);
 			break;
 		case ND_MOD:
-			printf("	remw a0,a0,a1\n");
+			printf("	rem%c a0,a0,a1\n", reg_size[reg_ty]);
 			break;
 		case ND_GT:
 			printf("	cmp %s,%s\n", reg_di[reg_ty], reg_ax[reg_ty]);
