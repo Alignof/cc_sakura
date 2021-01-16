@@ -39,11 +39,12 @@ else
 endif
 
 file_test: $(TARGET)
-	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
 ifeq ($(ARCH),x8664)
+	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
 	./tmp || echo $$?
 else
-	$(SPIKE) pk ./tmp || echo $$?
+	$(TARGET) test.c > tmp.s && $(BT) -march=rv32imac -mabi=ilp32 -static tmp.s -o tmp
+	$(SPIKE) --isa=rv32imac pk ./tmp || echo $$?
 endif
 
 gcc_test: 
@@ -51,7 +52,7 @@ ifeq ($(ARCH),x8664)
 	$(BT) test.c -S -masm=intel -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
 	./tmp || echo $$?
 else
-	$(BT) test.c -S -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
+	$(BT) test.c -S -O0 -o tmp.s && $(BT) -march=rv32gc -static -O0 tmp.s -o tmp
 	$(SPIKE) pk ./tmp || echo $$?
 endif
 

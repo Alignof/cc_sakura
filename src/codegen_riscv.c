@@ -1,6 +1,6 @@
 #include "cc_sakura.h"
 //                         void _Bool  char   enum  int   ptr  array struct
-const char reg_size[8]  = {'b',   'b', 'b',  'w',  'w',  'd',  'd',  'd'};
+const char reg_size[8]  = {'b',  'b',  'b',  'w',  'w',  'w',  'w',  'w'};
 const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
 const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
 const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
@@ -8,11 +8,11 @@ const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
 
 void push(char *reg){
 	printf("	addi sp,sp,-8\n");
-	printf("	sd  %s,0(sp)\n", reg);
+	printf("	sw  %s,0(sp)\n", reg);
 }
 
 void pop(char *reg){
-	printf("	ld  %s,0(sp)\n", reg);
+	printf("	lw  %s,0(sp)\n", reg);
 	printf("	addi sp,sp,8\n");
 }
 
@@ -318,7 +318,7 @@ void gen_expr(Node *node){
 			return;
 		case ND_AND:
 			gen_expr(node->lhs);
-			printf("	ld a0,0(sp)\n");
+			printf("	lw a0,0(sp)\n");
 			printf("	beqz a0,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
@@ -330,7 +330,7 @@ void gen_expr(Node *node){
 			return;
 		case ND_OR:
 			gen_expr(node->lhs);
-			printf("	ld a0,0(sp)\n");
+			printf("	lw a0,0(sp)\n");
 			printf("	bnez a0,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
@@ -534,7 +534,7 @@ void gen(Node *node){
 
 
 			pop("a0");
-			printf("	ld s0,%d(sp)\n", stack_align - 8);
+			printf("	lw s0,%d(sp)\n", stack_align - 8);
 			printf("	addi sp,sp,-%d\n", stack_align);
 			printf("	jr ra\n\n");
 			return;
@@ -581,7 +581,7 @@ void gen_main(void){
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	addi sp,sp,-%d\n", stack_align);
-		printf("	sd s0,%d(sp)\n", stack_align - 8);
+		printf("	sw s0,%d(sp)\n", stack_align - 8);
 		printf("	addi sp,sp,%d\n\n", stack_align);
 
 		if(func_list[i]->args){
@@ -595,7 +595,7 @@ void gen_main(void){
 		}
 
 		// epiroge
-		printf("	ld s0,%d(sp)\n", stack_align - 8);
+		printf("	lw s0,%d(sp)\n", stack_align - 8);
 		printf("	addi sp,sp,-%d\n", stack_align);
 		printf("	jr ra\n\n");
 	}
