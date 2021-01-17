@@ -105,13 +105,13 @@ void gen_calc(Node *node){
 			printf("	sub a0,a0,a1\n");
 			break;
 		case ND_MUL:
-			printf("	mul%c a0,a0,a1\n", reg_size[reg_ty]);
+			printf("	mul a0,a0,a1\n");
 			break;
 		case ND_DIV:
-			printf("	div%c a0,a0,a1\n", reg_size[reg_ty]);
+			printf("	div a0,a0,a1\n");
 			break;
 		case ND_MOD:
-			printf("	rem%c a0,a0,a1\n", reg_size[reg_ty]);
+			printf("	rem a0,a0,a1\n");
 			break;
 		case ND_GT:
 			printf("	sgt a0,a0,a1\n");
