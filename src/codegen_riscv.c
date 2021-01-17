@@ -49,8 +49,8 @@ void gen_lvar(Node *node){
 		error_at(token->str,"not a variable");
 	}
 
-	printf("	addi a0,s0,-%d\n", stack_align - 8 - node->offset);
-	push("a0");
+	printf("	addi a5,s0,-%d\n", stack_align - 8 - node->offset);
+	push("a5");
 }
 
 void gen_struc(Node *node){
@@ -99,47 +99,47 @@ void gen_calc(Node *node){
 
 	switch(node->kind){
 		case ND_ADD:
-			printf("	add a0,a0,a1\n");
+			printf("	add a5,a5,a4\n");
 			break;
 		case ND_SUB:
-			printf("	sub a0,a0,a1\n");
+			printf("	sub a5,a5,a4\n");
 			break;
 		case ND_MUL:
-			printf("	mul a0,a0,a1\n");
+			printf("	mul a5,a5,a4\n");
 			break;
 		case ND_DIV:
-			printf("	div a0,a0,a1\n");
+			printf("	div a5,a5,a4\n");
 			break;
 		case ND_MOD:
-			printf("	rem a0,a0,a1\n");
+			printf("	rem a5,a5,a4\n");
 			break;
 		case ND_GT:
-			printf("	sgt a0,a0,a1\n");
-			printf("	andi a0,a0,0xff\n");
+			printf("	sgt a5,a5,a4\n");
+			printf("	andi a5,a5,0xff\n");
 			break;
 		case ND_GE:
-			printf("	sgt a0,a0,a1\n");
-			printf("	xori a0,a0,1\n");
-			printf("	andi a0,a0,0xff\n");
+			printf("	sgt a5,a5,a4\n");
+			printf("	xori a5,a5,1\n");
+			printf("	andi a5,a5,0xff\n");
 			break;
 		case ND_LT:
-			printf("	slt a0,a0,a1\n");
-			printf("	andi a0,a0,0xff\n");
+			printf("	slt a5,a5,a4\n");
+			printf("	andi a5,a5,0xff\n");
 			break;
 		case ND_LE:
-			printf("	slt a0,a0,a1\n");
-			printf("	xori a0,a0,1\n");
-			printf("	andi a0,a0,0xff\n");
+			printf("	slt a5,a5,a4\n");
+			printf("	xori a5,a5,1\n");
+			printf("	andi a5,a5,0xff\n");
 			break;
 		case ND_EQ:
-			printf("	sub a0,a0,a1\n");
-			printf("	seqz a0,a0\n");
-			printf("	andi a0,a0,0xff\n");
+			printf("	sub a5,a5,a4\n");
+			printf("	seqz a5,a5\n");
+			printf("	andi a5,a5,0xff\n");
 			break;
 		case ND_NE:
-			printf("	sub a0,a0,a1\n");
-			printf("	snez a0,a0\n");
-			printf("	andi a0,a0,0xff\n");
+			printf("	sub a5,a5,a4\n");
+			printf("	snez a5,a5\n");
+			printf("	andi a5,a5,0xff\n");
 			break;
 		case ND_BIT_AND:
 			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
@@ -150,8 +150,8 @@ void gen_calc(Node *node){
 			printf("	movzb rax,al\n");
 			break;
 		case ND_NOT:
-			printf("	seqz a0,a0\n");
-			printf("	andi a0,a0,0xff\n");
+			printf("	seqz a5,a5\n");
+			printf("	andi a5,a5,0xff\n");
 			break;
 		default:
 			error_at(token->str, "cannot code gen");
@@ -169,8 +169,8 @@ void gen_expr(Node *node){
 
 	switch(node->kind){
 		case ND_NUM:
-			printf("	li a0,%d\n", node->val);
-			push("a0");
+			printf("	li a5,%d\n", node->val);
+			push("a5");
 			return;
 		case ND_CAST:
 			gen_expr(node->rhs);
@@ -190,23 +190,23 @@ void gen_expr(Node *node){
 			gen_gvar(node);
 
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-				pop("a0");
+				pop("a5");
 				if(node->type->ty <= CHAR){
 					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
 					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 				}
-				printf("	s%c a0,a0\n", reg_size[reg_ty]);
-				push("a0");
+				printf("	s%c a5,a5\n", reg_size[reg_ty]);
+				push("a5");
 			}
 			return;
 		case ND_LVAR:
 			gen_lvar(node);
 
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-				pop("a0");
-				printf("	s%c a0,0(a0)\n", reg_size[reg_ty]);
-				push("a0");
+				pop("a5");
+				printf("	s%c a5,0(a5)\n", reg_size[reg_ty]);
+				push("a5");
 			}
 			return;
 		case ND_PREID:
@@ -251,11 +251,11 @@ void gen_expr(Node *node){
 			gen_address(node->lhs);
 			gen_expr(node->rhs);
 
-			pop("a1");
-			pop("a0");
-			printf("	s%c a1,0(a0)\n", reg_size[reg_ty]);
+			pop("a4");
+			pop("a5");
+			printf("	s%c a4,0(a5)\n", reg_size[reg_ty]);
 
-			push("a1");
+			push("a4");
 			return;
 		case ND_COMPOUND:
 			// push
@@ -318,33 +318,33 @@ void gen_expr(Node *node){
 			return;
 		case ND_AND:
 			gen_expr(node->lhs);
-			printf("	lw a0,0(sp)\n");
-			printf("	beqz a0,.LlogicEnd%03d\n", node->val);
+			printf("	lw a5,0(sp)\n");
+			printf("	beqz a5,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
-			pop("a0");
-			pop("a1");
-			printf("	and a0,a0,a1\n");
-			push("a0");
+			pop("a5");
+			pop("a4");
+			printf("	and a5,a5,a4\n");
+			push("a5");
 			printf(".LlogicEnd%03d:\n", node->val);
 			return;
 		case ND_OR:
 			gen_expr(node->lhs);
-			printf("	lw a0,0(sp)\n");
-			printf("	bnez a0,.LlogicEnd%03d\n", node->val);
+			printf("	lw a5,0(sp)\n");
+			printf("	bnez a5,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
-			pop("a0");
-			pop("a1");
-			printf("	or a0,a0,a1\n");
-			push("a0");
+			pop("a5");
+			pop("a4");
+			printf("	or a5,a5,a4\n");
+			push("a5");
 			printf(".LlogicEnd%03d:\n", node->val);
 			return;
 		case ND_NOT:
 			gen_expr(node->rhs);
-			pop("a0");
+			pop("a5");
 			gen_calc(node);
-			push("a0");
+			push("a5");
 			return;
 		case ND_ADDRESS:
 			gen_address(node->rhs);// printf("	push rax\n");
@@ -381,14 +381,14 @@ void gen_expr(Node *node){
 			gen_expr(node->rhs);
 
 			// pop two value
-			pop("a1");
-			pop("a0");
+			pop("a4");
+			pop("a5");
 
 			// calculation lhs and rhs
 			gen_calc(node);
 
 			// push result
-			push("a0");
+			push("a5");
 	}
 }
 
@@ -533,14 +533,14 @@ void gen(Node *node){
 			}
 
 
-			pop("a0");
+			printf("	mv a0,a5\n");
 			printf("	lw s0,%d(sp)\n", stack_align - 8);
 			printf("	addi sp,sp,-%d\n", stack_align);
 			printf("	jr ra\n\n");
 			return;
 		default:
 			gen_expr(node);
-			pop("a0");
+			pop("a5");
 			return;
 	}
 }
@@ -595,6 +595,7 @@ void gen_main(void){
 		}
 
 		// epiroge
+		printf("	mv a0,a5\n");
 		printf("	lw s0,%d(sp)\n", stack_align - 8);
 		printf("	addi sp,sp,-%d\n", stack_align);
 		printf("	jr ra\n\n");
