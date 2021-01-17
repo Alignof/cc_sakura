@@ -1,13 +1,14 @@
 # x8664 or riscv
 ARCH    := riscv
 SPIKE   := ~/riscv/toolchain/bin/spike
+PK      := ~/riscv/toolchain/riscv32-unknown-elf/bin/pk 
 
 ifeq ($(ARCH),x8664)
 	BT	:= gcc
 	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 else
-	BT	:= /opt/riscv/bin/riscv64-unknown-linux-gnu-gcc
+	BT	:= /opt/riscv32/bin/riscv32-unknown-linux-gnu-gcc
 	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 endif
@@ -43,8 +44,8 @@ ifeq ($(ARCH),x8664)
 	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
 	./tmp || echo $$?
 else
-	$(TARGET) test.c > tmp.s && $(BT) -march=rv32imac -mabi=ilp32 -static tmp.s -o tmp
-	$(SPIKE) --isa=rv32imac pk ./tmp || echo $$?
+	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
+	$(SPIKE) $(pk) ./tmp || echo $$?
 endif
 
 gcc_test: 
@@ -53,7 +54,7 @@ ifeq ($(ARCH),x8664)
 	./tmp || echo $$?
 else
 	$(BT) test.c -S -O0 -o tmp.s && $(BT) -march=rv32gc -static -O0 tmp.s -o tmp
-	$(SPIKE) pk ./tmp || echo $$?
+	$(SPIKE) $(pk) ./tmp || echo $$?
 endif
 
 clean:

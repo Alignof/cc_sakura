@@ -1,2 +1,1 @@
-//int main(){int a;int b;a=3;b=2;a+b;}
-int main(){return 2+3;}
+int main(){return 5+6*7;}
