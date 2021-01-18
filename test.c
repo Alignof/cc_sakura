@@ -1,1 +1,1 @@
-int main(){int a; if(2<3) a=3-2; else a=2+3;a;}
+int main(){int a; int i; a=0; for(i=0;i<10;i=i+1) a=a+1;a;}
