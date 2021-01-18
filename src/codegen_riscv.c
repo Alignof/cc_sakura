@@ -220,25 +220,27 @@ void gen_expr(Node *node){
 			gen_expr(node->rhs->rhs->rhs);// push rhs
 			
 			// calc
-			printf("	pop rdi\n");    // rhs
-			printf("	pop rax\n");    // lhs
-			printf("	push [rax]\n"); // Evacuation lhs data
-			printf("	push rax\n");   // Evacuation lhs address
-			printf("	mov rax,[rax]\n"); // deref lhs
+			pop("a4"); // rhs
+			pop("a5"); // lhs
+
+			//printf("	lw a5, 0(a5)\n"); // Evacuation lhs data
+			push("0(a5)");// Evacuation lhs data
+			push("a5");// Evacuation lhs address
+			printf("	lw a5, 0(a5)\n"); // deref lhs
 
 			gen_calc(node->rhs->rhs);
-			printf("	push rax\n"); // rhs op lhs
+			push("a5"); // rhs op lhs
 
 			// assign
-			printf("	pop rdi\n"); // src
-			printf("	pop rax\n"); // dst
+			pop("a4"); // src
+			pop("a5"); // dst
 			if(node->lhs->type->ty == BOOL){
 				printf("	mov R8B,dil\n");
 				printf("	cmp R8B,0\n");
 				printf("	setne dl\n");
 				printf("	movzb rdi,dl\n");
 			}
-			printf("	mov [rax],%s\n", reg_di[reg_lty]);
+			printf("	sw a4, a5\n"); // deref lhs
 
 			// already evacuated
 			//printf("	push rax\n");
