@@ -1,1 +1,7 @@
-int main(){return 5+6*7;}
+int main(){
+	//int x = 3;
+	//int y = 4;
+	//return x + y;
+	int x;
+	return 0;
+}

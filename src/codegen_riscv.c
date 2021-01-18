@@ -7,13 +7,13 @@ const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
 const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
 
 void push(char *reg){
-	printf("	addi sp,sp,-8\n");
-	printf("	sw  %s,0(sp)\n", reg);
+	printf("		addi sp,sp,-4\n");
+	printf("		sw  %s,0(sp)\n", reg);
 }
 
 void pop(char *reg){
-	printf("	lw  %s,0(sp)\n", reg);
-	printf("	addi sp,sp,8\n");
+	printf("		lw  %s,0(sp)\n", reg);
+	printf("		addi sp,sp,4\n");
 }
 
 
@@ -49,7 +49,7 @@ void gen_lvar(Node *node){
 		error_at(token->str,"not a variable");
 	}
 
-	printf("	addi a5,s0,-%d\n", stack_align - 8 - node->offset);
+	printf("	addi a5,s0,-%d\n", stack_align - 4 - node->offset);
 	push("a5");
 }
 
@@ -534,7 +534,7 @@ void gen(Node *node){
 
 
 			printf("	mv a0,a5\n");
-			printf("	lw s0,%d(sp)\n", stack_align - 8);
+			printf("	lw s0,%d(sp)\n", stack_align - 4);
 			printf("	addi sp,sp,-%d\n", stack_align);
 			printf("	jr ra\n\n");
 			return;
@@ -581,7 +581,7 @@ void gen_main(void){
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	addi sp,sp,-%d\n", stack_align);
-		printf("	sw s0,%d(sp)\n", stack_align - 8);
+		printf("	sw s0,%d(sp)\n", stack_align - 4);
 		printf("	addi sp,sp,%d\n\n", stack_align);
 
 		if(func_list[i]->args){
@@ -592,11 +592,12 @@ void gen_main(void){
 		for(j = 0;func_list[i]->code[j] != NULL;j++){
 			// gen code
 			gen(func_list[i]->code[j]);
+			printf("\n");
 		}
 
 		// epiroge
 		printf("	mv a0,a5\n");
-		printf("	lw s0,%d(sp)\n", stack_align - 8);
+		printf("	lw s0,%d(sp)\n", stack_align - 4);
 		printf("	addi sp,sp,-%d\n", stack_align);
 		printf("	jr ra\n\n");
 	}

@@ -45,7 +45,7 @@ ifeq ($(ARCH),x8664)
 	./tmp || echo $$?
 else
 	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
-	$(SPIKE) $(pk) ./tmp || echo $$?
+	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 
 gcc_test: 
@@ -54,7 +54,7 @@ ifeq ($(ARCH),x8664)
 	./tmp || echo $$?
 else
 	$(BT) test.c -S -O0 -o tmp.s && $(BT) -march=rv32gc -static -O0 tmp.s -o tmp
-	$(SPIKE) $(pk) ./tmp || echo $$?
+	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 
 clean:
