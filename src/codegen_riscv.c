@@ -160,11 +160,9 @@ void gen_calc(Node *node){
 
 void gen_expr(Node *node){
 	int reg_ty; 
-	int reg_lty;
 	int reg_rty;
 
 	if(node && node->type) reg_ty = (int)node->type->ty;
-	if(node->lhs && node->lhs->type) reg_lty = (int)node->lhs->type->ty;
 	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 
 	switch(node->kind){
@@ -223,8 +221,8 @@ void gen_expr(Node *node){
 			pop("a4"); // rhs
 			pop("a5"); // lhs
 
-			//printf("	lw a5, 0(a5)\n"); // Evacuation lhs data
-			push("0(a5)");// Evacuation lhs data
+			printf("	lw t0, 0(a5)\n"); // Evacuation lhs data to temporary register
+			push("t0");// push temporary register
 			push("a5");// Evacuation lhs address
 			printf("	lw a5, 0(a5)\n"); // deref lhs
 
@@ -240,7 +238,7 @@ void gen_expr(Node *node){
 				printf("	setne dl\n");
 				printf("	movzb rdi,dl\n");
 			}
-			printf("	sw a4, a5\n"); // deref lhs
+			printf("	sw a4, 0(a5)\n"); // deref lhs
 
 			// already evacuated
 			//printf("	push rax\n");
