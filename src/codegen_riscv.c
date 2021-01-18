@@ -22,7 +22,7 @@ void expand_next(Node *node){
 		gen(node);
 		node = node->next;
 	}
-	printf("	push rax\n");
+	push("a5");
 }
 
 void expand_block_code(Node *node){
@@ -30,7 +30,7 @@ void expand_block_code(Node *node){
 		gen(node);
 		node = node->block_code;
 	}
-	printf("	push rax\n");
+	push("a5");
 }
 
 
