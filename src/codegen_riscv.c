@@ -455,8 +455,8 @@ void gen(Node *node){
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs->next);
 			if(node->lhs->next->kind != ND_NULL_STMT){
-				printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
-				printf("	je .LloopEnd%03d\n", node->val);
+				printf("	li a4,1\n");
+				printf("	bne a5,a4,.LloopEnd%03d\n", node->val);
 			}
 
 			// gen block
@@ -467,7 +467,7 @@ void gen(Node *node){
 			gen(node->lhs->next->next);
 
 			// continue
-			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf("	j .LloopBegin%03d\n", node->val);
 			printf(".LloopEnd%03d:\n", node->val);
 			return;
 		case ND_WHILE:
