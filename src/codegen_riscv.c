@@ -196,7 +196,7 @@ void gen_expr(Node *node){
 				}else{
 					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
 				}
-				printf("	s%c a5,a5\n", reg_size[reg_ty]);
+				printf("	l%c a5,a5\n", reg_size[reg_ty]);
 				push("a5");
 			}
 			return;
@@ -404,8 +404,8 @@ void gen(Node *node){
 			return;
 		case ND_IF:
 			gen(node->lhs);
-			printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
-			printf("	je .LifEnd%03d\n", node->val);
+			printf("	li a4,1\n");
+			printf("	bne a5,a4,.LifEnd%03d\n", node->val);
 			gen(node->rhs);
 
 			printf(".LifEnd%03d:\n", node->val);
@@ -413,12 +413,12 @@ void gen(Node *node){
 		case ND_IFELSE:
 			// condition
 			gen(node->lhs);
-			printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
-			printf("	je .Lelse%03d\n", node->val);
+			printf("	li a4,1\n");
+			printf("	bne a5,a4,.Lelse%03d\n", node->val);
 
 			// expr in if
 			gen(node->rhs->lhs);
-			printf("	jmp .LifEnd%03d\n", node->val);
+			printf("	j .Lelse%03d\n", node->val);
 			printf(".Lelse%03d:\n", node->val);
 
 			// expr in else

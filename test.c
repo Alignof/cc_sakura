@@ -1,7 +1,1 @@
-int main(){
-	//int x = 3;
-	//int y = 4;
-	//return x + y;
-	int x = 3;
-	return x;
-}
+int main(){int a; if(2>3) a=3-2; else a=2+3;a;}
