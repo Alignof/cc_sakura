@@ -506,7 +506,7 @@ void gen(Node *node){
 			printf("	jmp .LloopCont%03d\n", node->val);
 			return;
 		case ND_BREAK:
-			printf("	jmp .LloopEnd%03d\n", node->val);
+			printf("	j .LloopEnd%03d\n", node->val);
 			return;
 		case ND_BLOCK:
 			expand_block_code(node->rhs);

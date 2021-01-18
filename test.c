@@ -1,1 +1,1 @@
-int main(){int a; int i; a=1; for(i=0;i<6;i=i+1) a=a*2;a;}
+int main(){int i; for(i=0;i<10;i++){if(i==5) break;} return i;}
