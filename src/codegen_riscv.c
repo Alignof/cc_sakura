@@ -431,16 +431,16 @@ void gen(Node *node){
 			while(cases){
 				gen(cases);
 
-				printf("	cmp %s,0\n", reg_ax[cases->type->ty]);
-				printf("	jne .LcaseBegin%03d\n", cases->val);
+				printf("	li a4,1\n");
+				printf("	beq a5,a4,.LcaseBegin%03d\n", cases->val);
 				cases = cases->next;
 			}
 
 			// gen default condtion
 			if(node->lhs){
-				printf("	jmp .LcaseBegin%03d\n", node->lhs->val);
+				printf("	j .LcaseBegin%03d\n", node->lhs->val);
 			}
-			printf("	jmp .LloopEnd%03d\n", node->val);
+			printf("	j .LloopEnd%03d\n", node->val);
 
 			// gen code block
 			gen(node->rhs);
