@@ -418,7 +418,7 @@ void gen(Node *node){
 
 			// expr in if
 			gen(node->rhs->lhs);
-			printf("	j .Lelse%03d\n", node->val);
+			printf("	j .LifEnd%03d\n", node->val);
 			printf(".Lelse%03d:\n", node->val);
 
 			// expr in else
