@@ -205,7 +205,7 @@ void gen_expr(Node *node){
 
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				pop("a5");
-				printf("	s%c a5,0(a5)\n", reg_size[reg_ty]);
+				printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
 				push("a5");
 			}
 			return;
