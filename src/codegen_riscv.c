@@ -355,10 +355,10 @@ void gen_expr(Node *node){
 				if(node->type->ty <= CHAR){
 					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
-					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
+					printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
 				}
 			}
-			printf("	push rax\n");
+			push("a5");
 			return;
 		case ND_CALL_FUNC:
 			gen_args(node->rhs);
