@@ -532,7 +532,7 @@ void gen(Node *node){
 				gen_expr(node->rhs);
 			}
 
-
+			pop("a5");
 			printf("	mv a0,a5\n");
 			printf("	lw s0,%d(sp)\n", stack_align - 4);
 			printf("	addi sp,sp,-%d\n", stack_align);
@@ -582,7 +582,7 @@ void gen_main(void){
 		printf("%s:\n", func_list[i]->name);
 		printf("	addi sp,sp,-%d\n", stack_align);
 		printf("	sw s0,%d(sp)\n", stack_align - 4);
-		printf("	addi sp,sp,%d\n\n", stack_align);
+		printf("	addi s0,sp,%d\n\n", stack_align);
 
 		if(func_list[i]->args){
 			// set local variable
