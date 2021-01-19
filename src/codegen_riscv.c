@@ -366,6 +366,9 @@ void gen_expr(Node *node){
 			printf("	call %.*s\n", node->len, node->str);
 			push("a0");
 			return;
+		case ND_BLOCK:
+			expand_block_code(node->rhs);
+			return;
 		default:
 			// check left hand side
 			gen_expr(node->lhs);
@@ -499,9 +502,6 @@ void gen(Node *node){
 			return;
 		case ND_BREAK:
 			printf("	j .LloopEnd%03d\n", node->val);
-			return;
-		case ND_BLOCK:
-			expand_block_code(node->rhs);
 			return;
 		case ND_CASE:
 			printf(".LcaseBegin%03d:\n", node->val);

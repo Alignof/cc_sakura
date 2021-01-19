@@ -1,8 +1,2 @@
-int func() {
-	return 9;
-}
-int main() {
-	int b;
-	b = func();
-	return b;
-}
+int main(){int i; for(i=0;i<10;i++)if(i==5) break; return i;}
+//int main(){int i; for(i=0;i<10;i++){if(i==5) break;} return i;}
