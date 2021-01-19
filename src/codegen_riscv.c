@@ -172,7 +172,7 @@ void gen_expr(Node *node){
 			return;
 		case ND_CAST:
 			gen_expr(node->rhs);
-			printf("	pop rax\n");
+			pop("a5");
 			if(reg_ty > reg_rty){
 				if(reg_rty == BOOL){
 					printf("        movzx eax,al\n");
@@ -182,7 +182,7 @@ void gen_expr(Node *node){
 					printf("        cdqe\n");
 				}
 			}
-			printf("	push rax\n");
+			push("a5");
 			return;
 		case ND_GVAR:
 			gen_gvar(node);
@@ -302,19 +302,19 @@ void gen_expr(Node *node){
 		case ND_TERNARY:
 			// condition
 			gen_expr(node->lhs);
-			printf("	pop rax\n");
-			printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
-			printf("	je .Lelse%03d\n", node->val);
+			pop("a5");
+			printf("	li a4,0\n");
+			printf("	beq a5,a4,.Lelse%03d\n", node->val);
 
 			// true
 			gen(node->rhs);
-			printf("	jmp .LifEnd%03d\n", node->val);
+			printf("	j .LifEnd%03d\n", node->val);
 			printf(".Lelse%03d:\n", node->val);
 
 			// false
 			gen(node->next);
 			printf(".LifEnd%03d:\n", node->val);
-			printf("	push rax\n");
+			push("a5");
 			return;
 		case ND_AND:
 			gen_expr(node->lhs);
