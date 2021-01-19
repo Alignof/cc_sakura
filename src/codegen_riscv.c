@@ -49,7 +49,7 @@ void gen_lvar(Node *node){
 		error_at(token->str,"not a variable");
 	}
 
-	printf("	addi a5,s0,-%d\n", stack_align - 4 - node->offset);
+	printf("	addi a5,s0,-%d\n", stack_align - 8 - node->offset);
 	push("a5");
 }
 
@@ -81,7 +81,7 @@ void gen_args(Node *args){
 		printf("	pop rax\n");
 		printf("	mov %s,rax\n", reg[reg_num-1]);
 	}
-	printf("	mov rax,%d\n", arg_count);
+	//printf("	mov rax,%d\n", arg_count);
 
 }
 
@@ -363,16 +363,8 @@ void gen_expr(Node *node){
 		case ND_CALL_FUNC:
 			gen_args(node->rhs);
 
-			printf("	push rbp\n");
-			printf("	mov rbp,rsp\n");
-			printf("	and rsp,-16\n");
-
 			printf("	call %.*s\n", node->len, node->str);
-
-			printf("	mov rsp,rbp\n");
-			printf("	pop rbp\n");
-
-			printf("	push rax\n");
+			push("a0");
 			return;
 		default:
 			// check left hand side
@@ -534,8 +526,9 @@ void gen(Node *node){
 
 			pop("a5");
 			printf("	mv a0,a5\n");
-			printf("	lw s0,%d(sp)\n", stack_align - 4);
-			printf("	addi sp,sp,-%d\n", stack_align);
+			printf("	lw ra,%d(sp)\n", stack_align - 4);
+			printf("	lw s0,%d(sp)\n", stack_align - 8);
+			printf("	addi sp,sp,%d\n", stack_align);
 			printf("	jr ra\n\n");
 			return;
 		default:
@@ -581,7 +574,8 @@ void gen_main(void){
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	addi sp,sp,-%d\n", stack_align);
-		printf("	sw s0,%d(sp)\n", stack_align - 4);
+		printf("	sw ra,%d(sp)\n", stack_align - 4);
+		printf("	sw s0,%d(sp)\n", stack_align - 8);
 		printf("	addi s0,sp,%d\n\n", stack_align);
 
 		if(func_list[i]->args){
@@ -597,8 +591,9 @@ void gen_main(void){
 
 		// epiroge
 		printf("	mv a0,a5\n");
-		printf("	lw s0,%d(sp)\n", stack_align - 4);
-		printf("	addi sp,sp,-%d\n", stack_align);
+		printf("	lw ra,%d(sp)\n", stack_align - 4);
+		printf("	lw s0,%d(sp)\n", stack_align - 8);
+		printf("	addi sp,sp,%d\n", stack_align);
 		printf("	jr ra\n\n");
 	}
 }
