@@ -1,2 +1,11 @@
-int main(){int i; for(i=0;i<10;i++)if(i==5) break; return i;}
-//int main(){int i; for(i=0;i<10;i++){if(i==5) break;} return i;}
+int main() {
+	int a;
+	int b;
+	int c;
+	int d;
+	a = 3;
+	b = 2;
+	c = 12;
+	d = 17;
+	(d - c) * (a + b);
+}

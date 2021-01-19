@@ -49,7 +49,7 @@ void gen_lvar(Node *node){
 		error_at(token->str,"not a variable");
 	}
 
-	printf("	addi a5,s0,-%d\n", stack_align - 8 - node->offset);
+	printf("	addi a5,s0,-%d\n", 16 + node->offset);
 	push("a5");
 }
 
