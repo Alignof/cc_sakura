@@ -63,24 +63,6 @@ void get_code(int argc, char **argv){
 	}
 }
 
-void gen_gvar_label(GVar *gvar, Node *init){
-	Type *type = get_pointer_type(gvar->type);
-	if(init->kind == ND_STR){
-		if(gvar->type->ty == PTR){
-			printf("	.quad	.LC%d\n", init->val);
-		}else if(gvar->type->ty == ARRAY){
-			printf("	.string \"%.*s\"\n", init->len, init->str);
-			if(init->offset) printf("        .zero	%d\n", init->offset);
-		}
-	}else{
-		if(type->ty < INT){
-			printf("	.byte	%d\n", init->val);
-		}else{
-			printf("	.long	%d\n", init->val);
-		}
-	}
-}
-
 void set_gvar(GVar *gvar){
 	if(gvar->type->is_extern == 1){
 		return;
