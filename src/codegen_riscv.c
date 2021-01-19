@@ -207,11 +207,7 @@ void gen_expr(Node *node){
 
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				pop("a5");
-				if(node->type->ty <= CHAR){
-					printf("        mov al,BYTE PTR [rax]\n");
-				}else{
-					printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
-				}
+				printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
 				push("a5");
 			}
 			return;
@@ -261,8 +257,9 @@ void gen_expr(Node *node){
 			//printf("	push rax\n");
 			return;
 		case ND_STR:
-			printf("	lea rax, .LC%d[rip]\n", node->val);
-			printf("	push rax\n");
+			printf("	lui a5,%%hi(.LC%d)\n", node->val);
+			printf("	addi a5,a5,%%lo(.LC%d)\n", node->val);
+			push("a5");
 			return;
 		case ND_ASSIGN:
 			gen_address(node->lhs);
@@ -369,11 +366,7 @@ void gen_expr(Node *node){
 		case ND_DEREF:
 			gen(node->rhs);
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-				if(node->type->ty <= CHAR){
-					printf("        mov al,BYTE PTR [rax]\n");
-				}else{
-					printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
-				}
+				printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
 			}
 			push("a5");
 			return;
