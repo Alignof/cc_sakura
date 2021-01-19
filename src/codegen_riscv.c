@@ -535,10 +535,9 @@ void gen(Node *node){
 			return;
 		case ND_RETURN:
 			if(node->rhs){
-				gen_expr(node->rhs);
+				gen(node->rhs);
 			}
 
-			pop("a5");
 			printf("	mv a0,a5\n");
 			printf("	lw ra,%d(sp)\n", stack_align - 4);
 			printf("	lw s0,%d(sp)\n", stack_align - 8);
