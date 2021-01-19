@@ -4,14 +4,14 @@ const char reg_size[8]  = {'b',  'b',  'b',  'w',  'w',  'w',  'w',  'w'};
 const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
 const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
 const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
-const char reg[6][4]    = {"rdi","rsi","rdx","rcx","r8","r9"};
+const char reg[8][3]    = {"a0","a1","a2","a3","a4","a5","a6","a7"};
 
-void push(char *reg){
+void push(const char *reg){
 	printf("		addi sp,sp,-4\n");
 	printf("		sw  %s,0(sp)\n", reg);
 }
 
-void pop(char *reg){
+void pop(const char *reg){
 	printf("		lw  %s,0(sp)\n", reg);
 	printf("		addi sp,sp,4\n");
 }
@@ -39,9 +39,10 @@ void gen_gvar(Node *node){
 		printf("	mov rax, fs:0\n");
 		printf("	add rax, fs:%.*s@tpoff\n", node->len, node->str);
 	}else{
-		printf("	lea rax,%.*s[rip]\n", node->len, node->str);
+		printf("	lui a5,%%hi(%.*s)\n", node->len, node->str);
+		printf("	addi a5,a5,%%lo(%.*s)\n", node->len, node->str);
 	}
-	printf("	push rax\n");
+	push("a5");
 }
 
 void gen_lvar(Node *node){
@@ -78,10 +79,9 @@ void gen_args(Node *args){
 	}
 
 	for(reg_num = arg_count;reg_num > 0;reg_num--){
-		printf("	pop rax\n");
-		printf("	mov %s,rax\n", reg[reg_num-1]);
+		pop("t0");
+		printf("	mv %s,t0\n", reg[reg_num-1]);
 	}
-	//printf("	mov rax,%d\n", arg_count);
 
 }
 
@@ -192,9 +192,8 @@ void gen_expr(Node *node){
 				if(node->type->ty <= CHAR){
 					printf("        mov al,BYTE PTR [rax]\n");
 				}else{
-					printf("	mov %s,[rax]\n", reg_ax[reg_ty]);
+					printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
 				}
-				printf("	l%c a5,a5\n", reg_size[reg_ty]);
 				push("a5");
 			}
 			return;
@@ -389,8 +388,6 @@ void gen_expr(Node *node){
 
 void gen(Node *node){
 	Node *cases;
-	int reg_rty;
-	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 
 	// generate assembly
 	switch(node->kind){
@@ -509,13 +506,12 @@ void gen(Node *node){
 			return;
 		case ND_ARG:
 			while(node){
-				if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 				// push register argument saved
-				printf("        push %s\n", reg[node->val]);
+				push(reg[node->val]);
 				gen_lvar(node->rhs);
-				printf("	pop rax\n");
-				printf("	pop rdi\n");
-				printf("	mov [rax],%s\n", reg_di[reg_rty]);
+				pop("a5");
+				pop("a4");
+				printf("	sw a4,0(a5)\n");
 				node=node->next;
 			}
 			return;
