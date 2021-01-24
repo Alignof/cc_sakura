@@ -30,7 +30,6 @@ void expand_block_code(Node *node){
 		gen(node);
 		node = node->block_code;
 	}
-	push("a5");
 }
 
 void gen_gvar_label(GVar *gvar, Node *init){
@@ -376,9 +375,6 @@ void gen_expr(Node *node){
 			printf("	call %.*s\n", node->len, node->str);
 			push("a0");
 			return;
-		case ND_BLOCK:
-			expand_block_code(node->rhs);
-			return;
 		default:
 			// check left hand side
 			gen_expr(node->lhs);
@@ -525,6 +521,9 @@ void gen(Node *node){
 				printf("	sw a4,0(a5)\n");
 				node=node->next;
 			}
+			return;
+		case ND_BLOCK:
+			expand_block_code(node->rhs);
 			return;
 		case ND_RETURN:
 			if(node->rhs){

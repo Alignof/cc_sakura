@@ -19,7 +19,6 @@ void expand_block_code(Node *node){
 		gen(node);
 		node = node->block_code;
 	}
-	printf("	push rax\n");
 }
 
 
@@ -396,9 +395,6 @@ void gen_expr(Node *node){
 
 			printf("	push rax\n");
 			return;
-		case ND_BLOCK:
-			expand_block_code(node->rhs);
-			return;
 		default:
 			// check left hand side
 			gen_expr(node->lhs);
@@ -548,6 +544,9 @@ void gen(Node *node){
 				printf("	mov [rax],%s\n", reg_di[reg_rty]);
 				node=node->next;
 			}
+			return;
+		case ND_BLOCK:
+			expand_block_code(node->rhs);
 			return;
 		case ND_RETURN:
 			if(node->rhs){

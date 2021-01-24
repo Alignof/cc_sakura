@@ -1,5 +1,5 @@
 # x8664 or riscv
-ARCH    := riscv
+ARCH    := x8664
 SPIKE   := ~/riscv/toolchain/bin/spike
 PK      := ~/riscv/toolchain/riscv32-unknown-elf/bin/pk 
 
