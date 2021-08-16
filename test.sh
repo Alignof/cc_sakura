@@ -32,9 +32,9 @@ assert() {
 		gcc -o tmp -static tmp.s 
 		./tmp
 	elif [ $ARCH = "riscv" ]; then
-		/opt/riscv32/bin/riscv32-unknown-linux-gnu-gcc -c tmp.s 
-		/opt/riscv32/bin/riscv32-unknown-linux-gnu-gcc -o tmp -static tmp.s 
-		~/riscv/toolchain/bin/spike ~/riscv/toolchain/riscv32-unknown-elf/bin/pk ./tmp
+		/opt/riscv/bin/riscv64-unknown-linux-gnu-gcc -c tmp.s 
+		/opt/riscv/bin/riscv64-unknown-linux-gnu-gcc -o tmp -static tmp.s 
+		~/riscv/bin/spike ~/riscv/riscv64-unknown-linux-gnu/bin/pk ./tmp > /dev/null 2>&1 
 	fi
 
 	actual="$?"

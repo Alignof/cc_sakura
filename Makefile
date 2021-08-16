@@ -1,14 +1,14 @@
 # x8664 or riscv
-ARCH    := x8664
-SPIKE   := ~/riscv/toolchain/bin/spike
-PK      := ~/riscv/toolchain/riscv32-unknown-elf/bin/pk 
+ARCH    := riscv
+SPIKE   := ~/riscv/bin/spike 
+PK      := ~/riscv/riscv64-unknown-linux-gnu/bin/pk
 
 ifeq ($(ARCH),x8664)
 	BT	:= gcc
 	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 else
-	BT	:= /opt/riscv32/bin/riscv32-unknown-linux-gnu-gcc
+	BT	:= /opt/riscv/bin/riscv64-unknown-linux-gnu-gcc
 	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 endif
@@ -53,7 +53,7 @@ ifeq ($(ARCH),x8664)
 	$(BT) test.c -S -masm=intel -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
 	./tmp || echo $$?
 else
-	$(BT) test.c -S -O0 -o tmp.s && $(BT) -march=rv32gc -static -O0 tmp.s -o tmp
+	$(BT) test.c -S -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
 	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 
