@@ -575,13 +575,13 @@ void gen_main(void){
 	for(i = 0;func_list[i];i++){
 		if(func_list[i]->code[0] == NULL) continue;
 
-		stack_align = ((func_list[i]->stack_size % 16) ? 32 : 16 ) + (func_list[i]->stack_size / 16 * 16);
+		aligned_stack_size = ((func_list[i]->stack_size % 16) ? 32 : 16 ) + (func_list[i]->stack_size / 16 * 16);
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
-		printf("	addi sp,sp,-%d\n", stack_align);
-		printf("	sw ra,%d(sp)\n", stack_align - 4);
-		printf("	sw s0,%d(sp)\n", stack_align - 8);
-		printf("	addi s0,sp,%d\n\n", stack_align);
+		printf("	addi sp,sp,-%d\n", aligned_stack_size);
+		printf("	sw ra,%d(sp)\n", aligned_stack_size - 4);
+		printf("	sw s0,%d(sp)\n", aligned_stack_size - 8);
+		printf("	addi s0,sp,%d\n\n", aligned_stack_size);
 
 		if(func_list[i]->args){
 			// set local variable
@@ -596,9 +596,9 @@ void gen_main(void){
 
 		// epiroge
 		printf("	mv a0,a5\n");
-		printf("	lw ra,%d(sp)\n", stack_align - 4);
-		printf("	lw s0,%d(sp)\n", stack_align - 8);
-		printf("	addi sp,sp,%d\n", stack_align);
+		printf("	lw ra,%d(sp)\n", aligned_stack_size - 4);
+		printf("	lw s0,%d(sp)\n", aligned_stack_size - 8);
+		printf("	addi sp,sp,%d\n", aligned_stack_size);
 		printf("	jr ra\n\n");
 	}
 }
