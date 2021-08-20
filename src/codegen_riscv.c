@@ -67,7 +67,7 @@ void gen_lvar(Node *node){
 		error_at(token->str,"not a variable");
 	}
 
-	printf("	addi a5,s0,-%d\n", 16 + node->offset);
+	printf("	addi a5,s0,-%d\n", node->offset);
 	push("a5");
 }
 
@@ -531,9 +531,9 @@ void gen(Node *node){
 			}
 
 			printf("	mv a0,a5\n");
-			printf("	lw ra,%d(sp)\n", stack_align - 4);
-			printf("	lw s0,%d(sp)\n", stack_align - 8);
-			printf("	addi sp,sp,%d\n", stack_align);
+			printf("	lw ra,%d(sp)\n", aligned_stack_size - 4);
+			printf("	lw s0,%d(sp)\n", aligned_stack_size - 8);
+			printf("	addi sp,sp,%d\n", aligned_stack_size);
 			printf("	jr ra\n\n");
 			return;
 		default:

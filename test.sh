@@ -34,7 +34,7 @@ assert() {
 	elif [ $ARCH = "riscv" ]; then
 		/opt/riscv/bin/riscv64-unknown-linux-gnu-gcc -c tmp.s 
 		/opt/riscv/bin/riscv64-unknown-linux-gnu-gcc -o tmp -static tmp.s 
-		~/riscv/bin/spike ~/riscv/riscv64-unknown-linux-gnu/bin/pk ./tmp > /dev/null 2>&1 
+		~/riscv/bin/spike --isa=RV32IMAC ~/riscv/riscv64-unknown-linux-gnu/bin/pk ./tmp
 	fi
 
 	actual="$?"
@@ -82,7 +82,11 @@ assert -cl 1  "int main(){!(0 || 0);}"
 assert -cl 0  "int main(){!(1 || 0);}"
 
 assert -cl 8  "int main(){5+3;6+2;}"
+assert -cl 5  "int main(){return 2+3;}"
+assert -cl 5  "int main(){int a; return 0;}"
+assert -cl 5  "int main(){int a;int b; a=5; return a;}"
 assert -cl 5  "int main(){int a;int b;a=3;b=2;a+b;}"
+assert -cl 5  "int main(){int a;int b; a=13;b=8;return a-b;}"
 assert -cl 5  "int main(){int a_1;int b_2;a_1=3;b_2=2;a_1+b_2;}"
 assert -cl 5  "int main(){int a;a=8;a=a-3;a;}"
 assert -cl 25 "int main(){int a;int b;int c;int d; a=3;b=2;c=12;d=17;(d-c)*(a+b);}"
@@ -90,8 +94,6 @@ assert -cl 25 "int main(){int a;int b;int c;int d; a=3;b=2;c=12;d=17;(d-c)*(a+b)
 assert -cl 5  "int main(){int abc; int def; abc=3;def=2;abc+def;}"
 assert -cl 6  "int main(){int kinako;int momone; kinako=3;momone=2;momone*kinako;}"
 
-assert -cl 5  "int main(){return 2+3;}"
-assert -cl 5  "int main(){int a;int b; a=13;b=8;return a-b;}"
 
 assert -cl 1  "int main(){int a; a=0;if(3>2) a=1;a;}"
 assert -cl 0  "int main(){int a; a=0;if(3<2) a=1;a;}"
