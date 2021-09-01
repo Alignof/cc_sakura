@@ -1,14 +1,14 @@
 # x8664 or riscv
 ARCH    := riscv
-SPIKE   := ~/riscv/bin/spike 
-PK      := ~/riscv/riscv64-unknown-linux-gnu/bin/pk
+SPIKE   := /opt/riscv32/bin/spike --isa=RV32IMAC
+PK      := /opt/riscv32/riscv32-unknown-elf/bin/pk
 
 ifeq ($(ARCH),x8664)
 	BT	:= gcc
 	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 else
-	BT	:= /opt/riscv/bin/riscv64-unknown-linux-gnu-gcc
+	BT	:= /opt/riscv32/bin/riscv32-unknown-elf-gcc
 	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 endif
