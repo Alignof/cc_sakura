@@ -32,7 +32,7 @@ assert() {
 		gcc -o tmp -static tmp.s 
 		./tmp
 	elif [ $ARCH = "riscv" ]; then
-		/opt/riscv32/bin/riscv32-unknown-elf-gcc -c tmp.s 
+		/opt/riscv32/bin/riscv32-unknown-elf-gcc -c -march=rv32imac tmp.s 
 		/opt/riscv32/bin/riscv32-unknown-elf-gcc -o tmp -static tmp.s 
 		/opt/riscv32/bin/spike --isa=RV32IMAC /opt/riscv32/riscv32-unknown-elf/bin/pk ./tmp
 	fi
@@ -83,8 +83,8 @@ assert -cl 0  "int main(){!(1 || 0);}"
 
 assert -cl 8  "int main(){5+3;6+2;}"
 assert -cl 5  "int main(){return 2+3;}"
-assert -cl 5  "int main(){int a; return 0;}"
-assert -cl 5  "int main(){int a;int b; a=5; return a;}"
+assert -cl 5  "int main(){int a; return 5;}"
+assert -cl 5  "int main(){int a; a=5; return a;}"
 assert -cl 5  "int main(){int a;int b;a=3;b=2;a+b;}"
 assert -cl 5  "int main(){int a;int b; a=13;b=8;return a-b;}"
 assert -cl 5  "int main(){int a_1;int b_2;a_1=3;b_2=2;a_1+b_2;}"

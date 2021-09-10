@@ -53,7 +53,7 @@ ifeq ($(ARCH),x8664)
 	$(BT) test.c -S -masm=intel -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
 	./tmp || echo $$?
 else
-	$(BT) test.c -S -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
+	$(BT) test.c -march=rv32imac -S -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
 	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 
