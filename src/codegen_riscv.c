@@ -135,7 +135,7 @@ void gen_calc(Node *node){
 			printf("	andi a5,a5,0xff\n");
 			break;
 		case ND_GE:
-			printf("	sgt a5,a5,a4\n");
+			printf("	slt a5,a5,a4\n");
 			printf("	xori a5,a5,1\n");
 			printf("	andi a5,a5,0xff\n");
 			break;
@@ -144,7 +144,7 @@ void gen_calc(Node *node){
 			printf("	andi a5,a5,0xff\n");
 			break;
 		case ND_LE:
-			printf("	slt a5,a5,a4\n");
+			printf("	sgt a5,a5,a4\n");
 			printf("	xori a5,a5,1\n");
 			printf("	andi a5,a5,0xff\n");
 			break;

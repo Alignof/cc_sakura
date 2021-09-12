@@ -1,9 +1,20 @@
 int main() {
-    int a;
-    int b;
-    int c;
-    a = 2;
-    b = 3;
-    c = 9;
-    return c;
+    int i;
+    int k;
+    int sum = 0;
+    int x[10][10];
+
+    for (i = 1; i <= 9; i++) {
+        for (k = 1; k <= 9; k++) {
+            x[k][i] = i * k;
+        }
+    }
+
+    for (i = 1; i <= 9; i++) {
+        for (k = 1; k <= 9; k++) {
+            printf("%2d ", x[k][i]);
+        }
+        printf("\n");
+    }
+    return 0;
 }
