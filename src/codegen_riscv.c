@@ -67,7 +67,7 @@ void gen_lvar(Node *node){
 		error_at(token->str,"not a variable");
 	}
 
-	printf("	addi a5,s0,-%d\n", node->offset);
+	printf("	addi a5,s0,-%d\n", node->offset + 8);
 	push("a5");
 }
 
