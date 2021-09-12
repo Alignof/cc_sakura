@@ -575,8 +575,7 @@ void gen_main(void){
 	for(i = 0;func_list[i];i++){
 		if(func_list[i]->code[0] == NULL) continue;
 
-		//aligned_stack_size = ((func_list[i]->stack_size % 16) ? 32 : 16 ) + (func_list[i]->stack_size / 16 * 16);
-		aligned_stack_size = ((func_list[i]->stack_size % 16) ? 16 : 16 ) + (func_list[i]->stack_size / 16 * 16);
+		aligned_stack_size = 16 + ((func_list[i]->stack_size + 11) / 16 * 16);
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	addi sp,sp,-%d\n", aligned_stack_size);

@@ -1,4 +1,9 @@
 int main() {
-    int a = 5;
-	return a;
+    int a;
+    int b;
+    int c;
+    a = 2;
+    b = 3;
+    c = 9;
+    return c;
 }
