@@ -195,8 +195,6 @@ void gen_expr(Node *node){
 					printf("        zext.b a5,a5\n");
 				}else if(reg_rty == CHAR){
 					printf("        sext.b a5,a5\n");
-				}else if(reg_rty == INT){
-					printf("        cdqe\n");
 				}
 			}
 			push("a5");
