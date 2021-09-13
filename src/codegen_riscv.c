@@ -159,11 +159,11 @@ void gen_calc(Node *node){
 			printf("	andi a5,a5,0xff\n");
 			break;
 		case ND_BIT_AND:
-			printf("	and %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	and a5,a5,a4\n");
 			printf("    zext.b a5,a5\n");
 			break;
 		case ND_BIT_OR:
-			printf("	or %s,%s\n", reg_ax[reg_ty], reg_di[reg_ty]);
+			printf("	or a5,a5,a4\n");
 			printf("    zext.b a5,a5\n");
 			break;
 		case ND_NOT:
