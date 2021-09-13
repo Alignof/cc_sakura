@@ -222,7 +222,7 @@ void gen_expr(Node *node){
 		case ND_PREID:
 			// ++p -> p += 1
 			gen(node->lhs);
-			printf("	push rax\n");
+            push("a5");
 			return;
 		case ND_POSTID:
 			// push
@@ -276,17 +276,17 @@ void gen_expr(Node *node){
 			gen_expr(node->rhs->rhs);// push rhs
 
 			// calc
-			printf("	pop rdi\n");  // rhs
-			printf("	pop rax\n");  // lhs
-			printf("	push rax\n"); // Evacuation lhs
-			printf("	mov rax,[rax]\n"); // deref lhs
+			pop("a4"); // rhs
+			pop("a5"); // lhs
+			push("a5"); // Evacuation lhs
+			printf("	lw a5, 0(a5)\n"); // deref lhs
 
 			gen_calc(node->rhs);
-			printf("	push rax\n"); // rhs op lhs
+			push("a5"); // rhs op lhs
 
 			// assign
-			printf("	pop rdi\n"); // src
-			printf("	pop rax\n"); // dst
+			pop("a4"); // src
+			pop("a5"); // dst
 			if(node->lhs->type->ty <= CHAR){
 				if(node->lhs->type->ty == BOOL){
 					printf("	mov R8B,dil\n");
@@ -294,14 +294,12 @@ void gen_expr(Node *node){
 					printf("	setne dl\n");
 					printf("	movzb rdi,dl\n");
 				}
-				printf("	mov [rax],dil\n");
-			}else if(node->lhs->type->ty == INT){
-				printf("	mov [rax],edi\n");
+				printf("	sb a4,0(a5)\n");
 			}else{
-				printf("	mov [rax],rdi\n");
+				printf("	sw a4,0(a5)\n");
 			}
 
-			printf("	push rdi\n");
+			push("a4");
 			return;
 		case ND_DOT:
 		case ND_ARROW:
