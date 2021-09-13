@@ -1,9 +1,6 @@
 #include "cc_sakura.h"
 //                         void _Bool  char   enum  int   ptr  array struct
 const char reg_size[8]  = {'b',  'b',  'b',  'w',  'w',  'w',  'w',  'w'};
-const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
-const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
-const char reg_di[8][4] = {"dil","dil","dil","edi","edi","rdi","rdi","rdi"};
 const char reg[8][3]    = {"a0","a1","a2","a3","a4","a5","a6","a7"};
 
 void push(const char *reg){
