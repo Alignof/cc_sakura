@@ -243,10 +243,7 @@ void gen_expr(Node *node){
 			pop("a4"); // src
 			pop("a5"); // dst
 			if(node->lhs->type->ty == BOOL){
-				printf("	mov R8B,dil\n");
-				printf("	cmp R8B,0\n");
-				printf("	setne dl\n");
-				printf("	movzb rdi,dl\n");
+				printf("	snez a4,a4\n");
 			}
 			printf("	sw a4, 0(a5)\n"); // deref lhs
 
@@ -286,12 +283,9 @@ void gen_expr(Node *node){
 			pop("a4"); // src
 			pop("a5"); // dst
 			if(node->lhs->type->ty <= CHAR){
-				if(node->lhs->type->ty == BOOL){
-					printf("	mov R8B,dil\n");
-					printf("	cmp R8B,0\n");
-					printf("	setne dl\n");
-					printf("	movzb rdi,dl\n");
-				}
+                if(node->lhs->type->ty == BOOL){
+				    printf("	snez a4,a4\n");
+                }
 				printf("	sb a4,0(a5)\n");
 			}else{
 				printf("	sw a4,0(a5)\n");
