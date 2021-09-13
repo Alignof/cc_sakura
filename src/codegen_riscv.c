@@ -79,10 +79,10 @@ void gen_struc(Node *node){
 	gen_expr(node->lhs);
 	gen_expr(node->rhs);
 
-	printf("	pop rdi\n");
-	printf("	pop rax\n");
-	printf("	add rax,rdi\n");
-	printf("	push rax\n");
+    pop("a4");
+    pop("a5");
+	printf("	add a5,a5,a4\n");
+    push("a5");
 }
 
 void gen_args(Node *args){
