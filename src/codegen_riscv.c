@@ -192,9 +192,9 @@ void gen_expr(Node *node){
 			pop("a5");
 			if(reg_ty > reg_rty){
 				if(reg_rty == BOOL){
-					printf("        movzx eax,al\n");
+					printf("        zext.b a5,a5\n");
 				}else if(reg_rty == CHAR){
-					printf("        movsx eax,al\n");
+					printf("        sext.b a5,a5\n");
 				}else if(reg_rty == INT){
 					printf("        cdqe\n");
 				}
