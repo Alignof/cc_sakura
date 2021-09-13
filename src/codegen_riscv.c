@@ -306,8 +306,11 @@ void gen_expr(Node *node){
 			gen_struc(node);
 			// if it's an array or struct, ignore the deref
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-				printf("	pop rax\n");
-				printf("	push [rax]\n");
+                pop("a5");
+
+                // push [rax]
+                printf("	lw t0, 0(a5)\n");
+                push("t0");
 			}
 			return;
 		case ND_TERNARY:
