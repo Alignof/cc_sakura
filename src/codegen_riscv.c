@@ -487,9 +487,9 @@ void gen(Node *node){
 
 			// condition
 			gen(node->lhs);
-			printf("	cmp %s,0\n", reg_ax[node->lhs->type->ty]);
 			// break loop
-			printf("	je .LloopEnd%03d\n", node->val);
+			printf("	li a4,1\n");
+			printf("	bne a5,a4,.LloopEnd%03d\n", node->val);
 
 			printf("	jmp .LloopBegin%03d\n", node->val);
 			printf(".LloopEnd%03d:\n", node->val);
