@@ -1,4 +1,3 @@
-#include "cc_sakura.h"
 //                         void _Bool  char   enum  int   ptr  array struct
 const char reg_size[8]  = {'b',  'b',  'b',  'w',  'w',  'w',  'w',  'w'};
 const char reg[8][3]    = {"a0","a1","a2","a3","a4","a5","a6","a7"};
@@ -389,7 +388,7 @@ void gen(Node *node){
 	// generate assembly
 	switch(node->kind){
 		case ND_NULL_STMT:
-			// NULL statement
+			// __NULL statement
 			return;
 		case ND_IF:
 			gen(node->lhs);
@@ -557,13 +556,13 @@ void gen_main(void){
 	llid           = 0;
 	label_num      = 0;
 	label_loop_end = 0;
-	labels_head    = NULL;
-	labels_tail    = NULL;
+	labels_head    = __NULL;
+	labels_tail    = __NULL;
 
 	//generate assembly at first expr
 	printf(".text\n");
 	for(i = 0;func_list[i];i++){
-		if(func_list[i]->code[0] == NULL) continue;
+		if(func_list[i]->code[0] == __NULL) continue;
 
 		aligned_stack_size = 16 + ((func_list[i]->stack_size + 11) / 16 * 16);
 		printf(".globl %s\n", func_list[i]->name);
@@ -578,7 +577,7 @@ void gen_main(void){
 			gen(func_list[i]->args);
 		}
 
-		for(j = 0;func_list[i]->code[j] != NULL;j++){
+		for(j = 0;func_list[i]->code[j] != __NULL;j++){
 			// gen code
 			gen(func_list[i]->code[j]);
 			printf("\n");

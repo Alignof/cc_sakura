@@ -1,4 +1,3 @@
-#include "cc_sakura.h"
 
 int   llid;
 int   label_num;
@@ -8,7 +7,7 @@ int   label_loop_end;
 int   aligned_stack_size;
 char  *user_input;
 char  filename[100];
-Func  *func_list[FUNC_NUM];
+Func  *func_list[200];
 Label *labels_head;
 Label *labels_tail;
 
@@ -17,19 +16,19 @@ char *read_file(char *path){
 	char *buf;
 
 	strcpy(filename, path);
-	if ((fp = fopen(path, "r")) == NULL) {
+	if ((fp = fopen(path, "r")) == __NULL) {
 		fprintf(stderr, "File open error.\n");
 		exit(1);
 	}
 
 	// get file size
-	if(fseek(fp, 0L, SEEK_END) == -1){
+	if(fseek(fp, 0, SEEK_END) == -1){
 		printf("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 
-	if(fseek(fp, 0L, SEEK_SET) == -1){
+	if(fseek(fp, 0, SEEK_SET) == -1){
 		printf("%s: fseek:%s", path, strerror(errno));
 	}
 
@@ -105,7 +104,7 @@ int main(int argc, char **argv){
 	// make syntax tree
 	program();
 
-	if(func_list == NULL){
+	if(func_list == __NULL){
 		fprintf(stderr, "function is not found.");
 	}
 

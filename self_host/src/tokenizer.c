@@ -1,4 +1,3 @@
-#include "cc_sakura.h"
 
 int len_val(char *str){
 	int counter = 0;
@@ -110,7 +109,7 @@ bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_k
 Token *tokenize(char *p){
 	bool is_single_token;
 	Token head;
-	head.next = NULL;
+	head.next = __NULL;
 
 	//set head pointer to cur
 	Token *now = &head;
