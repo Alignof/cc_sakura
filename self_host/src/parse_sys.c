@@ -1,3 +1,5 @@
+#include "cc_sakura.h"
+
 void error_at(char *loc, char *msg){
 	while((user_input < loc) && (loc[-1] == '\n' || loc[-1] == '\t')) loc--;
 
@@ -83,7 +85,7 @@ Token *consume_string(void){
 	}
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_STR || !(is_ascii(*(token->str)))){
-		return __NULL;
+		return NULL;
 	}
 
 	Token *ret = token;
@@ -102,7 +104,7 @@ Token *consume_string(void){
 Token *consume_ident(void){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||!(is_alnum(*(token->str)))){
-		return __NULL;
+		return NULL;
 	}
 
 	Token *ret = token;
@@ -168,17 +170,17 @@ Func *find_func(Token *tok){
 			return func_list[i];
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 GVar *find_gvar(Token *tok){
-	//while var not equal __NULL
+	//while var not equal NULL
 	for (GVar *var = globals;var;var = var->next){
 		if(var->len == tok->len && !memcmp(tok->str, var->name, (size_t)var->len)){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 LVar *find_lvar(Token *tok, int find_range){
@@ -188,7 +190,7 @@ LVar *find_lvar(Token *tok, int find_range){
 	 */
 
 	int out_of_scope = 0;
-	//while var not equal __NULL
+	//while var not equal NULL
 	for (LVar *var = locals;var;var = var->next){
 		if(var == outside_lvar) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
@@ -196,7 +198,7 @@ LVar *find_lvar(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Str *find_string(Token *tok){
@@ -205,7 +207,7 @@ Str *find_string(Token *tok){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Struc *find_struc(Token *tok, int find_range){
@@ -217,7 +219,7 @@ Struc *find_struc(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Member *find_struct_member(Type *type, int find_range){
@@ -232,7 +234,7 @@ Member *find_struct_member(Type *type, int find_range){
 			return var->member;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Enum *find_enum(Token *tok, int find_range){
@@ -244,7 +246,7 @@ Enum *find_enum(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Member *find_enumerator(Token *tok, int find_range){
@@ -258,7 +260,7 @@ Member *find_enumerator(Token *tok, int find_range){
 			}
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Def_Type *find_defined_type(Token *tok, int find_range){
@@ -270,7 +272,7 @@ Def_Type *find_defined_type(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
@@ -314,7 +316,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		node->type = lhs->type;
 		if(lhs->type->ty > rhs->type->ty){
 			node->type = lhs->type;
-			node->rhs  = new_node(ND_CAST, __NULL, node->rhs);
+			node->rhs  = new_node(ND_CAST, NULL, node->rhs);
 			node->rhs->type = node->type;
 		}
 	}
@@ -322,11 +324,11 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	if(ND_GT <= kind && kind <= ND_NE){
 		if(lhs->type->ty > rhs->type->ty){
 			node->type = lhs->type;
-			node->rhs  = new_node(ND_CAST, __NULL, node->rhs);
+			node->rhs  = new_node(ND_CAST, NULL, node->rhs);
 			node->rhs->type = lhs->type;
 		}else if(lhs->type->ty < rhs->type->ty){
 			node->type = rhs->type;
-			node->lhs  = new_node(ND_CAST, __NULL, node->lhs);
+			node->lhs  = new_node(ND_CAST, NULL, node->lhs);
 			node->lhs->type = rhs->type;
 		}else{
 			node->type = lhs->type;

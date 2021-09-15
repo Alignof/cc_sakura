@@ -1,11 +1,13 @@
+#include "cc_sakura.h"
+
 Node *global_init(Node *node){
-	Node *init_val = __NULL;
+	Node *init_val = NULL;
 	if(check("\"")){
 		if(node->type->ty == ARRAY){
 			consume("\"");
 			Token *tok = consume_string();
 			expect("\"");
-			init_val   = new_node(ND_STR, __NULL, __NULL);
+			init_val   = new_node(ND_STR, NULL, NULL);
 			init_val->str      = tok->str;
 			init_val->len      = tok->len;
 			init_val->type->ty = PTR;
@@ -20,8 +22,8 @@ Node *global_init(Node *node){
 		}
 	}else if(consume("{")){
 		int ctr   = 0;
-		Node *new = __NULL;
-		init_val  = new_node(ND_BLOCK, __NULL, __NULL);
+		Node *new = NULL;
+		init_val  = new_node(ND_BLOCK, NULL, NULL);
 		while(token->kind != TK_BLOCK){
 			//Is first?
 			if(ctr == 0){
@@ -88,7 +90,7 @@ Node *dot_arrow(NodeKind type, Node *node){
 	// struc->aaa->bbb->ccc;
 	// (lvar <- node -> dot) <- node -> dot
 	Type *struc_type;
-	Node *new = new_node(type, node, __NULL);
+	Node *new = new_node(type, node, NULL);
 	Token *memb_name  = consume_ident();
 	Member *memb_list;
 
@@ -183,9 +185,9 @@ Node *array_str(Node *arr){
 		error_at(token->str, "Invalid assign");
 	}
 
-	Node *src  = __NULL;
+	Node *src  = NULL;
 	Node *dst  = calloc(1, sizeof(Node));
-	Node *node = new_node(ND_BLOCK, __NULL, __NULL);
+	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
 	consume("\"");
 	Token *tok = consume_string();
@@ -227,7 +229,7 @@ Node *array_block(Node *arr){
 	int isize = arr->type->index_size;
 	Node *src;
 	Node *dst  = calloc(1, sizeof(Node));
-	Node *node = new_node(ND_BLOCK, __NULL, __NULL);
+	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
 	memcpy(clone, arr, sizeof(Node));
@@ -291,9 +293,9 @@ Node *call_function(Node *node, Token *tok){
 	if(consume(")")) return node;
 
 	int ctr   = 0;
-	Node *new = __NULL;
+	Node *new = NULL;
 	while(1){
-		if(new == __NULL){
+		if(new == NULL){
 			new        = assign();
 			node->rhs  = new;
 		}else{
@@ -313,25 +315,25 @@ Node *call_function(Node *node, Token *tok){
 Node *array_index(Node *node, Node *index){
 	// a[1] == *(a+1)
 	node = new_node(ND_ADD, node, index);
-	node = new_node(ND_DEREF, __NULL, node);
+	node = new_node(ND_DEREF, NULL, node);
 
 	return node;
 }
 
 void get_argument(Func *target_func){
 	if(consume_reserved_word("void", TK_TYPE) || check(")")){
-		target_func->args = __NULL;
+		target_func->args = NULL;
 		expect(")");
 		return;
 	}
 
 	// set args node
-	Node *new_arg = __NULL;
+	Node *new_arg = NULL;
 	int arg_counter = 0;
 
 	while(token->kind == TK_CONST || token->kind == TK_NUM ||
 	      token->kind == TK_TYPE  || find_defined_type(token, 0)){
-		if(new_arg == __NULL){
+		if(new_arg == NULL){
 			new_arg       = calloc(1, sizeof(Node));
 			new_arg->kind = ND_ARG;
 			new_arg->val  = arg_counter;

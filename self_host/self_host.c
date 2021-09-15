@@ -244,7 +244,9 @@ struct Member{
 	Member *next;
 };
 
-//================= global variable ===================
+
+
+// global variable
 extern int      llid;
 extern int      alloc_size;
 extern int      IGNORE_SCOPE;
@@ -252,7 +254,7 @@ extern int      CONSIDER_SCOPE;
 extern char     *user_input;
 extern char     filename[100];
 extern Token    *token;
-extern Func     *func_list[300];
+extern Func     *func_list[FUNC_NUM];
 extern LVar     *locals;
 extern GVar     *globals;
 extern Str      *strings;
@@ -267,72 +269,8 @@ extern Enum     *outside_enum;
 extern Def_Type *outside_deftype;
 extern int      label_num;
 extern int      label_loop_end;
-//=====================================================
+extern int      aligned_stack_size;
 
-
-//================standard library=====================
-typedef struct _IO_FILE FILE;
-typedef void   _IO_lock_t;
-typedef void*  __off_t;
-
-struct _IO_FILE{
-	int _flags;           /* High-order word is _IO_MAGIC; rest is flags. */
-
-	/* The following pointers correspond to the C++ streambuf protocol. */
-	char *_IO_read_ptr;   /* Current read pointer */
-	char *_IO_read_end;   /* End of get area. */
-	char *_IO_read_base;  /* Start of putback+get area. */
-	char *_IO_write_base; /* Start of put area. */
-	char *_IO_write_ptr;  /* Current put pointer. */
-	char *_IO_write_end;  /* End of put area. */
-	char *_IO_buf_base;   /* Start of reserve area. */
-	char *_IO_buf_end;    /* End of reserve area. */
-
-	/* The following fields are used to support backing up and undo. */
-	char *_IO_save_base; /* Pointer to start of non-current get area. */
-	char *_IO_backup_base;  /* Pointer to first valid character of backup area */
-	char *_IO_save_end; /* Pointer to end of non-current get area. */
-
-	struct _IO_marker *_markers;
-
-	struct _IO_FILE *_chain;
-
-	int _fileno;
-	int _flags2;
-
-	__off_t _old_offset; /* This used to be _offset but it's too small.  */
-
-	/* 1+column number of pbase(); 0 is unknown. */
-	//unsigned short _cur_column;
-	//signed char _vtable_offset;
-	int  _cur_column;
-	char _vtable_offset;
-	char _shortbuf[1];
-
-	_IO_lock_t *_lock;
-};
-
-typedef _Bool bool;
-bool true  = 1;
-bool false = 0;
-//=========================================================
-
-
-
-//================temporary definition=====================
-int  SEEK_SET = 0;
-int  SEEK_END = 2;
-int  FUNC_NUM = 300;
-
-extern FILE *stdin;		/* Standard input stream.  */
-extern FILE *stdout;		/* Standard output stream.  */
-extern FILE *stderr;		/* Standard error output stream.  */
-
-extern _Thread_local int errno;
-//=========================================================
-
-
-//==================Prototype function=====================
 // main.c
 char *read_file(char *path);
 void get_code(int argc, char **argv);
@@ -424,6 +362,7 @@ Member *register_struc_member(int *asize_ptr);
 Member *register_enum_member(void);
 
 // codegen.c
+void gen_main(void);
 void gen(Node *node);
 void gen_expr(Node *node);
 void gen_args(Node *args);
@@ -435,11 +374,601 @@ void gen_address(Node *node);
 void expand_next(Node *node);
 void expand_block_code(Node *node);
 
+#include "cc_sakura.h"
+//                         void _Bool  char   enum  int   ptr  array struct
+const char reg_size[8]  = {'b',  'b',  'b',  'w',  'w',  'w',  'w',  'w'};
+const char reg[8][3]    = {"a0","a1","a2","a3","a4","a5","a6","a7"};
 
-//=========================================================
+void push(const char *reg){
+	printf("		addi sp,sp,-4\n");
+	printf("		sw  %s,0(sp)\n", reg);
+}
+
+void pop(const char *reg){
+	printf("		lw  %s,0(sp)\n", reg);
+	printf("		addi sp,sp,4\n");
+}
 
 
+void expand_next(Node *node){
+	while(node){
+		gen(node);
+		node = node->next;
+	}
+	push("a5");
+}
 
+void expand_block_code(Node *node){
+	while(node){
+		gen(node);
+		node = node->block_code;
+	}
+}
+
+void gen_gvar_label(GVar *gvar, Node *init){
+	Type *type = get_pointer_type(gvar->type);
+	if(init->kind == ND_STR){
+		if(gvar->type->ty == PTR){
+			printf("	.quad	.LC%d\n", init->val);
+		}else if(gvar->type->ty == ARRAY){
+			printf("	.string \"%.*s\"\n", init->len, init->str);
+			if(init->offset) printf("        .zero	%d\n", init->offset);
+		}
+	}else{
+		if(type->ty < INT){
+			printf("	.byte	%d\n", init->val);
+		}else{
+			printf("	.word	%d\n", init->val);
+		}
+	}
+}
+
+
+void gen_gvar(Node *node){
+	if(node->type->is_thread_local){
+		printf("	mov rax, fs:0\n");
+		printf("	add rax, fs:%.*s@tpoff\n", node->len, node->str);
+	}else{
+		printf("	lui a5,%%hi(%.*s)\n", node->len, node->str);
+		printf("	addi a5,a5,%%lo(%.*s)\n", node->len, node->str);
+	}
+	push("a5");
+}
+
+void gen_lvar(Node *node){
+	if(node->kind != ND_LVAR && node->kind != ND_CALL_FUNC){
+		error_at(token->str,"not a variable");
+	}
+
+	printf("	addi a5,s0,-%d\n", node->offset + 8);
+	push("a5");
+}
+
+void gen_struc(Node *node){
+	if(node->kind != ND_DOT && node->kind != ND_ARROW){
+		error_at(token->str, "not a struct");
+	}
+
+	gen_expr(node->lhs);
+	gen_expr(node->rhs);
+
+    pop("a4");
+    pop("a5");
+	printf("	add a5,a5,a4\n");
+    push("a5");
+}
+
+void gen_args(Node *args){
+	int reg_num;
+	int arg_count = 0;
+
+	while(args){
+		gen_expr(args);
+		arg_count++;
+		args=args->block_code;
+	}
+
+	for(reg_num = arg_count;reg_num > 0;reg_num--){
+		pop("t0");
+		printf("	mv %s,t0\n", reg[reg_num-1]);
+	}
+
+}
+
+void gen_address(Node *node){
+	/**/ if(node->kind == ND_DEREF)   gen_expr(node->rhs);
+	else if(node->kind == ND_DOT)     gen_struc(node);
+	else if(node->kind == ND_ARROW)   gen_struc(node);
+	else if(node->kind == ND_GVAR)    gen_gvar(node);
+	else if(node->kind == ND_LVAR)    gen_lvar(node);
+	else error_at(token->str, "can not assign");
+}
+
+void gen_calc(Node *node){
+	int reg_ty = (int)node->type->ty;
+
+	switch(node->kind){
+		case ND_ADD:
+			printf("	add a5,a5,a4\n");
+			break;
+		case ND_SUB:
+			printf("	sub a5,a5,a4\n");
+			break;
+		case ND_MUL:
+			printf("	mul a5,a5,a4\n");
+			break;
+		case ND_DIV:
+			printf("	div a5,a5,a4\n");
+			break;
+		case ND_MOD:
+			printf("	rem a5,a5,a4\n");
+			break;
+		case ND_GT:
+			printf("	sgt a5,a5,a4\n");
+			printf("	andi a5,a5,0xff\n");
+			break;
+		case ND_GE:
+			printf("	slt a5,a5,a4\n");
+			printf("	xori a5,a5,1\n");
+			printf("	andi a5,a5,0xff\n");
+			break;
+		case ND_LT:
+			printf("	slt a5,a5,a4\n");
+			printf("	andi a5,a5,0xff\n");
+			break;
+		case ND_LE:
+			printf("	sgt a5,a5,a4\n");
+			printf("	xori a5,a5,1\n");
+			printf("	andi a5,a5,0xff\n");
+			break;
+		case ND_EQ:
+			printf("	sub a5,a5,a4\n");
+			printf("	seqz a5,a5\n");
+			printf("	andi a5,a5,0xff\n");
+			break;
+		case ND_NE:
+			printf("	sub a5,a5,a4\n");
+			printf("	snez a5,a5\n");
+			printf("	andi a5,a5,0xff\n");
+			break;
+		case ND_BIT_AND:
+			printf("	and a5,a5,a4\n");
+			printf("    zext.b a5,a5\n");
+			break;
+		case ND_BIT_OR:
+			printf("	or a5,a5,a4\n");
+			printf("    zext.b a5,a5\n");
+			break;
+		case ND_NOT:
+			printf("	seqz a5,a5\n");
+			printf("	andi a5,a5,0xff\n");
+			break;
+		default:
+			error_at(token->str, "cannot code gen");
+	}
+}
+
+void gen_expr(Node *node){
+	int reg_ty; 
+	int reg_rty;
+
+	if(node && node->type) reg_ty = (int)node->type->ty;
+	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
+
+	switch(node->kind){
+		case ND_NUM:
+			printf("	li a5,%d\n", node->val);
+			push("a5");
+			return;
+		case ND_CAST:
+			gen_expr(node->rhs);
+			pop("a5");
+			if(reg_ty > reg_rty){
+				if(reg_rty == BOOL){
+					printf("        zext.b a5,a5\n");
+				}else if(reg_rty == CHAR){
+					printf("        sext.b a5,a5\n");
+				}
+			}
+			push("a5");
+			return;
+		case ND_GVAR:
+			gen_gvar(node);
+
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
+				pop("a5");
+				printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
+				push("a5");
+			}
+			return;
+		case ND_LVAR:
+			gen_lvar(node);
+
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
+				pop("a5");
+				printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
+				push("a5");
+			}
+			return;
+		case ND_PREID:
+			// ++p -> p += 1
+			gen(node->lhs);
+            push("a5");
+			return;
+		case ND_POSTID:
+			// push
+			gen_address(node->lhs); // push lhs
+			gen_expr(node->rhs->rhs->rhs);// push rhs
+			
+			// calc
+			pop("a4"); // rhs
+			pop("a5"); // lhs
+
+			printf("	lw t0, 0(a5)\n"); // Evacuation lhs data to temporary register
+			push("t0");// push temporary register
+			push("a5");// Evacuation lhs address
+			printf("	lw a5, 0(a5)\n"); // deref lhs
+
+			gen_calc(node->rhs->rhs);
+			push("a5"); // rhs op lhs
+
+			// assign
+			pop("a4"); // src
+			pop("a5"); // dst
+			if(node->lhs->type->ty == BOOL){
+				printf("	snez a4,a4\n");
+			}
+			printf("	sw a4, 0(a5)\n"); // deref lhs
+
+			// already evacuated
+			//printf("	push rax\n");
+			return;
+		case ND_STR:
+			printf("	lui a5,%%hi(.LC%d)\n", node->val);
+			printf("	addi a5,a5,%%lo(.LC%d)\n", node->val);
+			push("a5");
+			return;
+		case ND_ASSIGN:
+			gen_address(node->lhs);
+			gen_expr(node->rhs);
+
+			pop("a4");
+			pop("a5");
+			printf("	s%c a4,0(a5)\n", reg_size[reg_ty]);
+
+			push("a4");
+			return;
+		case ND_COMPOUND:
+			// push
+			gen_address(node->lhs);  // push lhs
+			gen_expr(node->rhs->rhs);// push rhs
+
+			// calc
+			pop("a4"); // rhs
+			pop("a5"); // lhs
+			push("a5"); // Evacuation lhs
+			printf("	lw a5, 0(a5)\n"); // deref lhs
+
+			gen_calc(node->rhs);
+			push("a5"); // rhs op lhs
+
+			// assign
+			pop("a4"); // src
+			pop("a5"); // dst
+			if(node->lhs->type->ty <= CHAR){
+                if(node->lhs->type->ty == BOOL){
+				    printf("	snez a4,a4\n");
+                }
+				printf("	sb a4,0(a5)\n");
+			}else{
+				printf("	sw a4,0(a5)\n");
+			}
+
+			push("a4");
+			return;
+		case ND_DOT:
+		case ND_ARROW:
+			gen_struc(node);
+			// if it's an array or struct, ignore the deref
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
+                pop("a5");
+
+                // push [rax]
+                printf("	lw t0, 0(a5)\n");
+                push("t0");
+			}
+			return;
+		case ND_TERNARY:
+			// condition
+			gen_expr(node->lhs);
+			pop("a5");
+			printf("	li a4,0\n");
+			printf("	beq a5,a4,.Lelse%03d\n", node->val);
+
+			// true
+			gen(node->rhs);
+			printf("	j .LifEnd%03d\n", node->val);
+			printf(".Lelse%03d:\n", node->val);
+
+			// false
+			gen(node->next);
+			printf(".LifEnd%03d:\n", node->val);
+			push("a5");
+			return;
+		case ND_AND:
+			gen_expr(node->lhs);
+			printf("	lw a5,0(sp)\n");
+			printf("	beqz a5,.LlogicEnd%03d\n", node->val);
+			gen_expr(node->rhs);
+
+			pop("a5");
+			pop("a4");
+			printf("	and a5,a5,a4\n");
+			push("a5");
+			printf(".LlogicEnd%03d:\n", node->val);
+			return;
+		case ND_OR:
+			gen_expr(node->lhs);
+			printf("	lw a5,0(sp)\n");
+			printf("	bnez a5,.LlogicEnd%03d\n", node->val);
+			gen_expr(node->rhs);
+
+			pop("a5");
+			pop("a4");
+			printf("	or a5,a5,a4\n");
+			push("a5");
+			printf(".LlogicEnd%03d:\n", node->val);
+			return;
+		case ND_NOT:
+			gen_expr(node->rhs);
+			pop("a5");
+			gen_calc(node);
+			push("a5");
+			return;
+		case ND_ADDRESS:
+			gen_address(node->rhs);// printf("	push rax\n");
+			return;
+		case ND_DEREF:
+			gen(node->rhs);
+			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
+				printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
+			}
+			push("a5");
+			return;
+		case ND_CALL_FUNC:
+			gen_args(node->rhs);
+
+			printf("	call %.*s\n", node->len, node->str);
+			push("a0");
+			return;
+		default:
+			// check left hand side
+			gen_expr(node->lhs);
+			// check right hand side
+			gen_expr(node->rhs);
+
+			// pop two value
+			pop("a4");
+			pop("a5");
+
+			// calculation lhs and rhs
+			gen_calc(node);
+
+			// push result
+			push("a5");
+	}
+}
+
+void gen(Node *node){
+	Node *cases;
+
+	// generate assembly
+	switch(node->kind){
+		case ND_NULL_STMT:
+			// NULL statement
+			return;
+		case ND_IF:
+			gen(node->lhs);
+			printf("	li a4,1\n");
+			printf("	bne a5,a4,.LifEnd%03d\n", node->val);
+			gen(node->rhs);
+
+			printf(".LifEnd%03d:\n", node->val);
+			return;
+		case ND_IFELSE:
+			// condition
+			gen(node->lhs);
+			printf("	li a4,1\n");
+			printf("	bne a5,a4,.Lelse%03d\n", node->val);
+
+			// expr in if
+			gen(node->rhs->lhs);
+			printf("	j .LifEnd%03d\n", node->val);
+			printf(".Lelse%03d:\n", node->val);
+
+			// expr in else
+			gen(node->rhs->rhs);
+			printf(".LifEnd%03d:\n", node->val);
+			return;
+		case ND_SWITCH:
+			// gen cases condtion
+			cases = node->next;
+			while(cases){
+				gen(cases);
+
+				printf("	li a4,1\n");
+				printf("	beq a5,a4,.LcaseBegin%03d\n", cases->val);
+				cases = cases->next;
+			}
+
+			// gen default condtion
+			if(node->lhs){
+				printf("	j .LcaseBegin%03d\n", node->lhs->val);
+			}
+			printf("	j .LloopEnd%03d\n", node->val);
+
+			// gen code block
+			gen(node->rhs);
+
+			printf(".LloopEnd%03d:\n", node->val);
+			return;
+		case ND_FOR:
+			// init
+			gen(node->lhs);
+
+			// condition
+			printf(".LloopBegin%03d:\n", node->val);
+			gen(node->lhs->next);
+			if(node->lhs->next->kind != ND_NULL_STMT){
+				printf("	li a4,1\n");
+				printf("	bne a5,a4,.LloopEnd%03d\n", node->val);
+			}
+
+			// gen block
+			gen(node->rhs);
+
+			// gen update expression
+			printf(".LloopCont%03d:\n", node->val);
+			gen(node->lhs->next->next);
+
+			// continue
+			printf("	j .LloopBegin%03d\n", node->val);
+			printf(".LloopEnd%03d:\n", node->val);
+			return;
+		case ND_WHILE:
+			// condition
+			printf(".LloopBegin%03d:\n", node->val);
+			gen(node->lhs);
+			printf("	li a4,1\n");
+			printf("	bne a5,a4,.LloopEnd%03d\n", node->val);
+
+			// else expression
+			gen(node->rhs);
+
+			// continue
+			printf(".LloopCont%03d:\n", node->val);
+			printf("	j .LloopBegin%03d\n", node->val);
+			printf(".LloopEnd%03d:\n", node->val);
+			return;
+		case ND_DOWHILE:
+			// codeblock
+			printf(".LloopBegin%03d:\n", node->val);
+			gen(node->rhs);
+
+			// continue
+			printf(".LloopCont%03d:\n", node->val);
+
+			// condition
+			gen(node->lhs);
+			// break loop
+			printf("	li a4,1\n");
+			printf("	bne a5,a4,.LloopEnd%03d\n", node->val);
+
+			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf(".LloopEnd%03d:\n", node->val);
+			return;
+		case ND_CONTINUE:
+			printf("	j .LloopCont%03d\n", node->val);
+			return;
+		case ND_BREAK:
+			printf("	j .LloopEnd%03d\n", node->val);
+			return;
+		case ND_CASE:
+			printf(".LcaseBegin%03d:\n", node->val);
+			gen(node->rhs);
+			return;
+		case ND_ARG:
+			while(node){
+				// push register argument saved
+				push(reg[node->val]);
+				gen_lvar(node->rhs);
+				pop("a5");
+				pop("a4");
+				printf("	sw a4,0(a5)\n");
+				node=node->next;
+			}
+			return;
+		case ND_BLOCK:
+			expand_block_code(node->rhs);
+			return;
+		case ND_RETURN:
+			if(node->rhs){
+				gen(node->rhs);
+			}
+
+			printf("	mv a0,a5\n");
+			printf("	lw ra,%d(sp)\n", aligned_stack_size - 4);
+			printf("	lw s0,%d(sp)\n", aligned_stack_size - 8);
+			printf("	addi sp,sp,%d\n", aligned_stack_size);
+			printf("	jr ra\n\n");
+			return;
+		default:
+			gen_expr(node);
+			pop("a5");
+			return;
+	}
+}
+
+void gen_main(void){
+	int i;
+	int j;
+
+
+	//printf("// risc-v\n");
+	printf(".option nopic\n");
+
+	// set global variable
+	printf(".data\n");
+	GVar *start = globals;
+	for (GVar *var = start;var;var = var->next){
+		set_gvar(var);
+	}
+
+	// set string
+	for (Str *var = strings;var;var = var->next){
+		printf(".LC%d:\n", var->label_num);
+		printf("	.string \"%.*s\"\n", var->len, var->str);
+	}
+
+	llid           = 0;
+	label_num      = 0;
+	label_loop_end = 0;
+	labels_head    = NULL;
+	labels_tail    = NULL;
+
+	//generate assembly at first expr
+	printf(".text\n");
+	for(i = 0;func_list[i];i++){
+		if(func_list[i]->code[0] == NULL) continue;
+
+		aligned_stack_size = 16 + ((func_list[i]->stack_size + 11) / 16 * 16);
+		printf(".globl %s\n", func_list[i]->name);
+		printf("%s:\n", func_list[i]->name);
+		printf("	addi sp,sp,-%d\n", aligned_stack_size);
+		printf("	sw ra,%d(sp)\n", aligned_stack_size - 4);
+		printf("	sw s0,%d(sp)\n", aligned_stack_size - 8);
+		printf("	addi s0,sp,%d\n\n", aligned_stack_size);
+
+		if(func_list[i]->args){
+			// set local variable
+			gen(func_list[i]->args);
+		}
+
+		for(j = 0;func_list[i]->code[j] != NULL;j++){
+			// gen code
+			gen(func_list[i]->code[j]);
+			printf("\n");
+		}
+
+		// epiroge
+		printf("	mv a0,a5\n");
+		printf("	lw ra,%d(sp)\n", aligned_stack_size - 4);
+		printf("	lw s0,%d(sp)\n", aligned_stack_size - 8);
+		printf("	addi sp,sp,%d\n", aligned_stack_size);
+		printf("	jr ra\n\n");
+	}
+}
+#include "cc_sakura.h"
 //                         void _Bool  char   enum  int   ptr  array struct
 const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
 const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
@@ -460,9 +989,26 @@ void expand_block_code(Node *node){
 		gen(node);
 		node = node->block_code;
 	}
-	printf("	push rax\n");
 }
 
+
+void gen_gvar_label(GVar *gvar, Node *init){
+	Type *type = get_pointer_type(gvar->type);
+	if(init->kind == ND_STR){
+		if(gvar->type->ty == PTR){
+			printf("	.quad	.LC%d\n", init->val);
+		}else if(gvar->type->ty == ARRAY){
+			printf("	.string \"%.*s\"\n", init->len, init->str);
+			if(init->offset) printf("        .zero	%d\n", init->offset);
+		}
+	}else{
+		if(type->ty < INT){
+			printf("	.byte	%d\n", init->val);
+		}else{
+			printf("	.long	%d\n", init->val);
+		}
+	}
+}
 
 void gen_gvar(Node *node){
 	if(node->type->is_thread_local){
@@ -953,9 +1499,6 @@ void gen(Node *node){
 		case ND_BREAK:
 			printf("	jmp .LloopEnd%03d\n", node->val);
 			return;
-		case ND_BLOCK:
-			expand_block_code(node->rhs);
-			return;
 		case ND_CASE:
 			printf(".LcaseBegin%03d:\n", node->val);
 			gen(node->rhs);
@@ -972,6 +1515,9 @@ void gen(Node *node){
 				node=node->next;
 			}
 			return;
+		case ND_BLOCK:
+			expand_block_code(node->rhs);
+			return;
 		case ND_RETURN:
 			if(node->rhs){
 				gen_expr(node->rhs);
@@ -987,6 +1533,63 @@ void gen(Node *node){
 			return;
 	}
 }
+
+void gen_main(void){
+	int i;
+	int j;
+
+
+	printf("// x86-64\n");
+	printf(".intel_syntax noprefix\n");
+
+	// set global variable
+	printf(".data\n");
+	GVar *start = globals;
+	for (GVar *var = start;var;var = var->next){
+		set_gvar(var);
+	}
+
+	// set string
+	for (Str *var = strings;var;var = var->next){
+		printf(".LC%d:\n", var->label_num);
+		printf("	.string \"%.*s\"\n", var->len, var->str);
+	}
+
+	llid           = 0;
+	label_num      = 0;
+	label_loop_end = 0;
+	labels_head    = NULL;
+	labels_tail    = NULL;
+
+	//generate assembly at first expr
+	printf(".text\n");
+	for(i = 0;func_list[i];i++){
+		if(func_list[i]->code[0] == NULL) continue;
+		printf(".globl %s\n", func_list[i]->name);
+		printf("%s:\n", func_list[i]->name);
+		printf("	push rbp\n");
+		printf("	mov rbp,rsp\n");
+		printf("	sub rsp,%d\n", func_list[i]->stack_size);
+
+		if(func_list[i]->args){
+			// set local variable
+			gen(func_list[i]->args);
+		}
+
+		for(j = 0;func_list[i]->code[j] != NULL;j++){
+			// gen code
+			gen(func_list[i]->code[j]);
+		}
+
+		// epiroge
+		// rax = return value
+		printf("	mov rsp,rbp\n");
+		printf("	pop rbp\n");
+		printf("	ret\n\n");
+	}
+}
+#include "cc_sakura.h"
+
 LVar     *locals;
 GVar     *globals;
 Struc    *structs;
@@ -998,8 +1601,8 @@ Enum     *outside_enum;
 Def_Type *outside_deftype;
 
 Type *set_type(Type *type, Token *tok){
-	Enum  *enum_found  = __NULL;
-	Struc *struc_found = __NULL;
+	Enum  *enum_found  = NULL;
+	Struc *struc_found = NULL;
 
 	switch(type->ty){
 		case VOID:
@@ -1019,7 +1622,7 @@ Type *set_type(Type *type, Token *tok){
 				type->ty   = STRUCT;
 				type->size = struc_found->memsize;
 				// unname enum
-				if(struc_found->member == __NULL && consume("{")){
+				if(struc_found->member == NULL && consume("{")){
 					struc_found->member = register_struc_member(&(struc_found->memsize));
 				}
 			}else{
@@ -1047,7 +1650,7 @@ Type *set_type(Type *type, Token *tok){
 
 			if(enum_found){
 				type->ty = ENUM;
-				if(enum_found->member == __NULL && consume("{")){
+				if(enum_found->member == NULL && consume("{")){
 					enum_found->member = register_enum_member();
 				}
 			}else{
@@ -1085,19 +1688,19 @@ Type *parse_type(void){
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
 		type->ty = VOID;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("_Bool", TK_TYPE)){
 		type->ty = BOOL;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("char", TK_TYPE)){
 		type->ty = CHAR;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("int", TK_TYPE)){
 		type->ty = INT;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("size_t", TK_TYPE)){
 		type->ty = SIZE_T;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("struct", TK_TYPE)){
 		type->ty = STRUCT;
 		type = set_type(type, consume_ident());
@@ -1190,7 +1793,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			newtype->ptr_to->is_thread_local = toplv_type->is_thread_local;
 			newtype = newtype->ptr_to;
 
-			if(gvar->type == __NULL){
+			if(gvar->type == NULL){
 				gvar->type = newtype;
 			}
 			expect("]");
@@ -1237,7 +1840,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			newtype->ptr_to->index_size = index_num;
 			newtype = newtype->ptr_to;
 
-			if(lvar->type == __NULL){
+			if(lvar->type == NULL){
 				lvar->type = newtype;
 			}
 			expect("]");
@@ -1261,8 +1864,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 Member *register_struc_member(int *asize_ptr){
 	int size_of_type;
-	Member *new_memb  = __NULL;
-	Member *memb_head = __NULL;
+	Member *new_memb  = NULL;
+	Member *memb_head = NULL;
 
 	while(1){
 		if(!(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE))){
@@ -1295,7 +1898,7 @@ Member *register_struc_member(int *asize_ptr){
 				newtype->ptr_to->index_size = index_num;
 				newtype = newtype->ptr_to;
 
-				if(new_memb->type == __NULL){
+				if(new_memb->type == NULL){
 					new_memb->type = newtype;
 				}
 				expect("]");
@@ -1341,8 +1944,8 @@ void declare_struct(Struc *new_struc){
 
 Member *register_enum_member(void){
 	int counter = 0;
-	Member *new_memb  = __NULL;
-	Member *memb_head = __NULL;
+	Member *new_memb  = NULL;
+	Member *memb_head = NULL;
 
 	while(1){
 		new_memb = calloc(1,sizeof(Member));
@@ -1381,14 +1984,17 @@ void declare_enum(Enum *new_enum){
 	new_enum->next   = enumerations;
 	enumerations     = new_enum;
 }
+#include "cc_sakura.h"
+
 int   llid;
 int   label_num;
 int   IGNORE_SCOPE;
 int   CONSIDER_SCOPE;
 int   label_loop_end;
+int   aligned_stack_size;
 char  *user_input;
 char  filename[100];
-Func  *func_list[300];
+Func  *func_list[FUNC_NUM];
 Label *labels_head;
 Label *labels_tail;
 
@@ -1397,19 +2003,19 @@ char *read_file(char *path){
 	char *buf;
 
 	strcpy(filename, path);
-	if ((fp = fopen(path, "r")) == __NULL) {
+	if ((fp = fopen(path, "r")) == NULL) {
 		fprintf(stderr, "File open error.\n");
 		exit(1);
 	}
 
 	// get file size
-	if(fseek(fp, 0, SEEK_END) == -1){
+	if(fseek(fp, 0L, SEEK_END) == -1){
 		printf("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 
-	if(fseek(fp, 0, SEEK_SET) == -1){
+	if(fseek(fp, 0L, SEEK_SET) == -1){
 		printf("%s: fseek:%s", path, strerror(errno));
 	}
 
@@ -1443,24 +2049,6 @@ void get_code(int argc, char **argv){
 	}
 }
 
-void gen_gvar_label(GVar *gvar, Node *init){
-	Type *type = get_pointer_type(gvar->type);
-	if(init->kind == ND_STR){
-		if(gvar->type->ty == PTR){
-			printf("	.quad	.LC%d\n", init->val);
-		}else if(gvar->type->ty == ARRAY){
-			printf("	.string \"%.*s\"\n", init->len, init->str);
-			if(init->offset) printf("        .zero	%d\n", init->offset);
-		}
-	}else{
-		if(type->ty < INT){
-			printf("	.byte	%d\n", init->val);
-		}else{
-			printf("	.long	%d\n", init->val);
-		}
-	}
-}
-
 void set_gvar(GVar *gvar){
 	if(gvar->type->is_extern == 1){
 		return;
@@ -1491,8 +2079,6 @@ void set_gvar(GVar *gvar){
 }
 
 int main(int argc, char **argv){
-	int i;
-	int j;
 	IGNORE_SCOPE   = 0;
 	CONSIDER_SCOPE = 1;
 
@@ -1501,74 +2087,30 @@ int main(int argc, char **argv){
 
 	// tokenize
 	token = tokenize(user_input);
+
 	// make syntax tree
 	program();
 
-	if(func_list == __NULL){
+	if(func_list == NULL){
 		fprintf(stderr, "function is not found.");
 	}
 
-
 	// generate code
-	printf(".intel_syntax noprefix\n");
-
-	// set global variable
-	printf(".data\n");
-	GVar *start = globals;
-	for (GVar *var = start;var;var = var->next){
-		set_gvar(var);
-	}
-
-	// set string
-	for (Str *var = strings;var;var = var->next){
-		printf(".LC%d:\n", var->label_num);
-		printf("	.string \"%.*s\"\n", var->len, var->str);
-	}
-
-	llid           = 0;
-	label_num      = 0;
-	label_loop_end = 0;
-	labels_head    = __NULL;
-	labels_tail    = __NULL;
-
-	//generate assembly at first expr
-	printf(".text\n");
-	for(i = 0;func_list[i];i++){
-		if(func_list[i]->code[0] == __NULL) continue;
-		printf(".globl %s\n", func_list[i]->name);
-		printf("%s:\n", func_list[i]->name);
-		printf("	push rbp\n");
-		printf("	mov rbp,rsp\n");
-		printf("	sub rsp,%d\n", func_list[i]->stack_size);
-
-		if(func_list[i]->args){
-			// set local variable
-			gen(func_list[i]->args);
-		}
-
-		for(j = 0;func_list[i]->code[j] != __NULL;j++){
-			// gen code
-			gen(func_list[i]->code[j]);
-		}
-
-		// epiroge
-		// rax = return value
-		printf("	mov rsp,rbp\n");
-		printf("	pop rbp\n");
-		printf("	ret\n\n");
-	}
+	gen_main();
 
 	return 0;
 }
 
+#include "cc_sakura.h"
+
 Node *global_init(Node *node){
-	Node *init_val = __NULL;
+	Node *init_val = NULL;
 	if(check("\"")){
 		if(node->type->ty == ARRAY){
 			consume("\"");
 			Token *tok = consume_string();
 			expect("\"");
-			init_val   = new_node(ND_STR, __NULL, __NULL);
+			init_val   = new_node(ND_STR, NULL, NULL);
 			init_val->str      = tok->str;
 			init_val->len      = tok->len;
 			init_val->type->ty = PTR;
@@ -1583,8 +2125,8 @@ Node *global_init(Node *node){
 		}
 	}else if(consume("{")){
 		int ctr   = 0;
-		Node *new = __NULL;
-		init_val  = new_node(ND_BLOCK, __NULL, __NULL);
+		Node *new = NULL;
+		init_val  = new_node(ND_BLOCK, NULL, NULL);
 		while(token->kind != TK_BLOCK){
 			//Is first?
 			if(ctr == 0){
@@ -1651,7 +2193,7 @@ Node *dot_arrow(NodeKind type, Node *node){
 	// struc->aaa->bbb->ccc;
 	// (lvar <- node -> dot) <- node -> dot
 	Type *struc_type;
-	Node *new = new_node(type, node, __NULL);
+	Node *new = new_node(type, node, NULL);
 	Token *memb_name  = consume_ident();
 	Member *memb_list;
 
@@ -1746,9 +2288,9 @@ Node *array_str(Node *arr){
 		error_at(token->str, "Invalid assign");
 	}
 
-	Node *src  = __NULL;
+	Node *src  = NULL;
 	Node *dst  = calloc(1, sizeof(Node));
-	Node *node = new_node(ND_BLOCK, __NULL, __NULL);
+	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
 	consume("\"");
 	Token *tok = consume_string();
@@ -1790,7 +2332,7 @@ Node *array_block(Node *arr){
 	int isize = arr->type->index_size;
 	Node *src;
 	Node *dst  = calloc(1, sizeof(Node));
-	Node *node = new_node(ND_BLOCK, __NULL, __NULL);
+	Node *node = new_node(ND_BLOCK, NULL, NULL);
 
 	Node *clone = calloc(1, sizeof(Node));
 	memcpy(clone, arr, sizeof(Node));
@@ -1854,9 +2396,9 @@ Node *call_function(Node *node, Token *tok){
 	if(consume(")")) return node;
 
 	int ctr   = 0;
-	Node *new = __NULL;
+	Node *new = NULL;
 	while(1){
-		if(new == __NULL){
+		if(new == NULL){
 			new        = assign();
 			node->rhs  = new;
 		}else{
@@ -1876,25 +2418,25 @@ Node *call_function(Node *node, Token *tok){
 Node *array_index(Node *node, Node *index){
 	// a[1] == *(a+1)
 	node = new_node(ND_ADD, node, index);
-	node = new_node(ND_DEREF, __NULL, node);
+	node = new_node(ND_DEREF, NULL, node);
 
 	return node;
 }
 
 void get_argument(Func *target_func){
 	if(consume_reserved_word("void", TK_TYPE) || check(")")){
-		target_func->args = __NULL;
+		target_func->args = NULL;
 		expect(")");
 		return;
 	}
 
 	// set args node
-	Node *new_arg = __NULL;
+	Node *new_arg = NULL;
 	int arg_counter = 0;
 
 	while(token->kind == TK_CONST || token->kind == TK_NUM ||
 	      token->kind == TK_TYPE  || find_defined_type(token, 0)){
-		if(new_arg == __NULL){
+		if(new_arg == NULL){
 			new_arg       = calloc(1, sizeof(Node));
 			new_arg->kind = ND_ARG;
 			new_arg->val  = arg_counter;
@@ -1924,6 +2466,8 @@ void get_argument(Func *target_func){
 	}
 	expect(")");
 }
+#include "cc_sakura.h"
+
 void error_at(char *loc, char *msg){
 	while((user_input < loc) && (loc[-1] == '\n' || loc[-1] == '\t')) loc--;
 
@@ -2009,7 +2553,7 @@ Token *consume_string(void){
 	}
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_STR || !(is_ascii(*(token->str)))){
-		return __NULL;
+		return NULL;
 	}
 
 	Token *ret = token;
@@ -2028,7 +2572,7 @@ Token *consume_string(void){
 Token *consume_ident(void){
 	// judge whether token is a ident and token pointer
 	if(token->kind != TK_IDENT ||!(is_alnum(*(token->str)))){
-		return __NULL;
+		return NULL;
 	}
 
 	Token *ret = token;
@@ -2094,17 +2638,17 @@ Func *find_func(Token *tok){
 			return func_list[i];
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 GVar *find_gvar(Token *tok){
-	//while var not equal __NULL
+	//while var not equal NULL
 	for (GVar *var = globals;var;var = var->next){
 		if(var->len == tok->len && !memcmp(tok->str, var->name, (size_t)var->len)){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 LVar *find_lvar(Token *tok, int find_range){
@@ -2114,7 +2658,7 @@ LVar *find_lvar(Token *tok, int find_range){
 	 */
 
 	int out_of_scope = 0;
-	//while var not equal __NULL
+	//while var not equal NULL
 	for (LVar *var = locals;var;var = var->next){
 		if(var == outside_lvar) out_of_scope = 1;
 		if(find_range && out_of_scope) break;
@@ -2122,7 +2666,7 @@ LVar *find_lvar(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Str *find_string(Token *tok){
@@ -2131,7 +2675,7 @@ Str *find_string(Token *tok){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Struc *find_struc(Token *tok, int find_range){
@@ -2143,7 +2687,7 @@ Struc *find_struc(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Member *find_struct_member(Type *type, int find_range){
@@ -2158,7 +2702,7 @@ Member *find_struct_member(Type *type, int find_range){
 			return var->member;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Enum *find_enum(Token *tok, int find_range){
@@ -2170,7 +2714,7 @@ Enum *find_enum(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Member *find_enumerator(Token *tok, int find_range){
@@ -2184,7 +2728,7 @@ Member *find_enumerator(Token *tok, int find_range){
 			}
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Def_Type *find_defined_type(Token *tok, int find_range){
@@ -2196,7 +2740,7 @@ Def_Type *find_defined_type(Token *tok, int find_range){
 			return var;
 		}
 	}
-	return __NULL;
+	return NULL;
 }
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
@@ -2240,7 +2784,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 		node->type = lhs->type;
 		if(lhs->type->ty > rhs->type->ty){
 			node->type = lhs->type;
-			node->rhs  = new_node(ND_CAST, __NULL, node->rhs);
+			node->rhs  = new_node(ND_CAST, NULL, node->rhs);
 			node->rhs->type = node->type;
 		}
 	}
@@ -2248,11 +2792,11 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	if(ND_GT <= kind && kind <= ND_NE){
 		if(lhs->type->ty > rhs->type->ty){
 			node->type = lhs->type;
-			node->rhs  = new_node(ND_CAST, __NULL, node->rhs);
+			node->rhs  = new_node(ND_CAST, NULL, node->rhs);
 			node->rhs->type = lhs->type;
 		}else if(lhs->type->ty < rhs->type->ty){
 			node->type = rhs->type;
-			node->lhs  = new_node(ND_CAST, __NULL, node->lhs);
+			node->lhs  = new_node(ND_CAST, NULL, node->lhs);
 			node->lhs->type = rhs->type;
 		}else{
 			node->type = lhs->type;
@@ -2296,6 +2840,8 @@ Node *new_node_num(int val){
 	node->type->align = type_align(node->type);
 	return node;
 }
+
+#include "cc_sakura.h"
 
 int type_size(Type *type){
 	switch(type->ty){
@@ -2366,7 +2912,7 @@ int type_align(Type *type){
 
 
 Type *get_pointer_type(Type *given){
-	while(given->ptr_to != __NULL) given = given->ptr_to;
+	while(given->ptr_to != NULL) given = given->ptr_to;
 	return given;
 }
 
@@ -2382,11 +2928,11 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 	pointer_size->type->align = type_align(pointer_size->type);
 
 
-	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to != __NULL){
+	if(lhs_type->ty >= PTR  &&  lhs_type->ptr_to != NULL){
 		ptrtype = lhs_type->ptr_to;
 		pointer_size->val = ptrtype->size;
 		node->rhs = new_node(ND_MUL, node->rhs, pointer_size);
-	}else if(rhs_type->ty >= PTR  &&  rhs_type->ptr_to != __NULL){
+	}else if(rhs_type->ty >= PTR  &&  rhs_type->ptr_to != NULL){
 		ptrtype = rhs_type->ptr_to;
 		pointer_size->val = ptrtype->size;
 		node->lhs = new_node(ND_MUL, node->lhs, pointer_size);
@@ -2394,6 +2940,8 @@ Node *pointer_calc(Node *node, Type *lhs_type, Type *rhs_type){
 
 	return node;
 }
+#include "cc_sakura.h"
+
 int alloc_size;
 Token *token;
 Str *strings;
@@ -2435,7 +2983,7 @@ Node *data(void){
 			node->len = new->len;
 			node->val = new->label_num;
 
-			if(strings == __NULL){
+			if(strings == NULL){
 				strings = new;
 			}else{
 				new->next = strings;
@@ -2494,8 +3042,8 @@ Node *data(void){
 	}
 
 
-	// __NULL statement
-	return new_node(ND_NULL_STMT, __NULL, __NULL);
+	// NULL statement
+	return new_node(ND_NULL_STMT, NULL, NULL);
 }
 
 Node *primary(void){
@@ -2522,7 +3070,7 @@ Node *primary(void){
 		// dot
 		if(consume(".")){
 			if(node->kind == ND_LVAR){
-				node = new_node(ND_ADDRESS, __NULL, node);
+				node = new_node(ND_ADDRESS, NULL, node);
 			}
 			node = dot_arrow(ND_DOT, node);
 		}
@@ -2543,7 +3091,7 @@ Node *primary(void){
 }
 
 Node *unary(void){
-	Node *node = __NULL;
+	Node *node = NULL;
 
 	// increment
 	if(consume("++")){
@@ -2557,7 +3105,7 @@ Node *unary(void){
 
 	// logical not
 	if(consume("!")){
-		node = new_node(ND_NOT, __NULL, unary());
+		node = new_node(ND_NOT, NULL, unary());
 		node->type->ty    = INT;
 		node->type->size  = 4 ;
 		node->type->align = 4;
@@ -2570,18 +3118,18 @@ Node *unary(void){
 			consume("(");
 			Type *casting_type = parse_type();
 			expect(")");
-			node = new_node(ND_CAST, __NULL, unary());
+			node = new_node(ND_CAST, NULL, unary());
 			node->type = casting_type;
 			return node;
 		}
 	}
 
 	if(consume("*")){
-		return new_node(ND_DEREF, __NULL, unary());
+		return new_node(ND_DEREF, NULL, unary());
 	}
 
 	if(consume("&")){
-		return new_node(ND_ADDRESS, __NULL, unary());
+		return new_node(ND_ADDRESS, NULL, unary());
 	}
 
 	if(consume("+")){
@@ -2800,10 +3348,10 @@ Node *expr(void){
 
 Node *stmt(void){
 	int stash_loop_end = label_loop_end;
-	Node *node = __NULL;
+	Node *node = NULL;
 
 	if(consume_reserved_word("return", TK_RETURN)){
-		node = new_node(ND_RETURN, node, __NULL);
+		node = new_node(ND_RETURN, node, NULL);
 		if(!consume(";")){
 			node->rhs = expr();
 			if(!consume(";")) error_at(token->str, "not a ';' token.");
@@ -2820,7 +3368,7 @@ Node *stmt(void){
 		 *                     | 
 		 *        if(cond)<--else-->expr
 		 */
-		node      = new_node(ND_IF, node, __NULL);
+		node      = new_node(ND_IF, node, NULL);
 		node->val = label_num++;
 		if(consume("(")){
 			//jmp expr
@@ -2853,11 +3401,11 @@ Node *stmt(void){
 		 *               +----->case->case->... 
 		 */
 
-		Node  *cond = __NULL;
+		Node  *cond = NULL;
 		Label *before_switch = labels_tail;
-		Label *prev = __NULL;
+		Label *prev = NULL;
 
-		node      = new_node(ND_SWITCH, node, __NULL);
+		node      = new_node(ND_SWITCH, node, NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
 
@@ -2874,7 +3422,7 @@ Node *stmt(void){
 		node->rhs = stmt(); 
 
 		// register and remove case
-		Node *cond_cases = __NULL;
+		Node *cond_cases = NULL;
 		prev = before_switch;
 		Label *lb = (before_switch) ? prev->next : labels_head;
 		while(lb){
@@ -2892,7 +3440,7 @@ Node *stmt(void){
 				if(node->lhs){
 					error_at(token->str, "multiple default labels in one switch");
 				}else{
-					node->lhs      = new_node(ND_CASE, __NULL, lb->cond);
+					node->lhs      = new_node(ND_CASE, NULL, lb->cond);
 					node->lhs->val = lb->id;
 				}
 			}
@@ -2905,14 +3453,14 @@ Node *stmt(void){
 			}else{
 				prev = lb;
 				lb   = lb->next;
-				prev = __NULL;
+				prev = NULL;
 			}
 		}
 	}else if(consume_reserved_word("case", TK_CASE)){
 		/*
 		 *  (cond) <--- case ---> code
 		 */
-		node = new_node(ND_CASE, logical(), __NULL);
+		node = new_node(ND_CASE, logical(), NULL);
 		expect(":");
 		label_register(node, LB_CASE);
 		node->rhs = stmt();
@@ -2920,7 +3468,7 @@ Node *stmt(void){
 		/*
 		 *  (cond) <--- default ---> code
 		 */
-		node = new_node(ND_CASE, __NULL, __NULL);
+		node = new_node(ND_CASE, NULL, NULL);
 		expect(":");
 		node->rhs = stmt();
 		label_register(node, LB_DEFAULT);
@@ -2929,7 +3477,7 @@ Node *stmt(void){
 		outside_enum   = enumerations;
 		outside_struct = structs;
 
-		node      = new_node(ND_FOR, node, __NULL);
+		node      = new_node(ND_FOR, node, NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
 
@@ -2956,7 +3504,7 @@ Node *stmt(void){
 		structs      = outside_struct; 
 	}else if(consume_reserved_word("do", TK_DO)){
 		// (cond)<-- do-while -->block
-		node      = new_node(ND_DOWHILE, __NULL, __NULL);
+		node      = new_node(ND_DOWHILE, NULL, NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
 		node->rhs = stmt();
@@ -2968,7 +3516,7 @@ Node *stmt(void){
 		}
 		expect(";");
 	}else if(consume_reserved_word("while", TK_WHILE)){
-		node      = new_node(ND_WHILE, node, __NULL);
+		node      = new_node(ND_WHILE, node, NULL);
 		node->val = label_num++;
 		label_loop_end = node->val;
 		if(consume("(")){
@@ -2982,7 +3530,7 @@ Node *stmt(void){
 			node->rhs = stmt();
 		}
 	}else if(consume("{")){
-		node = new_node(ND_BLOCK, node, __NULL);
+		node = new_node(ND_BLOCK, node, NULL);
 		outside_lvar   = locals;
 		outside_enum   = enumerations;
 		outside_struct = structs;
@@ -3029,7 +3577,7 @@ void function(Func *func){
 	defined_types = stash_def_types;
 
 	func->stack_size = alloc_size;
-	func->code[i] = __NULL;
+	func->code[i] = NULL;
 }
 
 void program(void){
@@ -3041,7 +3589,7 @@ void program(void){
 
 	while(!at_eof()){
 		// reset lvar list
-		locals = __NULL;
+		locals = NULL;
 
 		// reset lvar counter
 		alloc_size = 0;
@@ -3109,7 +3657,7 @@ void program(void){
 		// function
 		if(consume("(")){
 			Func *new_func = find_func(def_name);
-			if(new_func == __NULL){
+			if(new_func == NULL){
 				func_list[func_index]       = calloc(1, sizeof(Func));
 				func_list[func_index]->type = toplv_type;
 				func_list[func_index]->name = calloc(def_name->len, sizeof(char));
@@ -3144,8 +3692,10 @@ void program(void){
 			expect(";");
 		}
 	}
-	func_list[func_index] = __NULL;
+	func_list[func_index] = NULL;
 }
+#include "cc_sakura.h"
+
 int len_val(char *str){
 	int counter = 0;
 	for(;is_alnum(*str);str++){
@@ -3256,7 +3806,7 @@ bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_k
 Token *tokenize(char *p){
 	bool is_single_token;
 	Token head;
-	head.next = __NULL;
+	head.next = NULL;
 
 	//set head pointer to cur
 	Token *now = &head;

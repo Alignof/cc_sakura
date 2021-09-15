@@ -1,3 +1,5 @@
+#include "cc_sakura.h"
+
 LVar     *locals;
 GVar     *globals;
 Struc    *structs;
@@ -9,8 +11,8 @@ Enum     *outside_enum;
 Def_Type *outside_deftype;
 
 Type *set_type(Type *type, Token *tok){
-	Enum  *enum_found  = __NULL;
-	Struc *struc_found = __NULL;
+	Enum  *enum_found  = NULL;
+	Struc *struc_found = NULL;
 
 	switch(type->ty){
 		case VOID:
@@ -30,7 +32,7 @@ Type *set_type(Type *type, Token *tok){
 				type->ty   = STRUCT;
 				type->size = struc_found->memsize;
 				// unname enum
-				if(struc_found->member == __NULL && consume("{")){
+				if(struc_found->member == NULL && consume("{")){
 					struc_found->member = register_struc_member(&(struc_found->memsize));
 				}
 			}else{
@@ -58,7 +60,7 @@ Type *set_type(Type *type, Token *tok){
 
 			if(enum_found){
 				type->ty = ENUM;
-				if(enum_found->member == __NULL && consume("{")){
+				if(enum_found->member == NULL && consume("{")){
 					enum_found->member = register_enum_member();
 				}
 			}else{
@@ -96,19 +98,19 @@ Type *parse_type(void){
 	// check type
 	if(consume_reserved_word("void", TK_TYPE)){
 		type->ty = VOID;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("_Bool", TK_TYPE)){
 		type->ty = BOOL;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("char", TK_TYPE)){
 		type->ty = CHAR;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("int", TK_TYPE)){
 		type->ty = INT;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("size_t", TK_TYPE)){
 		type->ty = SIZE_T;
-		type = set_type(type, __NULL);
+		type = set_type(type, NULL);
 	}else if(consume_reserved_word("struct", TK_TYPE)){
 		type->ty = STRUCT;
 		type = set_type(type, consume_ident());
@@ -201,7 +203,7 @@ Node *declare_global_variable(int star_count, Token* def_name, Type *toplv_type)
 			newtype->ptr_to->is_thread_local = toplv_type->is_thread_local;
 			newtype = newtype->ptr_to;
 
-			if(gvar->type == __NULL){
+			if(gvar->type == NULL){
 				gvar->type = newtype;
 			}
 			expect("]");
@@ -248,7 +250,7 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 			newtype->ptr_to->index_size = index_num;
 			newtype = newtype->ptr_to;
 
-			if(lvar->type == __NULL){
+			if(lvar->type == NULL){
 				lvar->type = newtype;
 			}
 			expect("]");
@@ -272,8 +274,8 @@ Node *declare_local_variable(Node *node, Token *tok, int star_count){
 
 Member *register_struc_member(int *asize_ptr){
 	int size_of_type;
-	Member *new_memb  = __NULL;
-	Member *memb_head = __NULL;
+	Member *new_memb  = NULL;
+	Member *memb_head = NULL;
 
 	while(1){
 		if(!(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE))){
@@ -306,7 +308,7 @@ Member *register_struc_member(int *asize_ptr){
 				newtype->ptr_to->index_size = index_num;
 				newtype = newtype->ptr_to;
 
-				if(new_memb->type == __NULL){
+				if(new_memb->type == NULL){
 					new_memb->type = newtype;
 				}
 				expect("]");
@@ -352,8 +354,8 @@ void declare_struct(Struc *new_struc){
 
 Member *register_enum_member(void){
 	int counter = 0;
-	Member *new_memb  = __NULL;
-	Member *memb_head = __NULL;
+	Member *new_memb  = NULL;
+	Member *memb_head = NULL;
 
 	while(1){
 		new_memb = calloc(1,sizeof(Member));
