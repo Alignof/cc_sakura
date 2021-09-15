@@ -1,5 +1,16 @@
-CC	 := gcc
-CFLAGS 	 := -std=c11 -g -O0 -static -Wall 
+ARCH    := riscv
+SPIKE   := /opt/riscv32/bin/spike --isa=RV32IMAC
+PK      := /opt/riscv32/riscv32-unknown-elf/bin/pk
+
+ifeq ($(ARCH),x8664)
+	BT	:= gcc
+	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
+	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
+else
+	BT	:= /opt/riscv32/bin/riscv32-unknown-elf-gcc
+	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
+	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
+endif
 
 INCLUDE  := -I ../include
 MOTHER   := ../cc_sakura
@@ -7,7 +18,6 @@ TARGET   := ./child
 SRCDIR   := ../src
 ASMDIR   := ./asem
 OBJDIR   := ./asem/obj
-SOURCES  := $(wildcard ../src/*.c)
 ASEMS    := $(addprefix $(ASMDIR)/, $(notdir $(SOURCES:.c=.s)))
 OBJECTS  := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
@@ -31,17 +41,31 @@ EXCLUDEFILES := main
 franken:$(ASEMS)
 	# target:$(EXCLUDEFILES)
 	@$(call prepare_franken)
+ifeq ($(ARCH),x8664)
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
-	gcc $(ASMDIR)/*.s -static -o ./child
+	$(BT) $(ASMDIR)/*.s -static -o ./child
 	# gen2
-	./child self_host.c > child.s && gcc -static child.s -o child
+	./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen2.s
 	# gen3
-	./child self_host.c > child.s && gcc -static child.s -o child
+	./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen3.s
 	# check
 	diff gen2.s gen3.s
+else
+	# gen1
+	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
+	$(BT) $(ASMDIR)/*.s -static -o ./child
+	# gen2
+	./child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen2.s
+	# gen3
+	./child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen3.s
+	# check
+	diff gen2.s gen3.s
+endif
 
 # fix franken 
 PATCHFILE   := patch
@@ -68,7 +92,7 @@ patch:$(ASEMS)
 
 # build child by mother
 build: $(MOTHER)
-	$(MOTHER) self_host.c > child.s && gcc -static child.s -o child
+	$(MOTHER) self_host.c > child.s && $(BT) -static child.s -o child
 
 
 # run test.sh
@@ -79,17 +103,31 @@ test:
 self_host:
 	# prepare
 	cat src/header.h > self_host.c && cat src/*.c >> self_host.c
+ifeq ($(ARCH),x8664)
 	# gen1
-	$(MOTHER) self_host.c > child.s && gcc -static child.s -o child
+	$(MOTHER) self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen1.s
 	# gen2
-	./child self_host.c > child.s && gcc -static child.s -o child
+	./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen2.s
 	# gen3
-	./child self_host.c > child.s && gcc -static child.s -o child
+	./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen3.s
 	# check
 	diff gen2.s gen3.s
+else
+	# gen1
+	$(MOTHER) self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen1.s
+	# gen2
+	./child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen2.s
+	# gen3
+	./child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen3.s
+	# check
+	diff gen2.s gen3.s
+endif
 
 simple_test:$(TARGET)
 	./child dummy.c || echo $$?
