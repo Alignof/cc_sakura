@@ -100,7 +100,7 @@ test:
 # self hosting
 self_host:
 	# prepare
-	cat src/header.h > self_host.c && cat src/*.c >> self_host.c
+	cat src/header.h > self_host.c && cat $(SOURCES) >> self_host.c
 ifeq ($(ARCH),x8664)
 	# gen1
 	$(MOTHER) self_host.c > child.s && $(BT) -static child.s -o child
