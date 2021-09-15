@@ -51,21 +51,19 @@ ifeq ($(ARCH),x8664)
 	# gen3
 	./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen3.s
-	# check
-	diff gen2.s gen3.s
 else
 	# gen1
 	$(MOTHER) tmp.c > $(ASMDIR)/tmp.s 
 	$(BT) $(ASMDIR)/*.s -static -o ./child
 	# gen2
-	./child self_host.c > child.s && $(BT) -static child.s -o child
+	$(SPIKE) $(PK) ./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen2.s
 	# gen3
-	./child self_host.c > child.s && $(BT) -static child.s -o child
+	$(SPIKE) $(PK) ./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen3.s
+endif
 	# check
 	diff gen2.s gen3.s
-endif
 
 # fix franken 
 PATCHFILE   := patch
@@ -113,21 +111,19 @@ ifeq ($(ARCH),x8664)
 	# gen3
 	./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen3.s
-	# check
-	diff gen2.s gen3.s
 else
 	# gen1
 	$(MOTHER) self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen1.s
 	# gen2
-	./child self_host.c > child.s && $(BT) -static child.s -o child
+	$(SPIKE) $(PK) ./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen2.s
 	# gen3
-	./child self_host.c > child.s && $(BT) -static child.s -o child
+	$(SPIKE) $(PK) ./child self_host.c > child.s && $(BT) -static child.s -o child
 	cp child.s gen3.s
+endif
 	# check
 	diff gen2.s gen3.s
-endif
 
 simple_test:$(TARGET)
 	./child dummy.c || echo $$?
