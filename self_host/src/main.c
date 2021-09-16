@@ -10,6 +10,7 @@ char  filename[100];
 Func  *func_list[200];
 Label *labels_head;
 Label *labels_tail;
+FILE  *stderr;
 
 char *read_file(char *path){
 	FILE *fp;
