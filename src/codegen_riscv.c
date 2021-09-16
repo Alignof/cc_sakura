@@ -488,7 +488,7 @@ void gen(Node *node){
 			printf("	li a4,1\n");
 			printf("	bne a5,a4,.LloopEnd%03d\n", node->val);
 
-			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf("	j .LloopBegin%03d\n", node->val);
 			printf(".LloopEnd%03d:\n", node->val);
 			return;
 		case ND_CONTINUE:
