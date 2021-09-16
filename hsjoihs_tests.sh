@@ -1,13 +1,22 @@
 #!/bin/bash
 set -f
 run_test() {
+	ARCH="riscv"
+    
+    # compile test
 	echo -e $2 > test/hsjoihs_tmp/task$1.c 
     ./cc_sakura test/hsjoihs_tmp/task$1.c > test/hsjoihs_tmp/task$1.s
     d=$?
-    #if [ $d -ne 0 ]; then { echo -e "compile FAIL, at test case" $1: $2; return 0; }; else echo -e "\033[32mcompile PASS\033[m"; fi
     if [ $d -ne 0 ]; then { echo -e "\033[33mcompile FAIL\033[m"; return 0; }; else echo -e "\033[32mcompile PASS\033[m"; fi
-    gcc test/hsjoihs_tmp/task$1.s -o test/hsjoihs_tmp/task$1.out
-	./test/hsjoihs_tmp/task$1.out
+
+    # execute test
+	if [ $ARCH = "x8664" ]; then
+        gcc test/hsjoihs_tmp/task$1.s -o test/hsjoihs_tmp/task$1.out
+        ./test/hsjoihs_tmp/task$1.out
+	elif [ $ARCH = "riscv" ]; then
+        /opt/riscv32/bin/riscv32-unknown-elf-gcc -march=rv32imac -static test/hsjoihs_tmp/task$1.s -o test/hsjoihs_tmp/task$1.out
+		/opt/riscv32/bin/spike --isa=RV32IMAC /opt/riscv32/riscv32-unknown-elf/bin/pk ./test/hsjoihs_tmp/task$1.out
+	fi
 	res=$?
 	if [ $res -ne $3 ]; then { echo "got:" $res; echo "expected:" $3; echo -e "\033[31mFAIL\033[m, at test case" $1: $2; }; else echo -e "\033[32mPASS\033[m"; fi
 }
