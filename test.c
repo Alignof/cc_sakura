@@ -1,5 +1,9 @@
 int main() {
-    _Bool x = 3;
-    x++;
-    return x;
+    int *p;
+    int a;
+    p = &a;
+    if (p) {
+        return 4;
+    }
+    return 174;
 }
