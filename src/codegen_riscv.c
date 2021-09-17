@@ -385,6 +385,8 @@ void gen_expr(Node *node){
 
 void gen(Node *node){
 	Node *cases;
+	int reg_rty;
+	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 
 	// generate assembly
 	switch(node->kind){
@@ -503,12 +505,13 @@ void gen(Node *node){
 			return;
 		case ND_ARG:
 			while(node){
+				if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 				// push register argument saved
 				push(reg[node->val]);
 				gen_lvar(node->rhs);
 				pop("a5");
 				pop("a4");
-				printf("	sw a4,0(a5)\n");
+				printf("	s%c a4,0(a5)\n", reg_size[reg_rty]);
 				node=node->next;
 			}
 			return;

@@ -1,9 +1,8 @@
+int foo(char a, char b) {
+    return a * 4 + 11;
+}
 int main() {
-    int *p;
-    int a;
-    p = &a;
-    if (p) {
-        return 4;
-    }
-    return 174;
+    char f;
+    f = 3;
+    return foo(f, 4) + 151;
 }
