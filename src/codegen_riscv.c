@@ -507,9 +507,9 @@ void gen(Node *node){
 				// push register argument saved
 				push(reg[node->val]);
 				gen_lvar(node->rhs);
-				pop("a5");
-				pop("a4");
-				printf("	s%c a4,0(a5)\n", reg_size[reg_rty]);
+				pop("t1");
+				pop("t0");
+				printf("	s%c t0,0(t1)\n", reg_size[reg_rty]);
 				node=node->next;
 			}
 			return;
