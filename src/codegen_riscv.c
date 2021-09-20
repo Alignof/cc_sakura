@@ -1,7 +1,7 @@
 #include "cc_sakura.h"
-//                         void _Bool  char  enum  int   ptr  array struct
-const char reg_size[8]  = {'b',  'b',  'b',  'w',  'w',  'w',  'w',  'w'};
-const char reg[8][3]    = {"a0","a1","a2","a3","a4","a5","a6","a7"};
+//                         void _Bool char enum int  ptr array struct
+const char reg_size[8]  = {'b',  'b', 'b', 'w', 'w', 'w', 'w',  'w'};
+const char reg[8][3]    = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 
 void push(const char *reg){
 	printf("		addi sp,sp,-4\n");
@@ -109,8 +109,6 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	int reg_ty = (int)node->type->ty;
-
 	switch(node->kind){
 		case ND_ADD:
 			printf("	add a5,a5,a4\n");
