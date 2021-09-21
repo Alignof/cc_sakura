@@ -360,7 +360,13 @@ void gen_expr(Node *node){
 		case ND_CALL_FUNC:
 			gen_args(node->rhs);
 
+			push("s0");
+			printf("	mv s0,sp\n");
+			printf("	andi sp,sp,-16\n");
 			printf("	call %.*s\n", node->len, node->str);
+			printf("	mv sp,s0\n");
+			pop("s0");
+
 			push("a0");
 			return;
 		default:
