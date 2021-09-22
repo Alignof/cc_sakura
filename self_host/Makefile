@@ -128,6 +128,16 @@ endif
 simple_test:$(TARGET)
 	./child dummy.c || echo $$?
 
+update_src:
+	rm -f src/*.c
+	cp ../src/*.c src/
+	perl -pi -e 's/0L/0/g' src/*.c
+	perl -pi -e 's/(?<!_)NULL/__NULL/g' src/*.c
+	perl -pi -e 's/^#include.*//g' src/*.c
+	perl -pi -e 's/^#define.*//g' src/*.c
+	perl -pi -e 's/FUNC_NUM/300/g' src/*.c
+	perl -pi -e 's/Label\s\*labels_tail;/Label *labels_tail;\nFILE  *stderr;/g' src/*.c
+
 clean:
 	rm -f *.o *.s *~ child* *.txt *.out gen*
 	rm -f $(OBJECTS) ./asem/*.s
