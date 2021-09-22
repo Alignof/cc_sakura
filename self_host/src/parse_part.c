@@ -1,4 +1,5 @@
 
+
 Node *global_init(Node *node){
 	Node *init_val = __NULL;
 	if(check("\"")){

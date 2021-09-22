@@ -1,4 +1,5 @@
 
+
 int   llid;
 int   label_num;
 int   IGNORE_SCOPE;
@@ -7,7 +8,7 @@ int   label_loop_end;
 int   aligned_stack_size;
 char  *user_input;
 char  filename[100];
-Func  *func_list[200];
+Func  *func_list[300];
 Label *labels_head;
 Label *labels_tail;
 FILE  *stderr;

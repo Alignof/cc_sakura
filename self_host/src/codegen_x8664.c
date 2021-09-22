@@ -1,3 +1,4 @@
+
 //                         void _Bool  char   enum  int   ptr  array struct
 const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
 const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};

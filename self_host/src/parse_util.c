@@ -1,4 +1,5 @@
 
+
 int type_size(Type *type){
 	switch(type->ty){
 		case VOID:

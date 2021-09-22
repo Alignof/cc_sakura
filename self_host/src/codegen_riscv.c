@@ -1,6 +1,7 @@
-//                         void _Bool  char   enum  int   ptr  array struct
-const char reg_size[8]  = {'b',  'b',  'b',  'w',  'w',  'w',  'w',  'w'};
-const char reg[8][3]    = {"a0","a1","a2","a3","a4","a5","a6","a7"};
+
+//                         void _Bool char enum int  ptr array struct
+const char reg_size[8]  = {'b',  'b', 'b', 'w', 'w', 'w', 'w',  'w'};
+const char reg[8][3]    = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 
 void push(const char *reg){
 	printf("		addi sp,sp,-4\n");
@@ -108,8 +109,6 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
-	int reg_ty = (int)node->type->ty;
-
 	switch(node->kind){
 		case ND_ADD:
 			printf("	add a5,a5,a4\n");
@@ -361,7 +360,13 @@ void gen_expr(Node *node){
 		case ND_CALL_FUNC:
 			gen_args(node->rhs);
 
+			push("s0");
+			printf("	mv s0,sp\n");
+			printf("	andi sp,sp,-16\n");
 			printf("	call %.*s\n", node->len, node->str);
+			printf("	mv sp,s0\n");
+			pop("s0");
+
 			push("a0");
 			return;
 		default:
@@ -384,6 +389,8 @@ void gen_expr(Node *node){
 
 void gen(Node *node){
 	Node *cases;
+	int reg_rty;
+	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 
 	// generate assembly
 	switch(node->kind){
@@ -392,8 +399,8 @@ void gen(Node *node){
 			return;
 		case ND_IF:
 			gen(node->lhs);
-			printf("	li a4,1\n");
-			printf("	bne a5,a4,.LifEnd%03d\n", node->val);
+			printf("	li a4,0\n");
+			printf("	beq a5,a4,.LifEnd%03d\n", node->val);
 			gen(node->rhs);
 
 			printf(".LifEnd%03d:\n", node->val);
@@ -401,8 +408,8 @@ void gen(Node *node){
 		case ND_IFELSE:
 			// condition
 			gen(node->lhs);
-			printf("	li a4,1\n");
-			printf("	bne a5,a4,.Lelse%03d\n", node->val);
+			printf("	li a4,0\n");
+			printf("	beq a5,a4,.Lelse%03d\n", node->val);
 
 			// expr in if
 			gen(node->rhs->lhs);
@@ -443,8 +450,8 @@ void gen(Node *node){
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs->next);
 			if(node->lhs->next->kind != ND_NULL_STMT){
-				printf("	li a4,1\n");
-				printf("	bne a5,a4,.LloopEnd%03d\n", node->val);
+				printf("	li a4,0\n");
+				printf("	beq a5,a4,.LloopEnd%03d\n", node->val);
 			}
 
 			// gen block
@@ -462,8 +469,8 @@ void gen(Node *node){
 			// condition
 			printf(".LloopBegin%03d:\n", node->val);
 			gen(node->lhs);
-			printf("	li a4,1\n");
-			printf("	bne a5,a4,.LloopEnd%03d\n", node->val);
+			printf("	li a4,0\n");
+			printf("	beq a5,a4,.LloopEnd%03d\n", node->val);
 
 			// else expression
 			gen(node->rhs);
@@ -484,10 +491,10 @@ void gen(Node *node){
 			// condition
 			gen(node->lhs);
 			// break loop
-			printf("	li a4,1\n");
-			printf("	bne a5,a4,.LloopEnd%03d\n", node->val);
+			printf("	li a4,0\n");
+			printf("	beq a5,a4,.LloopEnd%03d\n", node->val);
 
-			printf("	jmp .LloopBegin%03d\n", node->val);
+			printf("	j .LloopBegin%03d\n", node->val);
 			printf(".LloopEnd%03d:\n", node->val);
 			return;
 		case ND_CONTINUE:
@@ -502,12 +509,13 @@ void gen(Node *node){
 			return;
 		case ND_ARG:
 			while(node){
+				if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
 				// push register argument saved
 				push(reg[node->val]);
 				gen_lvar(node->rhs);
-				pop("a5");
-				pop("a4");
-				printf("	sw a4,0(a5)\n");
+				pop("t1");
+				pop("t0");
+				printf("	s%c t0,0(t1)\n", reg_size[reg_rty]);
 				node=node->next;
 			}
 			return;
