@@ -57,8 +57,46 @@ else
 	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 
+self_host: $(TARGET)
+	# prepare
+	mkdir tmp/
+	cp src/*.c tmp/
+	perl -pi -e 's/0L/0/g' tmp/*.c
+	perl -pi -e 's/(?<!_)NULL/__NULL/g' tmp/*.c
+	perl -pi -e 's/^#include.*//g' tmp/*.c
+	perl -pi -e 's/^#define.*//g' tmp/*.c
+	perl -pi -e 's/FUNC_NUM/300/g' tmp/*.c
+	perl -pi -e 's/Label\s\*labels_tail;/Label *labels_tail;\nFILE  *stderr;/g' tmp/main.c
+	cat src/header.h > self_host.c && cat $(SOURCES) >> self_host.c
+	cd tmp/
+ifeq ($(ARCH),x8664)
+	# gen1
+	$(TARGET) self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen1.s
+	# gen2
+	./child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen2.s
+	# gen3
+	./child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen3.s
+else
+	# gen1
+	$(TARGET) self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen1.s
+	# gen2
+	$(SPIKE) $(PK) ./child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen2.s
+	# gen3
+	$(SPIKE) $(PK) ./child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen3.s
+endif
+	# check
+	diff gen2.s gen3.s
+	cd ..
+	rm -rf tmp/
+
 clean:
-	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out
+	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out child* gen*
 	rm -f $(OBJECTS) $(TARGET)
 
-.PHONY: test clean install
+.PHONY: test clean install self_host
