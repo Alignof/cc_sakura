@@ -314,24 +314,24 @@ struct _IO_FILE{
 };
 
 typedef _Bool bool;
-bool true  = 1;
-bool false = 0;
+typedef long size_t;
+extern bool true;
+extern bool false;
 //=========================================================
 
 
 
 //================temporary definition=====================
-int  SEEK_SET = 0;
-int  SEEK_END = 2;
-int  FUNC_NUM = 300;
-void *NULL = 0;
+extern int  SEEK_SET;
+extern int  SEEK_END;
+extern int  FUNC_NUM;
+extern void *NULL;
 
 extern FILE *stdin;		/* Standard input stream.  */
 extern FILE *stdout;		/* Standard output stream.  */
 extern FILE *stderr;		/* Standard error output stream.  */
 
-//extern _Thread_local int errno;
-extern int errno;
+//extern int errno;
 //=========================================================
 
 
