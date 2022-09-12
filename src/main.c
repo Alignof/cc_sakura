@@ -8,9 +8,18 @@ int   label_loop_end;
 int   aligned_stack_size;
 char  *user_input;
 char  filename[100];
-Func  *func_list[FUNC_NUM];
+Func  *func_list[300];
 Label *labels_head;
 Label *labels_tail;
+
+//================instead of define=====================
+bool true  = 1;
+bool false = 0;
+int  SEEK_SET = 0;
+int  SEEK_END = 2;
+int  FUNC_NUM = 300;
+void *NULL = 0;
+//=========================================================
 
 char *read_file(char *path){
 	FILE *fp;
@@ -24,13 +33,13 @@ char *read_file(char *path){
 
 	// get file size
 	if(fseek(fp, 0L, SEEK_END) == -1){
-		printf("%s: fseek:%s", path, strerror(errno));
+		printf("[%s]: fseek failed", path);
 	}
 
 	size_t size = ftell(fp);
 
 	if(fseek(fp, 0L, SEEK_SET) == -1){
-		printf("%s: fseek:%s", path, strerror(errno));
+		printf("[%s]: fseek failed", path);
 	}
 
 	buf = calloc(1, size+2);
