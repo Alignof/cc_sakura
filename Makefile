@@ -5,19 +5,19 @@ ifeq ($(ARCH),x8664)
 	BT	:= gcc
 	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
-	SELFSRC := $(filter-out ./sh_tmp/codegen_riscv.c, $(wildcard ./sh_tmp/*.c))
 	SPIKE   := 
 	PK      := 
+	SELFSRC = $(filter-out ./sh_tmp/codegen_riscv.c, $(wildcard ./sh_tmp/*.c))
 else
 	BT	:= /opt/riscv32/bin/riscv32-unknown-elf-gcc
 	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
-	SELFSRC := $(filter-out ./sh_tmp/codegen_x8664.c, $(wildcard ./sh_tmp/*.c))
 	SPIKE   := /opt/riscv32/bin/spike --isa=RV32IMAC
 	PK      := /opt/riscv32/riscv32-unknown-elf/bin/pk
+	SELFSRC = $(filter-out ./sh_tmp/codegen_x8664.c, $(wildcard ./sh_tmp/*.c))
 endif
 
-INCLUDE := -I ./include
+INCLUDE := -I./include
 TARGET  := ./cc_sakura
 SRCDIR  := ./src
 OBJDIR  := ./src/obj
@@ -74,22 +74,21 @@ self_host: $(TARGET)
 	perl -pi -e 's/^#define.*//g' sh_tmp/*.c
 	perl -pi -e 's/FUNC_NUM/300/g' sh_tmp/*.c
 	perl -pi -e 's/Label\s\*labels_tail;/Label *labels_tail;\nFILE  *stderr;/g' sh_tmp/main.c
-	cat sh_tmp/cc_sakura.h > sh_tmp/self_host.c && cat $(SELFSRC) >> self_host.c
+	cat sh_tmp/cc_sakura.h > self_host.c && cat $(SELFSRC) >> self_host.c
+	rm -rf sh_tmp/
 
 	# gen1
-	$(TARGET) sh_tmp/self_host.c > sh_tmp/child.s && $(BT) -static sh_tmp/child.s -o sh_tmp/child
-	cp sh_tmp/child.s sh_tmp/gen1.s
+	$(TARGET) self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen1.s
 	# gen2
-	$(SPIKE) $(PK) sh_tmp/child sh_tmp/self_host.c > sh_tmp/child.s && $(BT) -static sh_tmp/child.s -o sh_tmp/child
-	cp sh_tmp/child.s sh_tmp/gen2.s
+	$(SPIKE) $(PK) child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen2.s
 	# gen3
-	$(SPIKE) $(PK) sh_tmp/child sh_tmp/self_host.c > sh_tmp/child.s && $(BT) -static sh_tmp/child.s -o sh_tmp/child
-	cp sh_tmp/child.s sh_tmp/gen3.s
+	$(SPIKE) $(PK) child self_host.c > child.s && $(BT) -static child.s -o child
+	cp child.s gen3.s
 
 	# check
 	diff gen2.s gen3.s
-	cd ..
-	rm -rf sh_tmp/
 
 clean:
 	rm -f cc_sakura *.o *.s *~ tmp* *.txt *.out child* gen*
