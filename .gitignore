@@ -4,6 +4,7 @@ tmp*
 a.out
 cc_sakura
 *.txt
+*.s
 
 testing/
 
