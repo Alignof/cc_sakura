@@ -8,18 +8,9 @@ int   label_loop_end;
 int   aligned_stack_size;
 char  *user_input;
 char  filename[100];
-Func  *func_list[300];
+Func  *func_list[FUNC_NUM];
 Label *labels_head;
 Label *labels_tail;
-
-//================instead of define=====================
-bool true  = 1;
-bool false = 0;
-int  SEEK_SET = 0;
-int  SEEK_END = 2;
-int  FUNC_NUM = 300;
-void *NULL = 0;
-//=========================================================
 
 char *read_file(char *path){
 	FILE *fp;

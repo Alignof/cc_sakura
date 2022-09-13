@@ -272,6 +272,10 @@ extern int      aligned_stack_size;
 
 
 //================standard library=====================
+extern FILE *stdin;		/* Standard input stream.  */
+extern FILE *stdout;	/* Standard output stream.  */
+extern FILE *stderr;	/* Standard error output stream.  */
+
 typedef struct _IO_FILE FILE;
 typedef void   _IO_lock_t;
 typedef void*  __off_t;
@@ -315,23 +319,18 @@ struct _IO_FILE{
 
 typedef _Bool bool;
 typedef long size_t;
-extern bool true;
-extern bool false;
 //=========================================================
 
+//================define macro=====================
+#define true ((bool)1)
+#define false ((bool)0)
+#define SEEK_SET 0
+#define SEEK_END 2
+#define FUNC_NUM 300
+#define NULL ((void *)0)
 
-
-//================temporary definition=====================
-extern int  SEEK_SET;
-extern int  SEEK_END;
-extern int  FUNC_NUM;
-extern void *NULL;
-
-extern FILE *stdin;		/* Standard input stream.  */
-extern FILE *stdout;		/* Standard output stream.  */
-extern FILE *stderr;		/* Standard error output stream.  */
-
-//extern int errno;
+extern int *__errno_location(void);
+#define errno (*__errno_location())
 //=========================================================
 
 
