@@ -64,7 +64,7 @@ Node *global_init(Node *node){
 Node *compiler_directive(){
 	Node *node;
 
-	if(consume_reserved_word("__NULL", TK_COMPILER_DIRECTIVE)){
+	if(consume_reserved_word("_NULL", TK_COMPILER_DIRECTIVE)){
 		node = new_node_num(0);
 		node->type->ty    = PTR;
 		node->type->size  = 8;

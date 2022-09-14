@@ -169,8 +169,8 @@ assert -cl 1  "int main(){return sizeof(char);}"
 assert -cl 4  "int main(){return sizeof(int);}"
 assert -cl 8  "int main(){return sizeof(char *);}"
 assert -cl 8  "int main(){return sizeof(int **);}"
-assert -cl 8  "int main(){return sizeof(__NULL);}"
-assert -cl 1  "int main(){return sizeof(*__NULL);}"
+assert -cl 8  "int main(){return sizeof(_NULL);}"
+assert -cl 1  "int main(){return sizeof(*_NULL);}"
 assert -cl 6  'int main(){char x[]="hello"; return sizeof(x);}'
 assert -cl 12 'int main(){int x[]={0,1,2}; return sizeof(x);}'
 assert -cl 20 'int main(){int x[5]={0,1,2}; return sizeof(x);}'
