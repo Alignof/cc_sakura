@@ -1,29 +1,29 @@
 # x8664 or riscv
 ARCH    := riscv
+CFLAGS	:= -std=c11 -g -O0 -static -Wall 
+LDFLAGS := -static
 
 ifeq ($(ARCH),x8664)
 	BT	:= gcc
-	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 	SPIKE   := 
 	PK      := 
 	SELFSRC = $(filter-out ./sh_tmp/codegen_riscv.c, $(wildcard ./sh_tmp/*.c))
 else
 	BT	:= /opt/riscv32/bin/riscv32-unknown-elf-gcc
-	CFLAGS 	:= -std=c11 -g -O0 -static -Wall 
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 	SPIKE   := /opt/riscv32/bin/spike --isa=RV32IMAC
 	PK      := /opt/riscv32/riscv32-unknown-elf/bin/pk
 	SELFSRC = $(filter-out ./sh_tmp/codegen_x8664.c, $(wildcard ./sh_tmp/*.c))
 endif
 
-INCLUDE := -I./include
+INCLUDE := -I./include -I/usr/include
 TARGET  := ./cc_sakura
 SRCDIR  := ./src
 OBJDIR  := ./src/obj
 OBJECTS := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
-$(TARGET): $(OBJECTS)
+$(TARGET): $(OBJECTS) ./include/cc_sakura.h
 	echo $(ARCH)
 	echo $(BT)
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -37,11 +37,7 @@ install: $(OBJECTS)
 	$(CC) -O2 -o $(TARGET) $^ $(LDFLAGS)
 
 test: $(TARGET)
-ifeq ($(ARCH),x8664)
-	./test.sh x8664
-else
-	./test.sh riscv
-endif
+	./test.sh $(ARCH)
 
 file_test: $(TARGET)
 ifeq ($(ARCH),x8664)
@@ -68,12 +64,6 @@ self_host: $(TARGET)
 	mkdir sh_tmp/
 	cp src/*.c sh_tmp/
 	cp include/cc_sakura.h sh_tmp/
-	perl -pi -e 's/0L/0/g' sh_tmp/*.c
-	perl -pi -e 's/(?<!_)NULL/__NULL/g' sh_tmp/*.c
-	perl -pi -e 's/^#include.*//g' sh_tmp/*.c
-	perl -pi -e 's/^#define.*//g' sh_tmp/*.c
-	perl -pi -e 's/FUNC_NUM/300/g' sh_tmp/*.c
-	perl -pi -e 's/Label\s\*labels_tail;/Label *labels_tail;\nFILE  *stderr;/g' sh_tmp/main.c
 	cat sh_tmp/cc_sakura.h > self_host.c && cat $(SELFSRC) >> self_host.c
 	rm -rf sh_tmp/
 

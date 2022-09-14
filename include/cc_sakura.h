@@ -272,10 +272,6 @@ extern int      aligned_stack_size;
 
 
 //================standard library=====================
-extern FILE *stdin;		/* Standard input stream.  */
-extern FILE *stdout;	/* Standard output stream.  */
-extern FILE *stderr;	/* Standard error output stream.  */
-
 typedef struct _IO_FILE FILE;
 typedef void   _IO_lock_t;
 typedef void*  __off_t;
@@ -316,6 +312,10 @@ struct _IO_FILE{
 
 	_IO_lock_t *_lock;
 };
+
+extern FILE *stdin;     /* Standard input stream.  */
+extern FILE *stdout;	/* Standard output stream.  */
+extern FILE *stderr;	/* Standard error output stream.  */
 
 typedef _Bool bool;
 typedef long size_t;
