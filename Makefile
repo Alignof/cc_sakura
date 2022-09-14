@@ -8,13 +8,13 @@ ifeq ($(ARCH),x8664)
 	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 	SPIKE   := 
 	PK      := 
-	SELFSRC = $(filter-out ./sh_tmp/codegen_riscv.c, $(wildcard ./sh_tmp/*.c))
+	SELFSRC = $(filter-out ./self_host/codegen_riscv.c, $(wildcard ./self_host/*.c))
 else
 	BT	:= /opt/riscv32/bin/riscv32-unknown-elf-gcc
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 	SPIKE   := /opt/riscv32/bin/spike --isa=RV32IMAC
 	PK      := /opt/riscv32/riscv32-unknown-elf/bin/pk
-	SELFSRC = $(filter-out ./sh_tmp/codegen_x8664.c, $(wildcard ./sh_tmp/*.c))
+	SELFSRC = $(filter-out ./self_host/codegen_x8664.c, $(wildcard ./self_host/*.c))
 endif
 
 INCLUDE := -I./include -I/usr/include
@@ -60,12 +60,12 @@ endif
 
 self_host: $(TARGET)
 	# prepare
-	rm -rf sh_tmp/
-	mkdir sh_tmp/
-	cp src/*.c sh_tmp/
-	cp include/cc_sakura.h sh_tmp/
-	cat sh_tmp/cc_sakura.h > self_host.c && cat $(SELFSRC) >> self_host.c
-	rm -rf sh_tmp/
+	rm -rf self_host/
+	mkdir self_host/
+	cp src/*.c self_host/
+	cp include/cc_sakura.h self_host/
+	cat self_host/cc_sakura.h > self_host.c && cat $(SELFSRC) >> self_host.c
+	rm -rf self_host/
 
 	# gen1
 	$(TARGET) self_host.c > child.s && $(BT) -static child.s -o child
