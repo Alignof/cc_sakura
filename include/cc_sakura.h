@@ -352,7 +352,8 @@ bool is_symbol(char *str,  bool *single_flag);
 bool at_eof(void);
 bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
 Token *new_token(TokenKind kind, Token *cur, char *str);
-Token *tokenize(char *p);
+Token *tokenize(char **p, Token *now);
+Token *tokenize_main(char *p);
 
 
 // parse_sys.c

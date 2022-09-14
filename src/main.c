@@ -100,7 +100,7 @@ int main(int argc, char **argv){
 	get_code(argc, argv);
 
 	// tokenize
-	token = tokenize(user_input);
+	token = tokenize_main(user_input);
 
 	// make syntax tree
 	program();
