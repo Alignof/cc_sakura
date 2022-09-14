@@ -1,3 +1,15 @@
+//================define macro=====================
+#define SEEK_SET 0
+#define SEEK_END 2
+#define FUNC_NUM 300
+#define true ((bool)1)
+#define false ((bool)0)
+#define NULL ((void *)0)
+
+extern int *__errno_location(void);
+#define errno (*__errno_location())
+//=========================================================
+
 typedef enum{
 	TK_TYPE,
 	TK_RESERVED,
@@ -270,7 +282,6 @@ extern int      label_loop_end;
 extern int      aligned_stack_size;
 //=====================================================
 
-
 //================standard library=====================
 typedef struct _IO_FILE FILE;
 typedef void   _IO_lock_t;
@@ -318,21 +329,9 @@ extern FILE *stdout;	/* Standard output stream.  */
 extern FILE *stderr;	/* Standard error output stream.  */
 
 typedef _Bool bool;
-typedef long size_t;
+//typedef long size_t;
+typedef int size_t;
 //=========================================================
-
-//================define macro=====================
-#define true ((bool)1)
-#define false ((bool)0)
-#define SEEK_SET 0
-#define SEEK_END 2
-#define FUNC_NUM 300
-#define NULL ((void *)0)
-
-extern int *__errno_location(void);
-#define errno (*__errno_location())
-//=========================================================
-
 
 //==================Prototype function=====================
 // main.c

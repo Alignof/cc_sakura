@@ -200,7 +200,6 @@ Token *tokenize(char **p, Token *now){
     if(tokenize_reserved(p, "_Bool",    5, &now, TK_TYPE))	   return now;
     if(tokenize_reserved(p, "char",     4, &now, TK_TYPE))	   return now;
     if(tokenize_reserved(p, "int",	    3, &now, TK_TYPE))	   return now;
-    if(tokenize_reserved(p, "size_t",   6, &now, TK_TYPE))	   return now;
     if(tokenize_reserved(p, "struct",   6, &now, TK_TYPE))     return now;
     if(tokenize_reserved(p, "enum",     4, &now, TK_TYPE))     return now;
     if(tokenize_reserved(p, "if",	    2, &now, TK_IF))	   return now;
