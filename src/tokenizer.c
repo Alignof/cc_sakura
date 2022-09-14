@@ -21,6 +21,10 @@ bool is_digit(char c){
 	return	(('0' <=  c) && (c <=  '9'));
 }
 
+bool is_directive(char c) {
+    return c == '#';
+}
+
 bool at_eof(void){
 	return token->kind == TK_EOF;
 }
@@ -83,6 +87,14 @@ bool is_symbol(char *str,  bool *single_flag){
 	return false;
 }
 
+bool consume_keyword(char **p, char *str, int len) {
+	if(strncmp(*p, str, (size_t)len) != 0){
+		return false;
+	}
+
+    *p += len;
+    return true;
+}
 
 Token *new_token(TokenKind kind, Token *cur, char *str){
 	Token *new = calloc(1, sizeof(Token));
@@ -127,7 +139,7 @@ Token *tokenize(char *p){
 		}
 
 		if((*p == '/') && (*(p+1) == '*')){
-			p+=3;
+			p += 3;
 			while(!((*(p-1) == '*') && (*p == '/'))) p++;
 			p++;
 			continue;
@@ -139,16 +151,13 @@ Token *tokenize(char *p){
 			if(*p == '\\'){
 				p++;// consume back slash
 
-				//Is NUL? (\0)
-				if(*p == '0'){
+				if(*p == '0'){ // Is NUL? (\0)
 					now = new_token(TK_NUM, now, p++);
 					now->val = 0;
-					//Is LF? (\n)
-				}else if(*p == 'n'){
+				}else if(*p == 'n'){ // Is LF? (\n)
 					now = new_token(TK_NUM, now, p++);
 					now->val = 10;
-					//Is HT? (\t)
-				}else if(*p == 't'){
+				}else if(*p == 't'){ // Is HT? (\t)
 					now = new_token(TK_NUM, now, p++);
 					now->val = 9;
 				}else if(*p == '\\'){
@@ -219,9 +228,21 @@ Token *tokenize(char *p){
 		if(tokenize_reserved(&p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) continue;
 
 		// compiler directive
-		if(tokenize_reserved(&p, "__NULL",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
-		//if(tokenize_reserved(&p, "define",   6, &now, TK_COMPILER_DIRECTIVE)) continue;
-		//if(tokenize_reserved(&p, "include",  7, &now, TK_COMPILER_DIRECTIVE)) continue;
+		if(tokenize_reserved(&p, "_NULL",    5, &now, TK_COMPILER_DIRECTIVE)) continue;
+
+        if (is_directive(*p)) {
+            p++;
+		    if(consume_keyword(&p, "include", 7)) {
+                while(*p != '\n') p++;
+                p++;
+                continue;
+            }
+		    if(consume_keyword(&p, "define", 6)) {
+                while(*p != '\n') p++;
+                p++;
+                continue;
+            }
+        }
 
 
 		//Is block? '{' or '}'
