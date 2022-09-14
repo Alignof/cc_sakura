@@ -8,13 +8,13 @@ ifeq ($(ARCH),x8664)
 	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 	SPIKE   := 
 	PK      := 
-	SELFSRC = $(filter-out ./self_host/codegen_riscv.c, $(wildcard ./self_host/*.c))
+	SELFSRC ?= $(filter-out ./self_host/codegen_riscv.c, $(wildcard ./self_host/*.c))
 else
 	BT	:= /opt/riscv32/bin/riscv32-unknown-elf-gcc
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 	SPIKE   := /opt/riscv32/bin/spike --isa=RV32IMAC
 	PK      := /opt/riscv32/riscv32-unknown-elf/bin/pk
-	SELFSRC = $(filter-out ./self_host/codegen_x8664.c, $(wildcard ./self_host/*.c))
+	SELFSRC ?= $(filter-out ./self_host/codegen_x8664.c, $(wildcard ./self_host/*.c))
 endif
 
 INCLUDE := -I./include -I/usr/include
