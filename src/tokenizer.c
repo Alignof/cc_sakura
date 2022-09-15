@@ -137,7 +137,6 @@ bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_k
 }
 
 void register_macro(char **p) {
-	Token *code = calloc(1, sizeof(Token));
     MacroTable *new_macro = calloc(1, sizeof(MacroTable));
     new_macro->code = NULL;
     new_macro->name = *p;
@@ -145,6 +144,8 @@ void register_macro(char **p) {
     new_macro->len = *p - new_macro->name;
 
     while(**p == ' ') (*p)++; // skip space
+
+	Token *code = NULL;
     while(**p != '\n') {
         code = tokenize(p, code);
         if (new_macro->code == NULL) new_macro->code = code;
@@ -209,17 +210,12 @@ Token *tokenize(char **p, Token *now){
         return now;
     }
 
-    //Is number?
+    // Is number?
     if(is_digit(**p)){
-        if(now->kind == TK_IDENT){
-            now = new_token(TK_IDENT, now, (*p)++);
-            now->len = 1;
-        }else{
-            //add number token
-            now = new_token(TK_NUM, now, *p);
-            //set number
-            now->val = strtol(*p, &*p, 10);
-        }
+        // add number token
+        now = new_token(TK_NUM, now, *p);
+        // set number
+        now->val = strtol(*p, &*p, 10);
         return now;
     }
 
@@ -308,13 +304,15 @@ Token *tokenize(char **p, Token *now){
     //Is valiable or macro?
     if(is_alnum(**p)){
         char *tmp = *p;
-        Token *macro = NULL;
+        Token *macro_tok = NULL;
 
         while(is_alnum(**p)) (*p)++;
-        if (macro = is_macro(tmp, *p - tmp)) {
-            while (macro->next == NULL) {
-                memcpy(now->next, macro, sizeof(MacroTable));
+        if (macro_tok = is_macro(tmp, *p - tmp)) {
+            while (macro_tok != NULL) {
+                now->next = calloc(1, sizeof(Token));
+                memcpy(now->next, macro_tok, sizeof(Token));
                 now = now->next;
+                macro_tok = macro_tok->next;
             }
         } else {
             now = new_token(TK_IDENT, now, tmp);
