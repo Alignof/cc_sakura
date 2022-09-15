@@ -91,8 +91,8 @@ bool is_symbol(char *str,  bool *single_flag){
 
 Token *is_macro(char *p, int len) {
 	//while var not equal NULL
-	for (MacroTable *macro = macros; macro; macro = macro->next){
-		if(macro->code->len == len && strncmp(p, macro->code->str, len)){
+	for (MacroTable *macro = macros; macro; macro = macro->next) {
+		if(macro->len == len && strncmp(p, macro->name, len) == 0) {
 			return macro->code;
 		}
 	}
@@ -115,7 +115,11 @@ Token *new_token(TokenKind kind, Token *cur, char *str){
 	//Remaining characters
 	new->str = str;
 	new->len = 1;
-	cur->next = new;
+    if (cur == NULL) {
+        cur = new;
+    } else {
+	    cur->next = new;
+    }
 	return new;
 }
 
@@ -135,7 +139,7 @@ bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_k
 void register_macro(char **p) {
 	Token *code = calloc(1, sizeof(Token));
     MacroTable *new_macro = calloc(1, sizeof(MacroTable));
-    new_macro->code = code;
+    new_macro->code = NULL;
     new_macro->name = *p;
     while(**p != ' ') (*p)++;
     new_macro->len = *p - new_macro->name;
@@ -143,6 +147,7 @@ void register_macro(char **p) {
     while(**p == ' ') (*p)++; // skip space
     while(**p != '\n') {
         code = tokenize(p, code);
+        if (new_macro->code == NULL) new_macro->code = code;
     }
 
     if (macros == NULL) {
@@ -305,10 +310,12 @@ Token *tokenize(char **p, Token *now){
         char *tmp = *p;
         Token *macro = NULL;
 
-        while(is_alnum((*p)++));
-        if (macro = is_macro(*p, *p - tmp)) {
-            now->next = macro;
-            while (now->next != NULL) now = now->next; // seek to head
+        while(is_alnum(**p)) (*p)++;
+        if (macro = is_macro(tmp, *p - tmp)) {
+            while (macro->next == NULL) {
+                memcpy(now->next, macro, sizeof(MacroTable));
+                now = now->next;
+            }
         } else {
             now = new_token(TK_IDENT, now, tmp);
             now->len = *p - tmp;
@@ -320,17 +327,15 @@ Token *tokenize(char **p, Token *now){
 }
 
 Token *tokenize_main(char *p){
-	Token head;
-	head.next = NULL;
-
-	//set head pointer to cur
-	Token *now = &head;
+	Token *head = NULL;
+	Token *now = NULL;
 
 	while(*p){
         now = tokenize(&p, now);
+        if (head == NULL) head = now;
 	}
 
 	//add EOF token
 	new_token(TK_EOF, now, p);
-	return head.next;
+	return head;
 }
