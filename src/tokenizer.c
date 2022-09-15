@@ -87,6 +87,17 @@ bool is_symbol(char *str,  bool *single_flag){
 	return false;
 }
 
+Token *is_macro(char *p, int len) {
+	//while var not equal NULL
+	for (MacroTable *macro = macros; macro; macro = macro->next){
+		if(macro->tok->len == len && strncmp(p, macro->tok->str, len)){
+			return macro->tok;
+		}
+	}
+
+    return NULL;
+}
+
 bool consume_keyword(char **p, char *str, int len) {
 	if(strncmp(*p, str, (size_t)len) != 0){
 		return false;
@@ -265,11 +276,18 @@ Token *tokenize(char **p, Token *now){
         return now;
     }
 
-    //Is valiable?
+    //Is valiable or macro?
     if(is_alnum(**p)){
-        while(is_alnum(**p)){
-            now = new_token(TK_IDENT, now, (*p)++);
-            now->len = 1;
+        char *tmp = *p;
+        Token *macro = NULL;
+
+        while(is_alnum((*p)++));
+        if (macro = is_macro(*p, *p - tmp)) {
+            now->next = macro;
+            while (now->next != NULL) now = now->next; // seek to head
+        } else {
+            now = new_token(TK_IDENT, now, tmp);
+            now->len = *p - tmp;
         }
         return now;
     }
