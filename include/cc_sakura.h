@@ -148,8 +148,10 @@ struct Token{
 
 // macro table
 struct MacroTable {
-	Token *tok;
+	Token *code;
     MacroTable *next;
+    char *name;
+    int len;
 };
 
 // type of variable

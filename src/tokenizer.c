@@ -92,8 +92,8 @@ bool is_symbol(char *str,  bool *single_flag){
 Token *is_macro(char *p, int len) {
 	//while var not equal NULL
 	for (MacroTable *macro = macros; macro; macro = macro->next){
-		if(macro->tok->len == len && strncmp(p, macro->tok->str, len)){
-			return macro->tok;
+		if(macro->code->len == len && strncmp(p, macro->code->str, len)){
+			return macro->code;
 		}
 	}
 
@@ -130,6 +130,27 @@ bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_k
 	*p += len;
 
 	return true;
+}
+
+void register_macro(char **p) {
+	Token *code = calloc(1, sizeof(Token));
+    MacroTable *new_macro = calloc(1, sizeof(MacroTable));
+    new_macro->code = code;
+    new_macro->name = *p;
+    while(**p != ' ') (*p)++;
+    new_macro->len = *p - new_macro->name;
+
+    while(**p == ' ') (*p)++; // skip space
+    while(**p != '\n') {
+        code = tokenize(p, code);
+    }
+
+    if (macros == NULL) {
+        macros = new_macro;
+    } else {
+        new_macro->next = macros;
+        macros = new_macro;
+    }
 }
 
 Token *tokenize(char **p, Token *now){
@@ -238,15 +259,16 @@ Token *tokenize(char **p, Token *now){
 
     if (is_directive(**p)) {
         (*p)++;
-        if(consume_keyword(&*p, "include", 7)) {
+        if(consume_keyword(p, "include", 7)) {
             // ignore this line
             while(**p != '\n') (*p)++;
             (*p)++;
             return now;
         }
-        if(consume_keyword(&*p, "define", 6)) {
-            while(**p != '\n') (*p)++;
+        if(consume_keyword(p, "define", 6)) {
+            while(**p != ' ') (*p)++;
             (*p)++;
+            register_macro(p);
             return now;
         }
     }
