@@ -124,6 +124,7 @@ typedef enum{
 }LabelKind;
 
 typedef struct Token  Token;
+typedef struct MacroTable  MacroTable;
 typedef struct Node   Node;
 typedef struct LVar   LVar;
 typedef struct GVar   GVar;
@@ -143,6 +144,12 @@ struct Token{
 	int val;
 	char *str;
 	int len;
+};
+
+// macro table
+struct MacroTable {
+	Token *tok;
+    MacroTable *next;
 };
 
 // type of variable

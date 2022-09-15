@@ -1,5 +1,7 @@
 #include "cc_sakura.h"
 
+MacroTable *macros;
+
 int len_val(char *str){
 	int counter = 0;
 	for(;is_alnum(*str);str++){
