@@ -357,9 +357,12 @@ bool is_space(char c);
 bool is_digit(char c);
 bool is_block(char c);
 bool is_symbol(char *str,  bool *single_flag);
+Token *is_macro(char *p, int len);
+bool consume_keyword(char **p, char *str, int len);
 bool at_eof(void);
 bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
 Token *new_token(TokenKind kind, Token *cur, char *str);
+void register_macro(char **p);
 Token *tokenize(char **p, Token *now);
 Token *tokenize_main(char *p);
 
