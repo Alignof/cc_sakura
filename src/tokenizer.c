@@ -267,7 +267,7 @@ Token *tokenize(char **p, Token *now){
             return now;
         }
         if(consume_keyword(p, "define", 6)) {
-            while(**p != ' ') (*p)++;
+            while(!is_space(**p)) (*p)++;
             (*p)++;
             register_macro(p);
             return now;
@@ -309,10 +309,16 @@ Token *tokenize(char **p, Token *now){
         while(is_alnum(**p)) (*p)++;
         if (macro_tok = is_macro(tmp, *p - tmp)) {
             while (macro_tok != NULL) {
-                now->next = calloc(1, sizeof(Token));
-                memcpy(now->next, macro_tok, sizeof(Token));
-                now = now->next;
-                macro_tok = macro_tok->next;
+                if (now == NULL) {
+                    now = calloc(1, sizeof(Token));
+                    memcpy(now, macro_tok, sizeof(Token));
+                    macro_tok = macro_tok->next;
+                } else {
+                    now->next = calloc(1, sizeof(Token));
+                    memcpy(now->next, macro_tok, sizeof(Token));
+                    now = now->next;
+                    macro_tok = macro_tok->next;
+                }
             }
         } else {
             now = new_token(TK_IDENT, now, tmp);
