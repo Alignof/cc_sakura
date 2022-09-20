@@ -17,13 +17,13 @@ else
 	SELFSRC ?= $(filter-out ./self_host/codegen_x8664.c, $(wildcard ./self_host/*.c))
 endif
 
-INCLUDE := -I./include -I/usr/include
+INCLUDE = -I./include/x8664 -I/usr/include
 TARGET  := ./cc_sakura
 SRCDIR  := ./src
 OBJDIR  := ./src/obj
 OBJECTS := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
-$(TARGET): $(OBJECTS) ./include/cc_sakura.h
+$(TARGET): $(OBJECTS) ./include/$(ARCH)/cc_sakura.h
 	echo $(ARCH)
 	echo $(BT)
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -63,8 +63,9 @@ self_host: $(TARGET)
 	rm -rf self_host/
 	mkdir self_host/
 	cp src/*.c self_host/
-	cp include/cc_sakura.h self_host/
-	cat self_host/cc_sakura.h > self_host.c && cat $(SELFSRC) >> self_host.c
+	cp include/$(ARCH)/cc_sakura.h self_host/
+	cat self_host/cc_sakura.h > self_host.c
+	cat $(SELFSRC) >> self_host.c
 	rm -rf self_host/
 
 	# gen1
