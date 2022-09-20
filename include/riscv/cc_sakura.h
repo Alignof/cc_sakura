@@ -1,4 +1,30 @@
-//================define macro=====================
+
+//================standard library=====================
+extern struct __sFILE64;
+typedef struct __sFILE64 __FILE;
+struct _reent {
+  int _errno;			/* local copy of errno */
+
+  /* FILE is a big struct and may change over time.  To try to achieve binary
+     compatibility with future versions, put stdin,stdout,stderr here.
+     These are pointers into member __sf defined below.  */
+  __FILE *_stdin;
+  __FILE *_stdout;
+  __FILE *_stderr;
+
+  // ommit
+};
+typedef __FILE FILE;
+
+typedef _Bool bool;
+//typedef long size_t;
+typedef int size_t;
+
+extern struct _reent *__getreent(void);
+#define _REENT (__getreent())
+#define stdin (_REENT->_stdin)
+#define stdout (_REENT->_stdout)
+#define stderr (_REENT->_stderr)
 #define SEEK_SET 0
 #define SEEK_END 2
 #define FUNC_NUM 300
@@ -6,27 +32,8 @@
 #define false ((bool)0)
 #define NULL ((void *)0)
 
-extern int *__errno (void);
+extern int *__errno(void);
 #define errno (*__errno())
-//=========================================================
-
-//================standard library=====================
-extern struct __FILE;
-typedef struct __FILE FILE; 
-struct _reent {
-    struct __FILE *_stdin;
-    struct __FILE *_stdout;
-    struct __FILE *_stderr;
-};
-extern struct _reent *__getreent(void);
-#define _REENT (__getreent())
-#define	stdin (_REENT->_stdin)
-#define	stdout (_REENT->_stdout)
-#define	stderr (_REENT->_stderr)
-
-typedef _Bool bool;
-//typedef long size_t;
-typedef int size_t;
 //=========================================================
 
 typedef enum{
