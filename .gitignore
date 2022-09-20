@@ -27,6 +27,6 @@ self_host/*.txt
 self_host/gen*
 
 self_host.c
-sh_tmp/
+self_host/
 
 .gdb_history

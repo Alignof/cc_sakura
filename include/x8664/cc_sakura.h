@@ -1,3 +1,15 @@
+//================define macro=====================
+#define SEEK_SET 0
+#define SEEK_END 2
+#define FUNC_NUM 300
+#define true ((bool)1)
+#define false ((bool)0)
+#define NULL ((void *)0)
+
+extern int *__errno_location(void);
+#define errno (*__errno_location())
+//=========================================================
+
 typedef enum{
 	TK_TYPE,
 	TK_RESERVED,
@@ -112,6 +124,7 @@ typedef enum{
 }LabelKind;
 
 typedef struct Token  Token;
+typedef struct MacroTable  MacroTable;
 typedef struct Node   Node;
 typedef struct LVar   LVar;
 typedef struct GVar   GVar;
@@ -131,6 +144,14 @@ struct Token{
 	int val;
 	char *str;
 	int len;
+};
+
+// macro table
+struct MacroTable {
+	Token *code;
+    MacroTable *next;
+    char *name;
+    int len;
 };
 
 // type of variable
@@ -270,7 +291,6 @@ extern int      label_loop_end;
 extern int      aligned_stack_size;
 //=====================================================
 
-
 //================standard library=====================
 typedef struct _IO_FILE FILE;
 typedef void   _IO_lock_t;
@@ -313,27 +333,14 @@ struct _IO_FILE{
 	_IO_lock_t *_lock;
 };
 
+extern FILE *stdin;     /* Standard input stream.  */
+extern FILE *stdout;	/* Standard output stream.  */
+extern FILE *stderr;	/* Standard error output stream.  */
+
 typedef _Bool bool;
-typedef long size_t;
-extern bool true;
-extern bool false;
+//typedef long size_t;
+typedef int size_t;
 //=========================================================
-
-
-
-//================temporary definition=====================
-extern int  SEEK_SET;
-extern int  SEEK_END;
-extern int  FUNC_NUM;
-extern void *NULL;
-
-extern FILE *stdin;		/* Standard input stream.  */
-extern FILE *stdout;		/* Standard output stream.  */
-extern FILE *stderr;		/* Standard error output stream.  */
-
-//extern int errno;
-//=========================================================
-
 
 //==================Prototype function=====================
 // main.c
@@ -350,10 +357,14 @@ bool is_space(char c);
 bool is_digit(char c);
 bool is_block(char c);
 bool is_symbol(char *str,  bool *single_flag);
+Token *is_macro(char *p, int len);
+bool consume_keyword(char **p, char *str, int len);
 bool at_eof(void);
 bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
 Token *new_token(TokenKind kind, Token *cur, char *str);
-Token *tokenize(char *p);
+void register_macro(char **p);
+Token *tokenize(char **p, Token *now);
+Token *tokenize_main(char *p);
 
 
 // parse_sys.c
