@@ -15,10 +15,11 @@ struct _reent {
 
 extern struct _reent *__getreent(void);
 #define _REENT (__getreent())
-#define stderr (_REENT->_stderr)
+#define	stderr (_REENT->_stderr)
 extern int *__errno (void);
 #define errno (*__errno())
 int main(void){
     fprintf(stderr, "hello error world!: %d\n", errno);
     return 0;
 }
+

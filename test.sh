@@ -312,5 +312,11 @@ assert -cl 3 "int main(){int x=3; const int *y=&x; return *y;}"
 assert -cl 3 "int main(){int x=3; int * const y=&x; return *y;}"
 assert -cl 97 'const char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];}'
 
+assert -cl 3 "#define xxx 3
+int main(){return xxx;}"
+assert -cl 3 "#define yyy 3
+#define xxx yyy
+int main(){return xxx;}"
+
 
 echo OK
