@@ -5,6 +5,9 @@ if [ $# -eq 1 ]; then
 		ARCH="x8664"
 	elif [ $1 = "riscv" ]; then
 		ARCH="riscv"
+        if [ ! -e /opt/riscv32/bin/ ]; then
+            exit 0 # for CI
+        fi
 	else
 		echo "unknown architecture."
 		exit
