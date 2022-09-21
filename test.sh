@@ -156,20 +156,30 @@ assert -cl 3  "int main(){int x; int *y; y=&x;*y=3;return x;}"
 assert -cl 3  "int main(){int x; int *y; int **z; y=&x;z=&y;**z=3;return x;}"
 
 assert -cl 4  "int main(){int x; sizeof(x);}"
-assert -cl 8  "int main(){int *x; sizeof(x);}"
-assert -cl 8  "int main(){int x; sizeof(&x);}"
 assert -cl 4  "int main(){int x; sizeof(x+2);}"
-assert -cl 8  "int main(){int *x; sizeof(x+2);}"
-assert -cl 8  "int main(){int *x; sizeof((x));}"
 assert -cl 4  "int main(){char x[4]; sizeof((x));}"
 assert -cl 16 "int main(){int x[4]; sizeof((x));}"
 assert -cl 64 "int main(){int x[4][4]; sizeof((x));}"
 assert -cl 16 "int main(){int x[4][4]; sizeof((x[0]));}"
 assert -cl 1  "int main(){return sizeof(char);}"
 assert -cl 4  "int main(){return sizeof(int);}"
-assert -cl 8  "int main(){return sizeof(char *);}"
-assert -cl 8  "int main(){return sizeof(int **);}"
-assert -cl 8  "int main(){return sizeof(_NULL);}"
+if [ $1 = "x8664" ]; then
+    assert -cl 8  "int main(){int *x; sizeof(x);}"
+    assert -cl 8  "int main(){int x; sizeof(&x);}"
+    assert -cl 8  "int main(){int *x; sizeof(x+2);}"
+    assert -cl 8  "int main(){int *x; sizeof((x));}"
+    assert -cl 8  "int main(){return sizeof(char *);}"
+    assert -cl 8  "int main(){return sizeof(int **);}"
+    assert -cl 8  "int main(){return sizeof(_NULL);}"
+else
+    assert -cl 4  "int main(){int *x; sizeof(x);}"
+    assert -cl 4  "int main(){int x; sizeof(&x);}"
+    assert -cl 4  "int main(){int *x; sizeof(x+2);}"
+    assert -cl 4  "int main(){int *x; sizeof((x));}"
+    assert -cl 4  "int main(){return sizeof(char *);}"
+    assert -cl 4  "int main(){return sizeof(int **);}"
+    assert -cl 4  "int main(){return sizeof(_NULL);}"
+fi
 assert -cl 1  "int main(){return sizeof(*_NULL);}"
 assert -cl 6  'int main(){char x[]="hello"; return sizeof(x);}'
 assert -cl 12 'int main(){int x[]={0,1,2}; return sizeof(x);}'
@@ -301,8 +311,13 @@ assert -cl 4 "int main(){int x; return _Alignof(x); }"
 assert -cl 4 "int main(){int  a[456]; return _Alignof(a); }"
 assert -cl 1 "int main(){char a[456]; return _Alignof(a); }"
 assert -cl 4 "int main(){struct rgb{int r; int g; int b;}; struct rgb x; return _Alignof(x); }"
-assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
-assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
+if [ $1 = "x8664" ]; then
+    assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
+    assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
+else
+    assert -cl 4 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
+    assert -cl 4 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
+fi
 
 assert -cl 3 "int main(){const int x = 3; return x;}"
 assert -cl 3 'int main(){const int x[4]={0,1,2,3}; return x[1] + x[2];}'
