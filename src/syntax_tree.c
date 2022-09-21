@@ -699,7 +699,6 @@ void program(void){
 			is_thread_local = 1;
 		}
 
-
 		// parsing type
 		toplv_type = parse_type();
 		toplv_type->is_extern       = is_extern;
@@ -718,7 +717,7 @@ void program(void){
 			if(new_func == NULL){
 				func_list[func_index]       = calloc(1, sizeof(Func));
 				func_list[func_index]->type = toplv_type;
-				func_list[func_index]->name = calloc(def_name->len, sizeof(char));
+				func_list[func_index]->name = calloc(def_name->len+1, sizeof(char));
 				func_list[func_index]->len  = def_name->len;
 				strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 				new_func = func_list[func_index];
