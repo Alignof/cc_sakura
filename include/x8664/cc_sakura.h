@@ -8,6 +8,9 @@
 
 extern int *__errno_location(void);
 #define errno (*__errno_location())
+
+#define SIZE_PTR 4
+#define SIZE_SIZET 4
 //=========================================================
 
 typedef enum{
