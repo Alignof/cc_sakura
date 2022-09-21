@@ -69,13 +69,18 @@ self_host: $(TARGET)
 	rm -rf self_host/
 
 	# gen1
-	$(TARGET) self_host.c > child.s && $(BT) -static child.s -o child
+	$(TARGET) self_host.c > child.s 
+	$(BT) -static child.s -o child
 	cp child.s gen1.s
 	# gen2
-	$(SPIKE) $(PK) child self_host.c > child.s && $(BT) -static child.s -o child
+	$(SPIKE) $(PK) child self_host.c > child.s
+	perl -pi -e 's/^bbl loader\r\n//' child.s
+	$(BT) -static child.s -o child
 	cp child.s gen2.s
 	# gen3
-	$(SPIKE) $(PK) child self_host.c > child.s && $(BT) -static child.s -o child
+	$(SPIKE) $(PK) child self_host.c > child.s
+	perl -pi -e 's/^bbl loader\r\n//' child.s
+	$(BT) -static child.s -o child
 	cp child.s gen3.s
 
 	# check
