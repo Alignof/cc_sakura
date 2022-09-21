@@ -34,6 +34,9 @@ extern struct _reent *__getreent(void);
 
 extern int *__errno(void);
 #define errno (*__errno())
+
+#define SIZE_PTR 4
+#define SIZE_SIZET 4
 //=========================================================
 
 typedef enum{

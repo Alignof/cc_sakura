@@ -67,8 +67,8 @@ Node *compiler_directive(){
 	if(consume_reserved_word("_NULL", TK_COMPILER_DIRECTIVE)){
 		node = new_node_num(0);
 		node->type->ty    = PTR;
-		node->type->size  = 8;
-		node->type->align = 8;
+		node->type->size  = SIZE_PTR;
+		node->type->align = SIZE_PTR;
 
 		node->type->ptr_to        = calloc(1, sizeof(Type));
 		node->type->ptr_to->ty    = VOID;
@@ -351,11 +351,11 @@ void get_argument(Func *target_func){
 		if(new_arg->rhs->type->ty == ARRAY){
 			new_arg->rhs->type->ty = PTR;
 			new_arg->rhs->offset   -= new_arg->rhs->type->size;
-			new_arg->rhs->offset   += 8;
+			new_arg->rhs->offset   += SIZE_PTR;
 			locals->offset         = new_arg->rhs->offset;
 			locals->type->size     = new_arg->rhs->type->size;
 			alloc_size -= new_arg->rhs->type->size;
-			alloc_size += 8;
+			alloc_size += SIZE_PTR;
 		}
 
 		arg_counter++;

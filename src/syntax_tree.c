@@ -202,7 +202,7 @@ Node *unary(void){
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  => 4
-		// sizeof(&a) => 8
+		// sizeof(&a) => SIZE_PTR
 		if(consume("(")){
 			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();
@@ -221,7 +221,7 @@ Node *unary(void){
 
 	if(consume_reserved_word("_Alignof", TK_ALIGNOF)){
 		// _Alignof(5)  => 4
-		// _Alignof(&a) => 8
+		// _Alignof(&a) => SIZE_PTR
 		if(consume("(")){
 			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();

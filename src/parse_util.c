@@ -11,9 +11,9 @@ int type_size(Type *type){
 		case INT:
 			return 4;
 		case SIZE_T:
-			return 8;
+			return SIZE_SIZET;
 		case PTR:
-			return 8;
+			return SIZE_PTR;
 		case ARRAY:
 			if(type->index_size == -1) break; 
 			return type->size = type->index_size * type_size(type->ptr_to);
@@ -43,9 +43,9 @@ int type_align(Type *type){
 		case INT:
 			return 4;
 		case SIZE_T:
-			return 8;
+			return SIZE_SIZET;
 		case PTR:
-			return 8;
+			return SIZE_PTR;
 		case ARRAY:
 			return type->align = type_align(type->ptr_to);
 		case STRUCT:
