@@ -1,4 +1,23 @@
 #!/bin/bash
+
+if [ $# -eq 1 ]; then
+	if [ $1 = "x8664" ]; then
+		ARCH="x8664"
+	elif [ $1 = "riscv" ]; then
+		ARCH="riscv"
+        if [ ! -e /opt/riscv32/bin/ ]; then
+            exit 0 # for CI
+        fi
+	else
+		echo "unknown architecture."
+		exit
+	fi
+else
+	ARCH="x8664"
+fi
+
+echo $ARCH
+
 assert() {
 	if [ $# -eq 3 ]; then
 		option="$1"
@@ -11,10 +30,16 @@ assert() {
 		./cc_sakura "$input" > tmp.s
 	fi
 
-	gcc -c tmp.s 
-	gcc -o tmp -static tmp.s 
+	if [ $ARCH = "x8664" ]; then
+		gcc -c tmp.s 
+		gcc -o tmp -static tmp.s 
+		./tmp
+	elif [ $ARCH = "riscv" ]; then
+		/opt/riscv32/bin/riscv32-unknown-elf-gcc -c -march=rv32imac tmp.s 
+		/opt/riscv32/bin/riscv32-unknown-elf-gcc -o tmp -static tmp.s 
+		/opt/riscv32/bin/spike --isa=RV32IMAC /opt/riscv32/riscv32-unknown-elf/bin/pk ./tmp
+	fi
 
-	./tmp
 	actual="$?"
 
 	ESC=$(printf '\033')
@@ -25,6 +50,7 @@ assert() {
 		exit 1
 	fi
 }
+
 
 assert -cl 0  "int main(){0;}"
 assert -cl 42 "int main(){42;}"
@@ -59,7 +85,11 @@ assert -cl 1  "int main(){!(0 || 0);}"
 assert -cl 0  "int main(){!(1 || 0);}"
 
 assert -cl 8  "int main(){5+3;6+2;}"
+assert -cl 5  "int main(){return 2+3;}"
+assert -cl 5  "int main(){int a; return 5;}"
+assert -cl 5  "int main(){int a; a=5; return a;}"
 assert -cl 5  "int main(){int a;int b;a=3;b=2;a+b;}"
+assert -cl 5  "int main(){int a;int b; a=13;b=8;return a-b;}"
 assert -cl 5  "int main(){int a_1;int b_2;a_1=3;b_2=2;a_1+b_2;}"
 assert -cl 5  "int main(){int a;a=8;a=a-3;a;}"
 assert -cl 25 "int main(){int a;int b;int c;int d; a=3;b=2;c=12;d=17;(d-c)*(a+b);}"
@@ -67,15 +97,14 @@ assert -cl 25 "int main(){int a;int b;int c;int d; a=3;b=2;c=12;d=17;(d-c)*(a+b)
 assert -cl 5  "int main(){int abc; int def; abc=3;def=2;abc+def;}"
 assert -cl 6  "int main(){int kinako;int momone; kinako=3;momone=2;momone*kinako;}"
 
-assert -cl 5  "int main(){return 2+3;}"
-assert -cl 5  "int main(){int a;int b; a=13;b=8;return a-b;}"
 
 assert -cl 1  "int main(){int a; a=0;if(3>2) a=1;a;}"
 assert -cl 0  "int main(){int a; a=0;if(3<2) a=1;a;}"
 assert -cl 7  "int main(){int a; a=1+2;if(3>2) a=10-3;a;}"
 assert -cl 3  "int main(){int a; a=1+2;if(3<2) a=10-3;a;}"
-assert -cl 1  "int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a<b) c=b-a;c;}"
-assert -cl 5  "int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a>b) c=b-a;c;}"
+assert -cl 9  "int main(){int a; int b; int c; c = 9; c;}"
+assert -cl 1  "int main(){int a; int b; int c; a=2; b=3; c=a+b; if(a<b) c=b-a;c;}"
+assert -cl 5  "int main(){int a; int b; int c; a=2; b=3; c=a+b; if(a>b) c=b-a;c;}"
 assert -cl 1  "int main(){int a=0; return !a;}"
 assert -cl 0  "int main(){int a=9; return !a;}"
 
@@ -130,21 +159,31 @@ assert -cl 3  "int main(){int x; int *y; y=&x;*y=3;return x;}"
 assert -cl 3  "int main(){int x; int *y; int **z; y=&x;z=&y;**z=3;return x;}"
 
 assert -cl 4  "int main(){int x; sizeof(x);}"
-assert -cl 8  "int main(){int *x; sizeof(x);}"
-assert -cl 8  "int main(){int x; sizeof(&x);}"
 assert -cl 4  "int main(){int x; sizeof(x+2);}"
-assert -cl 8  "int main(){int *x; sizeof(x+2);}"
-assert -cl 8  "int main(){int *x; sizeof((x));}"
 assert -cl 4  "int main(){char x[4]; sizeof((x));}"
 assert -cl 16 "int main(){int x[4]; sizeof((x));}"
 assert -cl 64 "int main(){int x[4][4]; sizeof((x));}"
 assert -cl 16 "int main(){int x[4][4]; sizeof((x[0]));}"
 assert -cl 1  "int main(){return sizeof(char);}"
 assert -cl 4  "int main(){return sizeof(int);}"
-assert -cl 8  "int main(){return sizeof(char *);}"
-assert -cl 8  "int main(){return sizeof(int **);}"
-assert -cl 8  "int main(){return sizeof(__NULL);}"
-assert -cl 1  "int main(){return sizeof(*__NULL);}"
+if [ $1 = "x8664" ]; then
+    assert -cl 8  "int main(){int *x; sizeof(x);}"
+    assert -cl 8  "int main(){int x; sizeof(&x);}"
+    assert -cl 8  "int main(){int *x; sizeof(x+2);}"
+    assert -cl 8  "int main(){int *x; sizeof((x));}"
+    assert -cl 8  "int main(){return sizeof(char *);}"
+    assert -cl 8  "int main(){return sizeof(int **);}"
+    assert -cl 8  "int main(){return sizeof(_NULL);}"
+else
+    assert -cl 4  "int main(){int *x; sizeof(x);}"
+    assert -cl 4  "int main(){int x; sizeof(&x);}"
+    assert -cl 4  "int main(){int *x; sizeof(x+2);}"
+    assert -cl 4  "int main(){int *x; sizeof((x));}"
+    assert -cl 4  "int main(){return sizeof(char *);}"
+    assert -cl 4  "int main(){return sizeof(int **);}"
+    assert -cl 4  "int main(){return sizeof(_NULL);}"
+fi
+assert -cl 1  "int main(){return sizeof(*_NULL);}"
 assert -cl 6  'int main(){char x[]="hello"; return sizeof(x);}'
 assert -cl 12 'int main(){int x[]={0,1,2}; return sizeof(x);}'
 assert -cl 20 'int main(){int x[5]={0,1,2}; return sizeof(x);}'
@@ -229,8 +268,8 @@ assert -cl 5  "struct test{int a; int b;}; int main(){struct test x; struct test
 assert -cl 5  "struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;}"
 assert -cl 10 "struct test{int a; int b; int c[10];}; int main(){struct test x; x.a=1; x.b=2; x.c[0]=3; x.c[2]=4; return x.a + x.b + x.c[0] + x.c[2];}"
 assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb col;}; int main(){struct point test; test.col.r=2; test.col.g=3; test.col.b=4; return test.col.r + test.col.g + test.col.b;}"
-assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; test.col->r=2; test.col->g=3; test.col->b=4; return test.col->r + test.col->g + test.col->b;}"
-assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; struct point *ptr; ptr=&test; ptr->col->r=2; ptr->col->g=3; ptr->col->b=4; return ptr->col->r + ptr->col->g + ptr->col->b;}"
+assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; struct rgb c; test.col = &c; test.col->r=2; test.col->g=3; test.col->b=4; return test.col->r + test.col->g + test.col->b;}"
+assert -cl 9  "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; struct rgb c; test.col = &c; struct point *ptr; ptr=&test; ptr->col->r=2; ptr->col->g=3; ptr->col->b=4; return ptr->col->r + ptr->col->g + ptr->col->b;}"
 
 assert -cl 2  "enum Color{Red, Green, Blue}; int main(){return Blue;}"
 assert -cl 2  "enum Color{Red, Green, Blue}; int main(){enum Color test; test=Blue; return test;}"
@@ -275,11 +314,13 @@ assert -cl 4 "int main(){int x; return _Alignof(x); }"
 assert -cl 4 "int main(){int  a[456]; return _Alignof(a); }"
 assert -cl 1 "int main(){char a[456]; return _Alignof(a); }"
 assert -cl 4 "int main(){struct rgb{int r; int g; int b;}; struct rgb x; return _Alignof(x); }"
-assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
-assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
-
-assert -cl 8 "int main(){return sizeof(size_t);}"
-assert -cl 8 "int main(){size_t isize = 8; return sizeof(isize);}"
+if [ $1 = "x8664" ]; then
+    assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
+    assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
+else
+    assert -cl 4 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
+    assert -cl 4 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
+fi
 
 assert -cl 3 "int main(){const int x = 3; return x;}"
 assert -cl 3 'int main(){const int x[4]={0,1,2,3}; return x[1] + x[2];}'
@@ -288,6 +329,12 @@ assert -cl 3 'const int x[4]={0,1,2,3}; int main(){return x[1] + x[2];}'
 assert -cl 3 "int main(){int x=3; const int *y=&x; return *y;}"
 assert -cl 3 "int main(){int x=3; int * const y=&x; return *y;}"
 assert -cl 97 'const char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];}'
+
+assert -cl 3 "#define xxx 3
+int main(){return xxx;}"
+assert -cl 3 "#define yyy 3
+#define xxx yyy
+int main(){return xxx;}"
 
 
 echo OK

@@ -1,3 +1,4 @@
+#include "cc_sakura.h"
 //                         void _Bool  char   enum  int   ptr  array struct
 const char reg_ax[8][4] = {"al", "al", "al", "eax","eax","rax","rax","rax"};
 const char reg_dx[8][4] = {"dl", "dl", "dl", "edx","edx","rdx","rdx","rdx"};
@@ -18,9 +19,26 @@ void expand_block_code(Node *node){
 		gen(node);
 		node = node->block_code;
 	}
-	printf("	push rax\n");
 }
 
+
+void gen_gvar_label(GVar *gvar, Node *init){
+	Type *type = get_pointer_type(gvar->type);
+	if(init->kind == ND_STR){
+		if(gvar->type->ty == PTR){
+			printf("	.quad	.LC%d\n", init->val);
+		}else if(gvar->type->ty == ARRAY){
+			printf("	.string \"%.*s\"\n", init->len, init->str);
+			if(init->offset) printf("        .zero	%d\n", init->offset);
+		}
+	}else{
+		if(type->ty < INT){
+			printf("	.byte	%d\n", init->val);
+		}else{
+			printf("	.long	%d\n", init->val);
+		}
+	}
+}
 
 void gen_gvar(Node *node){
 	if(node->type->is_thread_local){
@@ -511,9 +529,6 @@ void gen(Node *node){
 		case ND_BREAK:
 			printf("	jmp .LloopEnd%03d\n", node->val);
 			return;
-		case ND_BLOCK:
-			expand_block_code(node->rhs);
-			return;
 		case ND_CASE:
 			printf(".LcaseBegin%03d:\n", node->val);
 			gen(node->rhs);
@@ -530,6 +545,9 @@ void gen(Node *node){
 				node=node->next;
 			}
 			return;
+		case ND_BLOCK:
+			expand_block_code(node->rhs);
+			return;
 		case ND_RETURN:
 			if(node->rhs){
 				gen_expr(node->rhs);
@@ -543,5 +561,60 @@ void gen(Node *node){
 			gen_expr(node);
 			printf("	pop rax\n\n");
 			return;
+	}
+}
+
+void gen_main(void){
+	int i;
+	int j;
+
+
+	printf("// x86-64\n");
+	printf(".intel_syntax noprefix\n");
+
+	// set global variable
+	printf(".data\n");
+	GVar *start = globals;
+	for (GVar *var = start;var;var = var->next){
+		set_gvar(var);
+	}
+
+	// set string
+	for (Str *var = strings;var;var = var->next){
+		printf(".LC%d:\n", var->label_num);
+		printf("	.string \"%.*s\"\n", var->len, var->str);
+	}
+
+	llid           = 0;
+	label_num      = 0;
+	label_loop_end = 0;
+	labels_head    = NULL;
+	labels_tail    = NULL;
+
+	//generate assembly at first expr
+	printf(".text\n");
+	for(i = 0;func_list[i];i++){
+		if(func_list[i]->code[0] == NULL) continue;
+		printf(".globl %s\n", func_list[i]->name);
+		printf("%s:\n", func_list[i]->name);
+		printf("	push rbp\n");
+		printf("	mov rbp,rsp\n");
+		printf("	sub rsp,%d\n", func_list[i]->stack_size);
+
+		if(func_list[i]->args){
+			// set local variable
+			gen(func_list[i]->args);
+		}
+
+		for(j = 0;func_list[i]->code[j] != NULL;j++){
+			// gen code
+			gen(func_list[i]->code[j]);
+		}
+
+		// epiroge
+		// rax = return value
+		printf("	mov rsp,rbp\n");
+		printf("	pop rbp\n");
+		printf("	ret\n\n");
 	}
 }

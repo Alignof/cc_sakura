@@ -5,6 +5,7 @@ int   label_num;
 int   IGNORE_SCOPE;
 int   CONSIDER_SCOPE;
 int   label_loop_end;
+int   aligned_stack_size;
 char  *user_input;
 char  filename[100];
 Func  *func_list[FUNC_NUM];
@@ -22,14 +23,14 @@ char *read_file(char *path){
 	}
 
 	// get file size
-	if(fseek(fp, 0L, SEEK_END) == -1){
-		printf("%s: fseek:%s", path, strerror(errno));
+	if(fseek(fp, 0, SEEK_END) == -1){
+        printf("%s: fseek:%s", path, strerror(errno));
 	}
 
 	size_t size = ftell(fp);
 
-	if(fseek(fp, 0L, SEEK_SET) == -1){
-		printf("%s: fseek:%s", path, strerror(errno));
+	if(fseek(fp, 0, SEEK_SET) == -1){
+        printf("%s: fseek:%s", path, strerror(errno));
 	}
 
 	buf = calloc(1, size+2);
@@ -59,24 +60,6 @@ void get_code(int argc, char **argv){
 	}else{
 		fprintf(stderr, "Incorrect number of arguments\n");
 		exit(1);
-	}
-}
-
-void gen_gvar_label(GVar *gvar, Node *init){
-	Type *type = get_pointer_type(gvar->type);
-	if(init->kind == ND_STR){
-		if(gvar->type->ty == PTR){
-			printf("	.quad	.LC%d\n", init->val);
-		}else if(gvar->type->ty == ARRAY){
-			printf("	.string \"%.*s\"\n", init->len, init->str);
-			if(init->offset) printf("        .zero	%d\n", init->offset);
-		}
-	}else{
-		if(type->ty < INT){
-			printf("	.byte	%d\n", init->val);
-		}else{
-			printf("	.long	%d\n", init->val);
-		}
 	}
 }
 
@@ -110,8 +93,6 @@ void set_gvar(GVar *gvar){
 }
 
 int main(int argc, char **argv){
-	int i;
-	int j;
 	IGNORE_SCOPE   = 0;
 	CONSIDER_SCOPE = 1;
 
@@ -119,7 +100,8 @@ int main(int argc, char **argv){
 	get_code(argc, argv);
 
 	// tokenize
-	token = tokenize(user_input);
+	token = tokenize_main(user_input);
+
 	// make syntax tree
 	program();
 
@@ -127,55 +109,8 @@ int main(int argc, char **argv){
 		fprintf(stderr, "function is not found.");
 	}
 
-
 	// generate code
-	printf(".intel_syntax noprefix\n");
-
-	// set global variable
-	printf(".data\n");
-	GVar *start = globals;
-	for (GVar *var = start;var;var = var->next){
-		set_gvar(var);
-	}
-
-	// set string
-	for (Str *var = strings;var;var = var->next){
-		printf(".LC%d:\n", var->label_num);
-		printf("	.string \"%.*s\"\n", var->len, var->str);
-	}
-
-	llid           = 0;
-	label_num      = 0;
-	label_loop_end = 0;
-	labels_head    = NULL;
-	labels_tail    = NULL;
-
-	//generate assembly at first expr
-	printf(".text\n");
-	for(i = 0;func_list[i];i++){
-		if(func_list[i]->code[0] == NULL) continue;
-		printf(".globl %s\n", func_list[i]->name);
-		printf("%s:\n", func_list[i]->name);
-		printf("	push rbp\n");
-		printf("	mov rbp,rsp\n");
-		printf("	sub rsp,%d\n", func_list[i]->stack_size);
-
-		if(func_list[i]->args){
-			// set local variable
-			gen(func_list[i]->args);
-		}
-
-		for(j = 0;func_list[i]->code[j] != NULL;j++){
-			// gen code
-			gen(func_list[i]->code[j]);
-		}
-
-		// epiroge
-		// rax = return value
-		printf("	mov rsp,rbp\n");
-		printf("	pop rbp\n");
-		printf("	ret\n\n");
-	}
+	gen_main();
 
 	return 0;
 }
