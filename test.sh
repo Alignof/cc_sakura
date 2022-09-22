@@ -173,7 +173,6 @@ if [ $1 = "x8664" ]; then
     assert -cl 8  "int main(){int *x; sizeof((x));}"
     assert -cl 8  "int main(){return sizeof(char *);}"
     assert -cl 8  "int main(){return sizeof(int **);}"
-    assert -cl 8  "int main(){return sizeof(_NULL);}"
 else
     assert -cl 4  "int main(){int *x; sizeof(x);}"
     assert -cl 4  "int main(){int x; sizeof(&x);}"
@@ -181,9 +180,7 @@ else
     assert -cl 4  "int main(){int *x; sizeof((x));}"
     assert -cl 4  "int main(){return sizeof(char *);}"
     assert -cl 4  "int main(){return sizeof(int **);}"
-    assert -cl 4  "int main(){return sizeof(_NULL);}"
 fi
-assert -cl 1  "int main(){return sizeof(*_NULL);}"
 assert -cl 6  'int main(){char x[]="hello"; return sizeof(x);}'
 assert -cl 12 'int main(){int x[]={0,1,2}; return sizeof(x);}'
 assert -cl 20 'int main(){int x[5]={0,1,2}; return sizeof(x);}'
@@ -329,6 +326,10 @@ assert -cl 3 'const int x[4]={0,1,2,3}; int main(){return x[1] + x[2];}'
 assert -cl 3 "int main(){int x=3; const int *y=&x; return *y;}"
 assert -cl 3 "int main(){int x=3; int * const y=&x; return *y;}"
 assert -cl 97 'const char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];}'
+
+assert -cl 3 "int main(){long x=3; return x;}"
+assert -cl 8 "int main(){return sizeof(long);}"
+assert -cl 8 "int main(){long x=3; return sizeof(x);}"
 
 assert -cl 3 "#define xxx 3
 int main(){return xxx;}"
