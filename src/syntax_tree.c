@@ -11,12 +11,6 @@ Node *data(void){
 		return node;
 	}
 
-	// compiler directive
-	if(token->kind == TK_COMPILER_DIRECTIVE){
-		return compiler_directive();
-	}
-
-
 	if(consume("\"")){
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_STR;

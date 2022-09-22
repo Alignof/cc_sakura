@@ -256,9 +256,6 @@ Token *tokenize(char **p, Token *now){
     if(tokenize_reserved(p, "const",    5, &now, TK_CONST))    return now;
     if(tokenize_reserved(p, "_Thread_local", 13, &now, TK_THREAD_LOCAL)) return now;
 
-    // compiler directive
-    if(tokenize_reserved(p, "_NULL", 5, &now, TK_COMPILER_DIRECTIVE)) return now;
-
     if (is_directive(**p)) {
         (*p)++;
         if(consume_keyword(p, "include", 7)) {

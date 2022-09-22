@@ -61,7 +61,6 @@ typedef enum{
 	TK_CONST,
 	TK_EXTERN,
 	TK_THREAD_LOCAL,
-	TK_COMPILER_DIRECTIVE,
 	TK_EOF,
 }TokenKind;
 
@@ -391,7 +390,6 @@ Node *data(void);
 
 // parse_part.c
 void get_argument(Func *target_func);
-Node *compiler_directive();
 Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(NodeKind type, Node *node);
 Node *init_formula(Node *node);
