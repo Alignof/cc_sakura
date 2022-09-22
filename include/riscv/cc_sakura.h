@@ -1,12 +1,41 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <string.h>
-#include <errno.h>
 
+//================standard library=====================
+extern struct __sFILE64;
+typedef struct __sFILE64 __FILE;
+struct _reent {
+  int _errno;			/* local copy of errno */
+
+  /* FILE is a big struct and may change over time.  To try to achieve binary
+     compatibility with future versions, put stdin,stdout,stderr here.
+     These are pointers into member __sf defined below.  */
+  __FILE *_stdin;
+  __FILE *_stdout;
+  __FILE *_stderr;
+
+  // ommit
+};
+typedef __FILE FILE;
+
+typedef _Bool bool;
+typedef int size_t;
+
+extern struct _reent *__getreent(void);
+#define _REENT (__getreent())
+#define stdin (_REENT->_stdin)
+#define stdout (_REENT->_stdout)
+#define stderr (_REENT->_stderr)
+#define SEEK_SET 0
+#define SEEK_END 2
 #define FUNC_NUM 300
+#define true ((bool)1)
+#define false ((bool)0)
+#define NULL ((void *)0)
+
+extern int *__errno(void);
+#define errno (*__errno())
+
+#define SIZE_PTR 4
+//=========================================================
 
 typedef enum{
 	TK_TYPE,
@@ -32,7 +61,6 @@ typedef enum{
 	TK_CONST,
 	TK_EXTERN,
 	TK_THREAD_LOCAL,
-	TK_COMPILER_DIRECTIVE,
 	TK_EOF,
 }TokenKind;
 
@@ -102,7 +130,7 @@ typedef enum{
 	CHAR,
 	INT,
 	ENUM,
-	SIZE_T,
+	LONG,
 	PTR,
 	ARRAY,
 	STRUCT,
@@ -122,6 +150,7 @@ typedef enum{
 }LabelKind;
 
 typedef struct Token  Token;
+typedef struct MacroTable  MacroTable;
 typedef struct Node   Node;
 typedef struct LVar   LVar;
 typedef struct GVar   GVar;
@@ -141,6 +170,14 @@ struct Token{
 	int val;
 	char *str;
 	int len;
+};
+
+// macro table
+struct MacroTable {
+	Token *code;
+    MacroTable *next;
+    char *name;
+    int len;
 };
 
 // type of variable
@@ -254,9 +291,7 @@ struct Member{
 	Member *next;
 };
 
-
-
-// global variable
+//================= global variable ===================
 extern int      llid;
 extern int      alloc_size;
 extern int      IGNORE_SCOPE;
@@ -264,7 +299,7 @@ extern int      CONSIDER_SCOPE;
 extern char     *user_input;
 extern char     filename[100];
 extern Token    *token;
-extern Func     *func_list[FUNC_NUM];
+extern Func     *func_list[300];
 extern LVar     *locals;
 extern GVar     *globals;
 extern Str      *strings;
@@ -279,7 +314,10 @@ extern Enum     *outside_enum;
 extern Def_Type *outside_deftype;
 extern int      label_num;
 extern int      label_loop_end;
+extern int      aligned_stack_size;
+//=====================================================
 
+//==================Prototype function=====================
 // main.c
 char *read_file(char *path);
 void get_code(int argc, char **argv);
@@ -294,10 +332,14 @@ bool is_space(char c);
 bool is_digit(char c);
 bool is_block(char c);
 bool is_symbol(char *str,  bool *single_flag);
+Token *is_macro(char *p, int len);
+bool consume_keyword(char **p, char *str, int len);
 bool at_eof(void);
 bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
 Token *new_token(TokenKind kind, Token *cur, char *str);
-Token *tokenize(char *p);
+void register_macro(char **p);
+Token *tokenize(char **p, Token *now);
+Token *tokenize_main(char *p);
 
 
 // parse_sys.c
@@ -348,7 +390,6 @@ Node *data(void);
 
 // parse_part.c
 void get_argument(Func *target_func);
-Node *compiler_directive();
 Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(NodeKind type, Node *node);
 Node *init_formula(Node *node);
@@ -371,6 +412,7 @@ Member *register_struc_member(int *asize_ptr);
 Member *register_enum_member(void);
 
 // codegen.c
+void gen_main(void);
 void gen(Node *node);
 void gen_expr(Node *node);
 void gen_args(Node *args);

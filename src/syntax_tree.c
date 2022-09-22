@@ -11,12 +11,6 @@ Node *data(void){
 		return node;
 	}
 
-	// compiler directive
-	if(token->kind == TK_COMPILER_DIRECTIVE){
-		return compiler_directive();
-	}
-
-
 	if(consume("\"")){
 		Node *node = calloc(1, sizeof(Node));
 		node->kind = ND_STR;
@@ -202,7 +196,7 @@ Node *unary(void){
 
 	if(consume_reserved_word("sizeof", TK_SIZEOF)){
 		// sizeof(5)  => 4
-		// sizeof(&a) => 8
+		// sizeof(&a) => SIZE_PTR
 		if(consume("(")){
 			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();
@@ -221,7 +215,7 @@ Node *unary(void){
 
 	if(consume_reserved_word("_Alignof", TK_ALIGNOF)){
 		// _Alignof(5)  => 4
-		// _Alignof(&a) => 8
+		// _Alignof(&a) => SIZE_PTR
 		if(consume("(")){
 			if(token->kind == TK_TYPE || find_defined_type(token, IGNORE_SCOPE)){
 				Type *target_type = parse_type();
@@ -699,7 +693,6 @@ void program(void){
 			is_thread_local = 1;
 		}
 
-
 		// parsing type
 		toplv_type = parse_type();
 		toplv_type->is_extern       = is_extern;
@@ -718,7 +711,7 @@ void program(void){
 			if(new_func == NULL){
 				func_list[func_index]       = calloc(1, sizeof(Func));
 				func_list[func_index]->type = toplv_type;
-				func_list[func_index]->name = calloc(def_name->len, sizeof(char));
+				func_list[func_index]->name = calloc(def_name->len+1, sizeof(char));
 				func_list[func_index]->len  = def_name->len;
 				strncpy(func_list[func_index]->name, def_name->str, def_name->len);
 				new_func = func_list[func_index];

@@ -108,14 +108,7 @@ Token *consume_ident(void){
 	}
 
 	Token *ret = token;
-	//check variable length
-	int _len   = len_val(token->str);
-	token->len = _len;
-
-	//move for next token 
-	for(int i = 0;i < _len;i++){
-		token = token->next;
-	}
+	token = token->next;
 
 	return ret;
 }
@@ -124,7 +117,7 @@ void expect(char *op){
 	// judge whether op is a symbol and move the pointer to the next
 	if((token->kind != TK_RESERVED && token->kind != TK_BLOCK)||
 	    strlen(op) != token->len || memcmp(token->str, op, (size_t)token->len)){
-		error_at(token->str, "not a charctor.");
+		error_at(token->str, "not a expected charctor.");
 	}
 	token = token->next;
 }

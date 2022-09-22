@@ -1,3 +1,17 @@
+//================define macro=====================
+#define SEEK_SET 0
+#define SEEK_END 2
+#define FUNC_NUM 300
+#define true ((bool)1)
+#define false ((bool)0)
+#define NULL ((void *)0)
+
+extern int *__errno_location(void);
+#define errno (*__errno_location())
+
+#define SIZE_PTR 4
+//=========================================================
+
 typedef enum{
 	TK_TYPE,
 	TK_RESERVED,
@@ -22,7 +36,6 @@ typedef enum{
 	TK_CONST,
 	TK_EXTERN,
 	TK_THREAD_LOCAL,
-	TK_COMPILER_DIRECTIVE,
 	TK_EOF,
 }TokenKind;
 
@@ -92,7 +105,7 @@ typedef enum{
 	CHAR,
 	INT,
 	ENUM,
-	SIZE_T,
+	LONG,
 	PTR,
 	ARRAY,
 	STRUCT,
@@ -112,6 +125,7 @@ typedef enum{
 }LabelKind;
 
 typedef struct Token  Token;
+typedef struct MacroTable  MacroTable;
 typedef struct Node   Node;
 typedef struct LVar   LVar;
 typedef struct GVar   GVar;
@@ -131,6 +145,14 @@ struct Token{
 	int val;
 	char *str;
 	int len;
+};
+
+// macro table
+struct MacroTable {
+	Token *code;
+    MacroTable *next;
+    char *name;
+    int len;
 };
 
 // type of variable
@@ -267,8 +289,8 @@ extern Enum     *outside_enum;
 extern Def_Type *outside_deftype;
 extern int      label_num;
 extern int      label_loop_end;
+extern int      aligned_stack_size;
 //=====================================================
-
 
 //================standard library=====================
 typedef struct _IO_FILE FILE;
@@ -312,25 +334,13 @@ struct _IO_FILE{
 	_IO_lock_t *_lock;
 };
 
+extern FILE *stdin;     /* Standard input stream.  */
+extern FILE *stdout;	/* Standard output stream.  */
+extern FILE *stderr;	/* Standard error output stream.  */
+
 typedef _Bool bool;
-bool true  = 1;
-bool false = 0;
+typedef int size_t;
 //=========================================================
-
-
-
-//================temporary definition=====================
-int  SEEK_SET = 0;
-int  SEEK_END = 2;
-int  FUNC_NUM = 300;
-
-extern FILE *stdin;		/* Standard input stream.  */
-extern FILE *stdout;		/* Standard output stream.  */
-extern FILE *stderr;		/* Standard error output stream.  */
-
-extern _Thread_local int errno;
-//=========================================================
-
 
 //==================Prototype function=====================
 // main.c
@@ -347,10 +357,14 @@ bool is_space(char c);
 bool is_digit(char c);
 bool is_block(char c);
 bool is_symbol(char *str,  bool *single_flag);
+Token *is_macro(char *p, int len);
+bool consume_keyword(char **p, char *str, int len);
 bool at_eof(void);
 bool tokenize_reserved(char **p, char *str, int len, Token **now, TokenKind tk_kind);
 Token *new_token(TokenKind kind, Token *cur, char *str);
-Token *tokenize(char *p);
+void register_macro(char **p);
+Token *tokenize(char **p, Token *now);
+Token *tokenize_main(char *p);
 
 
 // parse_sys.c
@@ -401,7 +415,6 @@ Node *data(void);
 
 // parse_part.c
 void get_argument(Func *target_func);
-Node *compiler_directive();
 Node *compound_assign(TypeKind type, Node *dst, Node *src);
 Node *dot_arrow(NodeKind type, Node *node);
 Node *init_formula(Node *node);
@@ -424,6 +437,7 @@ Member *register_struc_member(int *asize_ptr);
 Member *register_enum_member(void);
 
 // codegen.c
+void gen_main(void);
 void gen(Node *node);
 void gen_expr(Node *node);
 void gen_args(Node *args);
@@ -434,9 +448,4 @@ void gen_struc(Node *node);
 void gen_address(Node *node);
 void expand_next(Node *node);
 void expand_block_code(Node *node);
-
-
-//=========================================================
-
-
 

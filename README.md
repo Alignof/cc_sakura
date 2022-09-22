@@ -1,12 +1,13 @@
 # cc\_sakura
-![C/C++ CI](https://github.com/Takana-Norimasa/cc_sakura/workflows/C/C++%20CI/badge.svg)  
+[![C/C++ CI](https://github.com/Alignof/cc_sakura/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/Alignof/cc_sakura/actions/workflows/c-cpp.yml)  
 C Compiler Sakura  
 a small self-hosting C compiler.  
+It supports for both x8664 and RISC-V.
 
 ## Build
 ```zsh
 # build
-$ git clone https://github.com/Takana-Norimasa/cc_sakura.git
+$ git clone https://github.com/Alignof/cc_sakura.git
 $ cd cc_sakura
 $ make install
 
@@ -14,7 +15,6 @@ $ make install
 $ make test
 
 # self-hosting test
-$ cd self_host/
 $ make self_host
 ```
 
@@ -26,9 +26,6 @@ $ make self_host
 - [security camp 2020](https://www.security-camp.or.jp/camp/)  
 
 thank you so much!
-
-
-
 
 ## Example
 
@@ -169,7 +166,8 @@ int main(){
 
 ### testcode  
 ```c
-./test.sh
+./test.sh x8664
+x8664
 int main(){0;} => 0
 int main(){42;} => 42
 int main(){5+20-4;} => 21
@@ -197,20 +195,23 @@ int main(){!(1 && 0);} => 1
 int main(){!(0 || 0);} => 1
 int main(){!(1 || 0);} => 0
 int main(){5+3;6+2;} => 8
+int main(){return 2+3;} => 5
+int main(){int a; return 5;} => 5
+int main(){int a; a=5; return a;} => 5
 int main(){int a;int b;a=3;b=2;a+b;} => 5
+int main(){int a;int b; a=13;b=8;return a-b;} => 5
 int main(){int a_1;int b_2;a_1=3;b_2=2;a_1+b_2;} => 5
 int main(){int a;a=8;a=a-3;a;} => 5
 int main(){int a;int b;int c;int d; a=3;b=2;c=12;d=17;(d-c)*(a+b);} => 25
 int main(){int abc; int def; abc=3;def=2;abc+def;} => 5
 int main(){int kinako;int momone; kinako=3;momone=2;momone*kinako;} => 6
-int main(){return 2+3;} => 5
-int main(){int a;int b; a=13;b=8;return a-b;} => 5
 int main(){int a; a=0;if(3>2) a=1;a;} => 1
 int main(){int a; a=0;if(3<2) a=1;a;} => 0
 int main(){int a; a=1+2;if(3>2) a=10-3;a;} => 7
 int main(){int a; a=1+2;if(3<2) a=10-3;a;} => 3
-int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a<b) c=b-a;c;} => 1
-int main(){int a; int b;int c; a=2;b=3;c=a+b;if(a>b) c=b-a;c;} => 5
+int main(){int a; int b; int c; c = 9; c;} => 9
+int main(){int a; int b; int c; a=2; b=3; c=a+b; if(a<b) c=b-a;c;} => 1
+int main(){int a; int b; int c; a=2; b=3; c=a+b; if(a>b) c=b-a;c;} => 5
 int main(){int a=0; return !a;} => 1
 int main(){int a=9; return !a;} => 0
 int main(){int a; if(2>3) a=3-2; else a=2+3;a;} => 5
@@ -251,21 +252,19 @@ int fibo(int num){if(num==0){return 0;}if(num==1){return 1;} return fibo(num-1)+
 int main(){int x; int *y; y=&x;*y=3;return x;} => 3
 int main(){int x; int *y; int **z; y=&x;z=&y;**z=3;return x;} => 3
 int main(){int x; sizeof(x);} => 4
-int main(){int *x; sizeof(x);} => 8
-int main(){int x; sizeof(&x);} => 8
 int main(){int x; sizeof(x+2);} => 4
-int main(){int *x; sizeof(x+2);} => 8
-int main(){int *x; sizeof((x));} => 8
 int main(){char x[4]; sizeof((x));} => 4
 int main(){int x[4]; sizeof((x));} => 16
 int main(){int x[4][4]; sizeof((x));} => 64
 int main(){int x[4][4]; sizeof((x[0]));} => 16
 int main(){return sizeof(char);} => 1
 int main(){return sizeof(int);} => 4
+int main(){int *x; sizeof(x);} => 8
+int main(){int x; sizeof(&x);} => 8
+int main(){int *x; sizeof(x+2);} => 8
+int main(){int *x; sizeof((x));} => 8
 int main(){return sizeof(char *);} => 8
 int main(){return sizeof(int **);} => 8
-int main(){return sizeof(__NULL);} => 8
-int main(){return sizeof(*__NULL);} => 1
 int main(){char x[]="hello"; return sizeof(x);} => 6
 int main(){int x[]={0,1,2}; return sizeof(x);} => 12
 int main(){int x[5]={0,1,2}; return sizeof(x);} => 20
@@ -338,8 +337,8 @@ struct test{int a; int b;}; int main(){struct test x; struct test *y; y=&x; y->a
 struct test{int a; int b;}; int main(){struct test x; struct test *y; struct test **z; y=&x; z=&y; (*z)->a=2; (*z)->b=3; return (*z)->a + (*z)->b;} => 5
 struct test{int a; int b; int c[10];}; int main(){struct test x; x.a=1; x.b=2; x.c[0]=3; x.c[2]=4; return x.a + x.b + x.c[0] + x.c[2];} => 10
 struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb col;}; int main(){struct point test; test.col.r=2; test.col.g=3; test.col.b=4; return test.col.r + test.col.g + test.col.b;} => 9
-struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; test.col->r=2; test.col->g=3; test.col->b=4; return test.col->r + test.col->g + test.col->b;} => 9
-struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; struct point *ptr; ptr=&test; ptr->col->r=2; ptr->col->g=3; ptr->col->b=4; return ptr->col->r + ptr->col->g + ptr->col->b;} => 9
+struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; struct rgb c; test.col = &c; test.col->r=2; test.col->g=3; test.col->b=4; return test.col->r + test.col->g + test.col->b;} => 9
+struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point test; struct rgb c; test.col = &c; struct point *ptr; ptr=&test; ptr->col->r=2; ptr->col->g=3; ptr->col->b=4; return ptr->col->r + ptr->col->g + ptr->col->b;} => 9
 enum Color{Red, Green, Blue}; int main(){return Blue;} => 2
 enum Color{Red, Green, Blue}; int main(){enum Color test; test=Blue; return test;} => 2
 enum Color{Red, Green, Blue}; int main(){int Blue = 17; return Blue;} => 17
@@ -378,8 +377,6 @@ int main(){char a[456]; return _Alignof(a); } => 1
 int main(){struct rgb{int r; int g; int b;}; struct rgb x; return _Alignof(x); } => 4
 struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); } => 8
 struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); } => 8
-int main(){return sizeof(size_t);} => 8
-int main(){size_t isize = 8; return sizeof(isize);} => 8
 int main(){const int x = 3; return x;} => 3
 int main(){const int x[4]={0,1,2,3}; return x[1] + x[2];} => 3
 const int x = 3; int main(){return x;} => 3
@@ -387,5 +384,13 @@ const int x[4]={0,1,2,3}; int main(){return x[1] + x[2];} => 3
 int main(){int x=3; const int *y=&x; return *y;} => 3
 int main(){int x=3; int * const y=&x; return *y;} => 3
 const char reg_ax[8][4] = {"al", "al", "al", "eax","rax","rax","rax","eax"};int main(){return reg_ax[1][0];} => 97
+int main(){long x=3; return x;} => 3
+int main(){return sizeof(long);} => 8
+int main(){long x=3; return sizeof(x);} => 8
+#define xxx 3
+int main(){return xxx;} => 3
+#define yyy 3
+#define xxx yyy
+int main(){return xxx;} => 3
 OK
 ```
