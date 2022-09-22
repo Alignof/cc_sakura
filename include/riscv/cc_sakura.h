@@ -17,7 +17,6 @@ struct _reent {
 typedef __FILE FILE;
 
 typedef _Bool bool;
-//typedef long size_t;
 typedef int size_t;
 
 extern struct _reent *__getreent(void);
@@ -36,7 +35,6 @@ extern int *__errno(void);
 #define errno (*__errno())
 
 #define SIZE_PTR 4
-#define SIZE_SIZET 4
 //=========================================================
 
 typedef enum{
@@ -133,7 +131,7 @@ typedef enum{
 	CHAR,
 	INT,
 	ENUM,
-	SIZE_T,
+	LONG,
 	PTR,
 	ARRAY,
 	STRUCT,

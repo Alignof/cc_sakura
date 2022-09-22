@@ -9,8 +9,7 @@
 extern int *__errno_location(void);
 #define errno (*__errno_location())
 
-#define SIZE_PTR 4
-#define SIZE_SIZET 4
+#define SIZE_PTR 8
 //=========================================================
 
 typedef enum{
@@ -107,7 +106,7 @@ typedef enum{
 	CHAR,
 	INT,
 	ENUM,
-	SIZE_T,
+	LONG,
 	PTR,
 	ARRAY,
 	STRUCT,
@@ -341,8 +340,7 @@ extern FILE *stdout;	/* Standard output stream.  */
 extern FILE *stderr;	/* Standard error output stream.  */
 
 typedef _Bool bool;
-//typedef long size_t;
-typedef int size_t;
+typedef long size_t;
 //=========================================================
 
 //==================Prototype function=====================

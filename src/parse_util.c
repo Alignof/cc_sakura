@@ -10,8 +10,8 @@ int type_size(Type *type){
 			return 1;
 		case INT:
 			return 4;
-		case SIZE_T:
-			return SIZE_SIZET;
+		case LONG:
+			return 8;
 		case PTR:
 			return SIZE_PTR;
 		case ARRAY:
@@ -42,8 +42,8 @@ int type_align(Type *type){
 			return 1;
 		case INT:
 			return 4;
-		case SIZE_T:
-			return SIZE_SIZET;
+		case LONG:
+			return 8;
 		case PTR:
 			return SIZE_PTR;
 		case ARRAY:
