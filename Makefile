@@ -1,9 +1,13 @@
 # x8664 or riscv
-ARCH    := riscv
+HOST_ARCH := x8664
+TARGET_ARCH := x8664
+# 32 or 64
+TARGET_BIT := 64
+
 CFLAGS	:= -std=c11 -g -O0 -static -Wall 
 LDFLAGS := -static
 
-ifeq ($(ARCH),x8664)
+ifeq ($(TARGET_ARCH),x8664)
 	BT	:= gcc
 	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 	SPIKE   := 
@@ -17,14 +21,14 @@ else
 	SELFSRC ?= $(filter-out ./self_host/codegen_x8664.c, $(wildcard ./self_host/*.c))
 endif
 
-INCLUDE = -I./include/x8664 -I/usr/include
+INCLUDE = -I./include/$(HOST_ARCH) -I/usr/include
 TARGET  := ./cc_sakura
 SRCDIR  := ./src
 OBJDIR  := ./src/obj
 OBJECTS := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
-$(TARGET): $(OBJECTS) ./include/$(ARCH)/cc_sakura.h
-	echo $(ARCH)
+$(TARGET): $(OBJECTS)
+	echo $(TARGET_ARCH)
 	echo $(BT)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
@@ -37,10 +41,10 @@ install: $(OBJECTS)
 	$(CC) -O2 -o $(TARGET) $^ $(LDFLAGS)
 
 test: $(TARGET)
-	./test.sh $(ARCH)
+	./test.sh $(TARGET_ARCH)
 
 file_test: $(TARGET)
-ifeq ($(ARCH),x8664)
+ifeq ($(TARGET_ARCH),x8664)
 	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
 	./tmp || echo $$?
 else
@@ -49,7 +53,7 @@ else
 endif
 
 gcc_test: 
-ifeq ($(ARCH),x8664)
+ifeq ($(TARGET_ARCH),x8664)
 	$(BT) test.c -S -masm=intel -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
 	./tmp || echo $$?
 else
@@ -63,7 +67,7 @@ self_host: $(TARGET)
 	rm -rf self_host/
 	mkdir self_host/
 	cp src/*.c self_host/
-	cp include/$(ARCH)/cc_sakura.h self_host/
+	cp include/$(TARGET_ARCH)/cc_sakura.h self_host/
 	cat self_host/cc_sakura.h > self_host.c
 	cat $(SELFSRC) >> self_host.c
 	rm -rf self_host/
@@ -73,12 +77,12 @@ self_host: $(TARGET)
 	$(BT) -static child.s -o child
 	cp child.s gen1.s
 	# gen2
-	$(SPIKE) $(PK) child self_host.c > child.s
+	$(SPIKE) $(PK) ./child self_host.c > child.s
 	perl -pi -e 's/^bbl loader\r\n//' child.s
 	$(BT) -static child.s -o child
 	cp child.s gen2.s
 	# gen3
-	$(SPIKE) $(PK) child self_host.c > child.s
+	$(SPIKE) $(PK) ./child self_host.c > child.s
 	perl -pi -e 's/^bbl loader\r\n//' child.s
 	$(BT) -static child.s -o child
 	cp child.s gen3.s
