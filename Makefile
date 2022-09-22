@@ -1,8 +1,9 @@
-# x8664 or riscv
+# x86 or x8664 or riscv
+# example:
+# HOST: x86, TARGET: riscv(rv32imac)
+# HOST: x8664, TARGET: x8664
 HOST_ARCH := x8664
 TARGET_ARCH := x8664
-# 32 or 64
-TARGET_BIT := 64
 
 CFLAGS	:= -std=c11 -g -O0 -static -Wall 
 LDFLAGS := -static
@@ -12,13 +13,11 @@ ifeq ($(TARGET_ARCH),x8664)
 	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
 	SPIKE   := 
 	PK      := 
-	SELFSRC ?= $(filter-out ./self_host/codegen_riscv.c, $(wildcard ./self_host/*.c))
 else
 	BT	:= /opt/riscv32/bin/riscv32-unknown-elf-gcc
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 	SPIKE   := /opt/riscv32/bin/spike --isa=RV32IMAC
 	PK      := /opt/riscv32/riscv32-unknown-elf/bin/pk
-	SELFSRC ?= $(filter-out ./self_host/codegen_x8664.c, $(wildcard ./self_host/*.c))
 endif
 
 INCLUDE = -I./include/$(HOST_ARCH) -I/usr/include
@@ -69,7 +68,11 @@ self_host: $(TARGET)
 	cp src/*.c self_host/
 	cp include/$(TARGET_ARCH)/cc_sakura.h self_host/
 	cat self_host/cc_sakura.h > self_host.c
-	cat $(SELFSRC) >> self_host.c
+ifeq ($(TARGET_ARCH),x8664)
+	cat `ls --ignore=codegen_riscv.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
+else
+	cat `ls --ignore=codegen_x8664.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
+endif
 	rm -rf self_host/
 
 	# gen1
