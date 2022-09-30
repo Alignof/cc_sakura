@@ -33,7 +33,7 @@ char *read_file(char *path){
         printf("%s: fseek:%s", path, strerror(errno));
 	}
 
-	buf = calloc(1, size+2);
+	buf = calloc(sizeof(char), size+2);
 	fread(buf, size, 1, fp);
 
 	if(size == 0 || buf[size-1] != '\n'){
