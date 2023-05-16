@@ -2,8 +2,8 @@
 # example:
 # HOST: x86, TARGET: riscv(rv32imac)
 # HOST: x8664, TARGET: x8664
-HOST_ARCH := x8664
-TARGET_ARCH := x8664
+HOST_ARCH := x86
+TARGET_ARCH := riscv
 
 CFLAGS	:= -std=c11 -g -O0 -static -Wall 
 LDFLAGS := -static
