@@ -1,9 +1,9 @@
 # x86 or x8664 or riscv
 # example:
-# HOST: x86, TARGET: riscv(rv32imac)
+# HOST: x86, TARGET: rc32(rv32imac)
 # HOST: x8664, TARGET: x8664
-HOST_ARCH := x86
-TARGET_ARCH := riscv
+HOST_ARCH := x8664
+TARGET_ARCH := rv32
 
 CFLAGS	:= -std=c11 -g -O0 -static -Wall 
 LDFLAGS := -static
@@ -14,10 +14,10 @@ ifeq ($(TARGET_ARCH),x8664)
 	SPIKE   := 
 	PK      := 
 else
-	BT	:= /opt/riscv32/bin/riscv32-unknown-elf-gcc
+	BT	:= /opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
-	SPIKE   := /opt/riscv32/bin/spike --isa=RV32IMAC
-	PK      := /opt/riscv32/riscv32-unknown-elf/bin/pk
+	SPIKE   := /opt/riscv/bin/spike --isa=RV32IMAC
+	PK      := /opt/riscv/riscv32-unknown-elf/bin/pk
 endif
 
 INCLUDE = -I./include/$(HOST_ARCH) -I/usr/include
