@@ -10,7 +10,7 @@ LDFLAGS := -static
 
 ifeq ($(TARGET_ARCH),x8664)
 	BT	:= gcc
-	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
+	SOURCES := $(filter-out ./src/codegen_rv32.c, $(wildcard ./src/*.c))
 	SPIKE   := 
 	PK      := 
 else
@@ -69,7 +69,7 @@ self_host: $(TARGET)
 	cp include/$(TARGET_ARCH)/cc_sakura.h self_host/
 	cat self_host/cc_sakura.h > self_host.c
 ifeq ($(TARGET_ARCH),x8664)
-	cat `ls --ignore=codegen_riscv.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
+	cat `ls --ignore=codegen_rv32.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
 else
 	cat `ls --ignore=codegen_x8664.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
 endif
