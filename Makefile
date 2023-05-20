@@ -1,26 +1,24 @@
 # x86 or x8664 or riscv
 # example:
-# HOST: x86, TARGET: rc32(rv32imac)
-# HOST: x8664, TARGET: x8664
-HOST_ARCH := x8664
-TARGET_ARCH := rv32
+# TARGET_ARCH := x86, x8664, rv32, rv64
+TARGET_ARCH := x8664
 
 CFLAGS	:= -std=c11 -g -O0 -static -Wall 
 LDFLAGS := -static
 
 ifeq ($(TARGET_ARCH),x8664)
-	BT	:= gcc
+	CC		:= gcc
 	SOURCES := $(filter-out ./src/codegen_rv32.c, $(wildcard ./src/*.c))
 	SPIKE   := 
 	PK      := 
 else
-	BT	:= /opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 
+	CC		:= /opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 
 	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 	SPIKE   := /opt/riscv/bin/spike --isa=RV32IMAC
 	PK      := /opt/riscv/riscv32-unknown-elf/bin/pk
 endif
 
-INCLUDE = -I./include/$(HOST_ARCH) -I/usr/include
+INCLUDE = -I./include/$(TARGET_ARCH) -I/usr/include
 TARGET  := ./cc_sakura
 SRCDIR  := ./src
 OBJDIR  := ./src/obj
@@ -76,18 +74,19 @@ endif
 	rm -rf self_host/
 
 	# gen1
-	$(TARGET) self_host.c > child.s 
-	$(BT) -static child.s -o child
+	$(SPIKE) $(PK) $(TARGET) self_host.c > child.s 
+	perl -pi -e 's/^bbl loader\r\n//' child.s 
+	$(CC) -static child.s -o child
 	cp child.s gen1.s
 	# gen2
 	$(SPIKE) $(PK) ./child self_host.c > child.s
 	perl -pi -e 's/^bbl loader\r\n//' child.s
-	$(BT) -static child.s -o child
+	$(CC) -static child.s -o child
 	cp child.s gen2.s
 	# gen3
 	$(SPIKE) $(PK) ./child self_host.c > child.s
 	perl -pi -e 's/^bbl loader\r\n//' child.s
-	$(BT) -static child.s -o child
+	$(CC) -static child.s -o child
 	cp child.s gen3.s
 
 	# check
