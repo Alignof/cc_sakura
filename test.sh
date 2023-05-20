@@ -3,9 +3,9 @@
 if [ $# -eq 1 ]; then
 	if [ $1 = "x8664" ]; then
 		ARCH="x8664"
-	elif [ $1 = "riscv" ]; then
-		ARCH="riscv"
-        if [ ! -e /opt/riscv32/bin/ ]; then
+	elif [ $1 = "rv32" ]; then
+		ARCH="rv32"
+        if [ ! -e /opt/riscv/bin/ ]; then
             exit 0 # for CI
         fi
 	else
@@ -23,21 +23,22 @@ assert() {
 		option="$1"
 		expected="$2"
 		input="$3"
-		./cc_sakura "$option" "$input" > tmp.s
 	else
 		expected="$1"
 		input="$2"
-		./cc_sakura "$input" > tmp.s
 	fi
 
 	if [ $ARCH = "x8664" ]; then
+		./cc_sakura "$option" "$input" > tmp.s
 		gcc -c tmp.s 
 		gcc -o tmp -static tmp.s 
 		./tmp
-	elif [ $ARCH = "riscv" ]; then
-		/opt/riscv32/bin/riscv32-unknown-elf-gcc -c -march=rv32imac tmp.s 
-		/opt/riscv32/bin/riscv32-unknown-elf-gcc -o tmp -static tmp.s 
-		/opt/riscv32/bin/spike --isa=RV32IMAC /opt/riscv32/riscv32-unknown-elf/bin/pk ./tmp
+	elif [ $ARCH = "rv32" ]; then
+		/opt/riscv/bin/spike --isa=RV32IMAC /opt/riscv32/riscv32-unknown-elf/bin/pk ./cc_sakura "$option" "$input" > tmp.s
+	    perl -pi -e 's/^bbl loader\r\n//' tmp.s 
+		/opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 -c -march=rv32imac tmp.s 
+		/opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 -o tmp -static tmp.s 
+		/opt/riscv/bin/spike --isa=RV32IMAC /opt/riscv32/riscv32-unknown-elf/bin/pk ./tmp > /dev/null
 	fi
 
 	actual="$?"
