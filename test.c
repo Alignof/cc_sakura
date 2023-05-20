@@ -1,5 +1,5 @@
 int main(void){
-    long x = 0;
-    return 0;
+    long x = 42;
+    return 42;
 }
 

@@ -1,7 +1,7 @@
 
 //================standard library=====================
-extern struct __sFILE64;
-typedef struct __sFILE64 __FILE;
+extern struct __sFILE;
+typedef struct __sFILE __FILE;
 struct _reent {
   int _errno;			/* local copy of errno */
 
