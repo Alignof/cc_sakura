@@ -1,23 +1,26 @@
 # x86 or x8664 or riscv
 # example:
 # TARGET_ARCH := x86, x8664, rv32, rv64
-TARGET_ARCH := x8664
+TARGET_ARCH := rv64
 
 CFLAGS	:= -std=c11 -g -O0 -static -Wall 
 LDFLAGS := -static
 
 ifeq ($(TARGET_ARCH),x8664)
 	CC		:= gcc
-	SOURCES := $(filter-out ./src/codegen_rv32.c, $(wildcard ./src/*.c))
 	SPIKE   := 
 	PK      := 
-else
+else ifeq ($(TARGET_ARCH),rv32)
 	CC		:= /opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 
-	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
 	SPIKE   := /opt/riscv/bin/spike --isa=RV32IMAC
 	PK      := /opt/riscv/riscv32-unknown-elf/bin/pk
+else ifeq ($(TARGET_ARCH),rv64)
+	CC		:= /opt/riscv/bin/riscv64-unknown-elf-gcc 
+	SPIKE   := /opt/riscv/bin/spike --isa=rv64imac
+	PK      := /opt/riscv/riscv64-unknown-elf/bin/pk
 endif
 
+SOURCES := $(filter-out ./src/codegen_%, $(wildcard ./src/*.c)) ./src/codegen_$(TARGET_ARCH).c
 INCLUDE = -I./include/$(TARGET_ARCH) -I/usr/include
 TARGET  := ./cc_sakura
 SRCDIR  := ./src
