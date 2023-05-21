@@ -47,7 +47,7 @@ file_test: $(TARGET)
 ifeq ($(TARGET_ARCH),x8664)
 	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
 	./tmp || echo $$?
-else
+else ifeq ($(TARGET_ARCH),rv32)
 	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
 	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
@@ -56,7 +56,7 @@ gcc_test:
 ifeq ($(TARGET_ARCH),x8664)
 	$(BT) test.c -S -masm=intel -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
 	./tmp || echo $$?
-else
+else ifeq ($(TARGET_ARCH),rv32)
 	$(BT) test.c -march=rv32imac -S -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
 	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
@@ -70,9 +70,11 @@ self_host: $(TARGET)
 	cp include/$(TARGET_ARCH)/cc_sakura.h self_host/
 	cat self_host/cc_sakura.h > self_host.c
 ifeq ($(TARGET_ARCH),x8664)
-	cat `ls --ignore=codegen_rv32.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
-else
-	cat `ls --ignore=codegen_x8664.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
+	cat `ls --ignore=codegen_rv32.c --ignore=codegen_rv64.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
+else ifeq ($(TARGET_ARCH),rv32)
+	cat `ls --ignore=codegen_x8664.c --ignore=codegen_rv64.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
+else ifeq ($(TARGET_ARCH),rv64)
+	cat `ls --ignore=codegen_x8664.c --ignore=codegen_rv32.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
 endif
 	rm -rf self_host/
 
