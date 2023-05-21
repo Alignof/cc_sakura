@@ -8,6 +8,11 @@ if [ $# -eq 1 ]; then
         if [ ! -e /opt/riscv/bin/ ]; then
             exit 0 # for CI
         fi
+	elif [ $1 = "rv64" ]; then
+		ARCH="rv64"
+        if [ ! -e /opt/riscv/bin/ ]; then
+            exit 0 # for CI
+        fi
 	else
 		echo "unknown architecture."
 		exit
@@ -34,11 +39,17 @@ assert() {
 		gcc -o tmp -static tmp.s 
 		./tmp
 	elif [ $ARCH = "rv32" ]; then
-		/opt/riscv/bin/spike --isa=RV32IMAC /opt/riscv32/riscv32-unknown-elf/bin/pk ./cc_sakura "$option" "$input" > tmp.s
+		/opt/riscv/bin/spike --isa=RV32IMAC /opt/riscv/riscv32-unknown-elf/bin/pk ./cc_sakura "$option" "$input" > tmp.s
 	    perl -pi -e 's/^bbl loader\r\n//' tmp.s 
-		/opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 -c -march=rv32imac tmp.s 
+		/opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 -c tmp.s 
 		/opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 -o tmp -static tmp.s 
-		/opt/riscv/bin/spike --isa=RV32IMAC /opt/riscv32/riscv32-unknown-elf/bin/pk ./tmp > /dev/null
+		/opt/riscv/bin/spike --isa=RV32IMAC /opt/riscv/riscv32-unknown-elf/bin/pk ./tmp > /dev/null
+	elif [ $ARCH = "rv64" ]; then
+		/opt/riscv/bin/spike --isa=RV64IMAC /opt/riscv/riscv64-unknown-elf/bin/pk ./cc_sakura "$option" "$input" > tmp.s
+	    perl -pi -e 's/^bbl loader\r\n//' tmp.s 
+		/opt/riscv/bin/riscv64-unknown-elf-gcc -c tmp.s 
+		/opt/riscv/bin/riscv64-unknown-elf-gcc -o tmp -static tmp.s 
+		/opt/riscv/bin/spike --isa=RV64IMAC /opt/riscv/riscv64-unknown-elf/bin/pk ./tmp > /dev/null
 	fi
 
 	actual="$?"
