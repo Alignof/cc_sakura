@@ -178,7 +178,7 @@ assert -cl 64 "int main(){int x[4][4]; sizeof((x));}"
 assert -cl 16 "int main(){int x[4][4]; sizeof((x[0]));}"
 assert -cl 1  "int main(){return sizeof(char);}"
 assert -cl 4  "int main(){return sizeof(int);}"
-if [ $1 = "x8664" ]; then
+if [ $1 = "x8664" ] || [ $1 = "rv64" ]; then
     assert -cl 8  "int main(){int *x; sizeof(x);}"
     assert -cl 8  "int main(){int x; sizeof(&x);}"
     assert -cl 8  "int main(){int *x; sizeof(x+2);}"
@@ -323,7 +323,7 @@ assert -cl 4 "int main(){int x; return _Alignof(x); }"
 assert -cl 4 "int main(){int  a[456]; return _Alignof(a); }"
 assert -cl 1 "int main(){char a[456]; return _Alignof(a); }"
 assert -cl 4 "int main(){struct rgb{int r; int g; int b;}; struct rgb x; return _Alignof(x); }"
-if [ $1 = "x8664" ]; then
+if [ $1 = "x8664" ] || [ $1 = "rv64" ]; then
     assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(x); }"
     assert -cl 8 "struct rgb{int r; int g; int b;}; struct point{int x; int y; struct rgb *col;}; int main(){struct point x; return _Alignof(struct point); }"
 else
