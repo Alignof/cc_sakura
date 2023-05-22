@@ -1,16 +1,16 @@
 #include "cc_sakura.h"
 //                         void _Bool char enum int  ptr array struct
-const char reg_size[8]  = {'b',  'b', 'b', 'w', 'w', 'w', 'w',  'w'};
+const char reg_size[8]  = {'b',  'b', 'b', 'w', 'w', 'd', 'd', 'd'};
 const char reg[8][3]    = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 
 void push(const char *reg){
-	printf("		addi sp,sp,-4\n");
-	printf("		sw  %s,0(sp)\n", reg);
+	printf("		addi sp,sp,-%d\n", SIZE_PTR);
+	printf("		sd  %s,0(sp)\n", reg);
 }
 
 void pop(const char *reg){
-	printf("		lw  %s,0(sp)\n", reg);
-	printf("		addi sp,sp,4\n");
+	printf("		ld  %s,0(sp)\n", reg);
+	printf("		addi sp,sp,%d\n", SIZE_PTR);
 }
 
 
@@ -64,7 +64,7 @@ void gen_lvar(Node *node){
 		error_at(token->str,"not a variable");
 	}
 
-	printf("	addi a5,s0,-%d\n", node->offset + 8);
+	printf("	addi a5,s0,-%d\n", node->offset + 16);
 	push("a5");
 }
 
@@ -226,10 +226,10 @@ void gen_expr(Node *node){
 			pop("a4"); // rhs
 			pop("a5"); // lhs
 
-			printf("	lw t0, 0(a5)\n"); // Evacuation lhs data to temporary register
+			printf("	ld t0, 0(a5)\n"); // Evacuation lhs data to temporary register
 			push("t0");// push temporary register
 			push("a5");// Evacuation lhs address
-			printf("	lw a5, 0(a5)\n"); // deref lhs
+			printf("	ld a5, 0(a5)\n"); // deref lhs
 
 			gen_calc(node->rhs->rhs);
 			push("a5"); // rhs op lhs
@@ -240,7 +240,7 @@ void gen_expr(Node *node){
 			if(node->lhs->type->ty == BOOL){
 				printf("	snez a4,a4\n");
 			}
-			printf("	sw a4, 0(a5)\n"); // deref lhs
+			printf("	sd a4, 0(a5)\n"); // deref lhs
 
 			// already evacuated
 			//printf("	push rax\n");
@@ -269,7 +269,7 @@ void gen_expr(Node *node){
 			pop("a4"); // rhs
 			pop("a5"); // lhs
 			push("a5"); // Evacuation lhs
-			printf("	lw a5, 0(a5)\n"); // deref lhs
+			printf("	ld a5, 0(a5)\n"); // deref lhs
 
 			gen_calc(node->rhs);
 			push("a5"); // rhs op lhs
@@ -283,7 +283,7 @@ void gen_expr(Node *node){
                 }
 				printf("	sb a4,0(a5)\n");
 			}else{
-				printf("	sw a4,0(a5)\n");
+				printf("	sd a4,0(a5)\n");
 			}
 
 			push("a4");
@@ -296,7 +296,7 @@ void gen_expr(Node *node){
                 pop("a5");
 
                 // push [rax]
-                printf("	lw t0, 0(a5)\n");
+                printf("	ld t0, 0(a5)\n");
                 push("t0");
 			}
 			return;
@@ -319,7 +319,7 @@ void gen_expr(Node *node){
 			return;
 		case ND_AND:
 			gen_expr(node->lhs);
-			printf("	lw a5,0(sp)\n");
+			printf("	ld a5,0(sp)\n");
 			printf("	beqz a5,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
@@ -331,7 +331,7 @@ void gen_expr(Node *node){
 			return;
 		case ND_OR:
 			gen_expr(node->lhs);
-			printf("	lw a5,0(sp)\n");
+			printf("	ld a5,0(sp)\n");
 			printf("	bnez a5,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
@@ -528,8 +528,8 @@ void gen(Node *node){
 			}
 
 			printf("	mv a0,a5\n");
-			printf("	lw ra,%d(sp)\n", aligned_stack_size - 4);
-			printf("	lw s0,%d(sp)\n", aligned_stack_size - 8);
+			printf("	ld ra,%d(sp)\n", aligned_stack_size - 8);
+			printf("	ld s0,%d(sp)\n", aligned_stack_size - 16);
 			printf("	addi sp,sp,%d\n", aligned_stack_size);
 			printf("	jr ra\n\n");
 			return;
@@ -572,12 +572,12 @@ void gen_main(void){
 	for(i = 0;func_list[i];i++){
 		if(func_list[i]->code[0] == NULL) continue;
 
-		aligned_stack_size = 16 + ((func_list[i]->stack_size + 11) / 16 * 16);
+		aligned_stack_size = 32 + ((func_list[i]->stack_size + 24) / 32 * 32);
 		printf(".globl %s\n", func_list[i]->name);
 		printf("%s:\n", func_list[i]->name);
 		printf("	addi sp,sp,-%d\n", aligned_stack_size);
-		printf("	sw ra,%d(sp)\n", aligned_stack_size - 4);
-		printf("	sw s0,%d(sp)\n", aligned_stack_size - 8);
+		printf("	sd ra,%d(sp)\n", aligned_stack_size - 8);
+		printf("	sd s0,%d(sp)\n", aligned_stack_size - 16);
 		printf("	addi s0,sp,%d\n\n", aligned_stack_size);
 
 		if(func_list[i]->args){
@@ -593,8 +593,8 @@ void gen_main(void){
 
 		// epiroge
 		printf("	mv a0,a5\n");
-		printf("	lw ra,%d(sp)\n", aligned_stack_size - 4);
-		printf("	lw s0,%d(sp)\n", aligned_stack_size - 8);
+		printf("	ld ra,%d(sp)\n", aligned_stack_size - 8);
+		printf("	ld s0,%d(sp)\n", aligned_stack_size - 16);
 		printf("	addi sp,sp,%d\n", aligned_stack_size);
 		printf("	jr ra\n\n");
 	}
