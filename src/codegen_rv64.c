@@ -109,21 +109,26 @@ void gen_address(Node *node){
 }
 
 void gen_calc(Node *node){
+	char inst_word = ' ';
+    if (node->type->ty == INT || node->type->ty == ENUM) {
+        inst_word = 'w';
+    }
+
 	switch(node->kind){
 		case ND_ADD:
-			printf("	add a5,a5,a4\n");
+			printf("	add%c a5,a5,a4\n", inst_word);
 			break;
 		case ND_SUB:
-			printf("	sub a5,a5,a4\n");
+			printf("	sub%c a5,a5,a4\n", inst_word);
 			break;
 		case ND_MUL:
-			printf("	mul a5,a5,a4\n");
+			printf("	mul%c a5,a5,a4\n", inst_word);
 			break;
 		case ND_DIV:
-			printf("	div a5,a5,a4\n");
+			printf("	div%c a5,a5,a4\n", inst_word);
 			break;
 		case ND_MOD:
-			printf("	rem a5,a5,a4\n");
+			printf("	rem%c a5,a5,a4\n", inst_word);
 			break;
 		case ND_GT:
 			printf("	sgt a5,a5,a4\n");
@@ -240,7 +245,7 @@ void gen_expr(Node *node){
 			if(node->lhs->type->ty == BOOL){
 				printf("	snez a4,a4\n");
 			}
-			printf("	sd a4, 0(a5)\n"); // deref lhs
+			printf("	s%c a4,0(a5)\n", reg_size[reg_ty]); // deref lhs
 
 			// already evacuated
 			//printf("	push rax\n");
@@ -277,14 +282,10 @@ void gen_expr(Node *node){
 			// assign
 			pop("a4"); // src
 			pop("a5"); // dst
-			if(node->lhs->type->ty <= CHAR){
-                if(node->lhs->type->ty == BOOL){
-				    printf("	snez a4,a4\n");
-                }
-				printf("	sb a4,0(a5)\n");
-			}else{
-				printf("	sd a4,0(a5)\n");
-			}
+            if(node->lhs->type->ty == BOOL){
+                printf("	snez a4,a4\n");
+            }
+			printf("	s%c a4,0(a5)\n", reg_size[reg_ty]);
 
 			push("a4");
 			return;
