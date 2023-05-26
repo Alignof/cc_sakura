@@ -3,12 +3,12 @@
 const char reg_size[8]  = {'b',  'b', 'b', 'w', 'w', 'd', 'd', 'd'};
 const char reg[8][3]    = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 
-void push(const char *reg){
+void push(const char *reg, Node *node){
 	printf("		addi sp,sp,-%d\n", SIZE_PTR);
 	printf("		sd  %s,0(sp)\n", reg);
 }
 
-void pop(const char *reg){
+void pop(const char *reg, Node *node){
 	printf("		ld  %s,0(sp)\n", reg);
 	printf("		addi sp,sp,%d\n", SIZE_PTR);
 }
