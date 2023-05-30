@@ -1,5 +1,6 @@
 int main(void){
-    long x = 42;
-    return 42;
+    int x=3;
+    int a=++x;
+    return a+x;
 }
 
