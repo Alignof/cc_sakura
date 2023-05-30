@@ -4,13 +4,13 @@ const char reg_size[8]  = {'b',  'b', 'b', 'w', 'w', 'd', 'd', 'd'};
 const char reg[8][3]    = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 
 void push(const char *reg){
-	printf("		addi sp,sp,-%d\n", SIZE_PTR);
+	printf("		addi sp,sp,-8\n");
 	printf("		sd  %s,0(sp)\n", reg);
 }
 
 void pop(const char *reg){
 	printf("		ld  %s,0(sp)\n", reg);
-	printf("		addi sp,sp,%d\n", SIZE_PTR);
+	printf("		addi sp,sp,8\n");
 }
 
 
@@ -176,9 +176,9 @@ void gen_calc(Node *node){
 }
 
 void gen_expr(Node *node){
-	int reg_ty; 
-	int reg_rty;
-	int reg_lty;
+	int reg_ty = -1; 
+	int reg_rty = -1;
+	int reg_lty = -1;
 
 	if(node && node->type) reg_ty = (int)node->type->ty;
 	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
@@ -236,7 +236,7 @@ void gen_expr(Node *node){
 			printf("	ld t0, 0(a5)\n"); // Evacuation lhs data to temporary register
 			push("t0");// push temporary register
 			push("a5");// Evacuation lhs address
-			printf("	l%c a5, 0(a5)\n", reg_size[reg_lty]); // deref lhs
+			printf("	ld a5, 0(a5)\n"); // deref lhs
 
 			gen_calc(node->rhs->rhs);
 			push("a5"); // rhs op lhs
@@ -247,7 +247,7 @@ void gen_expr(Node *node){
 			if(reg_lty == BOOL){
 				printf("	snez a4,a4\n");
 			}
-			printf("	s%c a4,0(a5)\n", reg_size[reg_ty]); // deref lhs
+			printf("	s%c a4,0(a5)\n", reg_size[reg_ty]); // assign to src
 
 			// already evacuated
 			//printf("	push rax\n");
@@ -276,7 +276,7 @@ void gen_expr(Node *node){
 			pop("a4"); // rhs
 			pop("a5"); // lhs
 			push("a5"); // evacuation lhs
-			printf("	l%c a5, 0(a5)\n", reg_size[node->lhs->type->ptr_to->ty]); // deref lhs
+			printf("	ld a5, 0(a5)\n"); // deref lhs
 
 			gen_calc(node->rhs);
 			push("a5"); // rhs op lhs
@@ -299,7 +299,7 @@ void gen_expr(Node *node){
                 pop("a5");
 
                 // push [rax]
-                printf("	l%c t0, 0(a5)\n", reg_size[node->type->ptr_to->ty]);
+                printf("	ld t0, 0(a5)\n");
                 push("t0");
 			}
 			return;
