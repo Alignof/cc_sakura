@@ -3,16 +3,14 @@
 const char reg_size[8]  = {'b',  'b', 'b', 'w', 'w', 'd', 'd', 'd'};
 const char reg[8][3]    = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 
-void push(const char *reg, Type *node){
-    int stack_alloc_size = type->size;
-	printf("		addi sp,sp,-%d\n", stack_alloc_size);
-	printf("		s%c  %s,0(sp)\n", reg_size[type->ty], reg);
+void push(const char *reg){
+	printf("		addi sp,sp,-%d\n", SIZE_PTR);
+	printf("		sd  %s,0(sp)\n", reg);
 }
 
-void pop(const char *reg, Type *node){
-    int stack_alloc_size = type->size;
-	printf("		l%c  %s,0(sp)\n", reg_size[type->ty], reg);
-	printf("		addi sp,sp,%d\n", stack_alloc_size);
+void pop(const char *reg){
+	printf("		ld  %s,0(sp)\n", reg);
+	printf("		addi sp,sp,%d\n", SIZE_PTR);
 }
 
 
@@ -21,7 +19,7 @@ void expand_next(Node *node){
 		gen(node);
 		node = node->next;
 	}
-	push("a5", node->type);
+	push("a5");
 }
 
 void expand_block_code(Node *node){
@@ -58,7 +56,7 @@ void gen_gvar(Node *node){
 		printf("	lui a5,%%hi(%.*s)\n", node->len, node->str);
 		printf("	addi a5,a5,%%lo(%.*s)\n", node->len, node->str);
 	}
-	push("a5", node->type);
+	push("a5");
 }
 
 void gen_lvar(Node *node){
@@ -67,7 +65,7 @@ void gen_lvar(Node *node){
 	}
 
 	printf("	addi a5,s0,-%d\n", node->offset + 16);
-	push("a5", node->type);
+	push("a5");
 }
 
 void gen_struc(Node *node){
@@ -78,10 +76,10 @@ void gen_struc(Node *node){
 	gen_expr(node->lhs);
 	gen_expr(node->rhs);
 
-    pop("a4", node->rhs->type);
-    pop("a5", node->lhs->type);
+    pop("a4");
+    pop("a5");
 	printf("	add a5,a5,a4\n");
-    push("a5", node->type;
+    push("a5");
 }
 
 void gen_args(Node *args){
@@ -95,7 +93,7 @@ void gen_args(Node *args){
 	}
 
 	for(reg_num = arg_count;reg_num > 0;reg_num--){
-		pop("t0", args->type);
+		pop("t0");
 		printf("	mv %s,t0\n", reg[reg_num-1]);
 	}
 
@@ -180,18 +178,20 @@ void gen_calc(Node *node){
 void gen_expr(Node *node){
 	int reg_ty; 
 	int reg_rty;
+	int reg_lty;
 
 	if(node && node->type) reg_ty = (int)node->type->ty;
 	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
+	if(node->lhs && node->lhs->type) reg_lty = (int)node->lhs->type->ty;
 
 	switch(node->kind){
 		case ND_NUM:
 			printf("	li a5,%d\n", node->val);
-			push("a5", node->type);
+			push("a5");
 			return;
 		case ND_CAST:
 			gen_expr(node->rhs);
-			pop("a5", node->rhs->type);
+			pop("a5");
 			if(reg_ty > reg_rty){
 				if(reg_rty == BOOL){
 					printf("        zext.b a5,a5\n");
@@ -199,30 +199,30 @@ void gen_expr(Node *node){
 					printf("        sext.b a5,a5\n");
 				}
 			}
-			push("a5", node->type);
+			push("a5");
 			return;
 		case ND_GVAR:
 			gen_gvar(node);
 
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-				pop("a5", node->type);
+				pop("a5");
 				printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
-				push("a5", node->type);
+				push("a5");
 			}
 			return;
 		case ND_LVAR:
 			gen_lvar(node);
 
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-				pop("a5", node->type);
+				pop("a5");
 				printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
-				push("a5", node->type);
+				push("a5");
 			}
 			return;
 		case ND_PREID:
 			// ++p -> p += 1
 			gen(node->lhs);
-            push("a5", node->type);
+            push("a5");
 			return;
 		case ND_POSTID:
 			// push
@@ -230,21 +230,21 @@ void gen_expr(Node *node){
 			gen_expr(node->rhs->rhs->rhs);// push rhs
 			
 			// calc
-			pop("a4", node->type->rhs->rhs->rhs); // rhs
-			pop("a5", node->type->lhs); // lhs
+			pop("a4"); // rhs
+			pop("a5"); // lhs
 
-			printf("	l%c t0, 0(a5)\n", reg_size[node->lhs->type->ty]); // Evacuation lhs data to temporary register
-			push("t0", node->lhs->type);// push temporary register
-			push("a5", node->lhs->type);// Evacuation lhs address
-			printf("	l%c a5, 0(a5)\n", reg_size[node->lhs->type->ptr_to]); // deref lhs
+			printf("	ld t0, 0(a5)\n"); // Evacuation lhs data to temporary register
+			push("t0");// push temporary register
+			push("a5");// Evacuation lhs address
+			printf("	l%c a5, 0(a5)\n", reg_size[reg_lty]); // deref lhs
 
 			gen_calc(node->rhs->rhs);
-			push("a5", node->type); // rhs op lhs
+			push("a5"); // rhs op lhs
 
 			// assign
-			pop("a4", node->type); // src
-			pop("a5", node->type); // dst
-			if(node->lhs->type->ty == BOOL){
+			pop("a4"); // src
+			pop("a5"); // dst
+			if(reg_lty == BOOL){
 				printf("	snez a4,a4\n");
 			}
 			printf("	s%c a4,0(a5)\n", reg_size[reg_ty]); // deref lhs
@@ -255,17 +255,17 @@ void gen_expr(Node *node){
 		case ND_STR:
 			printf("	lui a5,%%hi(.LC%d)\n", node->val);
 			printf("	addi a5,a5,%%lo(.LC%d)\n", node->val);
-			push("a5", node->type);
+			push("a5");
 			return;
 		case ND_ASSIGN:
 			gen_address(node->lhs);
 			gen_expr(node->rhs);
 
-			pop("a4", node->rhs->type);
-			pop("a5", node->lhs->type);
+			pop("a4");
+			pop("a5");
 			printf("	s%c a4,0(a5)\n", reg_size[reg_ty]);
 
-			push("a4", node->type);
+			push("a4");
 			return;
 		case ND_COMPOUND:
 			// push
@@ -273,40 +273,40 @@ void gen_expr(Node *node){
 			gen_expr(node->rhs->rhs);// push rhs
 
 			// calc
-			pop("a4", node->rhs->type); // rhs
-			pop("a5", node->lhs->type); // lhs
-			push("a5", node->lhs->type); // Evacuation lhs
-			printf("	l%c a5, 0(a5)\n", reg_size[node->lhs->type->ptr_to]); // deref lhs
+			pop("a4"); // rhs
+			pop("a5"); // lhs
+			push("a5"); // evacuation lhs
+			printf("	l%c a5, 0(a5)\n", reg_size[node->lhs->type->ptr_to->ty]); // deref lhs
 
 			gen_calc(node->rhs);
-			push("a5", node->type); // rhs op lhs
+			push("a5"); // rhs op lhs
 
 			// assign
-			pop("a4", node->type); // src
-			pop("a5", node->type); // dst
-            if(node->lhs->type->ty == BOOL){
+			pop("a4"); // src
+			pop("a5"); // dst
+            if(reg_lty == BOOL){
                 printf("	snez a4,a4\n");
             }
 			printf("	s%c a4,0(a5)\n", reg_size[reg_ty]);
 
-			push("a4", node->type);
+			push("a4");
 			return;
 		case ND_DOT:
 		case ND_ARROW:
 			gen_struc(node);
 			// if it's an array or struct, ignore the deref
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
-                pop("a5", node->type);
+                pop("a5");
 
                 // push [rax]
                 printf("	l%c t0, 0(a5)\n", reg_size[node->type->ptr_to->ty]);
-                push("t0", node->type->ptr_to);
+                push("t0");
 			}
 			return;
 		case ND_TERNARY:
 			// condition
 			gen_expr(node->lhs);
-			pop("a5", node->lhs->type);
+			pop("a5");
 			printf("	li a4,0\n");
 			printf("	beq a5,a4,.Lelse%03d\n", node->val);
 
@@ -318,7 +318,7 @@ void gen_expr(Node *node){
 			// false
 			gen(node->next);
 			printf(".LifEnd%03d:\n", node->val);
-			push("a5", node->type);
+			push("a5");
 			return;
 		case ND_AND:
 			gen_expr(node->lhs);
@@ -326,10 +326,10 @@ void gen_expr(Node *node){
 			printf("	beqz a5,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
-			pop("a5", node->type);
-			pop("a4", node->type);
+			pop("a5");
+			pop("a4");
 			printf("	and a5,a5,a4\n");
-			push("a5", node->type);
+			push("a5");
 			printf(".LlogicEnd%03d:\n", node->val);
 			return;
 		case ND_OR:
@@ -338,17 +338,17 @@ void gen_expr(Node *node){
 			printf("	bnez a5,.LlogicEnd%03d\n", node->val);
 			gen_expr(node->rhs);
 
-			pop("a5", node->type);
-			pop("a4", node->type);
+			pop("a5");
+			pop("a4");
 			printf("	or a5,a5,a4\n");
-			push("a5", node->type);
+			push("a5");
 			printf(".LlogicEnd%03d:\n", node->val);
 			return;
 		case ND_NOT:
 			gen_expr(node->rhs);
-			pop("a5", node->type);
+			pop("a5");
 			gen_calc(node);
-			push("a5", node->type);
+			push("a5");
 			return;
 		case ND_ADDRESS:
 			gen_address(node->rhs);// printf("	push rax\n");
@@ -358,7 +358,7 @@ void gen_expr(Node *node){
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
 				printf("	l%c a5,0(a5)\n", reg_size[reg_ty]);
 			}
-			push("a5", node->type);
+			push("a5");
 			return;
 		case ND_CALL_FUNC:
 			gen_args(node->rhs);
@@ -370,7 +370,7 @@ void gen_expr(Node *node){
 			printf("	mv sp,s0\n");
 			pop("s0");
 
-			push("a0", node->type);
+			push("a0");
 			return;
 		default:
 			// check left hand side
@@ -379,14 +379,14 @@ void gen_expr(Node *node){
 			gen_expr(node->rhs);
 
 			// pop two value
-			pop("a4", node->type);
-			pop("a5", node->type);
+			pop("a4");
+			pop("a5");
 
 			// calculation lhs and rhs
 			gen_calc(node);
 
 			// push result
-			push("a5", node->type);
+			push("a5");
 	}
 }
 
@@ -538,7 +538,7 @@ void gen(Node *node){
 			return;
 		default:
 			gen_expr(node);
-			pop("a5", node->type);
+			pop("a5");
 			return;
 	}
 }
