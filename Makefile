@@ -66,6 +66,9 @@ ifeq ($(TARGET_ARCH),x8664)
 else ifeq ($(TARGET_ARCH),rv32)
 	$(CC) test.c -march=rv32imac -S -O0 -o tmp.s && $(CC) -static -O0 tmp.s -o tmp
 	$(SPIKE) $(PK) ./tmp || echo $$?
+else ifeq ($(TARGET_ARCH),rv64)
+	$(CC) test.c -march=rv64imac -S -O0 -o tmp.s && $(CC) -static -O0 tmp.s -o tmp
+	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 
 
