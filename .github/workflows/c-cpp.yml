@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: make
-      run: make
+      run: make TARGET_ARCH=x8664
     - name: make test
-      run: make test
+      run: make test TARGET_ARCH=x8664
  
