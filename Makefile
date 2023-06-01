@@ -29,7 +29,7 @@ OBJECTS := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
 $(TARGET): $(OBJECTS)
 	echo $(TARGET_ARCH)
-	echo $(BT)
+	echo $(CC)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c 
@@ -45,19 +45,29 @@ test: $(TARGET)
 
 file_test: $(TARGET)
 ifeq ($(TARGET_ARCH),x8664)
-	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
+	$(TARGET) test.c > tmp.s && $(CC) -static tmp.s -o tmp
 	./tmp || echo $$?
 else ifeq ($(TARGET_ARCH),rv32)
-	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
+	$(SPIKE) $(PK) $(TARGET) test.c > tmp.s
+	perl -pi -e 's/^bbl loader\r\n//' tmp.s 
+	$(CC) -static tmp.s -o tmp
+	$(SPIKE) $(PK) ./tmp || echo $$?
+else ifeq ($(TARGET_ARCH),rv64)
+	$(SPIKE) $(PK) $(TARGET) test.c > tmp.s
+	perl -pi -e 's/^bbl loader\r\n//' tmp.s 
+	$(CC) -static tmp.s -o tmp
 	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 
 gcc_test: 
 ifeq ($(TARGET_ARCH),x8664)
-	$(BT) test.c -S -masm=intel -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
+	$(CC) test.c -S -masm=intel -O0 -o tmp.s && $(CC) -static -O0 tmp.s -o tmp
 	./tmp || echo $$?
 else ifeq ($(TARGET_ARCH),rv32)
-	$(BT) test.c -march=rv32imac -S -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
+	$(CC) test.c -march=rv32imac -S -O0 -o tmp.s && $(CC) -static -O0 tmp.s -o tmp
+	$(SPIKE) $(PK) ./tmp || echo $$?
+else ifeq ($(TARGET_ARCH),rv64)
+	$(CC) test.c -march=rv64imac -S -O0 -o tmp.s && $(CC) -static -O0 tmp.s -o tmp
 	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 

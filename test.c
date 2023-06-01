@@ -1,5 +1,10 @@
 int main(void){
-    long x = 42;
-    return 42;
+    int x = -1;
+
+    if (x == -1) {
+        return 0;
+    }
+
+    return 1;
 }
 
