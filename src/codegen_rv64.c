@@ -296,9 +296,7 @@ void gen_expr(Node *node){
 			// if it's an array or struct, ignore the deref
 			if(node->type->ty != ARRAY && node->type->ty != STRUCT){
                 pop("a5");
-
-                // push [rax]
-                printf("	ld t0, 0(a5)\n");
+				printf("	l%c t0,0(a5)\n", reg_size[reg_ty]); // deref stack addr
                 push("t0");
 			}
 			return;
