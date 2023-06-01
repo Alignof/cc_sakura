@@ -1,6 +1,6 @@
 #include "cc_sakura.h"
-//                         void _Bool char enum int  ptr array struct
-const char reg_size[8]  = {'b',  'b', 'b', 'w', 'w', 'd', 'd', 'd'};
+//                         void _Bool char int  enum long ptr array struct
+const char reg_size[9]  = {'b',  'b', 'b', 'w', 'w', 'd', 'd', 'd', 'd'};
 const char reg[8][3]    = {"a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7"};
 
 void push(const char *reg){
@@ -12,7 +12,6 @@ void pop(const char *reg){
 	printf("		ld  %s,0(sp)\n", reg);
 	printf("		addi sp,sp,8\n");
 }
-
 
 void expand_next(Node *node){
 	while(node){
