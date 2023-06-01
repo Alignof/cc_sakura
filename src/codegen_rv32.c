@@ -171,8 +171,8 @@ void gen_calc(Node *node){
 }
 
 void gen_expr(Node *node){
-	int reg_ty; 
-	int reg_rty;
+	int reg_ty = -1; 
+	int reg_rty = -1;
 
 	if(node && node->type) reg_ty = (int)node->type->ty;
 	if(node->rhs && node->rhs->type) reg_rty = (int)node->rhs->type->ty;
