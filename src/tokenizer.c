@@ -215,7 +215,7 @@ Token *tokenize(char **p, Token *now){
         // add number token
         now = new_token(TK_NUM, now, *p);
         // set number
-        now->val = strtol(*p, &*p, 10);
+        now->val = strtol(*p, p, 10);
         return now;
     }
 

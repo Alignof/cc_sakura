@@ -1,26 +1,27 @@
 # x86 or x8664 or riscv
 # example:
-# HOST: x86, TARGET: riscv(rv32imac)
-# HOST: x8664, TARGET: x8664
-HOST_ARCH := x8664
-TARGET_ARCH := x8664
+# TARGET_ARCH := x86, x8664, rv32, rv64
+TARGET_ARCH := rv64
 
 CFLAGS	:= -std=c11 -g -O0 -static -Wall 
 LDFLAGS := -static
 
 ifeq ($(TARGET_ARCH),x8664)
-	BT	:= gcc
-	SOURCES := $(filter-out ./src/codegen_riscv.c, $(wildcard ./src/*.c))
+	CC		:= gcc
 	SPIKE   := 
 	PK      := 
-else
-	BT	:= /opt/riscv32/bin/riscv32-unknown-elf-gcc
-	SOURCES := $(filter-out ./src/codegen_x8664.c, $(wildcard ./src/*.c))
-	SPIKE   := /opt/riscv32/bin/spike --isa=RV32IMAC
-	PK      := /opt/riscv32/riscv32-unknown-elf/bin/pk
+else ifeq ($(TARGET_ARCH),rv32)
+	CC		:= /opt/riscv/bin/riscv64-unknown-elf-gcc -march=rv32imac -mabi=ilp32 
+	SPIKE   := /opt/riscv/bin/spike --isa=RV32IMAC
+	PK      := /opt/riscv/riscv32-unknown-elf/bin/pk
+else ifeq ($(TARGET_ARCH),rv64)
+	CC		:= /opt/riscv/bin/riscv64-unknown-elf-gcc 
+	SPIKE   := /opt/riscv/bin/spike --isa=rv64imac
+	PK      := /opt/riscv/riscv64-unknown-elf/bin/pk
 endif
 
-INCLUDE = -I./include/$(HOST_ARCH) -I/usr/include
+SOURCES := $(filter-out ./src/codegen_%, $(wildcard ./src/*.c)) ./src/codegen_$(TARGET_ARCH).c
+INCLUDE = -I./include/$(TARGET_ARCH) -I/usr/include
 TARGET  := ./cc_sakura
 SRCDIR  := ./src
 OBJDIR  := ./src/obj
@@ -28,7 +29,7 @@ OBJECTS := $(addprefix $(OBJDIR)/, $(notdir $(SOURCES:.c=.o)))
 
 $(TARGET): $(OBJECTS)
 	echo $(TARGET_ARCH)
-	echo $(BT)
+	echo $(CC)
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c 
@@ -44,19 +45,29 @@ test: $(TARGET)
 
 file_test: $(TARGET)
 ifeq ($(TARGET_ARCH),x8664)
-	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
+	$(TARGET) test.c > tmp.s && $(CC) -static tmp.s -o tmp
 	./tmp || echo $$?
-else
-	$(TARGET) test.c > tmp.s && $(BT) -static tmp.s -o tmp
+else ifeq ($(TARGET_ARCH),rv32)
+	$(SPIKE) $(PK) $(TARGET) test.c > tmp.s
+	perl -pi -e 's/^bbl loader\r\n//' tmp.s 
+	$(CC) -static tmp.s -o tmp
+	$(SPIKE) $(PK) ./tmp || echo $$?
+else ifeq ($(TARGET_ARCH),rv64)
+	$(SPIKE) $(PK) $(TARGET) test.c > tmp.s
+	perl -pi -e 's/^bbl loader\r\n//' tmp.s 
+	$(CC) -static tmp.s -o tmp
 	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 
 gcc_test: 
 ifeq ($(TARGET_ARCH),x8664)
-	$(BT) test.c -S -masm=intel -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
+	$(CC) test.c -S -masm=intel -O0 -o tmp.s && $(CC) -static -O0 tmp.s -o tmp
 	./tmp || echo $$?
-else
-	$(BT) test.c -march=rv32imac -S -O0 -o tmp.s && $(BT) -static -O0 tmp.s -o tmp
+else ifeq ($(TARGET_ARCH),rv32)
+	$(CC) test.c -march=rv32imac -S -O0 -o tmp.s && $(CC) -static -O0 tmp.s -o tmp
+	$(SPIKE) $(PK) ./tmp || echo $$?
+else ifeq ($(TARGET_ARCH),rv64)
+	$(CC) test.c -march=rv64imac -S -O0 -o tmp.s && $(CC) -static -O0 tmp.s -o tmp
 	$(SPIKE) $(PK) ./tmp || echo $$?
 endif
 
@@ -69,25 +80,28 @@ self_host: $(TARGET)
 	cp include/$(TARGET_ARCH)/cc_sakura.h self_host/
 	cat self_host/cc_sakura.h > self_host.c
 ifeq ($(TARGET_ARCH),x8664)
-	cat `ls --ignore=codegen_riscv.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
-else
-	cat `ls --ignore=codegen_x8664.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
+	cat `ls --ignore=codegen_rv32.c --ignore=codegen_rv64.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
+else ifeq ($(TARGET_ARCH),rv32)
+	cat `ls --ignore=codegen_x8664.c --ignore=codegen_rv64.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
+else ifeq ($(TARGET_ARCH),rv64)
+	cat `ls --ignore=codegen_x8664.c --ignore=codegen_rv32.c -F src/ | grep -v / | perl -pe 's//src\//'` >> self_host.c
 endif
 	rm -rf self_host/
 
 	# gen1
-	$(TARGET) self_host.c > child.s 
-	$(BT) -static child.s -o child
+	$(SPIKE) $(PK) $(TARGET) self_host.c > child.s 
+	perl -pi -e 's/^bbl loader\r\n//' child.s 
+	$(CC) -static child.s -o child
 	cp child.s gen1.s
 	# gen2
 	$(SPIKE) $(PK) ./child self_host.c > child.s
 	perl -pi -e 's/^bbl loader\r\n//' child.s
-	$(BT) -static child.s -o child
+	$(CC) -static child.s -o child
 	cp child.s gen2.s
 	# gen3
 	$(SPIKE) $(PK) ./child self_host.c > child.s
 	perl -pi -e 's/^bbl loader\r\n//' child.s
-	$(BT) -static child.s -o child
+	$(CC) -static child.s -o child
 	cp child.s gen3.s
 
 	# check

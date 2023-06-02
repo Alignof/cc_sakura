@@ -2,7 +2,7 @@
 [![C/C++ CI](https://github.com/Alignof/cc_sakura/actions/workflows/c-cpp.yml/badge.svg)](https://github.com/Alignof/cc_sakura/actions/workflows/c-cpp.yml)  
 C Compiler Sakura  
 a small self-hosting C compiler.  
-It supports for both x8664 and RISC-V.
+It supports for both x8664 and RISC-V(rv32/rv64).
 
 ## Build
 ```zsh
