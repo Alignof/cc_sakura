@@ -1,16 +1,12 @@
 # x86 or x8664 or riscv
 # example:
-# TARGET_ARCH := same_as_host, x86, x8664, rv32, rv64
+# TARGET_ARCH := x86, x8664, rv32, rv64
 TARGET_ARCH := rv64
 
 CFLAGS	:= -std=c11 -g -O0 -static -Wall 
 LDFLAGS := -static
 
 ifeq ($(TARGET_ARCH),x8664)
-	CC		:= gcc
-	SPIKE   := 
-	PK      := 
-else ifeq ($(TARGET_ARCH),same_as_host)
 	CC		:= gcc
 	SPIKE   := 
 	PK      := 
